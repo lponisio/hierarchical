@@ -1,0 +1,70 @@
+rm(list=ls())
+setwd("~/Dropbox/nimble-dev/occupancy/singleSpp-multiSea")
+source('src/initialize.R')
+
+## *********************************************************************
+##  Multi-season occupancy model: option 1: user defined distribution
+##  that computes all dbern(psi)s in one loop
+##  *********************************************************************
+
+## specify model in NIMBLE
+ss.ms.occ <- nimbleCode({
+  ## Specify priors
+  psi1 ~ dunif(0, 1)
+
+  for(k in 1:(nyear-1)){
+    phi[k] ~ dunif(0, 1)
+    gamma[k] ~ dunif(0, 1)
+    p[k] ~ dunif(0, 1)
+  }
+  p[nyear] ~ dunif(0, 1)
+
+  for (i in 1:nsite){
+    z[i,1] ~ dbern(psi1)
+    for (k in 2:nyear){
+      muZ[i,k]<- z[i,k-1]*phi[k-1] + (1-z[i,k-1])*gamma[k-1]
+      z[i,k] ~ dbern(muZ[i,k])
+    }
+  }
+
+
+  ##  not beneficial to vectorize over i or k, because each z[i,k] and
+  ## p[k] is a different variable with different graph edges But it
+  ## would make sense to vectorize over j, I believe.
+
+  for (i in 1:nsite){
+      for (k in 1:nyear){
+          muy[i,k] <- z[i,k]*p[k]
+          y[i,1:nrep,k] ~ dbern_vec(muy[i,k], nrep)
+    }
+  }
+
+  ## Derived parameters: Sample and population occupancy, growth rate
+  ## and turnover
+  psi[1] <- psi1
+  n.occ[1]<-sum(z[1:nsite,1])
+  for (k in 2:nyear){
+    psi[k] <- psi[k-1]*phi[k-1] + (1-psi[k-1])*gamma[k-1]
+    n.occ[k] <- sum(z[1:nsite,k])
+    growthr[k-1] <- psi[k]/psi[k-1]
+    turnover[k-1] <- (1 - psi[k-1]) * gamma[k-1]/psi[k]
+  }
+})
+
+## *********************************************************************
+## run with compareMCMCs
+
+input1 <- list(code=ss.ms.occ,
+                       constants=constants,
+                       data=model.data,
+                       inits=inits)
+
+
+ss.ms.opt1 <- compareMCMCs(input1,
+                                MCMCs=c('nimble'),
+                                niter=niter,
+                                burnin = burnin,
+                                summary=FALSE,
+                           check=FALSE)
+
+save(ss.ms.opt1, file="saved/opt1.Rdata")

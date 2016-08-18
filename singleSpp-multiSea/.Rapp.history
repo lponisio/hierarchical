@@ -1,0 +1,5179 @@
+install.packages("DataCombine")
+head(traits)
+traits.all <- read.csv(file.path(src.dir, "traits/traits.csv"))
+head(traits.all)
+traits.all <- read.csv(file.path(src.dir, "traits/traits.csv"))#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"))#
+  print(unique(levels(traits.dat$studyID)))#
+  if(i == 1){#
+    traits <- rbind(traits, traits.dat)#
+  } else{#
+    browser()#
+    FillIn(traits, traits.dat, Var1= "reproStrat", KeyVar=c("animalID" "animalID"))#
+  }#
+}
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"))#
+  print(unique(levels(traits.dat$studyID)))#
+  if(i == 1){#
+    traits <- rbind(traits, traits.dat)#
+  }else{#
+    browser()#
+    FillIn(traits, traits.dat, Var1= "reproStrat", KeyVar=c("animalID" "animalID"))#
+  }#
+}
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"))#
+  print(unique(levels(traits.dat$studyID)))#
+  if(i == 1){#
+    traits <- rbind(traits, traits.dat)#
+  }else{#
+    browser()#
+    FillIn(traits, traits.dat, Var1= "reproStrat", KeyVar=c("animalID","animalID"))#
+  }#
+}
+FillIn(traits, traits.dat, Var1= "reproStrat", KeyVar=c("animalID","animalID"))
+library(DataCombine)
+FillIn(traits, traits.dat, Var1= "reproStrat", KeyVar=c("animalID","animalID"))
+Q
+7/9
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+traits <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"))#
+  print(unique(levels(spec.dat$studyID)))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"))#
+  print(unique(levels(site.dat$studyID)))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"))#
+  print(unique(levels(meta.dat$studyID)))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits.csv"))#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"))#
+  print(unique(levels(traits.dat$studyID)))#
+  if(i == 1){#
+    traits <- rbind(traits, traits.dat)#
+  }else{#
+    browser()#
+    FillIn(traits, traits.dat, Var1= "reproStrat", KeyVar=c("animalID","animalID"))#
+  }#
+}#
+#
+traits <- tClean()#
+save(traits, file=file.path(preped.dir, "traits.Rdata"))
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"))#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"))#
+  browser()#
+  print(unique(levels(traits.dat$studyID)))#
+  if(i == 1){#
+    traits <- rbind(traits, traits.dat)#
+  }else{#
+    browser()#
+    FillIn(traits, traits.dat, Var1= "reproStrat", KeyVar=c("animalID","animalID"))#
+  }#
+}
+head(traits.all)
+traits.dat
+library(DataCombine)
+?FillIn
+FillIn(traits, traits.dat, Var1= "reproStrat", KeyVar=c("animalID","animalID"))
+?FillIn
+# Create data set with missing values#
+naDF <- data.frame(a = sample(c(1,2), 100, rep = TRUE),#
+                   b = sample(c(3,4), 100, rep = TRUE),#
+                   fNA = sample(c(100, 200, 300, 400, NA), 100, rep = TRUE))
+Q
+# Create data set with missing values#
+naDF <- data.frame(a = sample(c(1,2), 100, rep = TRUE),#
+                   b = sample(c(3,4), 100, rep = TRUE),#
+                   fNA = sample(c(100, 200, 300, 400, NA), 100, rep = TRUE))
+naDf
+naDF
+# Created full data set#
+fillDF <- data.frame(a = c(1, 2, 1, 2),#
+                     b = c(3, 3, 4, 4),#
+                     j = c(5, 5, 5, 5),#
+                     fFull = c(100, 200, 300, 400))
+fillDF
+head(naDF)
+FillIn(traits, traits.dat,#
+           Var1= "reproStrat",#
+           Var2= "reproStrat",#
+           KeyVar=c("animalID","animalID"))
+traits.dat[match(traits$animalID,#
+                                     traits.dat$animalID),]
+traits.dat[match(traits.dat$animalID,#
+                                     traits$animalID),]
+traits
+traits.dat
+match(traits.dat$animalID,#
+                                     traits$animalID)
+match(traits$animalID,#
+                                     traits.dat$animalID)
+duplicated(traits$animalID)
+traits.dat[match(traits.all$animalID,#
+                                     traits.dat$animalID),]
+traits.in.main <- traits.dat[match(traits.dat$animalID,#
+                                     traits.all$animalID),]
+traits.in.main
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+traits <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"))#
+  print(unique(levels(spec.dat$studyID)))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"))#
+  print(unique(levels(site.dat$studyID)))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"))#
+  print(unique(levels(meta.dat$studyID)))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"))#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"))#
+  browser()#
+  traits.in.main <- traits.dat[match(traits.dat$animalID,#
+                                     traits.all$animalID),]#
+  }#
+}
+Q
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+traits <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"))#
+  print(unique(levels(spec.dat$studyID)))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"))#
+  print(unique(levels(site.dat$studyID)))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"))#
+  print(unique(levels(meta.dat$studyID)))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"))#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"))#
+  browser()#
+  traits.in.main <- traits.dat[match(traits.dat$animalID,#
+                                     traits.all$animalID),]#
+}
+traits.in.main <- traits.dat[match(traits.dat$animalID,#
+                                     traits.all$animalID),]
+traits.in.main
+traits.in.main <- traits.dat[match(traits.all$animalID,#
+                                     traits.dat$animalID),]
+traits.in.main
+[match(traits.all$animalID,#
+                                     traits.dat$animalID),]
+match(traits.all$animalID,#
+                                     traits.dat$animalID)
+match(traits.dat$animalID,#
+                                     traits.all$animalID)
+traits.dat$animalID %in%#
+                               traits.all$animalID
+traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]
+traits.in.main
+traits.all <- rbind(traits.all, !traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,])
+head(traits)
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"))
+traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                               traits.all$animalID,])
+head(traits.all)
+head(traits.dat)
+colnames(traits.all)
+order(colnames(traits.all, colnames(traits.dat))
+)
+order(colnames(traits.all), colnames(traits.dat))
+Q
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"))#
+traits.all$studyID <- NA#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"))#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  browser()#
+  traits.dat[]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                               traits.all$animalID,])#
+}
+order(colnames(traits.all), colnames(traits.dat))
+colnames(traits.dat)
+colnames(traits.all)
+traits.dat$author <- NA
+order(colnames(traits.all), colnames(traits.dat))
+traits.dat[, order(colnames(traits.all), colnames(traits.dat))]
+traits.dat <- traits.dat[, order(colnames(traits.all),#
+                                   colnames(traits.dat))]
+traits.dat
+head(traits.dat)
+head(traits.all)
+traits.dat <- traits.dat[, order(colnames(traits.dat),#
+                                   colnames(traits.all))]
+head(traits.all)
+head(traits.dat)
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"))#
+traits.all$studyID <- NA
+traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"))#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA
+traits.dat <- traits.dat[, colnames(traits.all)]
+traits.dat
+head(traits.dat)
+head(traits.all)
+traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]
+traits.in.main
+traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                               traits.all$animalID,])
+?fillIn
+?FillIn
+Q
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"))#
+traits.all$studyID <- NA#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"))#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID)){#
+    for(i in colnames(traits.all)){#
+      browser()#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(this.col != this.all){#
+        if(!is.na(this.col) & is.na(this.all)){#
+          traits.all[traits.all$animalID == j, i] <- this.col#
+        }#
+      }#
+    }#
+  }#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                               traits.all$animalID,])#
+}
+Q
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"))#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      browser()#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(this.col != this.all){#
+        if(!is.na(this.col) & is.na(this.all)){#
+          traits.all[traits.all$animalID == j, i] <- this.col#
+        }#
+      }#
+    }#
+  }#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                               traits.all$animalID,])#
+}
+this.col <- traits.dat[traits.dat$animalID == j, i]
+this.col
+j
+i
+this.all <- traits.all[traits.all$animalID == j, i]
+this.all
+Q
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"))#
+  print(unique(levels(spec.dat$studyID)))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"))#
+  print(unique(levels(site.dat$studyID)))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"))#
+  print(unique(levels(meta.dat$studyID)))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"))#
+traits.all$studyID <- NA#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"))#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      browser()#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(this.col != this.all){#
+        if(!is.na(this.col) & is.na(this.all)){#
+          traits.all[traits.all$animalID == j, i] <- this.col#
+        } else if(is.na(this.col) & is.na(this.all)){#
+          print(paste(unique(traits.in.main$studyID)),#
+                "trait", i, "problem!", this.all, "!=", this.col)#
+        }#
+      }#
+    }#
+  }#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                               traits.all$animalID,])#
+}#
+#
+save(traits.all, file=file.path(preped.dir, "traits.Rdata"))
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"))#
+traits.all$studyID <- NA#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"))#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(this.col != this.all){#
+        if(!is.na(this.col) & is.na(this.all)){#
+          traits.all[traits.all$animalID == j, i] <- this.col#
+        } else if(is.na(this.col) & is.na(this.all)){#
+          print(paste(unique(traits.in.main$studyID)),#
+                "trait", i, "problem!", this.all, "!=", this.col)#
+        }#
+      }#
+    }#
+  }#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                               traits.all$animalID,])#
+}
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"))#
+traits.all$studyID <- NA#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"))#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(this.col != this.all){#
+        browser()#
+        if(!is.na(this.col) & is.na(this.all)){#
+          traits.all[traits.all$animalID == j, i] <- this.col#
+        } else if(is.na(this.col) & is.na(this.all)){#
+          print(paste(unique(traits.in.main$studyID)),#
+                "trait", i, "problem!", this.all, "!=", this.col)#
+        }#
+      }#
+    }#
+  }#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                               traits.all$animalID,])#
+}
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"))#
+traits.all$studyID <- NA#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"))#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      browser()#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(this.col != this.all){#
+        if(!is.na(this.col) & is.na(this.all)){#
+          traits.all[traits.all$animalID == j, i] <- this.col#
+        } else if(is.na(this.col) & is.na(this.all)){#
+          print(paste(unique(traits.in.main$studyID)),#
+                "trait", i, "problem!", this.all, "!=", this.col)#
+        }#
+      }#
+    }#
+  }#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                               traits.all$animalID,])#
+}
+this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]
+this.col
+this.all
+this.col != this.all
+!is.na(this.col) & is.na(this.all)
+?read.csv
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- NA#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      browser()#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(this.col != this.all){#
+        if(!is.na(this.col) & is.na(this.all)){#
+          traits.all[traits.all$animalID == j, i] <- this.col#
+        } else if(is.na(this.col) & is.na(this.all)){#
+          print(paste(unique(traits.in.main$studyID)),#
+                "trait", i, "problem!", this.all, "!=", this.col)#
+        }#
+      }#
+    }#
+  }#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                               traits.all$animalID,])#
+}
+Q
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- NA#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(this.col != this.all){#
+        if(!is.na(this.col) & is.na(this.all)){#
+          traits.all[traits.all$animalID == j, i] <- this.col#
+        } else if(is.na(this.col) & is.na(this.all)){#
+          print(paste(unique(traits.in.main$studyID)),#
+                "trait", i, "problem!", this.all, "!=", this.col)#
+        }#
+      }#
+    }#
+  }#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                               traits.all$animalID,])#
+}
+for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      print(this.col)#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      print(this.all)#
+      if(this.col != this.all){#
+        if(!is.na(this.col) & is.na(this.all)){#
+          traits.all[traits.all$animalID == j, i] <- this.col#
+        } else if(is.na(this.col) & is.na(this.all)){#
+          print(paste(unique(traits.in.main$studyID)),#
+                "trait", i, "problem!", this.all, "!=", this.col)#
+        }#
+      }#
+    }#
+  }#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                               traits.all$animalID,])#
+}
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- NA#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      print(this.col)#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      print(this.all)#
+        if(!is.na(this.col) & is.na(this.all)){#
+          traits.all[traits.all$animalID == j, i] <- this.col#
+        } else if(is.na(this.col) & is.na(this.all)){#
+          print(paste(unique(traits.in.main$studyID)),#
+                "trait", i, "problem!", this.all, "!=", this.col)#
+      }#
+    }#
+  }#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                               traits.all$animalID,])#
+}
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- NA#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      print(this.col)#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      print(this.all)#
+        if(!is.na(this.col) & is.na(this.all)){#
+          traits.all[traits.all$animalID == j, i] <- this.col#
+        } else if(is.na(this.col) & is.na(this.all)){#
+          print(paste(unique(traits.in.main$studyID),#
+                "trait", i, "problem!", this.all, "!=", this.col))#
+      }#
+    }#
+  }#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                               traits.all$animalID,])#
+}
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- NA#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+        if(!is.na(this.col) & is.na(this.all)){#
+          traits.all[traits.all$animalID == j, i] <- this.col#
+        } else if(is.na(this.col) & is.na(this.all)){#
+          print(paste(unique(traits.in.main$studyID),#
+                "trait", i, "problem!", this.all, "!=", this.col))#
+      }#
+    }#
+  }#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                               traits.all$animalID,])#
+}
+?read.csv
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- NA#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(!all(is.na(c(this.col, this.all)))){#
+        if(!is.na(this.col) & is.na(this.all)){#
+          traits.all[traits.all$animalID == j, i] <- this.col#
+        } else if(is.na(this.col) & is.na(this.all)){#
+          print(paste(unique(traits.in.main$studyID),#
+                      "trait", i, "problem!", this.all, "!=", this.col))#
+        }#
+      }#
+    }#
+  }#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}
+warnings()
+for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      browser()#
+      if(!all(is.na(c(this.col, this.all)))){#
+        if(!is.na(this.col) & is.na(this.all)){#
+          traits.all[traits.all$animalID == j, i] <- this.col#
+        } else if(is.na(this.col) & is.na(this.all)){#
+          print(paste(unique(traits.in.main$studyID),#
+                      "trait", i, "problem!", this.all, "!=", this.col))#
+        }#
+      }#
+    }#
+  }#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}
+Q
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      browser()#
+      if(!all(is.na(c(this.col, this.all)))){#
+        if(!is.na(this.col) & is.na(this.all)){#
+          traits.all[traits.all$animalID == j, i] <- this.col#
+        } else if(is.na(this.col) & is.na(this.all)){#
+          print(paste(unique(traits.in.main$studyID),#
+                      "trait", i, "problem!", this.all, "!=", this.col))#
+        }#
+      }#
+    }#
+  }#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}
+this.col
+this.all
+!all(is.na(c(this.col, this.all)))
+!is.na(this.col) & is.na(this.all)
+is.na(this.col) & is.na(this.all)
+this.col
+Q
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- NA#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      print(this.col)#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      print(this.all)#
+      if(!all(is.na(c(this.col, this.all)))){#
+        if(!is.na(this.col) & is.na(this.all)){#
+          traits.all[traits.all$animalID == j, i] <- this.col#
+        } else if(is.na(this.col) & is.na(this.all)){#
+          print(paste(unique(traits.in.main$studyID),#
+                      "trait", i, "problem!", this.all, "!=", this.col))#
+        }#
+      }#
+    }#
+  }#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}
+head(traits.dat)
+head(traits.all)
+traits.all
+write.csv(traits.all, file.path(src.dir,#
+                                "traits/traits_updated.csv"),#
+          row.names=FALSE)
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"))#
+  print(unique(levels(spec.dat$studyID)))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"))#
+  print(unique(levels(site.dat$studyID)))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"))#
+  print(unique(levels(meta.dat$studyID)))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- NA#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      print(this.col)#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      print(this.all)#
+      if(!all(is.na(c(this.col, this.all)))){#
+        if(!is.na(this.col) & is.na(this.all)){#
+          traits.all[traits.all$animalID == j, i] <- this.col#
+        } else if(is.na(this.col) & is.na(this.all)){#
+          print(paste(unique(traits.in.main$studyID),#
+                      "trait", i, "problem!", this.all, "!=", this.col))#
+        }#
+      }#
+    }#
+  }#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}#
+#
+save(traits.all, file=file.path(preped.dir, "traits.Rdata"))#
+write.csv(traits.all, file.path(src.dir,#
+                                "traits/traits_updated.csv"),#
+          row.names=FALSE)
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"))#
+  print(unique(levels(spec.dat$studyID)))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"))#
+  print(unique(levels(site.dat$studyID)))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"))#
+  print(unique(levels(meta.dat$studyID)))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- NA#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(!all(is.na(c(this.col, this.all)))){#
+        if(!is.na(this.col) & is.na(this.all)){#
+          traits.all[traits.all$animalID == j, i] <- this.col#
+        } else if(is.na(this.col) & is.na(this.all)){#
+          print(paste(unique(traits.in.main$studyID),#
+                      "trait", i, "problem!", this.all, "!=", this.col))#
+        }#
+      }#
+    }#
+  }#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}#
+#
+save(traits.all, file=file.path(preped.dir, "traits.Rdata"))#
+write.csv(traits.all, file.path(src.dir,#
+                                "traits/traits_updated.csv"),#
+          row.names=FALSE)
+warnings()
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"))#
+  print(unique(levels(spec.dat$studyID)))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"))#
+  print(unique(levels(site.dat$studyID)))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"))#
+  print(unique(levels(meta.dat$studyID)))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- NA#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      print(length(this.col))#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      print(length(this.all))#
+      if(!all(is.na(c(this.col, this.all)))){#
+        if(!is.na(this.col) & is.na(this.all)){#
+          traits.all[traits.all$animalID == j, i] <- this.col#
+        } else if(is.na(this.col) & is.na(this.all)){#
+          print(paste(unique(traits.in.main$studyID),#
+                      "trait", i, "problem!", this.all, "!=", this.col))#
+        }#
+      }#
+    }#
+  }#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}#
+#
+save(traits.all, file=file.path(preped.dir, "traits.Rdata"))#
+write.csv(traits.all, file.path(src.dir,#
+                                "traits/traits_updated.csv"),#
+          row.names=FALSE)
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- NA#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      print(length(this.col))#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      print(length(this.all))#
+      if(!all(is.na(c(this.col, this.all)))){#
+        browser()#
+        if(!is.na(this.col) & is.na(this.all)){#
+          traits.all[traits.all$animalID == j, i] <- this.col#
+        } else if(is.na(this.col) & is.na(this.all)){#
+          print(paste(unique(traits.in.main$studyID),#
+                      "trait", i, "problem!", this.all, "!=", this.col))#
+        }#
+      }#
+    }#
+  }#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}
+is.na(this.col)
+is.na(this.all)
+!is.na(this.col) & is.na(this.all)
+Q
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- NA#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      print(length(this.col))#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      print(length(this.all))#
+      if(!all(is.na(c(this.col, this.all)))){#
+        if(!is.na(this.col) & is.na(this.all)){#
+          traits.all[traits.all$animalID == j, i] <- this.col#
+        } else if(!is.na(this.col) & !is.na(this.all)){#
+          print(paste(unique(traits.in.main$studyID),#
+                      "trait", i, "problem!", this.all, "!=", this.col))#
+        }#
+      }#
+    }#
+  }#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}#
+#
+save(traits.all, file=file.path(preped.dir, "traits.Rdata"))#
+write.csv(traits.all, file.path(src.dir,#
+                                "traits/traits_updated.csv"),#
+          row.names=FALSE)
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- NA#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(!all(is.na(c(this.col, this.all)))){#
+        if(!is.na(this.col) & is.na(this.all)){#
+          traits.all[traits.all$animalID == j, i] <- this.col#
+        } else if(!is.na(this.col) & !is.na(this.all)){#
+          print(paste(unique(traits.in.main$studyID),#
+                      "trait", i, "problem!", this.all, "!=", this.col))#
+        }#
+      }#
+    }#
+  }#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}#
+#
+save(traits.all, file=file.path(preped.dir, "traits.Rdata"))#
+write.csv(traits.all, file.path(src.dir,#
+                                "traits/traits_updated.csv"),#
+          row.names=FALSE)
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"))#
+  print(unique(levels(spec.dat$studyID)))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"))#
+  print(unique(levels(site.dat$studyID)))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"))#
+  print(unique(levels(meta.dat$studyID)))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- NA#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(this.col != this.all){#
+        if(!is.na(this.col) & is.na(this.all)){#
+          traits.all[traits.all$animalID == j, i] <- this.col#
+        } else if(!is.na(this.col) & !is.na(this.all)){#
+          print(paste(unique(traits.in.main$studyID),#
+                      "trait", i, "problem!", this.all, "!=", this.col))#
+        }#
+      }#
+    }#
+  }#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}#
+#
+save(traits.all, file=file.path(preped.dir, "traits.Rdata"))#
+write.csv(traits.all, file.path(src.dir,#
+                                "traits/traits_updated.csv"),#
+          row.names=FALSE)
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"))#
+  print(unique(levels(spec.dat$studyID)))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"))#
+  print(unique(levels(site.dat$studyID)))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"))#
+  print(unique(levels(meta.dat$studyID)))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- NA#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(!all(is.na(c(this.col, this.all)))){#
+        if(this.col =! this.all){#
+          if(!is.na(this.col) & is.na(this.all)){#
+            traits.all[traits.all$animalID == j, i] <- this.col#
+          } else if(!is.na(this.col) & !is.na(this.all)){#
+            print(paste(unique(traits.in.main$studyID),#
+                        "trait", i, "problem!", this.all, "!=", this.col))#
+          }#
+        }#
+      }#
+    }#
+  }#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}#
+#
+save(traits.all, file=file.path(preped.dir, "traits.Rdata"))#
+write.csv(traits.all, file.path(src.dir,#
+                                "traits/traits_updated.csv"),#
+          row.names=FALSE)
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"))#
+  print(unique(levels(spec.dat$studyID)))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"))#
+  print(unique(levels(site.dat$studyID)))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"))#
+  print(unique(levels(meta.dat$studyID)))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- NA#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(!all(is.na(c(this.col, this.all)))){#
+        if(this.col != this.all){#
+          if(!is.na(this.col) & is.na(this.all)){#
+            traits.all[traits.all$animalID == j, i] <- this.col#
+          } else if(!is.na(this.col) & !is.na(this.all)){#
+            print(paste(unique(traits.in.main$studyID),#
+                        "trait", i, "problem!", this.all, "!=", this.col))#
+          }#
+        }#
+      }#
+    }#
+  }#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}#
+#
+save(traits.all, file=file.path(preped.dir, "traits.Rdata"))#
+write.csv(traits.all, file.path(src.dir,#
+                                "traits/traits_updated.csv"),#
+          row.names=FALSE)
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"))#
+  print(unique(levels(spec.dat$studyID)))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"))#
+  print(unique(levels(site.dat$studyID)))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"))#
+  print(unique(levels(meta.dat$studyID)))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- NA#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      print(paste(this.col, this.all))#
+      if(this.col != this.all){#
+        if(!is.na(this.col) & is.na(this.all)){#
+          traits.all[traits.all$animalID == j, i] <- this.col#
+        } else if(!is.na(this.col) & !is.na(this.all)){#
+          print(paste(unique(traits.in.main$studyID),#
+                      "trait", i, "problem!", this.all, "!=", this.col))#
+        }#
+      }#
+    }#
+  }#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}#
+#
+save(traits.all, file=file.path(preped.dir, "traits.Rdata"))#
+write.csv(traits.all, file.path(src.dir,#
+                                "traits/traits_updated.csv"),#
+          row.names=FALSE)
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"))#
+  print(unique(levels(spec.dat$studyID)))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"))#
+  print(unique(levels(site.dat$studyID)))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"))#
+  print(unique(levels(meta.dat$studyID)))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- NA#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      print(paste(this.col, this.all))#
+      if(!is.na(this.col) & is.na(this.all)){#
+        traits.all[traits.all$animalID == j, i] <- this.col#
+      } else if(!is.na(this.col) & !is.na(this.all)){#
+        if(this.col != this.all){#
+          print(paste(unique(traits.in.main$studyID),#
+                      "trait", i, "problem!", this.all, "!=", this.col))#
+        }#
+      }#
+    }#
+  }#
+#
+traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                            traits.all$animalID,])#
+}#
+#
+save(traits.all, file=file.path(preped.dir, "traits.Rdata"))#
+write.csv(traits.all, file.path(src.dir,#
+                                "traits/traits_updated.csv"),#
+          row.names=FALSE)
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"))#
+  print(unique(levels(spec.dat$studyID)))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"))#
+  print(unique(levels(site.dat$studyID)))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"))#
+  print(unique(levels(meta.dat$studyID)))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- NA#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      print(paste(this.col, this.all))#
+      if(!is.na(this.col) & is.na(this.all)){#
+        traits.all[traits.all$animalID == j, i] <- this.col#
+      } else if(!is.na(this.col) & !is.na(this.all)){#
+        if(this.col != this.all){#
+          if(!all(is.na(c(this.col, this.all)))){#
+            print(paste(unique(traits.in.main$studyID),#
+                        "trait", i, "problem!", this.all, "!=", this.col))#
+          }#
+        }#
+      }#
+    }#
+  }#
+#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}#
+#
+save(traits.all, file=file.path(preped.dir, "traits.Rdata"))#
+write.csv(traits.all, file.path(src.dir,#
+                                "traits/traits_updated.csv"),#
+          row.names=FALSE)
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"))#
+  print(unique(levels(spec.dat$studyID)))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"))#
+  print(unique(levels(site.dat$studyID)))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"))#
+  print(unique(levels(meta.dat$studyID)))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- NA#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(!is.na(this.col) & is.na(this.all)){#
+        traits.all[traits.all$animalID == j, i] <- this.col#
+      } else if(!is.na(this.col) & !is.na(this.all)){#
+        if(this.col != this.all){#
+          if(!all(is.na(c(this.col, this.all)))){#
+            print(paste(unique(traits.in.main$studyID),#
+                        "trait", i, "problem!", this.all, "!=", this.col))#
+          }#
+        }#
+      }#
+    }#
+  }#
+#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}#
+#
+save(traits.all, file=file.path(preped.dir, "traits.Rdata"))#
+write.csv(traits.all, file.path(src.dir,#
+                                "traits/traits_updated.csv"),#
+          row.names=FALSE)
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"))#
+  print(unique(levels(spec.dat$studyID)))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"))#
+  print(unique(levels(site.dat$studyID)))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"))#
+  print(unique(levels(meta.dat$studyID)))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- NA#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(!is.na(this.col) & is.na(this.all)){#
+        traits.all[traits.all$animalID == j, i] <- this.col#
+      } else if(!is.na(this.col) & !is.na(this.all)){#
+        if(this.col != this.all){#
+          if(!all(is.na(c(this.col, this.all)))){#
+            print(paste(unique(traits.in.main$studyID),#
+                        "trait", i, "problem!", "original",#
+                        this.all, "!=", this.col))#
+          }#
+        }#
+      }#
+    }#
+  }#
+#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}#
+#
+save(traits.all, file=file.path(preped.dir, "traits.Rdata"))#
+write.csv(traits.all, file.path(src.dir,#
+                                "traits/traits_updated.csv"),#
+          row.names=FALSE)
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"))#
+  print(unique(levels(spec.dat$studyID)))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"))#
+  print(unique(levels(site.dat$studyID)))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"))#
+  print(unique(levels(meta.dat$studyID)))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- NA#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(!is.na(this.col) & is.na(this.all)){#
+        traits.all[traits.all$animalID == j, i] <- this.col#
+      } else if(!is.na(this.col) & !is.na(this.all)){#
+        if(this.col != this.all){#
+          if(!all(is.na(c(this.col, this.all)))){#
+            print(paste(unique(traits.in.main$studyID), j,#
+                        "trait", i, "problem!", "original",#
+                        this.all, "!=", this.col))#
+          }#
+        }#
+      }#
+    }#
+  }#
+#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}#
+#
+save(traits.all, file=file.path(preped.dir, "traits.Rdata"))#
+write.csv(traits.all, file.path(src.dir,#
+                                "traits/traits_updated.csv"),#
+          row.names=FALSE)
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"))#
+  print(unique(levels(spec.dat$studyID)))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"))#
+  print(unique(levels(site.dat$studyID)))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"))#
+  print(unique(levels(meta.dat$studyID)))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- NA#
+#
+traits.all <- tclean(traits.all)#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- tclean(traits.dat)#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(!is.na(this.col) & is.na(this.all)){#
+        traits.all[traits.all$animalID == j, i] <- this.col#
+      } else if(!is.na(this.col) & !is.na(this.all)){#
+        if(this.col != this.all){#
+          if(!all(is.na(c(this.col, this.all)))){#
+            print(paste(unique(traits.in.main$studyID), j,#
+                        "trait", i, "problem!", "original",#
+                        this.all, "!=", this.col))#
+          }#
+        }#
+      }#
+    }#
+  }#
+#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}#
+#
+save(traits.all, file=file.path(preped.dir, "traits.Rdata"))#
+write.csv(traits.all, file.path(src.dir,#
+                                "traits/traits_updated.csv"),#
+          row.names=FALSE)
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"))#
+  print(unique(levels(spec.dat$studyID)))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"))#
+  print(unique(levels(site.dat$studyID)))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"))#
+  print(unique(levels(meta.dat$studyID)))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- NA#
+#
+traits.all <- tClean(traits.all)#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- tClean(traits.dat)#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(!is.na(this.col) & is.na(this.all)){#
+        traits.all[traits.all$animalID == j, i] <- this.col#
+      } else if(!is.na(this.col) & !is.na(this.all)){#
+        if(this.col != this.all){#
+          if(!all(is.na(c(this.col, this.all)))){#
+            print(paste(unique(traits.in.main$studyID), j,#
+                        "trait", i, "problem!", "original",#
+                        this.all, "!=", this.col))#
+          }#
+        }#
+      }#
+    }#
+  }#
+#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}#
+#
+save(traits.all, file=file.path(preped.dir, "traits.Rdata"))#
+write.csv(traits.all, file.path(src.dir,#
+                                "traits/traits_updated.csv"),#
+          row.names=FALSE)
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"))#
+  print(unique(levels(spec.dat$studyID)))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"))#
+  print(unique(levels(site.dat$studyID)))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"))#
+  print(unique(levels(meta.dat$studyID)))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- NA#
+#
+traits.all <- tClean(traits.all)#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- tClean(traits.dat)#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(!is.na(this.col) & is.na(this.all)){#
+        traits.all[traits.all$animalID == j, i] <- this.col#
+      } else if(!is.na(this.col) & !is.na(this.all)){#
+        if(this.col != this.all){#
+          if(!all(is.na(c(this.col, this.all)))){#
+            if(!is.na(this.col)){#
+              print(paste(unique(traits.in.main$studyID), j,#
+                          "trait", i, "problem!", "original",#
+                          this.all, "!=", this.col))#
+            }#
+          }#
+        }#
+      }#
+    }#
+#
+    traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                                traits.all$animalID,])#
+  }#
+#
+  save(traits.all, file=file.path(preped.dir, "traits.Rdata"))#
+  write.csv(traits.all, file.path(src.dir,#
+                                  "traits/traits_updated.csv"),#
+            row.names=FALSE)
+Q
+}
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"))#
+  print(unique(levels(spec.dat$studyID)))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"))#
+  print(unique(levels(site.dat$studyID)))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"))#
+  print(unique(levels(meta.dat$studyID)))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- NA#
+#
+traits.all <- tClean(traits.all)#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- tClean(traits.dat)#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(!is.na(this.col) & is.na(this.all)){#
+        traits.all[traits.all$animalID == j, i] <- this.col#
+      } else if(!is.na(this.col) & !is.na(this.all)){#
+        if(this.col != this.all){#
+          if(!all(is.na(c(this.col, this.all)))){#
+            if(!is.na(this.col)){#
+              print(paste(unique(traits.in.main$studyID), j,#
+                          "trait", i, "problem!", "original",#
+                          this.all, "!=", this.col))#
+            }#
+          }#
+        }#
+      }#
+    }#
+  }#
+#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}#
+#
+save(traits.all, file=file.path(preped.dir, "traits.Rdata"))#
+write.csv(traits.all, file.path(src.dir,#
+                                "traits/traits_updated.csv"),#
+          row.names=FALSE)
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"))#
+  print(unique(levels(spec.dat$studyID)))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"))#
+  print(unique(levels(site.dat$studyID)))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"))#
+  print(unique(levels(meta.dat$studyID)))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- NA#
+#
+traits.all <- tClean(traits.all)#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- tClean(traits.dat)#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(!is.na(this.col) & is.na(this.all)){#
+        traits.all[traits.all$animalID == j, i] <- this.col#
+      } else if(!is.na(this.col) & !is.na(this.all)){#
+        if(this.col != this.all){#
+          if(!is.na(this.col)){#
+            print(paste(unique(traits.in.main$studyID), j,#
+                        "trait", i, "problem!", "original",#
+                        this.all, "!=", this.col))#
+          }#
+        }#
+      }#
+    }#
+  }#
+#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}#
+#
+save(traits.all, file=file.path(preped.dir, "traits.Rdata"))#
+write.csv(traits.all, file.path(src.dir,#
+                                "traits/traits_updated.csv"),#
+          row.names=FALSE)
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"))#
+  print(unique(levels(spec.dat$studyID)))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"))#
+  print(unique(levels(site.dat$studyID)))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"))#
+  print(unique(levels(meta.dat$studyID)))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- NA#
+#
+traits.all <- tClean(traits.all)#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- tClean(traits.dat)#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(!is.na(this.col) & is.na(this.all)){#
+        traits.all[traits.all$animalID == j, i] <- this.col#
+      } else if(!is.na(this.col) & !is.na(this.all)){#
+        if(this.col != this.all & !is.na(this.col)){#
+            print(paste(unique(traits.in.main$studyID), j,#
+                        "trait", i, "problem!", "original",#
+                        this.all, "!=", this.col))#
+        }#
+      }#
+    }#
+  }#
+#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}#
+#
+save(traits.all, file=file.path(preped.dir, "traits.Rdata"))#
+write.csv(traits.all, file.path(src.dir,#
+                                "traits/traits_updated.csv"),#
+          row.names=FALSE)
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"))#
+  print(unique(levels(spec.dat$studyID)))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"))#
+  print(unique(levels(site.dat$studyID)))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"))#
+  print(unique(levels(meta.dat$studyID)))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- NA#
+#
+traits.all <- tClean(traits.all)#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- tClean(traits.dat)#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(!is.na(this.col) & is.na(this.all)){#
+        traits.all[traits.all$animalID == j, i] <- this.col#
+      } else if(this.col != this.all & !is.na(this.col)){#
+        print(paste(unique(traits.in.main$studyID), j,#
+                    "trait", i, "problem!", "original",#
+                    this.all, "!=", this.col))#
+      }#
+    }#
+  }#
+#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}#
+#
+save(traits.all, file=file.path(preped.dir, "traits.Rdata"))#
+write.csv(traits.all, file.path(src.dir,#
+                                "traits/traits_updated.csv"),#
+          row.names=FALSE)
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"))#
+  print(unique(levels(spec.dat$studyID)))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"))#
+  print(unique(levels(site.dat$studyID)))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"))#
+  print(unique(levels(meta.dat$studyID)))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- NA#
+#
+traits.all <- tClean(traits.all)#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- tClean(traits.dat)#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      browser()#
+      if(!is.na(this.col) & is.na(this.all)){#
+        traits.all[traits.all$animalID == j, i] <- this.col#
+      } else if(this.col != this.all & !is.na(this.col)){#
+        print(paste(unique(traits.in.main$studyID), j,#
+                    "trait", i, "problem!", "original",#
+                    this.all, "!=", this.col))#
+      }#
+    }#
+  }#
+#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}#
+#
+save(traits.all, file=file.path(preped.dir, "traits.Rdata"))#
+write.csv(traits.all, file.path(src.dir,#
+                                "traits/traits_updated.csv"),#
+          row.names=FALSE)
+Q
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"))#
+  print(unique(levels(spec.dat$studyID)))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"))#
+  print(unique(levels(site.dat$studyID)))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"))#
+  print(unique(levels(meta.dat$studyID)))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- NA#
+#
+traits.all <- tClean(traits.all)#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- tClean(traits.dat)#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      browser()#
+      if(!is.na(this.col) & is.na(this.all)){#
+        traits.all[traits.all$animalID == j, i] <- this.col#
+      } else if(this.col != this.all & !is.na(this.col)){#
+        print(paste(unique(traits.in.main$studyID), j,#
+                    "trait", i, "problem!", "original",#
+                    this.all, "!=", this.col))#
+      }#
+    }#
+  }#
+#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}#
+#
+save(traits.all, file=file.path(preped.dir, "traits.Rdata"))#
+write.csv(traits.all, file.path(src.dir,#
+                                "traits/traits_updated.csv"),#
+          row.names=FALSE)
+n
+this.col
+this.all
+n
+this.all
+this.col
+f
+n
+Q
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"))#
+  print(unique(levels(meta.dat$studyID)))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- NA#
+#
+traits.all <- tClean(traits.all)#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- tClean(traits.dat)#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(!is.na(this.col) & is.na(this.all)){#
+        traits.all[traits.all$animalID == j, i] <- this.col#
+      } else if(this.col != this.all & !is.na(this.col)){#
+        browser()#
+        print(paste(unique(traits.in.main$studyID), j,#
+                    "trait", i, "problem!", "original",#
+                    this.all, "!=", this.col))#
+      }#
+    }#
+  }#
+#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}
+this.col
+is.na(this.col)
+?read.csv
+class(this.cal)
+class(this.col)
+Q
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"))#
+  print(unique(levels(spec.dat$studyID)))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"))#
+  print(unique(levels(site.dat$studyID)))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"))#
+  print(unique(levels(meta.dat$studyID)))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all[traits.all == "NA"] <- NA#
+#
+traits.all$studyID <- NA#
+#
+traits.all <- tClean(traits.all)#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- tClean(traits.dat)#
+  traits.dat[traits.dat == "NA"] <- NA#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(!is.na(this.col) & is.na(this.all)){#
+        traits.all[traits.all$animalID == j, i] <- this.col#
+      } else if(this.col != this.all & !is.na(this.col)){#
+        print(paste(unique(traits.in.main$studyID), j,#
+                    "trait", i, "problem!", "original",#
+                    this.all, "!=", this.col))#
+      }#
+    }#
+  }#
+#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}#
+#
+save(traits.all, file=file.path(preped.dir, "traits.Rdata"))#
+write.csv(traits.all, file.path(src.dir,#
+                                "traits/traits_updated.csv"),#
+          row.names=FALSE)
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"))#
+  print(unique(levels(spec.dat$studyID)))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"))#
+  print(unique(levels(site.dat$studyID)))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"))#
+  print(unique(levels(meta.dat$studyID)))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits_LP.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all[traits.all == "NA"] <- NA#
+#
+traits.all$studyID <- NA#
+#
+traits.all <- tClean(traits.all)#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat[traits.dat == "NA"] <- NA#
+  traits.dat <- tClean(traits.dat)#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(!is.na(this.col) & is.na(this.all)){#
+        traits.all[traits.all$animalID == j, i] <- this.col#
+      } else if(this.col != this.all & !is.na(this.col)){#
+        print(paste(unique(traits.in.main$studyID), j,#
+                    "trait", i, "problem!", "original",#
+                    this.all, "!=", this.col))#
+      }#
+    }#
+  }#
+#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}#
+#
+save(traits.all, file=file.path(preped.dir, "traits.Rdata"))#
+write.csv(traits.all, file.path(src.dir,#
+                                "traits/traits_updated.csv"),#
+          row.names=FALSE)
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"))#
+  print(unique(levels(spec.dat$studyID)))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"))#
+  print(unique(levels(site.dat$studyID)))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"))#
+  print(unique(levels(meta.dat$studyID)))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all[traits.all == "NA"] <- NA#
+#
+traits.all$studyID <- NA#
+#
+traits.all <- tClean(traits.all)#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat[traits.dat == "NA"] <- NA#
+  traits.dat <- tClean(traits.dat)#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(!is.na(this.col) & is.na(this.all)){#
+        traits.all[traits.all$animalID == j, i] <- this.col#
+      } else if(this.col != this.all & !is.na(this.col)){#
+        print(paste(unique(traits.in.main$studyID), j,#
+                    "trait", i, "problem!", "original",#
+                    this.all, "!=", this.col))#
+      }#
+    }#
+  }#
+#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}#
+#
+save(traits.all, file=file.path(preped.dir, "traits.Rdata"))#
+write.csv(traits.all, file.path(src.dir,#
+                                "traits/traits_updated.csv"),#
+          row.names=FALSE)
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"))#
+  print(unique(levels(spec.dat$studyID)))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"))#
+  print(unique(levels(site.dat$studyID)))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"))#
+  print(unique(levels(meta.dat$studyID)))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- NA#
+#
+traits.all <- tClean(traits.all)#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- tClean(traits.dat)#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(!is.na(this.col) & is.na(this.all)){#
+        traits.all[traits.all$animalID == j, i] <- this.col#
+      } else if(this.col != this.all & !is.na(this.col)){#
+        print(paste(unique(traits.in.main$studyID), j,#
+                    "trait", i, "problem!", "original",#
+                    this.all, "!=", this.col))#
+      }#
+    }#
+  }#
+#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}#
+#
+save(traits.all, file=file.path(preped.dir, "traits.Rdata"))#
+write.csv(traits.all, file.path(src.dir,#
+                                "traits/traits_updated.csv"),#
+          row.names=FALSE)
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"))#
+  print(unique(levels(spec.dat$studyID)))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"))#
+  print(unique(levels(site.dat$studyID)))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"))#
+  print(unique(levels(meta.dat$studyID)))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- NA#
+traits.all <- tClean(traits.all)#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- tClean(traits.dat)#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(!is.na(this.col) & is.na(this.all)){#
+        traits.all[traits.all$animalID == j, i] <- this.col#
+      } else if(this.col != this.all & !is.na(this.col)){#
+        print(paste(unique(traits.in.main$studyID), j,#
+                    "trait", i, "problem!", "original",#
+                    this.all, "!=", this.col))#
+      }#
+    }#
+  }#
+#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}#
+#
+save(traits.all, file=file.path(preped.dir, "traits.Rdata"))#
+write.csv(traits.all, file.path(src.dir,#
+                                "traits/traits_updated.csv"),#
+          row.names=FALSE)
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"))#
+  print(unique(levels(spec.dat$studyID)))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"))#
+  print(unique(levels(site.dat$studyID)))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"))#
+  print(unique(levels(meta.dat$studyID)))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all <- tClean(traits.all)#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat[, 'studyID']#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- tClean(traits.dat)#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in colnames(traits.all)){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(!is.na(this.col) & is.na(this.all)){#
+        traits.all[traits.all$animalID == j, i] <- this.col#
+      } else if(this.col != this.all & !is.na(this.col)){#
+        print(paste(unique(traits.in.main$studyID), j,#
+                    "trait", i, "problem!", "original",#
+                    this.all, "!=", this.col))#
+      }#
+    }#
+  }#
+#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}#
+#
+save(traits.all, file=file.path(preped.dir, "traits.Rdata"))#
+write.csv(traits.all, file.path(src.dir,#
+                                "traits/traits_updated.csv"),#
+          row.names=FALSE)
+head(traits)
+head(traits.all)
+traits.itd <- traits.all[, c("animalID", "femaleITD", "maleITD",#
+                             " queenITD", "MeanITDKremen")]
+traits.itd <- traits.all[, c("animalID", "femaleITD", "maleITD",#
+                             "queenITD", "MeanITDKremen")]
+traits.itd
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.itd$studyID <- "published"#
+traits.all <- tClean(traits.all)#
+#
+its.cols <-  c("animalID", "femaleITD", "maleITD",#
+                             "queenITD", "MeanITDKremen", "studyID")]#
+traits.itd <- traits.all[, itd.cols]
+traits.all <- read.csv(file.path(src.dir, "traits/traits.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.itd$studyID <- "published"#
+traits.all <- tClean(traits.all)#
+#
+itd.cols <-  c("animalID", "femaleITD", "maleITD",#
+                             "queenITD", "MeanITDKremen", "studyID")]#
+traits.itd <- traits.all[, itd.cols]#
+traits.itd <- traits.itd[all(is.na(traits.itd[, c("femaleITD", "maleITD",#
+                             "queenITD", "MeanITDKremen")])),]
+traits.all <- read.csv(file.path(src.dir, "traits/traits.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.itd$studyID <- "published"#
+traits.all <- tClean(traits.all)#
+#
+itd.cols <-  c("animalID", "femaleITD", "maleITD",#
+                             "queenITD", "MeanITDKremen", "studyID")#
+traits.itd <- traits.all[, itd.cols]#
+traits.itd <- traits.itd[all(is.na(traits.itd[, c("femaleITD", "maleITD",#
+                             "queenITD", "MeanITDKremen")])),]
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- "published"#
+traits.all <- tClean(traits.all)#
+#
+itd.cols <-  c("animalID", "femaleITD", "maleITD", "queenITD",#
+               "MeanITDKremen", "studyID")#
+#
+traits.itd <- traits.all[, itd.cols]#
+traits.itd <- traits.itd[all(is.na(traits.itd[, c("femaleITD", "maleITD",#
+                             "queenITD", "MeanITDKremen")])),]
+traits.its
+traits.itd
+traits.itd <- traits.all[, itd.cols]
+traits.itd
+is.na(traits.itd[, c("femaleITD", "maleITD",#
+                             "queenITD", "MeanITDKremen")]
+)
+apply(traits.itd[, c("femaleITD", "maleITD",#
+                     "queenITD", "MeanITDKremen")], 1,#
+      function(x) all(is.na(x))
+)
+apply(traits.itd[, c("femaleITD", "maleITD",#
+                     "queenITD", "MeanITDKremen")], 1,#
+      function(x) all(is.na(x)))
+traits.itd <- traits.its[apply(traits.itd[, c("femaleITD", "maleITD",#
+                     "queenITD", "MeanITDKremen")], 1,#
+      function(x) all(is.na(x))),]
+traits.itd <- traits.itd[apply(traits.itd[, c("femaleITD", "maleITD",#
+                     "queenITD", "MeanITDKremen")], 1,#
+      function(x) all(is.na(x))),]
+traits.itd
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- "published"#
+traits.all <- tClean(traits.all)#
+#
+itd.cols <-  c("animalID", "femaleITD", "maleITD", "queenITD",#
+               "MeanITDKremen", "studyID")#
+#
+traits.itd <- traits.all[, itd.cols]#
+traits.itd <- traits.itd[#
+#
+traits.itd <- traits.itd[apply(traits.itd[, c("femaleITD", "maleITD",#
+                     "queenITD", "MeanITDKremen")], 1,#
+      function(x) !all(is.na(x))),]
+)
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- "published"#
+traits.all <- tClean(traits.all)#
+#
+itd.cols <-  c("animalID", "femaleITD", "maleITD", "queenITD",#
+               "MeanITDKremen", "studyID")#
+#
+traits.itd <- traits.all[, itd.cols]#
+traits.itd <- traits.itd[apply(traits.itd[, c("femaleITD", "maleITD",#
+                     "queenITD", "MeanITDKremen")], 1,#
+      function(x) !all(is.na(x))),]
+traits.itd
+cols.to.check <- colnames(traits.all)[!colnames(traits.all) %in% itd.cols]
+cols.to.check
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"))#
+  print(unique(levels(spec.dat$studyID)))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"))#
+  print(unique(levels(site.dat$studyID)))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"))#
+  print(unique(levels(meta.dat$studyID)))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- "published"#
+traits.all <- tClean(traits.all)#
+#
+itd.cols <-  c("animalID", "femaleITD", "maleITD", "queenITD",#
+               "MeanITDKremen", "studyID")#
+#
+cols.to.check <- colnames(traits.all)[!colnames(traits.all) %in% itd.cols]#
+traits.itd <- traits.all[, itd.cols]#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat[, 'studyID']#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- tClean(traits.dat)#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.itd <- rbind(traits.itd, traits.dat[,itd.cols])#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in cols.to.check){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(!is.na(this.col) & is.na(this.all)){#
+        traits.all[traits.all$animalID == j, i] <- this.col#
+      } else if(this.col != this.all & !is.na(this.col)){#
+        print(paste(unique(traits.in.main$studyID), j,#
+                    "trait", i, "problem!", "original",#
+                    this.all, "!=", this.col))#
+      }#
+    }#
+  }#
+#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}#
+#
+traits.itd <- traits.itd[apply(traits.itd[, c("femaleITD", "maleITD",#
+                     "queenITD", "MeanITDKremen")], 1,#
+      function(x) !all(is.na(x))),]#
+#
+save(traits.all, file=file.path(preped.dir, "traits.Rdata"))#
+write.csv(traits.all, file.path(src.dir,#
+                                "traits/traits_updated.csv"),#
+          row.names=FALSE)
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"),#
+             stringsAsFactors = FALSE)#
+  print(unique(levels(spec.dat$studyID)))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"),#
+             stringsAsFactors = FALSE)#
+  print(unique(levels(site.dat$studyID)))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"))#
+  print(unique(levels(meta.dat$studyID)))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- "published"#
+traits.all <- tClean(traits.all)#
+#
+itd.cols <-  c("animalID", "femaleITD", "maleITD", "queenITD",#
+               "MeanITDKremen", "studyID")#
+#
+cols.to.check <- colnames(traits.all)[!colnames(traits.all) %in% itd.cols]#
+traits.itd <- traits.all[, itd.cols]#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat[, 'studyID']#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- tClean(traits.dat)#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.itd <- rbind(traits.itd, traits.dat[,itd.cols])#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in cols.to.check){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(!is.na(this.col) & is.na(this.all)){#
+        traits.all[traits.all$animalID == j, i] <- this.col#
+      } else if(this.col != this.all & !is.na(this.col)){#
+        print(paste(unique(traits.in.main$studyID), j,#
+                    "trait", i, "problem!", "original",#
+                    this.all, "!=", this.col))#
+      }#
+    }#
+  }#
+#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}#
+#
+traits.itd <- traits.itd[apply(traits.itd[, c("femaleITD", "maleITD",#
+                     "queenITD", "MeanITDKremen")], 1,#
+      function(x) !all(is.na(x))),]#
+#
+save(traits.all, file=file.path(preped.dir, "traits.Rdata"))#
+write.csv(traits.all, file.path(src.dir,#
+                                "traits/traits_updated.csv"),#
+          row.names=FALSE)
+## check t see if site ID includes studt ID#
+siteCheck <- function(dats){#
+  site.names <- mapply(function(a, b)#
+    grepl(pattern= a,#
+          x= b),#
+    a=dats$studyID,#
+    b=dats$siteID,#
+    SIMPLIFY=TRUE)#
+  if(!all(site.names)){#
+    dats$siteID <- dats$siteID#
+    dats$siteID[!site.names] <- paste(dats$studyID,#
+                                      dats$siteID, sep="_")#
+  }#
+  return(dats)#
+}#
+#
+## takes the data and the columns that shoudl be numbers, returns the#
+## name of problem columns are "all numbers" if all is well#
+checkNum <- function(dats, num.cols){#
+  out <- apply(dats[, num.cols], 2, is.numeric)#
+  check <- all(out)#
+  if(check == FALSE) print(colnames(dats)[out == FALSE])#
+  else print("all columns are numbers")#
+}#
+#
+## takes the data, the column name that is being checked, and the#
+## possible values. Returns studies with problem values, or "all#
+## matching" if all is well#
+checkLevels <- function(dats, col, vals){#
+  out <- dats[, col] %in% c(vals, NA)#
+  check <- all(out)#
+  if(check == FALSE) print(unique(paste(col, "has a problem with",#
+                                        dats$studyID[out == FALSE],#
+                                        unique(dats[!out,col]))))#
+  ## else print(paste(col, "all matching"))#
+}#
+#
+## cleans animial data#
+aClean <- function(){#
+  ## cleaning for animal data#
+  animal$samplingMethod <- tolower(animal$samplingMethod)#
+  animal$flowering <- tolower(animal$flowering)#
+  animal$countMethod <- tolower(animal$countMethod)#
+#
+  animal$samplingMethod[animal$samplingMethod ==#
+                        "net"] <- "ariel netting"#
+#
+  animal$samplingMethod[animal$samplingMethod ==#
+                        "obs"] <- "timed observation"#
+#
+  animal$samplingMethod[animal$samplingMethod ==#
+                        "pan + obs"] <- "obs + pan"#
+#
+  animal$flowering[animal$flowering ==#
+                   "no"] <- "not flowering"#
+#
+  animal$flowering[animal$flowering ==#
+                   "yes"] <- "flowering"#
+#
+  ## possible column values#
+  countMethod <- c("abundance", "visits", "both")#
+  checkLevels(animal, "countMethod", countMethod)#
+#
+  samplingMethod <- c("ariel netting", "sweep netting",#
+                      "pan", "pitfall", "suction", "beating",#
+                      "sticky trap", "timed observation",#
+                      "obs + net", "obs + pan")#
+  checkLevels(animal, "samplingMethod", samplingMethod)#
+#
+  flowering <- c("flowering", "not flowering")#
+  checkLevels(animal, "flowering", flowering)#
+#
+  animal.nums <- c("abundance", "numCensus", "samplingIntensity",#
+                   "fieldDist")#
+#
+  checkNum(animal, animal.nums)#
+  return(animal)#
+}#
+#
+## cleans site data#
+sClean <- function(){#
+  ## cleaning for site data#
+  site$siteType <- tolower(site$siteType)#
+  site$biome <- tolower(site$biome)#
+  site$cropID <- tolower(site$cropID)#
+  site$fieldDiv <- tolower(site$fieldDiv)#
+  site$landscape <- tolower(site$landscape)#
+  site$fieldType <- tolower(site$fieldType)#
+  site$siteSubtype <- tolower(site$siteSubtype)#
+  site$enhancementType <-#
+    tolower(site$enhancementType)#
+  site$enhancementAge <-#
+    tolower(site$enhancementAge)#
+  site$enhancementPlantType <-#
+    tolower(site$enhancementPlantType)#
+  site$enhancementIsolation <-#
+    tolower(site$enhancementIsolation)#
+  site$habitatGrowth <-#
+    tolower(site$habitatGrowth)#
+  site$habitatType <-#
+    tolower(site$habitatType)#
+  site$marginPlantType <-#
+    tolower(site$marginPlantType)#
+#
+  ## possible column values#
+  siteType <- c("crop", "enhancement", "natural habitat", "field margin")#
+  checkLevels(site, "siteType", siteType)#
+#
+  biome <- c("temperate", "tropical", "mediterranean")#
+  checkLevels(site, "biome", biome)#
+#
+  fieldDiv <- c("locally simple", "locally complex")#
+  checkLevels(site, "fieldDiv", fieldDiv)#
+#
+  landscape <- c("very simple", "simple", "complex")#
+  checkLevels(site, "landscape", landscape)#
+#
+  fieldType <- c("organic", "conventional")#
+  checkLevels(site, "fieldType", fieldType)#
+#
+  siteSubtype <- c("hedgerow", "flowerstrip", "hedgerow/flowerstrip")#
+  checkLevels(site, "siteSubtype", siteSubtype)#
+#
+  enhancementType <- c("perennial", "annual", "mix")#
+  checkLevels(site, "enhancementType", enhancementType)#
+#
+  enhancementAge <- c("newly restored", "maturing", "mature")#
+  checkLevels(site, "enhancementAge",  enhancementAge)#
+#
+  enhancementPlantType <- c("native", "nonnative")#
+  checkLevels(site, "enhancementPlantType",  enhancementPlantType)#
+#
+  enhancementIsolation <- c("isolated", "continuous")#
+  checkLevels(site, "enhancementIsolation",  enhancementIsolation)#
+#
+  habitatGrowth <- c("primary", "primary managed", "manged regrowth", "secondary", "restored")#
+  checkLevels(site, "habitatGrowth",  habitatGrowth)#
+#
+  marginPlantType <- c("grass", "forbs", "shrubs", "trees", "bare")#
+  checkLevels(site, "marginPlantType",  marginPlantType)#
+#
+  site.nums <- c("totalArea",#
+                 "proportionSemiNatural",#
+                 "proportionArable",#
+                 "northing_UTM",#
+                 "easting_UTM")#
+#
+  checkNum(site, site.nums)#
+  return(site)#
+}#
+## clean traits data#
+#
+tClean <- function(traits){#
+  ## traits$genus <- all.traits$genus[match(traits$animalID,#
+  ##                                        traits.all$animalID)]#
+  ## traits$subGenus <- all.traits$subGenus[match(traits$animalID,#
+  ##                                              traits.all$animalID)]#
+  ## traits$author <- all.traits$author[match(traits$animalID,#
+  ##                                          traits.all$animalID)]#
+  traits[traits == "NA"] <- NA#
+  traits$reproStrat <- tolower(traits$reproStrat)#
+  traits$nestLoc <- fix.white.space(tolower(traits$nestLoc))#
+  traits$nestBuild <- tolower(traits$nestBuild)#
+  traits$sociality <- fix.white.space(tolower(traits$sociality))#
+  traits$lecty <- tolower(traits$lecty)#
+  traits$substrate <- NA#
+#
+  traits$family[traits$family == "Colettidae"] <-#
+    "Colletidae"#
+  traits$reproStrat[traits$reproStrat == "cleptoparasite"] <-#
+    "parasite"#
+#
+  ## nesting issues#
+  traits$substrate[traits$nestLoc == "above snail"] <-#
+    "snail"#
+  traits$substrate[traits$nestLoc == "ground"] <-#
+    "ground"#
+  traits$substrate[traits$nestLoc == "above cavity"] <-#
+    "cavity"#
+  traits$substrate[traits$nestLoc == "below cavity"] <-#
+    "cavity"#
+  traits$nestLoc[traits$nestLoc == "above snail"] <-#
+    "above"#
+  traits$nestLoc[traits$nestLoc == "above cavity"] <-#
+    "above"#
+  traits$nestLoc[traits$nestLoc == "below cavity"] <-#
+    "below"#
+  traits$nestLoc[traits$nestLoc == "ground"] <-#
+    "below"#
+  traits$nestLoc[traits$nestLoc == "mixed"] <-#
+    "mix"#
+#
+  traits$nestBuild[traits$nestBuild == "create"] <-#
+    "constructor"#
+  traits$substrate[traits$nestBuild == "wood"] <-#
+    "wood"#
+  traits$nestBuild[traits$nestBuild == "wood"] <-#
+    "constructor"#
+  traits$nestBuild[traits$nestBuild == "renter+excavator"] <-#
+    "variable"#
+  traits$nestBuild[traits$nestBuild == "builder"] <-#
+    "constructor"#
+  traits$nestBuild[traits$nestBuild == "rent"] <-#
+    "renter"#
+#
+  ## sociality issues#
+  traits$sociality[traits$sociality == "perennial"] <-#
+    "perennial social"#
+  traits$sociality[traits$sociality == "social"] <-#
+    "annual social"#
+  traits$sociality[traits$sociality == "annual social/solitary"] <-#
+    "variable"#
+  traits$sociality[traits$sociality == "solitary/social"] <-#
+    "variable"#
+#
+  ## lecty issues#
+  traits$lecty[traits$lecty == "oligolectic or polylectic"] <-#
+    "variable"#
+#
+  nestLoc <- c("above", "below", "mix", "NA")#
+  checkLevels(traits, "nestLoc",  nestLoc)#
+#
+  nestBuild <- c("excavator", "renter", "mason", "constructor", "NA")#
+  checkLevels(traits, "nestBuild",  nestBuild)#
+#
+  sociality <- c("solitary", "perennial social",#
+                 "annual social", "variable", "communal", "NA")#
+  checkLevels(traits, "sociality",  sociality)#
+#
+  lecty <- c("polylectic", "oligolectic", "variable", "NA")#
+  checkLevels(traits, "lecty",  lecty)#
+  ## traits.comb <- unique(traits[,!colnames(traits) == "studyID"],#
+  ##                       MARGIN=1)#
+  ## paste(traits.comb$animalID[duplicated(traits.comb$animalID)])#
+  traits[traits == "NA"] <- NA#
+  return(traits)#
+}
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"),#
+             stringsAsFactors = FALSE)#
+  print(unique(levels(spec.dat$studyID)))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"),#
+             stringsAsFactors = FALSE)#
+  print(unique(levels(site.dat$studyID)))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"))#
+  print(unique(levels(meta.dat$studyID)))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- "published"#
+traits.all <- tClean(traits.all)#
+#
+itd.cols <-  c("animalID", "femaleITD", "maleITD", "queenITD",#
+               "MeanITDKremen", "studyID")#
+#
+cols.to.check <- colnames(traits.all)[!colnames(traits.all) %in% itd.cols]#
+traits.itd <- traits.all[, itd.cols]#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat[, 'studyID']#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- tClean(traits.dat)#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.itd <- rbind(traits.itd, traits.dat[,itd.cols])#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in cols.to.check){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(!is.na(this.col) & is.na(this.all)){#
+        traits.all[traits.all$animalID == j, i] <- this.col#
+      } else if(this.col != this.all & !is.na(this.col)){#
+        print(paste(unique(traits.in.main$studyID), j,#
+                    "trait", i, "problem!", "original",#
+                    this.all, "!=", this.col))#
+      }#
+    }#
+  }#
+#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}#
+#
+traits.itd <- traits.itd[apply(traits.itd[, c("femaleITD", "maleITD",#
+                     "queenITD", "MeanITDKremen")], 1,#
+      function(x) !all(is.na(x))),]#
+#
+save(traits.all, file=file.path(preped.dir, "traits.Rdata"))#
+write.csv(traits.all, file.path(src.dir,#
+                                "traits/traits_updated.csv"),#
+          row.names=FALSE)
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"),#
+             stringsAsFactors = FALSE)#
+  print(unique(spec.dat$studyID))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"),#
+             stringsAsFactors = FALSE)#
+  print(unique(levels(site.dat$studyID)))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"))#
+  print(unique(meta.dat$studyID))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- "published"#
+traits.all <- tClean(traits.all)#
+#
+itd.cols <-  c("animalID", "femaleITD", "maleITD", "queenITD",#
+               "MeanITDKremen", "studyID")#
+#
+cols.to.check <- colnames(traits.all)[!colnames(traits.all) %in% itd.cols]#
+traits.itd <- traits.all[, itd.cols]#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat[, 'studyID']#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- tClean(traits.dat)#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.itd <- rbind(traits.itd, traits.dat[,itd.cols])#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in cols.to.check){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(!is.na(this.col) & is.na(this.all)){#
+        traits.all[traits.all$animalID == j, i] <- this.col#
+      } else if(this.col != this.all & !is.na(this.col)){#
+        print(paste(unique(traits.in.main$studyID), j,#
+                    "trait", i, "problem!", "original",#
+                    this.all, "!=", this.col))#
+      }#
+    }#
+  }#
+#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}#
+#
+traits.itd <- traits.itd[apply(traits.itd[, c("femaleITD", "maleITD",#
+                                              "queenITD", "MeanITDKremen")], 1,#
+                               function(x) !all(is.na(x))),]#
+#
+save(traits.all, file=file.path(preped.dir, "traits.Rdata"))#
+write.csv(traits.all, file.path(src.dir,#
+                                "traits/traits_updated.csv"),#
+          row.names=FALSE)
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"),#
+             stringsAsFactors = FALSE)#
+  print(unique(spec.dat$studyID))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"),#
+             stringsAsFactors = FALSE)#
+  print(unique(levels(site.dat$studyID)))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"),#
+              stringsAsFactors = FALSE)#
+  print(unique(meta.dat$studyID))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- "published"#
+traits.all <- tClean(traits.all)#
+#
+itd.cols <-  c("animalID", "femaleITD", "maleITD", "queenITD",#
+               "MeanITDKremen", "studyID")#
+#
+cols.to.check <- colnames(traits.all)[!colnames(traits.all) %in% itd.cols]#
+traits.itd <- traits.all[, itd.cols]#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat[, 'studyID']#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- tClean(traits.dat)#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.itd <- rbind(traits.itd, traits.dat[,itd.cols])#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in cols.to.check){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(!is.na(this.col) & is.na(this.all)){#
+        traits.all[traits.all$animalID == j, i] <- this.col#
+      } else if(this.col != this.all & !is.na(this.col)){#
+        print(paste(unique(traits.in.main$studyID), j,#
+                    "trait", i, "problem!", "original",#
+                    this.all, "!=", this.col))#
+      }#
+    }#
+  }#
+#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}#
+#
+traits.itd <- traits.itd[apply(traits.itd[, c("femaleITD", "maleITD",#
+                                              "queenITD", "MeanITDKremen")], 1,#
+                               function(x) !all(is.na(x))),]#
+#
+save(traits.all, file=file.path(preped.dir, "traits.Rdata"))#
+write.csv(traits.all, file.path(src.dir,#
+                                "traits/traits_updated.csv"),#
+          row.names=FALSE)
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"),#
+             stringsAsFactors = FALSE)#
+  print(unique(spec.dat$studyID))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"),#
+             stringsAsFactors = FALSE)#
+  print(unique(site.dat$studyID))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"),#
+              stringsAsFactors = FALSE)#
+  print(unique(meta.dat$studyID))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all$studyID <- "published"#
+traits.all <- tClean(traits.all)#
+#
+itd.cols <-  c("animalID", "femaleITD", "maleITD", "queenITD",#
+               "MeanITDKremen", "studyID")#
+#
+cols.to.check <- colnames(traits.all)[!colnames(traits.all) %in% itd.cols]#
+traits.itd <- traits.all[, itd.cols]#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat[, 'studyID']#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- tClean(traits.dat)#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.itd <- rbind(traits.itd, traits.dat[,itd.cols])#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in cols.to.check){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(!is.na(this.col) & is.na(this.all)){#
+        traits.all[traits.all$animalID == j, i] <- this.col#
+      } else if(this.col != this.all & !is.na(this.col)){#
+        print(paste(unique(traits.in.main$studyID), j,#
+                    "trait", i, "problem!", "original",#
+                    this.all, "!=", this.col))#
+      }#
+    }#
+  }#
+#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}#
+#
+traits.itd <- traits.itd[apply(traits.itd[, c("femaleITD", "maleITD",#
+                                              "queenITD", "MeanITDKremen")], 1,#
+                               function(x) !all(is.na(x))),]#
+#
+save(traits.all, file=file.path(preped.dir, "traits.Rdata"))#
+write.csv(traits.all, file.path(src.dir,#
+                                "traits/traits_updated.csv"),#
+          row.names=FALSE)
+## *******************************************************#
+## make files for use in relational database#
+## *******************************************************#
+## load data#
+library(DataCombine)#
+src.dir <- '~/Dropbox/pollinator_beta_study/data/'#
+source(file.path(src.dir, 'relational/src/updated/src/cleaning.R'))#
+#
+original.dir <- file.path(src.dir, 'original/updated')#
+preped.dir <- file.path(src.dir, 'relational/preped_data')#
+#
+all.original.dir <- list.dirs(original.dir, recursive=FALSE)#
+#
+animal <- data.frame()#
+site <- data.frame()#
+service <- data.frame()#
+meta <- data.frame()#
+#
+## *******************************************************#
+print("animal")#
+for(i in 1:length(all.original.dir)){#
+  spec.dat <-#
+    read.csv(file.path(all.original.dir[i], "animal.csv"),#
+             stringsAsFactors = FALSE)#
+  print(unique(spec.dat$studyID))#
+  if("abundanceMethod" %in% colnames(spec.dat)){#
+    colnames(spec.dat)["abundanceMethod"] <- "countMethod"#
+  }#
+  spec.dat <- siteCheck(spec.dat)#
+  source('~/Dropbox/pollinator_beta_study/data/relational/src/cleaning.R')#
+  animal <- rbind(animal, spec.dat)#
+}#
+#
+animal <- aClean()#
+save(animal, file=file.path(preped.dir, "animal.Rdata"))#
+#
+## *******************************************************#
+print("site")#
+for(i in 1:length(all.original.dir)){#
+  site.dat <-#
+    read.csv(file.path(all.original.dir[i], "site.csv"),#
+             stringsAsFactors = FALSE)#
+  print(unique(site.dat$studyID))#
+  site.dat <- siteCheck(site.dat)#
+  site <- rbind(site, site.dat)#
+}#
+#
+site <- sClean()#
+save(site, file=file.path(preped.dir, "site.Rdata"))#
+#
+## *******************************************************#
+print("meta")#
+for(i in 1:length(all.original.dir)){#
+  meta.dat <-#
+    read.csv(file.path(all.original.dir[i], "meta.csv"),#
+              stringsAsFactors = FALSE)#
+  print(unique(meta.dat$studyID))#
+  meta <- rbind(meta, meta.dat)#
+}#
+#
+save(meta, file=file.path(preped.dir, "meta.Rdata"))#
+#
+## *******************************************************#
+traits.all <- read.csv(file.path(src.dir, "traits/traits.csv"),#
+                       stringsAsFactors = FALSE)#
+traits.all <- tClean(traits.all)#
+traits.all$studyID <- "published"#
+itd.cols <-  c("animalID", "femaleITD", "maleITD", "queenITD",#
+               "MeanITDKremen", "studyID")#
+#
+cols.to.check <- colnames(traits.all)[!colnames(traits.all) %in% itd.cols]#
+traits.itd <- traits.all[, itd.cols]#
+#
+print("traits")#
+for(i in 1:length(all.original.dir)){#
+  traits.dat <-#
+    read.csv(file.path(all.original.dir[i], "traits.csv"),#
+             stringsAsFactors = FALSE)#
+  traits.dat[, 'studyID']#
+  traits.dat$genus <- NA#
+  traits.dat$subGenus <- NA#
+  traits.dat$MeanITDKremen <- NA#
+  traits.dat$author <- NA#
+  traits.dat <- tClean(traits.dat)#
+  traits.dat <- traits.dat[, colnames(traits.all)]#
+  traits.itd <- rbind(traits.itd, traits.dat[,itd.cols])#
+  traits.in.main <- traits.dat[traits.dat$animalID %in%#
+                               traits.all$animalID,]#
+#
+  for(j in traits.in.main$animalID){#
+    for(i in cols.to.check){#
+      this.col <- traits.dat[traits.dat$animalID == j, i]#
+      this.all <- traits.all[traits.all$animalID == j, i]#
+      if(!is.na(this.col) & is.na(this.all)){#
+        traits.all[traits.all$animalID == j, i] <- this.col#
+      } else if(this.col != this.all & !is.na(this.col)){#
+        print(paste(unique(traits.in.main$studyID), j,#
+                    "trait", i, "problem!", "original",#
+                    this.all, "!=", this.col))#
+      }#
+    }#
+  }#
+#
+  traits.all <- rbind(traits.all, traits.dat[!traits.dat$animalID %in%#
+                                              traits.all$animalID,])#
+}#
+#
+traits.itd <- traits.itd[apply(traits.itd[, c("femaleITD", "maleITD",#
+                                              "queenITD",#
+                                              "MeanITDKremen")],#
+                               1, function(x) !all(is.na(x))),]#
+#
+save(traits.all, file=file.path(preped.dir, "traits.Rdata"))#
+write.csv(traits.all, file.path(src.dir,#
+                                "traits/traits_updated.csv"),#
+          row.names=FALSE)
+25/3
+25/2
+3662 + 1500
+install.packages("nimble", repos = "http://r-nimble.org", type = "source")
+137-1850-9.85
+137-18.50-9.85
+rexp(100)
+mean(rexp(100))
+plot(density(rexp(100)))
+plot(density(rnorm(100)))
+mean(rnorm(100))
+mean(rexp(100))
+plot(density(rexp(100)))
+100-(19.2+3.7)
+100+(19.2+3.7)
+(19.2+3.7)
+(19.2-3.7)
+100-22.7
+load("~/Desktop/HedgeWatermelon_List.RData")
+ls()
+list.mel
+100-13
+100-5
+9+4
+9-4
+162/400
+rm(list=ls())#
+setwd('~/Dropbox/nimble-dev/occupancy/singleSpp-multiSea')#
+source('src/initialize.R')#
+#
+## original model jags and nimble#
+load(file="saved/orig.Rdata")#
+#
+## vectorized bernuli calls#
+load(file="saved/opt1.Rdata")#
+#
+## custom sampler for zs, reflective sampler for other parms#
+load(file="saved/opt2.Rdata")#
+#
+## costum function for latent state#
+load(file="saved/opt3.Rdata")#
+#
+## rename results#
+ss.ms.opt1[[1]] <- rename_MCMC_comparison_method('nimble', 'vectorized',#
+                                                 comparison=ss.ms.opt1[[1]])#
+ss.ms.opt2[[1]] <- rename_MCMC_comparison_method('nimbleOpt2',#
+                                                  'reflective',#
+                                                  comparison=ss.ms.opt2[[1]])#
+ss.ms.opt3[[1]] <- rename_MCMC_comparison_method(c('nimble', 'autoBlock'),#
+                                                 c('no z',#
+                                                   'no z, autoBlock'),#
+                                                 comparison=ss.ms.opt3[[1]])#
+#
+## compare mcmcs#
+ss.ms.occ.all <- combine_MCMC_comparison_results(ss.ms.orig[[1]],#
+                                                 ss.ms.opt1[[1]],#
+                                                 ss.ms.opt2[[1]],#
+                                                 ss.ms.opt3[[1]],#
+                                                 name = "ss.ms" )#
+#
+make_MCMC_comparison_pages(ss.ms.occ.all, dir="figures/comparisons")
