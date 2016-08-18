@@ -1,5 +1,5 @@
 rm(list=ls())
-setwd('~/Dropbox/nimble-dev/occupancy/singleSpp-multiSea')
+setwd('~/Dropbox/occupancy-nimble/singleSpp-multiSea')
 source('src/initialize.R')
 
 ## original model jags and nimble

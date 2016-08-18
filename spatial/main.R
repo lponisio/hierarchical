@@ -1,5 +1,5 @@
 rm(list=ls())
-setwd("~/Dropbox/nimble-dev/occupancy/spatial")
+setwd("~/Dropbox/occupancy-nimble/spatial")
 source('src/initialize.R')
 
 sp.mod <- nimbleCode({

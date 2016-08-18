@@ -1,5 +1,5 @@
 rm(list=ls())
-setwd('~/Dropbox/nimble-dev/occupancy/multiSpp-singleSea')
+setwd('~/Dropbox/occupancy-nimble/multiSpp-singleSea')
 
 ## don't agument data
 n_zeroes <- 0

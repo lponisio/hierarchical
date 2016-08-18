@@ -1,6 +1,6 @@
 rm(list=ls())
 library(nimble)
-setwd('~/Dropbox/nimble-dev/occupancy/multiSpp-singleSea')
+setwd('~/Dropbox/occupancy-nimble/multiSpp-singleSea')
 source('src/plotting.R')
 
 ## original model jags and nimble

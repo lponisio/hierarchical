@@ -1,5 +1,5 @@
 rm(list=ls())
-setwd("~/Dropbox/nimble-dev/occupancy/singleSpp-multiSea")
+setwd("~/Dropbox/occupancy-nimble/singleSpp-multiSea")
 
 ## original model
 source('original.R')
