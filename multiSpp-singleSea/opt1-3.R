@@ -185,13 +185,13 @@ save(ms.ss.opt2, file="saved/opt2.Rdata")
 MCMCdefs.opt2 <- list('nimbleOpt3' = quote({
   customSpec <- configureMCMC(Rmodel)
   ## find node names for random effects
-  sp.parms.a <- Rmodel$getNodeNames(includeData = FALSE))[grepl("^a",
+  sp.parms.a <- Rmodel$getNodeNames(includeData = FALSE)[grepl("^a",
                                     Rmodel$getNodeNames(includeData = FALSE))]
-  sp.parms.b <- Rmodel$getNodeNames(includeData = FALSE))[grepl("^b",
+  sp.parms.b <- Rmodel$getNodeNames(includeData = FALSE)[grepl("^b",
                                      Rmodel$getNodeNames(includeData = FALSE))]
-  sp.parms.u <- Rmodel$getNodeNames(includeData = FALSE))[grepl("^u",
+  sp.parms.u <- Rmodel$getNodeNames(includeData = FALSE)[grepl("^u",
                                      Rmodel$getNodeNames(includeData = FALSE))]
-  sp.parms.v <- Rmodel$getNodeNames(includeData = FALSE))[grepl("^v",
+  sp.parms.v <- Rmodel$getNodeNames(includeData = FALSE)[grepl("^v",
                                      Rmodel$getNodeNames(includeData = FALSE))]
   customSpec$removeSamplers(c(sp.parms.a, sp.parms.b, sp.parms.u,
                               sp.parms.v),

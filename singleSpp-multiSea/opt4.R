@@ -48,9 +48,9 @@ ss.ms.occ <- nimbleCode({
 MCMCdefs.opt4 <- list('nimbleOpt4' = quote({
   customSpec <- configureMCMC(Rmodel)
   ## find node names for random effects
-  sp.parms.phi <- Rmodel$getNodeNames(includeData = FALSE))[grepl("\\<phi\\>",
+  sp.parms.phi <- Rmodel$getNodeNames(includeData = FALSE)[grepl("\\<phi\\>",
                                     Rmodel$getNodeNames(includeData = FALSE))]
-  sp.parms.gam <- Rmodel$getNodeNames(includeData = FALSE))[grepl("[[gamma]]",
+  sp.parms.gam <- Rmodel$getNodeNames(includeData = FALSE)[grepl("[[gamma]]",
                                      Rmodel$getNodeNames(includeData = FALSE))]
   customSpec$removeSamplers(c(sp.parms.phi, sp.parms.gam),
                             print=FALSE)
