@@ -179,43 +179,42 @@ save(ms.ss.opt2, file="saved/opt2.Rdata")
 
 
 ## *********************************************************************
-## ## option XX: block sampler for species random effects for each "type"
-## ## this option just does not work for some reason
+## ## option 3: block sampler for species random effects for each "type"
 
-## ## remove the samples, add block samplers
-## MCMCdefs.opt2 <- list('nimbleOpt2' = quote({
-##   customSpec <- configureMCMC(Rmodel)
-##   ## find node names for random effects
-##   sp.parms.a <- Rmodel$getNodeNames()[grepl("^a",
-##                                     Rmodel$getNodeNames(includeData = FALSE))]
-##   sp.parms.b <- Rmodel$getNodeNames()[grepl("^b",
-##                                      Rmodel$getNodeNames(includeData = FALSE))]
-##   sp.parms.u <- Rmodel$getNodeNames()[grepl("^u",
-##                                      Rmodel$getNodeNames(includeData = FALSE))]
-##   sp.parms.v <- Rmodel$getNodeNames()[grepl("^v",
-##                                      Rmodel$getNodeNames(includeData = FALSE))]
-##   customSpec$removeSamplers(c(sp.parms.a, sp.parms.b, sp.parms.u,
-##                               sp.parms.v),
-##                             print=FALSE)
+## remove the samples, add block samplers
+MCMCdefs.opt2 <- list('nimbleOpt3' = quote({
+  customSpec <- configureMCMC(Rmodel)
+  ## find node names for random effects
+  sp.parms.a <- Rmodel$getNodeNames(includeData = FALSE))[grepl("^a",
+                                    Rmodel$getNodeNames(includeData = FALSE))]
+  sp.parms.b <- Rmodel$getNodeNames(includeData = FALSE))[grepl("^b",
+                                     Rmodel$getNodeNames(includeData = FALSE))]
+  sp.parms.u <- Rmodel$getNodeNames(includeData = FALSE))[grepl("^u",
+                                     Rmodel$getNodeNames(includeData = FALSE))]
+  sp.parms.v <- Rmodel$getNodeNames(includeData = FALSE))[grepl("^v",
+                                     Rmodel$getNodeNames(includeData = FALSE))]
+  customSpec$removeSamplers(c(sp.parms.a, sp.parms.b, sp.parms.u,
+                              sp.parms.v),
+                            print=FALSE)
 
-##   customSpec$addSampler(target = sp.parms.a,
-##                         type = "RW_block", log=TRUE)
-##   customSpec$addSampler(target = sp.parms.b,
-##                         type = "RW_block", log=TRUE)
-##   customSpec$addSampler(target = sp.parms.u,
-##                         type = "RW_block", log=TRUE)
-##   customSpec$addSampler(target = sp.parms.v,
-##                         type = "RW_block", log=TRUE)
-##   customSpec
-## }))
+  customSpec$addSampler(target = sp.parms.a,
+                        type = "RW_block", log=TRUE)
+  customSpec$addSampler(target = sp.parms.b,
+                        type = "RW_block", log=TRUE)
+  customSpec$addSampler(target = sp.parms.u,
+                        type = "RW_block", log=TRUE)
+  customSpec$addSampler(target = sp.parms.v,
+                        type = "RW_block", log=TRUE)
+  customSpec
+}))
 
-## ## run the model
-## ms.ss.opt2 <- compareMCMCs(input1,
-##                            MCMCs=c('nimbleOpt2'),
-##                            MCMCdefs = MCMCdefs.opt2,
-##                            niter= niter,
-##                            burnin = burnin,
-##                            summary=FALSE,
-##                            check=FALSE)
+## run the model
+ms.ss.opt2 <- compareMCMCs(input1,
+                           MCMCs=c('nimbleOpt3'),
+                           MCMCdefs = MCMCdefs.opt3,
+                           niter= niter,
+                           burnin = burnin,
+                           summary=FALSE,
+                           check=FALSE)
 
-## save(ms.ss.opt2, file="saved/opt2.Rdata")
+save(ms.ss.opt2, file="saved/opt3.Rdata")
