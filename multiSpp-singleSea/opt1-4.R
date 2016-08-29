@@ -149,7 +149,7 @@ save(ms.ss.opt1, file="saved/opt1.Rdata")
 ## *********************************************************************
 
 ## remove the samples, add block samplers
-MCMCdefs.opt2 <- list('nimbleOpt3' = quote({
+MCMCdefs.opt2 <- list('nimbleOpt2' = quote({
   customSpec <- configureMCMC(Rmodel)
   ## find node names of each species for random effects
   base.names <- c("a1", "a2", "a3", "a4", "b1", "b2", "u_cato",
@@ -162,8 +162,7 @@ MCMCdefs.opt2 <- list('nimbleOpt3' = quote({
     blocknames <- unlist(lapply(exp.names.list, function(x) x[i]))
     customSpec$removeSamplers(blocknames, print=FALSE)
     customSpec$addSampler(target = blocknames,
-                          type = "RW_block",
-                          log=TRUE)
+                          type = "RW_block")
   }
   customSpec
 }))
@@ -201,13 +200,13 @@ MCMCdefs.opt3 <- list('nimbleOpt3' = quote({
                             print=FALSE)
 
   customSpec$addSampler(target = sp.parms.a,
-                        type = "RW_block", log=TRUE)
+                        type = "RW_block")
   customSpec$addSampler(target = sp.parms.b,
-                        type = "RW_block", log=TRUE)
+                        type = "RW_block")
   customSpec$addSampler(target = sp.parms.u,
-                        type = "RW_block", log=TRUE)
+                        type = "RW_block")
   customSpec$addSampler(target = sp.parms.v,
-                        type = "RW_block", log=TRUE)
+                        type = "RW_block")
   customSpec
 }))
 
