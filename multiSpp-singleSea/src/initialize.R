@@ -102,6 +102,6 @@ model_data$onesRow <- matrix(rep(1, constants$max_num_reps), nrow = 1)
 
 
 ## mcmc settings
-scale <- 5e1
+scale <- 1e2
 burnin <- 1e2*scale
 niter <- (1e3)*scale

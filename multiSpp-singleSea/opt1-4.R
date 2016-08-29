@@ -75,11 +75,11 @@ ms.ss.occ <- nimbleCode({
     ## nodes in the model by a factor of num_points
     logit(psi[1:num_points,i]) <-
       u_cato[i]*(1-habitat_ind[1:num_points]) +
-      u_fcw[i]*habitat_ind[1:num_points] +
-      a1[i]*ufc_linear[1:num_points] +
-      a2[i]*ufc_quadratic[1:num_points] +
-      a3[i]*ba_linear[1:num_points] +
-      a4[i]*ba_quadratic[1:num_points]
+        u_fcw[i]*habitat_ind[1:num_points] +
+          a1[i]*ufc_linear[1:num_points] +
+            a2[i]*ufc_quadratic[1:num_points] +
+              a3[i]*ba_linear[1:num_points] +
+                a4[i]*ba_quadratic[1:num_points]
     ## We can also vectorize this
     mu_psi[1:num_points,i] <- psi[1:num_points, i]
 
@@ -90,9 +90,9 @@ ms.ss.occ <- nimbleCode({
     logit(p[1:num_points, 1:max_num_reps, i]) <-
       (v_cato[i]*(1-habitat_ind[1:num_points]) +
        v_fcw[i]*habitat_ind[1:num_points]) %*%
-      asRow(onesRow[1, 1:max_num_reps])+
-      b1[i]*date_linear[1:num_points,1:max_num_reps] +
-      b2[i]*date_quadratic[1:num_points,1:max_num_reps]
+         asRow(onesRow[1, 1:max_num_reps])+
+           b1[i]*date_linear[1:num_points,1:max_num_reps] +
+             b2[i]*date_quadratic[1:num_points,1:max_num_reps]
 
     ## This is the biggest change: We can write our own distribution
     ## to combine the bernoulli occupancy and detection events.  We
@@ -132,6 +132,7 @@ input1 <- list(code=ms.ss.occ,
 
 ## *********************************************************************
 ## option 1 (vanilla NIMBLE) using compare MCMC
+## *********************************************************************
 
 ms.ss.opt1 <- compareMCMCs(input1,
                            MCMCs=c('nimble', 'autoBlock'),
@@ -145,9 +146,10 @@ save(ms.ss.opt1, file="saved/opt1.Rdata")
 
 ## *********************************************************************
 ## option 2: block sampler for species random effects for each species
+## *********************************************************************
 
 ## remove the samples, add block samplers
-MCMCdefs.opt3 <- list('nimbleOpt3' = quote({
+MCMCdefs.opt2 <- list('nimbleOpt3' = quote({
   customSpec <- configureMCMC(Rmodel)
   ## find node names of each species for random effects
   base.names <- c("a1", "a2", "a3", "a4", "b1", "b2", "u_cato",
@@ -167,9 +169,9 @@ MCMCdefs.opt3 <- list('nimbleOpt3' = quote({
 }))
 
 ## run the model
-ms.ss.opt3 <- compareMCMCs(input1,
-                           MCMCs=c('nimbleOpt3'),
-                           MCMCdefs = MCMCdefs.opt3,
+ms.ss.opt2 <- compareMCMCs(input1,
+                           MCMCs=c('nimbleOpt2'),
+                           MCMCdefs = MCMCdefs.opt2,
                            niter= niter,
                            burnin = burnin,
                            summary=FALSE,
@@ -177,22 +179,23 @@ ms.ss.opt3 <- compareMCMCs(input1,
 
 save(ms.ss.opt2, file="saved/opt2.Rdata")
 
-
 ## *********************************************************************
-## ## option 3: block sampler for species random effects for each "type"
+## ## option 3: block sampler for species random effects for each
+## "type"
+## *********************************************************************
 
 ## remove the samples, add block samplers
-MCMCdefs.opt2 <- list('nimbleOpt3' = quote({
+MCMCdefs.opt3 <- list('nimbleOpt3' = quote({
   customSpec <- configureMCMC(Rmodel)
   ## find node names for random effects
   sp.parms.a <- Rmodel$getNodeNames(includeData = FALSE)[grepl("^a",
-                                    Rmodel$getNodeNames(includeData = FALSE))]
+                                      Rmodel$getNodeNames(includeData = FALSE))]
   sp.parms.b <- Rmodel$getNodeNames(includeData = FALSE)[grepl("^b",
-                                     Rmodel$getNodeNames(includeData = FALSE))]
+                                      Rmodel$getNodeNames(includeData = FALSE))]
   sp.parms.u <- Rmodel$getNodeNames(includeData = FALSE)[grepl("^u",
-                                     Rmodel$getNodeNames(includeData = FALSE))]
+                                      Rmodel$getNodeNames(includeData = FALSE))]
   sp.parms.v <- Rmodel$getNodeNames(includeData = FALSE)[grepl("^v",
-                                     Rmodel$getNodeNames(includeData = FALSE))]
+                                      Rmodel$getNodeNames(includeData = FALSE))]
   customSpec$removeSamplers(c(sp.parms.a, sp.parms.b, sp.parms.u,
                               sp.parms.v),
                             print=FALSE)
@@ -209,7 +212,7 @@ MCMCdefs.opt2 <- list('nimbleOpt3' = quote({
 }))
 
 ## run the model
-ms.ss.opt2 <- compareMCMCs(input1,
+ms.ss.opt3 <- compareMCMCs(input1,
                            MCMCs=c('nimbleOpt3'),
                            MCMCdefs = MCMCdefs.opt3,
                            niter= niter,
@@ -217,4 +220,42 @@ ms.ss.opt2 <- compareMCMCs(input1,
                            summary=FALSE,
                            check=FALSE)
 
-save(ms.ss.opt2, file="saved/opt3.Rdata")
+save(ms.ss.opt3, file="saved/opt3.Rdata")
+
+
+
+## *********************************************************************
+## ## option 4: sigma sampler
+## *********************************************************************
+source('src/sampler_RW_shift.R')
+## remove the samples, add block samplers
+MCMCdefs.opt4 <- list('nimbleOpt4' = quote({
+  customSpec <- configureMCMC(Rmodel)
+  ## find node names for random effects
+  sigma.parms <- Rmodel$getNodeNames(includeData = FALSE)[grepl("^sigma",
+                                 Rmodel$getNodeNames(includeData = FALSE))]
+  mu.parms <- paste("mu",
+                    sapply(strsplit(sigma.parms, "_"), function(x) x[2]),
+                    sep="_")
+  customSpec$removeSamplers(sigma.parms,
+                            print=FALSE)
+  
+  for(i in 1:length(sigma.parms)){
+    customSpec$addSampler(target = sigma.parms[i],
+                          type = "sampler_RW_log_shift",
+                          control = list(shiftNodes = mu.parms[i]))
+    
+  }
+  customSpec
+}))
+
+## run the model
+ms.ss.opt4 <- compareMCMCs(input1,
+                           MCMCs=c('nimbleOpt4'),
+                           MCMCdefs = MCMCdefs.opt4,
+                           niter= niter,
+                           burnin = burnin,
+                           summary=FALSE,
+                           check=FALSE)
+
+save(ms.ss.opt4, file="saved/opt4.Rdata")
