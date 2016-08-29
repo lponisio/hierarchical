@@ -42,8 +42,8 @@ ss.ms.occ.all <- combine_MCMC_comparison_results(ss.ms.orig[[1]],
                                                  ss.ms.opt1[[1]],
                                                  ss.ms.opt2[[1]],
                                                  ss.ms.opt3[[1]],
-                                                 ss.ms.opt4[[1]]
-                                                 ss.ms.opt5[[1]]
+                                                 ss.ms.opt4[[1]],
+                                                 ss.ms.opt5[[1]],
                                                  name = "ss.ms" )
 
 make_MCMC_comparison_pages(ss.ms.occ.all, dir="figures/comparisons")
