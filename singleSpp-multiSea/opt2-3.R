@@ -54,7 +54,7 @@ input1 <- list(code=ss.ms.occ,
                inits=inits)
 
 ## *********************************************************************
-## add custom z sampler and slice on uniform(0,1) nodes
+## opt 2: add custom z sampler and slice on uniform(0,1) nodes
 ## *********************************************************************
 
 MCMCdefs.opt2 <- list('nimbleOpt2' = quote({
@@ -94,6 +94,52 @@ ss.ms.opt2 <- compareMCMCs(input1,
                            check=FALSE)
 
 save(ss.ms.opt2, file="saved/opt2.Rdata")
+
+
+## *********************************************************************
+## opt3:  add custom z sampler and reflective samplers
+## *********************************************************************
+
+MCMCdefs.opt3 <- list('nimbleOpt3' = quote({
+  customSpec <- configureMCMC(Rmodel)
+  ## identify samplers to replace
+  znodes <- Rmodel$expandNodeNames('z')
+  znodes <- znodes[!Rmodel$isData(znodes)]
+  ## remove samplers
+  customSpec$removeSamplers(znodes, print=FALSE)
+  ## add custom samples
+  for(znode in znodes) customSpec$addSampler(target = znode,
+                                             type = custom_z_sampler,
+                                             print=FALSE)
+
+  customSpec$removeSamplers('phi', print=FALSE)
+  customSpec$removeSamplers('gamma', print=FALSE)
+  customSpec$removeSamplers('p', print=FALSE)
+  customSpec$removeSamplers('psi1', print=FALSE)
+  ## happens to be all top nodes
+  zeroOneNodes <- Rmodel$getNodeNames(topOnly = TRUE)
+  for(zon in zeroOneNodes) customSpec$addSampler(target = zon,
+                                                 type =
+                                                   sampler_RW_reflect,
+                                                 print=FALSE)
+  customSpec
+}))
+
+
+## *********************************************************************
+## run with compareMCMCs
+
+ss.ms.opt3 <- compareMCMCs(input1,
+                           MCMCs=c('nimbleOpt3'),
+                           MCMCdefs = MCMCdefs.opt3,
+                           niter= niter,
+                           burnin = burnin,
+                           summary=FALSE,
+                           check=FALSE)
+
+save(ss.ms.opt3, file="saved/opt3.Rdata")
+
+
 
 
 ## this is now the default

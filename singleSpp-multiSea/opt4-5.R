@@ -3,7 +3,7 @@ setwd("~/Dropbox/occupancy-nimble/singleSpp-multiSea")
 source('src/initialize.R')
 
 ## *********************************************************************
-##  Multi-season occupancy model: option 3 remove latent states using
+##  Multi-season occupancy model: option 4-5 remove latent states using
 ##  user-defined NIMBLE function
 ##  *********************************************************************
 
@@ -43,6 +43,47 @@ ss.ms.occ <- nimbleCode({
 })
 
 ## *********************************************************************
+## opt 4 run with compareMCMCs
+## *********************************************************************
+
+input1 <- list(code=ss.ms.occ,
+               constants=constants,
+               data=model.data,
+               inits=inits)
+
+
+ss.ms.opt4 <- compareMCMCs(input1,
+                           MCMCs=c('nimble', 'autoBlock'),
+                           niter=niter,
+                           burnin = burnin,
+                           summary=FALSE,
+                           check=FALSE)
+
+save(ss.ms.opt4, file="saved/opt4.Rdata")
+
+
+## *********************************************************************
+## opt 5 add block samplers
+## *********************************************************************
+MCMCdefs.opt5 <- list('nimbleOpt5' = quote({
+  customSpec <- configureMCMC(Rmodel)
+  ## find node names for random effects
+  parms.phi <- Rmodel$getNodeNames(includeData = FALSE)[grepl("^phi",
+                                     Rmodel$getNodeNames(includeData = FALSE))]
+  parms.gam <- Rmodel$getNodeNames(includeData = FALSE)[grepl("^gamma",
+                                     Rmodel$getNodeNames(includeData =
+                                                         FALSE))]
+  phi.gam <- cbind(parms.phi, parms.gam)[-1,]
+  for(i in 1:nrow(phi.gam)){
+    customSpec$removeSamplers(phi.gam[i,], print=FALSE)
+    customSpec$addSampler(target = phi.gam[i,],
+                          type = "RW_block")
+  }
+  customSpec
+}))
+
+
+## *********************************************************************
 ## run with compareMCMCs
 
 input1 <- list(code=ss.ms.occ,
@@ -51,11 +92,12 @@ input1 <- list(code=ss.ms.occ,
                inits=inits)
 
 
-ss.ms.opt3 <- compareMCMCs(input1,
-                           MCMCs=c('nimble', 'autoBlock'),
+ss.ms.opt5 <- compareMCMCs(input1,
+                           MCMCs=c('nimbleOpt5'),
+                           MCMCdefs = MCMCdefs.opt5,
                            niter=niter,
                            burnin = burnin,
                            summary=FALSE,
                            check=FALSE)
 
-save(ss.ms.opt3, file="saved/opt3.Rdata")
+save(ss.ms.opt5, file="saved/opt5.Rdata")
