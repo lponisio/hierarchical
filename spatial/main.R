@@ -46,7 +46,7 @@ sp.mod.opt1 <- compareMCMCs(input1,
                             summary=FALSE,
                             check=FALSE)
 
-save(sp.mod.opt1, file="saved/opt1.Rdata")
+## save(sp.mod.opt1, file="saved/opt1.Rdata")
 
-checkChains(sp.mod.opt1[[1]]$samples,
-            f.path = "figures/chains/%s.pdf")
+## checkChains(sp.mod.opt1[[1]]$samples,
+##             f.path = "figures/chains/%s.pdf")
