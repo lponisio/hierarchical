@@ -1,0 +1,165 @@
+\documentclass[12pt]{article} 
+\usepackage[pdftex]{graphicx}
+\usepackage{natbib} 
+\usepackage{color}
+\usepackage{amsmath} 
+\usepackage{amssymb} 
+\usepackage{verbatim}
+\usepackage{mathpazo} 
+\usepackage{setspace}
+\usepackage{multirow}
+\usepackage{fullpage}
+\usepackage{lscape}
+\usepackage{fancyhdr}
+\usepackage[normalem]{ulem} 
+\usepackage{hyperref}
+\usepackage[parfill]{parskip}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xr}
+
+\hypersetup{colorlinks=true, linkcolor=black, citecolor=black}
+\RequirePackage{lineno}
+
+\newcommand{\flagged}[1] {
+  \textcolor{blue}{#1}
+}
+
+\def\title{Increasing the tractability of occupancy models}
+\def\author{Lauren C.\ Ponisio$^{1,2}$, Perry de Valpine$^1$}
+
+\def\runninghead{Occupancy model efficiency}
+\def\keywords{NIMBLE, Markov chain Monte Carlo, latent states, block
+  sampling, dynamic occupancy, mutli species occupancy, spatial
+  occupancy, JAGS }
+
+\def\extras{
+  \begin{itemize}
+  \item Submitted as a Standard paper
+  \item Abstract word count: 
+  \item Main text word count: 
+  \item Number of references: 
+  \item Number of figures:
+  \end{itemize}
+}
+
+\def\affiliation{
+  \begin{enumerate}
+  \item Department of Environmental Science, Policy, and Management\\
+    University of California, Berkeley\\
+    130 Mulford Hall\\
+    Berkeley, California, USA\\
+    94720\\
+  \item Department of Entomology\\
+    University of California, Riverside\\
+    417 Entomology Bldg.\\
+    Riverside, California, USA\\
+    92521\\
+  \end{enumerate}
+}
+
+\newcommand{\mstitlepage}{
+  \paragraph{Running head:} \textsc{\runninghead}
+  % \parindent=0pt
+  \begin{center}%
+    {\LARGE \title \par}%
+    \vskip 3em%
+    {\large
+      \lineskip .75em%
+      \begin{tabular}[t]{c}%
+        \author
+      \end{tabular}\par}%
+    \vskip 1.5em%
+  \end{center}\par
+  \affiliation
+}
+\clearpage
+
+\begin{document}
+
+\mstitlepage
+\doublespacing
+\linenumbers
+\clearpage
+
+\begin{abstract}  
+place holder
+\end{abstract}
+
+\keywords
+
+\clearpage
+
+\section*{Introduction}
+\label{sec:introduction}
+
+Estimating the proportion of sites occupied by a species is common
+challange for many subdisciplines ecology and evolution including
+metapopulation, engangered and invasion biology. Greater acceptance of
+the biases of imperfect detection has lead to the development and
+proliferation of occupancy models, which model the occurrence of a
+species at a site as a latent state layered underneath a detection
+process \citep[e.g.,][]{mackenzie-2006, royle-2007-1813}. Now only a
+little over a decade after occupancy models were introduced to
+ecology, they are being used to model the occurence of everything from
+bees \citep{mgonigle-2015-x} to tigers \citep{hines2010tigers} in an
+endless variety of complexity.
+
+Occupancy models are part of a larger class of models known as Hidden
+Markov Models. For discrete Hidden Markov Models like occupancy models
+where a species is either present or absent from a site, likelihood
+calculation involves summing over the distribution of latent
+states. Because estimating the effect of explanatory variables on site
+occupancy or shared variation of in occupancy across species is often
+of greatest interest to ecologsits
+\citep[e.g.,][]{iknayan2014detecting}, the Hidden Markov Models are
+embedded in a larger hierarchical model. In such cases, practitioners
+may rely on Markov chain Monte Carlo (MCMC) to perform a Bayesian
+analysis. Such models are computationally intensive, and large models
+requiring hundreds or thousands of dimensions which require MCMC can
+be computationally impractical. To ensure occupancy models are
+accessible to practitioners, more efficient methods for estimating these
+models are necessary. 
+
+%% model selection
+
+\section*{Materials \& Methods}
+\label{sec:methods}
+
+
+\section*{Results}
+\label{sec:results}
+
+\section*{Discussion}
+\label{sec:discussion}
+
+\section*{Acknowledgments}
+\label{sec:acknowledge}
+
+\bibliographystyle{mee}
+
+\bibliography{refs}
+
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=.8\textwidth]{../analysis/changePoint/plotting/networks.pdf}
+%   \caption{Assembling hedgerow networks had more changing points
+%     (vertical red lines) than non-assembling hedgerows and weedy field
+%     margins (a representative sample of non-assembling sites are
+%     depicted here). In each network, plants and pollinators are
+%     represented by green and yellow circles, respectively, weighted by
+%     their degree. Each species has a consistent position in the
+%     network across years. In the assembling hedgerows, colored squares
+%     in the corner of each network represent the year of
+%     assembly. Before hedgerows are installed (when they are still
+%     field margins) the year of assembly is zero.}
+%   \label{fig:changePoints}
+% \end{figure}
+% \clearpage
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-PDF-mode: t
+%%% End:

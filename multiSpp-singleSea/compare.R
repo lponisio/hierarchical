@@ -14,9 +14,9 @@ load(file="saved/opt1.Rdata")
 ## species
 load(file="saved/opt2.Rdata")
 
-## option 1 + custom block sampler on species random effect for each
-## random effect type
-load(file="saved/opt3.Rdata")
+## ## option 1 + custom block sampler on species random effect for each
+## ## random effect type
+## load(file="saved/opt3.Rdata")
 
 ## option 1 + sigma sampler on random effects
 load(file="saved/opt4.Rdata")
@@ -25,9 +25,9 @@ ms.ss.opt1[[1]] <- rename_MCMC_comparison_method('nimble', 'remove_z',
                                                  comparison=ms.ss.opt1[[1]])
 ms.ss.opt2[[1]] <- rename_MCMC_comparison_method('nimbleOpt2', 'block_1',
                                                  comparison=ms.ss.opt2[[1]])
-ms.ss.opt3[[1]] <- rename_MCMC_comparison_method('nimbleOpt3',
-                                                 'block_2',
-                                                 comparison=ms.ss.opt3[[1]])
+## ms.ss.opt3[[1]] <- rename_MCMC_comparison_method('nimbleOpt3',
+##                                                  'block_2',
+##                                                  comparison=ms.ss.opt3[[1]])
 ms.ss.opt4[[1]] <- rename_MCMC_comparison_method('nimbleOpt4',
                                                  'sigma sampler',
                                                  comparison=ms.ss.opt4[[1]])
@@ -36,7 +36,7 @@ ms.ss.opt4[[1]] <- rename_MCMC_comparison_method('nimbleOpt4',
 ms.ss.occ.all <- combine_MCMC_comparison_results(ms.ss.orig[[1]],
                                                  ms.ss.opt1[[1]],
                                                  ms.ss.opt2[[1]],
-                                                 ms.ss.opt3[[1]],
+                                                 ## ms.ss.opt3[[1]],
                                                  ms.ss.opt4[[1]],
                                                  name = "ms.ss" )
 

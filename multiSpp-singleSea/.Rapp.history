@@ -1,0 +1,1661 @@
+rm(list=ls())#
+setwd('~/Dropbox/hedgerow_assembly/analysis/variability')#
+source('src/initialize.R')#
+#
+## ************************************************************#
+## coefficient of variation of degree thingy through time#
+## ************************************************************#
+## ************************************************************#
+## occurrence#
+## ************************************************************#
+## pollinators and k#
+## sig!#
+occ.k.cv <- cv.trait(spec,#
+                     specs[specs$speciesType =="pollinator",],#
+                     trait="occ.date",#
+                     method= "time", time.col="assem",#
+                     abund.col="k",#
+                     cv.function=cv,#
+                     zero2na=TRUE,#
+                     standard.cv=TRUE,#
+                     na.rm=TRUE)#
+summary(occ.k.cv$lm.nss)#
+#
+## plants and k#
+## not sig!#
+plants.occ.k.cv <- cv.trait(spec,#
+                            specs[specs$speciesType =="plant",],#
+                            trait="occ.plant.date",#
+                            method= "time", time.col="assem",#
+                            abund.col="k",#
+                            cv.function=cv,#
+                            zero2na=TRUE,#
+                            standard.cv=TRUE,#
+                            na.rm=TRUE,#
+                            species.type="PlantGenusSpecies")#
+summary(plants.occ.k.cv$lm.nss)#
+#
+## pollinators and closeness#
+## sig#
+occ.closeness.cv <- cv.trait(spec,#
+                             specs[specs$speciesType =="pollinator",],#
+                             trait="occ.date",#
+                             method= "time", time.col="assem",#
+                             abund.col="weighted.closeness",#
+                             cv.function=cv,#
+                             zero2na=TRUE,#
+                             standard.cv=TRUE,#
+                             na.rm=TRUE)#
+summary(occ.closeness.cv$lm.nss)#
+#
+## plants and closeness#
+## not sig#
+plants.occ.closeness.cv <- cv.trait(spec,#
+                                    specs[specs$speciesType =="plant",],#
+                                    trait="occ.plant.date",#
+                                    method= "time", time.col="assem",#
+                                    abund.col="weighted.closeness",#
+                                    cv.function=cv,#
+                                    zero2na=TRUE,#
+                                    standard.cv=TRUE,#
+                                    na.rm=TRUE,#
+                                    species.type="PlantGenusSpecies")#
+summary(plants.occ.closeness.cv$lm.nss)#
+#
+## ************************************************************#
+## degree#
+## ************************************************************#
+## pollinators and k#
+## sig#
+degree.k.cv <- cv.trait(spec,#
+                        specs[specs$speciesType =="pollinator",],#
+                        trait="degree",#
+                        method= "time", time.col="assem",#
+                        abund.col="k",#
+                        cv.function=cv,#
+                        zero2na=TRUE,#
+                        standard.cv=TRUE,#
+                        na.rm=TRUE)#
+summary(degree.k.cv$lm.nss)#
+#
+## plants and k#
+## sig#
+plants.degree.k.cv <- cv.trait(spec,#
+                               specs[specs$speciesType =="plant",],#
+                               trait="plant.degree",#
+                               method= "time", time.col="assem",#
+                               abund.col="k",#
+                               cv.function=cv,#
+                               zero2na=TRUE,#
+                               standard.cv=TRUE,#
+                               na.rm=TRUE,#
+                               species.type="PlantGenusSpecies")#
+summary(plants.degree.k.cv$lm.nss)#
+#
+## pollinators and closeness#
+## sig#
+degree.closeness.cv <- cv.trait(spec,#
+                                specs[specs$speciesType =="pollinator",],#
+                                trait="degree",#
+                                method= "time", time.col="assem",#
+                                abund.col="weighted.closeness",#
+                                cv.function=cv,#
+                                zero2na=TRUE,#
+                                standard.cv=TRUE,#
+                                na.rm=TRUE)#
+summary(degree.closeness.cv$lm.nss)#
+#
+## plants and closeness#
+## not sig!#
+plants.degree.closeness.cv <- cv.trait(spec,#
+                                       specs[specs$speciesType =="plant",],#
+                                       trait="plant.degree",#
+                                       method= "time", time.col="assem",#
+                                       abund.col="weighted.closeness",#
+                                       cv.function=cv,#
+                                       zero2na=TRUE,#
+                                       standard.cv=TRUE,#
+                                       na.rm=TRUE,#
+                                       species.type="PlantGenusSpecies")#
+summary(plants.degree.closeness.cv$lm.nss)#
+## check correlation of degree and occ #
+## pollinators#
+check.pol <- unique(cbind(spec$degree,#
+                          spec$occ.date))#
+plot(check.pol)#
+#
+cor.test(check.pol[,1], check.pol[,2])#
+check.plant <- unique(cbind(spec$plant.degree,#
+                            spec$occ.plant.date))#
+plot(check.plant)#
+#
+cor.test(check.plant[,1], check.plant[,2])#
+## ************************************************************#
+## dprime#
+## ************************************************************#
+## not sig#
+dprime.k.cv <- cv.trait(spec,#
+                        specs[specs$speciesType =="pollinator",],#
+                        trait="d",#
+                        method= "time", time.col="assem",#
+                        abund.col="k",#
+                        cv.function=cv,#
+                        zero2na=TRUE,#
+                        standard.cv=TRUE,#
+                        na.rm=TRUE)#
+summary(dprime.k.cv$lm.nss)#
+#
+## not sig#
+dprime.closeness.cv <- cv.trait(spec,#
+                                specs[specs$speciesType =="pollinator",],#
+                                trait="d",#
+                                method= "time", time.col="assem",#
+                                abund.col="weighted.closeness",#
+                                cv.function=cv,#
+                                zero2na=TRUE,#
+                                standard.cv=TRUE,#
+                                na.rm=TRUE)#
+summary(dprime.closeness.cv$lm.nss)#
+## ************************************************************#
+## coefficient of variation of abundance through time#
+## ************************************************************#
+byYear <- aggregate(list(Abund=spec$GenusSpecies),#
+                    list(GenusSpecies= spec$GenusSpecies,#
+                         Date=spec$Date,#
+                         SiteStatus= spec$SiteStatus,#
+                         Site=spec$Site), length)#
+#
+dprime <- cv.trait(spec, byYear, trait="d",#
+                   method= "time",#
+                   time.col="Date",#
+                   abund.col="Abund")#
+#
+degree <- cv.trait(spec, byYear, trait="degree",#
+                   method= "time",#
+                   time.col="Date",#
+                   abund.col="Abund")#
+#
+itd <- cv.trait(spec, byYear, trait="ITD",#
+                method= "time",#
+                time.col="Date",#
+                abund.col="Abund")#
+#
+## ************************************************************#
+## save#
+save(itd, dprime, degree,#
+     dprime.k.cv, dprime.closeness.cv,#
+     occ.k.cv, occ.closeness.cv,#
+     plants.occ.k.cv, plants.occ.closeness.cv,#
+     degree.k.cv, degree.closeness.cv,#
+     plants.degree.k.cv, plants.degree.closeness.cv,#
+     file="saved/contMods.Rdata")#
+#
+## ************************************************************#
+## coefficient of variation through space#
+## ************************************************************#
+#
+## byYr <- aggregate(list(Abund=spec$GenusSpecies),#
+##                   list(GenSp= spec$GenusSpecies,#
+##                        status= spec$SiteStatus,#
+##                        date= spec$Site,#
+##                        site= spec$Year), length)#
+#
+## dprime.sp <- cv.trait(spec, byYr, trait="d", xlabel= "Specialization",#
+##                       method= "space")#
+## itd.sp <- cv.trait(spec, byYr, trait="ITD", xlabel= "Body size",#
+##                    method= "space")#
+## lecty.sp <-  cv.trait(spec, byYr, trait="Lecty", cont=FALSE,#
+##                       method= "space")#
+## excavate.sp <-  cv.trait(spec, byYr, trait="Excavate", cont=FALSE,#
+##                          method=" space")#
+## nest.sp <-  cv.trait(spec, byYr, trait="NestLoc", cont=FALSE,#
+##                      method= "space")#
+## soc.sp <- cv.trait(spec, byYr, trait="Sociality", cont=FALSE,#
+##                   method= "space")
+rm(list=ls())#
+setwd('~/Dropbox/hedgerow_assembly/analysis/variability')#
+source('src/initialize.R')#
+#
+## ************************************************************#
+## coefficient of variation of degree thingy through time#
+## ************************************************************#
+## ************************************************************#
+## occurrence#
+## ************************************************************#
+## pollinators and k#
+## sig!#
+occ.k.cv <- cv.trait(spec,#
+                     specs[specs$speciesType =="pollinator",],#
+                     trait="occ.date",#
+                     method= "time", time.col="assem",#
+                     abund.col="k",#
+                     cv.function=cv,#
+                     zero2na=TRUE,#
+                     standard.cv=TRUE,#
+                     na.rm=TRUE)#
+summary(occ.k.cv$lm.nss)#
+#
+## plants and k#
+## not sig!#
+plants.occ.k.cv <- cv.trait(spec,#
+                            specs[specs$speciesType =="plant",],#
+                            trait="occ.plant.date",#
+                            method= "time", time.col="assem",#
+                            abund.col="k",#
+                            cv.function=cv,#
+                            zero2na=TRUE,#
+                            standard.cv=TRUE,#
+                            na.rm=TRUE,#
+                            species.type="PlantGenusSpecies")#
+summary(plants.occ.k.cv$lm.nss)#
+#
+## pollinators and closeness#
+## sig#
+occ.closeness.cv <- cv.trait(spec,#
+                             specs[specs$speciesType =="pollinator",],#
+                             trait="occ.date",#
+                             method= "time", time.col="assem",#
+                             abund.col="weighted.closeness",#
+                             cv.function=cv,#
+                             zero2na=TRUE,#
+                             standard.cv=TRUE,#
+                             na.rm=TRUE)#
+summary(occ.closeness.cv$lm.nss)#
+#
+## plants and closeness#
+## not sig#
+plants.occ.closeness.cv <- cv.trait(spec,#
+                                    specs[specs$speciesType =="plant",],#
+                                    trait="occ.plant.date",#
+                                    method= "time", time.col="assem",#
+                                    abund.col="weighted.closeness",#
+                                    cv.function=cv,#
+                                    zero2na=TRUE,#
+                                    standard.cv=TRUE,#
+                                    na.rm=TRUE,#
+                                    species.type="PlantGenusSpecies")#
+summary(plants.occ.closeness.cv$lm.nss)#
+#
+## ************************************************************#
+## degree#
+## ************************************************************#
+## pollinators and k#
+## sig#
+degree.k.cv <- cv.trait(spec,#
+                        specs[specs$speciesType =="pollinator",],#
+                        trait="degree",#
+                        method= "time", time.col="assem",#
+                        abund.col="k",#
+                        cv.function=cv,#
+                        zero2na=TRUE,#
+                        standard.cv=TRUE,#
+                        na.rm=TRUE)#
+summary(degree.k.cv$lm.nss)#
+#
+## plants and k#
+## sig#
+plants.degree.k.cv <- cv.trait(spec,#
+                               specs[specs$speciesType =="plant",],#
+                               trait="plant.degree",#
+                               method= "time", time.col="assem",#
+                               abund.col="k",#
+                               cv.function=cv,#
+                               zero2na=TRUE,#
+                               standard.cv=TRUE,#
+                               na.rm=TRUE,#
+                               species.type="PlantGenusSpecies")#
+summary(plants.degree.k.cv$lm.nss)#
+#
+## pollinators and closeness#
+## sig#
+degree.closeness.cv <- cv.trait(spec,#
+                                specs[specs$speciesType =="pollinator",],#
+                                trait="degree",#
+                                method= "time", time.col="assem",#
+                                abund.col="weighted.closeness",#
+                                cv.function=cv,#
+                                zero2na=TRUE,#
+                                standard.cv=TRUE,#
+                                na.rm=TRUE)#
+summary(degree.closeness.cv$lm.nss)#
+#
+## plants and closeness#
+## not sig!#
+plants.degree.closeness.cv <- cv.trait(spec,#
+                                       specs[specs$speciesType =="plant",],#
+                                       trait="plant.degree",#
+                                       method= "time", time.col="assem",#
+                                       abund.col="weighted.closeness",#
+                                       cv.function=cv,#
+                                       zero2na=TRUE,#
+                                       standard.cv=TRUE,#
+                                       na.rm=TRUE,#
+                                       species.type="PlantGenusSpecies")#
+summary(plants.degree.closeness.cv$lm.nss)#
+## check correlation of degree and occ #
+## pollinators#
+check.pol <- unique(cbind(spec$degree,#
+                          spec$occ.date))#
+plot(check.pol)#
+#
+cor.test(check.pol[,1], check.pol[,2])#
+check.plant <- unique(cbind(spec$plant.degree,#
+                            spec$occ.plant.date))#
+plot(check.plant)#
+#
+cor.test(check.plant[,1], check.plant[,2])#
+## ************************************************************#
+## dprime#
+## ************************************************************#
+## not sig#
+dprime.k.cv <- cv.trait(spec,#
+                        specs[specs$speciesType =="pollinator",],#
+                        trait="d",#
+                        method= "time", time.col="assem",#
+                        abund.col="k",#
+                        cv.function=cv,#
+                        zero2na=TRUE,#
+                        standard.cv=TRUE,#
+                        na.rm=TRUE)#
+summary(dprime.k.cv$lm.nss)#
+#
+## not sig#
+dprime.closeness.cv <- cv.trait(spec,#
+                                specs[specs$speciesType =="pollinator",],#
+                                trait="d",#
+                                method= "time", time.col="assem",#
+                                abund.col="weighted.closeness",#
+                                cv.function=cv,#
+                                zero2na=TRUE,#
+                                standard.cv=TRUE,#
+                                na.rm=TRUE)#
+summary(dprime.closeness.cv$lm.nss)#
+## ************************************************************#
+## coefficient of variation of abundance through time#
+## ************************************************************#
+byYear <- aggregate(list(Abund=spec$GenusSpecies),#
+                    list(GenusSpecies= spec$GenusSpecies,#
+                         Date=spec$Date,#
+                         SiteStatus= spec$SiteStatus,#
+                         Site=spec$Site), length)#
+#
+dprime <- cv.trait(spec, byYear, trait="d",#
+                   method= "time",#
+                   time.col="Date",#
+                   abund.col="Abund")#
+#
+degree <- cv.trait(spec, byYear, trait="degree",#
+                   method= "time",#
+                   time.col="Date",#
+                   abund.col="Abund")#
+#
+itd <- cv.trait(spec, byYear, trait="ITD",#
+                method= "time",#
+                time.col="Date",#
+                abund.col="Abund")#
+#
+## ************************************************************#
+## save#
+save(itd, dprime, degree,#
+     dprime.k.cv, dprime.closeness.cv,#
+     occ.k.cv, occ.closeness.cv,#
+     plants.occ.k.cv, plants.occ.closeness.cv,#
+     degree.k.cv, degree.closeness.cv,#
+     plants.degree.k.cv, plants.degree.closeness.cv,#
+     file="saved/contMods.Rdata")#
+#
+## ************************************************************#
+## coefficient of variation through space#
+## ************************************************************#
+#
+## byYr <- aggregate(list(Abund=spec$GenusSpecies),#
+##                   list(GenSp= spec$GenusSpecies,#
+##                        status= spec$SiteStatus,#
+##                        date= spec$Site,#
+##                        site= spec$Year), length)#
+#
+## dprime.sp <- cv.trait(spec, byYr, trait="d", xlabel= "Specialization",#
+##                       method= "space")#
+## itd.sp <- cv.trait(spec, byYr, trait="ITD", xlabel= "Body size",#
+##                    method= "space")#
+## lecty.sp <-  cv.trait(spec, byYr, trait="Lecty", cont=FALSE,#
+##                       method= "space")#
+## excavate.sp <-  cv.trait(spec, byYr, trait="Excavate", cont=FALSE,#
+##                          method=" space")#
+## nest.sp <-  cv.trait(spec, byYr, trait="NestLoc", cont=FALSE,#
+##                      method= "space")#
+## soc.sp <- cv.trait(spec, byYr, trait="Sociality", cont=FALSE,#
+##                   method= "space")
+rm(list=ls())#
+setwd('~/Dropbox/hedgerow_assembly/analysis/variability')#
+source('src/initialize.R')
+rm(list=ls())#
+library(RColorBrewer)#
+setwd('~/Dropbox/hedgerow_assembly/analysis/variability')#
+source("plotting/src/predictIntervals.R")#
+source("plotting/src/CIplotting.R")#
+source("plotting/src/plotPanels.R")#
+source('../networkLevel/src/misc.R', chdir = TRUE)#
+load('saved/contMods.Rdata')#
+#
+## ************************************************************#
+## persistence closeness#
+## ************************************************************#
+dd.occ.pol <- expand.grid(traits=seq(#
+                            from= min(occ.closeness.cv$data$traits,#
+                              na.rm=TRUE),#
+                            to= max(occ.closeness.cv$data$traits,#
+                              na.rm=TRUE),#
+                            length=20),#
+                          SiteStatus="all",#
+                          cv= 0)#
+#
+## pols#
+occ.closeness.cv$data$SiteStatus <- "all"#
+occ.pi.close <- predict.int(mod= occ.closeness.cv$lm.nss,#
+                            dd=dd.occ.pol,#
+                            y="cv",#
+                            family="gaussian")#
+#
+## plants#
+dd.occ.plants <- expand.grid(traits=seq(#
+                               from= min(plants.occ.closeness.cv$data$traits,#
+                                 na.rm=TRUE),#
+                               to= max(plants.occ.closeness.cv$data$traits,#
+                                 na.rm=TRUE),#
+                               length=20),#
+                             SiteStatus="all",#
+                             cv= 0)#
+plants.occ.closeness.cv$data$SiteStatus <- "all"#
+plants.occ.pi.close <- predict.int(mod= plants.occ.closeness.cv$lm.nss,#
+                                   dd=dd.occ.plants,#
+                                   y="cv",#
+                                   family="gaussian")#
+## ************************************************************#
+## degree closeness#
+## ************************************************************#
+dd.degree.pol <- expand.grid(traits=seq(#
+                               from=#
+                               min(degree.closeness.cv$data$traits,#
+                                   na.rm=TRUE),#
+                               to=#
+                               max(degree.closeness.cv$data$traits,#
+                                   na.rm=TRUE),#
+                               length=10),#
+                             SiteStatus="all",#
+                             cv= 0)#
+## pols#
+#
+degree.closeness.cv$data$SiteStatus <- "all"#
+#
+degree.pi <- predict.int(mod= degree.closeness.cv$lm.nss,#
+                         dd=dd.degree.pol,#
+                         y="cv",#
+                         family="gaussian")#
+#
+## plants#
+dd.degree.plants <- expand.grid(traits=seq(#
+                           from=#
+                           min(plants.degree.closeness.cv$data$traits,#
+                               na.rm=TRUE),#
+                           to=#
+                           max(plants.degree.closeness.cv$data$traits,#
+                               na.rm=TRUE),#
+                           length=10),#
+                         SiteStatus="all",#
+                         cv= 0)#
+#
+plants.degree.closeness.cv$data$SiteStatus <- "all"#
+#
+plants.degree.pi <- predict.int(mod= plants.degree.closeness.cv$lm.nss,#
+                                dd=dd.degree.plants,#
+                                y="cv",#
+                                family="gaussian")#
+plot.panels()#
+## ## ************************************************************#
+## ## dprime network position - k#
+## ## ************************************************************#
+#
+## dd.dprime <- expand.grid(traits=seq(#
+##                            from= min(dprime$data$traits),#
+##                            to= max(dprime$data$traits),#
+##                            length=10),#
+##                          SiteStatus= c("control", "maturing", "mature"),#
+##                          cv= 0)#
+#
+## dprime.pi <- predict.int(mod= dprime.k.cv$lm,#
+##                          dd=dd.dprime,#
+##                          y="cv",#
+##                          family="gaussian")#
+#
+## plot.predict.div(new.dd=dprime.pi,#
+##                  ylabel="Network position variability",#
+##                  dats=dprime.k.cv$data,#
+##                  xs="traits",#
+##                  y1="cv",#
+##                  xlabel="Specialization",#
+##                  legend.loc="topright",#
+##                  height=5,#
+##                  width=5,#
+##                  x.adj=0.5,#
+##                  f.path='figures/cv')#
+#
+## ## ************************************************************#
+## ## dprime network position - closeness#
+## ## ************************************************************#
+#
+## dprime.pi.cl <- predict.int(mod= dprime.closeness.cv$lm,#
+##                             dd=dd.dprime,#
+##                             y="cv",#
+##                             family="gaussian")#
+#
+## plot.predict.div(new.dd=dprime.pi.cl,#
+##                  ylabel="Closeness variability",#
+##                  dats=dprime.closeness.cv$data,#
+##                  xs="traits",#
+##                  y1="cv",#
+##                  xlabel="Specialization",#
+##                  legend.loc="topright",#
+##                  height=5,#
+##                  width=5,#
+##                  x.adj=0.5,#
+##                  f.path='figures/cv')#
+## ## ************************************************************#
+## ## itd abundance#
+## ## ************************************************************#
+#
+## dd.itd <- expand.grid(traits=seq(#
+##                         from= min(itd$data$traits, na.rm=TRUE),#
+##                         to= max(itd$data$traits, na.rm=TRUE),#
+##                         length=10),#
+##                       SiteStatus= c("control", "maturing", "mature"),#
+##                       cv= 0)#
+#
+## itd.pi <- predict.int(mod= itd$lm,#
+##                       dd=dd.itd,#
+##                       y="cv",#
+##                       family="gaussian")#
+#
+## plot.predict.div(new.dd=itd.pi,#
+##                  ylabel="Coefficient of variation",#
+##                  dats=itd$data,#
+##                  xs="traits",#
+##                  y1="cv",#
+##                  xlabel="Body size",#
+##                  legend.loc="bottomright",#
+##                  height=5,#
+##                  width=5,#
+##                  x.adj=0.5,#
+##                  f.path='figures/cv')#
+## ## ************************************************************#
+## ## dprime abundance#
+## ## ************************************************************#
+#
+## dprime.pi <- predict.int(mod= dprime$lm,#
+##                          dd=dd.dprime,#
+##                          y="cv",#
+##                          family="gaussian")#
+#
+## plot.predict.div(new.dd=dprime.pi,#
+##                  ylabel="Coefficient of variation",#
+##                  dats=dprime$data,#
+##                  xs="traits",#
+##                  y1="cv",#
+##                  xlabel="Specialization",#
+##                  legend.loc="bottomright",#
+##                  height=5,#
+##                  width=5,#
+##                  x.adj=0.5,#
+##                  f.path='figures/cv')
+rm(list=ls())#
+library(RColorBrewer)#
+setwd('~/Dropbox/hedgerow_assembly/analysis/variability')#
+source("plotting/src/predictIntervals.R")#
+source("plotting/src/CIplotting.R")#
+source("plotting/src/plotPanels.R")#
+source('../networkLevel/src/misc.R', chdir = TRUE)#
+load('saved/contMods.Rdata')#
+#
+## ************************************************************#
+## persistence closeness#
+## ************************************************************#
+dd.occ.pol <- expand.grid(traits=seq(#
+                            from= min(occ.closeness.cv$data$traits,#
+                              na.rm=TRUE),#
+                            to= max(occ.closeness.cv$data$traits,#
+                              na.rm=TRUE),#
+                            length=20),#
+                          SiteStatus="all",#
+                          cv= 0)#
+#
+## pols#
+occ.closeness.cv$data$SiteStatus <- "all"#
+occ.pi.close <- predict.int(mod= occ.closeness.cv$lm.nss,#
+                            dd=dd.occ.pol,#
+                            y="cv",#
+                            family="gaussian")#
+#
+## plants#
+dd.occ.plants <- expand.grid(traits=seq(#
+                               from= min(plants.occ.closeness.cv$data$traits,#
+                                 na.rm=TRUE),#
+                               to= max(plants.occ.closeness.cv$data$traits,#
+                                 na.rm=TRUE),#
+                               length=20),#
+                             SiteStatus="all",#
+                             cv= 0)#
+plants.occ.closeness.cv$data$SiteStatus <- "all"#
+plants.occ.pi.close <- predict.int(mod= plants.occ.closeness.cv$lm.nss,#
+                                   dd=dd.occ.plants,#
+                                   y="cv",#
+                                   family="gaussian")#
+## ************************************************************#
+## degree closeness#
+## ************************************************************#
+dd.degree.pol <- expand.grid(traits=seq(#
+                               from=#
+                               min(degree.closeness.cv$data$traits,#
+                                   na.rm=TRUE),#
+                               to=#
+                               max(degree.closeness.cv$data$traits,#
+                                   na.rm=TRUE),#
+                               length=10),#
+                             SiteStatus="all",#
+                             cv= 0)#
+## pols#
+#
+degree.closeness.cv$data$SiteStatus <- "all"#
+#
+degree.pi <- predict.int(mod= degree.closeness.cv$lm.nss,#
+                         dd=dd.degree.pol,#
+                         y="cv",#
+                         family="gaussian")#
+#
+## plants#
+dd.degree.plants <- expand.grid(traits=seq(#
+                           from=#
+                           min(plants.degree.closeness.cv$data$traits,#
+                               na.rm=TRUE),#
+                           to=#
+                           max(plants.degree.closeness.cv$data$traits,#
+                               na.rm=TRUE),#
+                           length=10),#
+                         SiteStatus="all",#
+                         cv= 0)#
+#
+plants.degree.closeness.cv$data$SiteStatus <- "all"#
+#
+plants.degree.pi <- predict.int(mod= plants.degree.closeness.cv$lm.nss,#
+                                dd=dd.degree.plants,#
+                                y="cv",#
+                                family="gaussian")#
+plot.panels()#
+## ## ************************************************************#
+## ## dprime network position - k#
+## ## ************************************************************#
+#
+## dd.dprime <- expand.grid(traits=seq(#
+##                            from= min(dprime$data$traits),#
+##                            to= max(dprime$data$traits),#
+##                            length=10),#
+##                          SiteStatus= c("control", "maturing", "mature"),#
+##                          cv= 0)#
+#
+## dprime.pi <- predict.int(mod= dprime.k.cv$lm,#
+##                          dd=dd.dprime,#
+##                          y="cv",#
+##                          family="gaussian")#
+#
+## plot.predict.div(new.dd=dprime.pi,#
+##                  ylabel="Network position variability",#
+##                  dats=dprime.k.cv$data,#
+##                  xs="traits",#
+##                  y1="cv",#
+##                  xlabel="Specialization",#
+##                  legend.loc="topright",#
+##                  height=5,#
+##                  width=5,#
+##                  x.adj=0.5,#
+##                  f.path='figures/cv')#
+#
+## ## ************************************************************#
+## ## dprime network position - closeness#
+## ## ************************************************************#
+#
+## dprime.pi.cl <- predict.int(mod= dprime.closeness.cv$lm,#
+##                             dd=dd.dprime,#
+##                             y="cv",#
+##                             family="gaussian")#
+#
+## plot.predict.div(new.dd=dprime.pi.cl,#
+##                  ylabel="Closeness variability",#
+##                  dats=dprime.closeness.cv$data,#
+##                  xs="traits",#
+##                  y1="cv",#
+##                  xlabel="Specialization",#
+##                  legend.loc="topright",#
+##                  height=5,#
+##                  width=5,#
+##                  x.adj=0.5,#
+##                  f.path='figures/cv')#
+## ## ************************************************************#
+## ## itd abundance#
+## ## ************************************************************#
+#
+## dd.itd <- expand.grid(traits=seq(#
+##                         from= min(itd$data$traits, na.rm=TRUE),#
+##                         to= max(itd$data$traits, na.rm=TRUE),#
+##                         length=10),#
+##                       SiteStatus= c("control", "maturing", "mature"),#
+##                       cv= 0)#
+#
+## itd.pi <- predict.int(mod= itd$lm,#
+##                       dd=dd.itd,#
+##                       y="cv",#
+##                       family="gaussian")#
+#
+## plot.predict.div(new.dd=itd.pi,#
+##                  ylabel="Coefficient of variation",#
+##                  dats=itd$data,#
+##                  xs="traits",#
+##                  y1="cv",#
+##                  xlabel="Body size",#
+##                  legend.loc="bottomright",#
+##                  height=5,#
+##                  width=5,#
+##                  x.adj=0.5,#
+##                  f.path='figures/cv')#
+## ## ************************************************************#
+## ## dprime abundance#
+## ## ************************************************************#
+#
+## dprime.pi <- predict.int(mod= dprime$lm,#
+##                          dd=dd.dprime,#
+##                          y="cv",#
+##                          family="gaussian")#
+#
+## plot.predict.div(new.dd=dprime.pi,#
+##                  ylabel="Coefficient of variation",#
+##                  dats=dprime$data,#
+##                  xs="traits",#
+##                  y1="cv",#
+##                  xlabel="Specialization",#
+##                  legend.loc="bottomright",#
+##                  height=5,#
+##                  width=5,#
+##                  x.adj=0.5,#
+##                  f.path='figures/cv')
+rm(list=ls())#
+library(RColorBrewer)#
+setwd('~/Dropbox/hedgerow_assembly/analysis/variability')#
+source("plotting/src/predictIntervals.R")#
+source("plotting/src/CIplotting.R")#
+source("plotting/src/plotPanels.R")#
+source('../networkLevel/src/misc.R', chdir = TRUE)#
+load('saved/contMods.Rdata')#
+#
+## ************************************************************#
+## persistence closeness#
+## ************************************************************#
+dd.occ.pol <- expand.grid(traits=seq(#
+                            from= min(occ.closeness.cv$data$traits,#
+                              na.rm=TRUE),#
+                            to= max(occ.closeness.cv$data$traits,#
+                              na.rm=TRUE),#
+                            length=20),#
+                          SiteStatus="all",#
+                          cv= 0)#
+#
+## pols#
+occ.closeness.cv$data$SiteStatus <- "all"#
+occ.pi.close <- predict.int(mod= occ.closeness.cv$lm.nss,#
+                            dd=dd.occ.pol,#
+                            y="cv",#
+                            family="gaussian")#
+#
+## plants#
+dd.occ.plants <- expand.grid(traits=seq(#
+                               from= min(plants.occ.closeness.cv$data$traits,#
+                                 na.rm=TRUE),#
+                               to= max(plants.occ.closeness.cv$data$traits,#
+                                 na.rm=TRUE),#
+                               length=20),#
+                             SiteStatus="all",#
+                             cv= 0)#
+plants.occ.closeness.cv$data$SiteStatus <- "all"#
+plants.occ.pi.close <- predict.int(mod= plants.occ.closeness.cv$lm.nss,#
+                                   dd=dd.occ.plants,#
+                                   y="cv",#
+                                   family="gaussian")#
+## ************************************************************#
+## degree closeness#
+## ************************************************************#
+dd.degree.pol <- expand.grid(traits=seq(#
+                               from=#
+                               min(degree.closeness.cv$data$traits,#
+                                   na.rm=TRUE),#
+                               to=#
+                               max(degree.closeness.cv$data$traits,#
+                                   na.rm=TRUE),#
+                               length=10),#
+                             SiteStatus="all",#
+                             cv= 0)#
+## pols#
+#
+degree.closeness.cv$data$SiteStatus <- "all"#
+#
+degree.pi <- predict.int(mod= degree.closeness.cv$lm.nss,#
+                         dd=dd.degree.pol,#
+                         y="cv",#
+                         family="gaussian")#
+#
+## plants#
+dd.degree.plants <- expand.grid(traits=seq(#
+                           from=#
+                           min(plants.degree.closeness.cv$data$traits,#
+                               na.rm=TRUE),#
+                           to=#
+                           max(plants.degree.closeness.cv$data$traits,#
+                               na.rm=TRUE),#
+                           length=10),#
+                         SiteStatus="all",#
+                         cv= 0)#
+#
+plants.degree.closeness.cv$data$SiteStatus <- "all"#
+#
+plants.degree.pi <- predict.int(mod= plants.degree.closeness.cv$lm.nss,#
+                                dd=dd.degree.plants,#
+                                y="cv",#
+                                family="gaussian")#
+plot.panels()#
+## ## ************************************************************#
+## ## dprime network position - k#
+## ## ************************************************************#
+#
+## dd.dprime <- expand.grid(traits=seq(#
+##                            from= min(dprime$data$traits),#
+##                            to= max(dprime$data$traits),#
+##                            length=10),#
+##                          SiteStatus= c("control", "maturing", "mature"),#
+##                          cv= 0)#
+#
+## dprime.pi <- predict.int(mod= dprime.k.cv$lm,#
+##                          dd=dd.dprime,#
+##                          y="cv",#
+##                          family="gaussian")#
+#
+## plot.predict.div(new.dd=dprime.pi,#
+##                  ylabel="Network position variability",#
+##                  dats=dprime.k.cv$data,#
+##                  xs="traits",#
+##                  y1="cv",#
+##                  xlabel="Specialization",#
+##                  legend.loc="topright",#
+##                  height=5,#
+##                  width=5,#
+##                  x.adj=0.5,#
+##                  f.path='figures/cv')#
+#
+## ## ************************************************************#
+## ## dprime network position - closeness#
+## ## ************************************************************#
+#
+## dprime.pi.cl <- predict.int(mod= dprime.closeness.cv$lm,#
+##                             dd=dd.dprime,#
+##                             y="cv",#
+##                             family="gaussian")#
+#
+## plot.predict.div(new.dd=dprime.pi.cl,#
+##                  ylabel="Closeness variability",#
+##                  dats=dprime.closeness.cv$data,#
+##                  xs="traits",#
+##                  y1="cv",#
+##                  xlabel="Specialization",#
+##                  legend.loc="topright",#
+##                  height=5,#
+##                  width=5,#
+##                  x.adj=0.5,#
+##                  f.path='figures/cv')#
+## ## ************************************************************#
+## ## itd abundance#
+## ## ************************************************************#
+#
+## dd.itd <- expand.grid(traits=seq(#
+##                         from= min(itd$data$traits, na.rm=TRUE),#
+##                         to= max(itd$data$traits, na.rm=TRUE),#
+##                         length=10),#
+##                       SiteStatus= c("control", "maturing", "mature"),#
+##                       cv= 0)#
+#
+## itd.pi <- predict.int(mod= itd$lm,#
+##                       dd=dd.itd,#
+##                       y="cv",#
+##                       family="gaussian")#
+#
+## plot.predict.div(new.dd=itd.pi,#
+##                  ylabel="Coefficient of variation",#
+##                  dats=itd$data,#
+##                  xs="traits",#
+##                  y1="cv",#
+##                  xlabel="Body size",#
+##                  legend.loc="bottomright",#
+##                  height=5,#
+##                  width=5,#
+##                  x.adj=0.5,#
+##                  f.path='figures/cv')#
+## ## ************************************************************#
+## ## dprime abundance#
+## ## ************************************************************#
+#
+## dprime.pi <- predict.int(mod= dprime$lm,#
+##                          dd=dd.dprime,#
+##                          y="cv",#
+##                          family="gaussian")#
+#
+## plot.predict.div(new.dd=dprime.pi,#
+##                  ylabel="Coefficient of variation",#
+##                  dats=dprime$data,#
+##                  xs="traits",#
+##                  y1="cv",#
+##                  xlabel="Specialization",#
+##                  legend.loc="bottomright",#
+##                  height=5,#
+##                  width=5,#
+##                  x.adj=0.5,#
+##                  f.path='figures/cv')
+rm(list=ls())#
+library(RColorBrewer)#
+setwd('~/Dropbox/hedgerow_assembly/analysis/variability')#
+source("plotting/src/predictIntervals.R")#
+source("plotting/src/CIplotting.R")#
+source("plotting/src/plotPanels.R")#
+source('../networkLevel/src/misc.R', chdir = TRUE)#
+load('saved/contMods.Rdata')#
+#
+## ************************************************************#
+## persistence closeness#
+## ************************************************************#
+dd.occ.pol <- expand.grid(traits=seq(#
+                            from= min(occ.closeness.cv$data$traits,#
+                              na.rm=TRUE),#
+                            to= max(occ.closeness.cv$data$traits,#
+                              na.rm=TRUE),#
+                            length=20),#
+                          SiteStatus="all",#
+                          cv= 0)#
+#
+## pols#
+occ.closeness.cv$data$SiteStatus <- "all"#
+occ.pi.close <- predict.int(mod= occ.closeness.cv$lm.nss,#
+                            dd=dd.occ.pol,#
+                            y="cv",#
+                            family="gaussian")#
+#
+## plants#
+dd.occ.plants <- expand.grid(traits=seq(#
+                               from= min(plants.occ.closeness.cv$data$traits,#
+                                 na.rm=TRUE),#
+                               to= max(plants.occ.closeness.cv$data$traits,#
+                                 na.rm=TRUE),#
+                               length=20),#
+                             SiteStatus="all",#
+                             cv= 0)#
+plants.occ.closeness.cv$data$SiteStatus <- "all"#
+plants.occ.pi.close <- predict.int(mod= plants.occ.closeness.cv$lm.nss,#
+                                   dd=dd.occ.plants,#
+                                   y="cv",#
+                                   family="gaussian")#
+## ************************************************************#
+## degree closeness#
+## ************************************************************#
+dd.degree.pol <- expand.grid(traits=seq(#
+                               from=#
+                               min(degree.closeness.cv$data$traits,#
+                                   na.rm=TRUE),#
+                               to=#
+                               max(degree.closeness.cv$data$traits,#
+                                   na.rm=TRUE),#
+                               length=10),#
+                             SiteStatus="all",#
+                             cv= 0)#
+## pols#
+#
+degree.closeness.cv$data$SiteStatus <- "all"#
+#
+degree.pi <- predict.int(mod= degree.closeness.cv$lm.nss,#
+                         dd=dd.degree.pol,#
+                         y="cv",#
+                         family="gaussian")#
+#
+## plants#
+dd.degree.plants <- expand.grid(traits=seq(#
+                           from=#
+                           min(plants.degree.closeness.cv$data$traits,#
+                               na.rm=TRUE),#
+                           to=#
+                           max(plants.degree.closeness.cv$data$traits,#
+                               na.rm=TRUE),#
+                           length=10),#
+                         SiteStatus="all",#
+                         cv= 0)#
+#
+plants.degree.closeness.cv$data$SiteStatus <- "all"#
+#
+plants.degree.pi <- predict.int(mod= plants.degree.closeness.cv$lm.nss,#
+                                dd=dd.degree.plants,#
+                                y="cv",#
+                                family="gaussian")#
+plot.panels()#
+## ## ************************************************************#
+## ## dprime network position - k#
+## ## ************************************************************#
+#
+## dd.dprime <- expand.grid(traits=seq(#
+##                            from= min(dprime$data$traits),#
+##                            to= max(dprime$data$traits),#
+##                            length=10),#
+##                          SiteStatus= c("control", "maturing", "mature"),#
+##                          cv= 0)#
+#
+## dprime.pi <- predict.int(mod= dprime.k.cv$lm,#
+##                          dd=dd.dprime,#
+##                          y="cv",#
+##                          family="gaussian")#
+#
+## plot.predict.div(new.dd=dprime.pi,#
+##                  ylabel="Network position variability",#
+##                  dats=dprime.k.cv$data,#
+##                  xs="traits",#
+##                  y1="cv",#
+##                  xlabel="Specialization",#
+##                  legend.loc="topright",#
+##                  height=5,#
+##                  width=5,#
+##                  x.adj=0.5,#
+##                  f.path='figures/cv')#
+#
+## ## ************************************************************#
+## ## dprime network position - closeness#
+## ## ************************************************************#
+#
+## dprime.pi.cl <- predict.int(mod= dprime.closeness.cv$lm,#
+##                             dd=dd.dprime,#
+##                             y="cv",#
+##                             family="gaussian")#
+#
+## plot.predict.div(new.dd=dprime.pi.cl,#
+##                  ylabel="Closeness variability",#
+##                  dats=dprime.closeness.cv$data,#
+##                  xs="traits",#
+##                  y1="cv",#
+##                  xlabel="Specialization",#
+##                  legend.loc="topright",#
+##                  height=5,#
+##                  width=5,#
+##                  x.adj=0.5,#
+##                  f.path='figures/cv')#
+## ## ************************************************************#
+## ## itd abundance#
+## ## ************************************************************#
+#
+## dd.itd <- expand.grid(traits=seq(#
+##                         from= min(itd$data$traits, na.rm=TRUE),#
+##                         to= max(itd$data$traits, na.rm=TRUE),#
+##                         length=10),#
+##                       SiteStatus= c("control", "maturing", "mature"),#
+##                       cv= 0)#
+#
+## itd.pi <- predict.int(mod= itd$lm,#
+##                       dd=dd.itd,#
+##                       y="cv",#
+##                       family="gaussian")#
+#
+## plot.predict.div(new.dd=itd.pi,#
+##                  ylabel="Coefficient of variation",#
+##                  dats=itd$data,#
+##                  xs="traits",#
+##                  y1="cv",#
+##                  xlabel="Body size",#
+##                  legend.loc="bottomright",#
+##                  height=5,#
+##                  width=5,#
+##                  x.adj=0.5,#
+##                  f.path='figures/cv')#
+## ## ************************************************************#
+## ## dprime abundance#
+## ## ************************************************************#
+#
+## dprime.pi <- predict.int(mod= dprime$lm,#
+##                          dd=dd.dprime,#
+##                          y="cv",#
+##                          family="gaussian")#
+#
+## plot.predict.div(new.dd=dprime.pi,#
+##                  ylabel="Coefficient of variation",#
+##                  dats=dprime$data,#
+##                  xs="traits",#
+##                  y1="cv",#
+##                  xlabel="Specialization",#
+##                  legend.loc="bottomright",#
+##                  height=5,#
+##                  width=5,#
+##                  x.adj=0.5,#
+##                  f.path='figures/cv')
+rm(list=ls())#
+setwd('~/Dropbox/hedgerow_assembly/analysis/speciesLevel')#
+source('plotting/src/predictIntervals.R')#
+source('plotting/src/CIplotting.R')#
+source('plotting/src/plotPanels.R')#
+source('src/initialize.R')#
+#
+## ************************************************************#
+## specialization#
+## ************************************************************#
+#
+load(file=file.path(save.path, 'specs.Rdata'))#
+load(file=file.path(save.path, "mods/specs_ypr.Rdata"))#
+#
+ylabs <- c("Proportional Generality", "Specialization (d')", "Degree",#
+           "Betweenness", "Closeness" )#
+#
+dd <- expand.grid(ypr=seq(from= min(specs$ypr, na.rm=TRUE),#
+                          to= max(specs$ypr, na.rm=TRUE),#
+                          length=10))#
+pp <- c("plants", "pols")#
+mods <- list(mod.pols, mod.plants)#
+names(mods) <- pp#
+#
+for(j in pp){#
+  for(i in 1:length(ys)){#
+    dd.ypr <- cbind(dd, 0)#
+    colnames(dd.ypr) <- c("ypr", ys[i])#
+      ypr.pi <- predict.int(mod= mods[[j]][[i]],#
+                            dd=dd.ypr,#
+                            y=ys[i],#
+                            family="gaussian")#
+#
+    plot.predict.ypr(new.dd=ypr.pi,#
+                     ylabel=ylabs[i],#
+                     dats=specs,#
+                     y1=ys[i],#
+                     extinction.method=j,#
+                     agg.col="GenusSpecies")#
+  }#
+}#
+## closeness only#
+#
+ypr.pi.pol <- predict.int(mod= mods$pol$closeness,#
+                      dd=dd.ypr,#
+                      y="closeness",#
+                      family="gaussian")#
+ypr.pi.plant <- predict.int(mod= mods$plant$closeness,#
+                      dd=dd.ypr,#
+                      y="closeness",#
+                      family="gaussian")#
+#
+plot.panels()
+rm(list=ls())#
+setwd('~/Dropbox/hedgerow_assembly/analysis/speciesLevel')#
+source('plotting/src/predictIntervals.R')#
+source('plotting/src/CIplotting.R')#
+source('plotting/src/plotPanels.R')#
+source('src/initialize.R')#
+#
+## ************************************************************#
+## specialization#
+## ************************************************************#
+#
+load(file=file.path(save.path, 'specs.Rdata'))#
+load(file=file.path(save.path, "mods/specs_ypr.Rdata"))#
+#
+ylabs <- c("Proportional Generality", "Specialization (d')", "Degree",#
+           "Betweenness", "Closeness" )#
+#
+dd <- expand.grid(ypr=seq(from= min(specs$ypr, na.rm=TRUE),#
+                          to= max(specs$ypr, na.rm=TRUE),#
+                          length=10))#
+pp <- c("plants", "pols")#
+mods <- list(mod.pols, mod.plants)#
+names(mods) <- pp#
+#
+for(j in pp){#
+  for(i in 1:length(ys)){#
+    dd.ypr <- cbind(dd, 0)#
+    colnames(dd.ypr) <- c("ypr", ys[i])#
+      ypr.pi <- predict.int(mod= mods[[j]][[i]],#
+                            dd=dd.ypr,#
+                            y=ys[i],#
+                            family="gaussian")#
+#
+    plot.predict.ypr(new.dd=ypr.pi,#
+                     ylabel=ylabs[i],#
+                     dats=specs,#
+                     y1=ys[i],#
+                     extinction.method=j,#
+                     agg.col="GenusSpecies")#
+  }#
+}#
+## closeness only#
+#
+ypr.pi.pol <- predict.int(mod= mods$pol$closeness,#
+                      dd=dd.ypr,#
+                      y="closeness",#
+                      family="gaussian")#
+ypr.pi.plant <- predict.int(mod= mods$plant$closeness,#
+                      dd=dd.ypr,#
+                      y="closeness",#
+                      family="gaussian")#
+#
+plot.panels()
+rm(list=ls())#
+setwd('~/Dropbox/hedgerow_assembly/analysis/speciesLevel')#
+source('plotting/src/predictIntervals.R')#
+source('plotting/src/CIplotting.R')#
+source('plotting/src/plotPanels.R')#
+source('src/initialize.R')#
+#
+## ************************************************************#
+## specialization#
+## ************************************************************#
+#
+load(file=file.path(save.path, 'specs.Rdata'))#
+load(file=file.path(save.path, "mods/specs_ypr.Rdata"))#
+#
+ylabs <- c("Proportional Generality", "Specialization (d')", "Degree",#
+           "Betweenness", "Closeness" )#
+#
+dd <- expand.grid(ypr=seq(from= min(specs$ypr, na.rm=TRUE),#
+                          to= max(specs$ypr, na.rm=TRUE),#
+                          length=10))#
+pp <- c("plants", "pols")#
+mods <- list(mod.pols, mod.plants)#
+names(mods) <- pp#
+#
+for(j in pp){#
+  for(i in 1:length(ys)){#
+    dd.ypr <- cbind(dd, 0)#
+    colnames(dd.ypr) <- c("ypr", ys[i])#
+      ypr.pi <- predict.int(mod= mods[[j]][[i]],#
+                            dd=dd.ypr,#
+                            y=ys[i],#
+                            family="gaussian")#
+#
+    plot.predict.ypr(new.dd=ypr.pi,#
+                     ylabel=ylabs[i],#
+                     dats=specs,#
+                     y1=ys[i],#
+                     extinction.method=j,#
+                     agg.col="GenusSpecies")#
+  }#
+}#
+## closeness only#
+#
+ypr.pi.pol <- predict.int(mod= mods$pol$closeness,#
+                      dd=dd.ypr,#
+                      y="closeness",#
+                      family="gaussian")#
+ypr.pi.plant <- predict.int(mod= mods$plant$closeness,#
+                      dd=dd.ypr,#
+                      y="closeness",#
+                      family="gaussian")#
+#
+plot.panels()
+rm(list=ls())#
+setwd('~/Dropbox/hedgerow_assembly/analysis/speciesLevel')#
+source('plotting/src/predictIntervals.R')#
+source('plotting/src/CIplotting.R')#
+source('plotting/src/plotPanels.R')#
+source('src/initialize.R')#
+#
+## ************************************************************#
+## specialization#
+## ************************************************************#
+#
+load(file=file.path(save.path, 'specs.Rdata'))#
+load(file=file.path(save.path, "mods/specs_ypr.Rdata"))#
+#
+ylabs <- c("Proportional Generality", "Specialization (d')", "Degree",#
+           "Betweenness", "Closeness" )#
+#
+dd <- expand.grid(ypr=seq(from= min(specs$ypr, na.rm=TRUE),#
+                          to= max(specs$ypr, na.rm=TRUE),#
+                          length=10))#
+pp <- c("plants", "pols")#
+mods <- list(mod.pols, mod.plants)#
+names(mods) <- pp#
+#
+for(j in pp){#
+  for(i in 1:length(ys)){#
+    dd.ypr <- cbind(dd, 0)#
+    colnames(dd.ypr) <- c("ypr", ys[i])#
+      ypr.pi <- predict.int(mod= mods[[j]][[i]],#
+                            dd=dd.ypr,#
+                            y=ys[i],#
+                            family="gaussian")#
+#
+    plot.predict.ypr(new.dd=ypr.pi,#
+                     ylabel=ylabs[i],#
+                     dats=specs,#
+                     y1=ys[i],#
+                     extinction.method=j,#
+                     agg.col="GenusSpecies")#
+  }#
+}#
+## closeness only#
+#
+ypr.pi.pol <- predict.int(mod= mods$pol$closeness,#
+                      dd=dd.ypr,#
+                      y="closeness",#
+                      family="gaussian")#
+ypr.pi.plant <- predict.int(mod= mods$plant$closeness,#
+                      dd=dd.ypr,#
+                      y="closeness",#
+                      family="gaussian")#
+#
+plot.panels()
+rm(list=ls())#
+setwd('~/Dropbox/hedgerow_assembly/analysis/speciesLevel')#
+source('plotting/src/predictIntervals.R')#
+source('plotting/src/CIplotting.R')#
+source('plotting/src/plotPanels.R')#
+source('src/initialize.R')#
+#
+## ************************************************************#
+## specialization#
+## ************************************************************#
+#
+load(file=file.path(save.path, 'specs.Rdata'))#
+load(file=file.path(save.path, "mods/specs_ypr.Rdata"))#
+#
+ylabs <- c("Proportional Generality", "Specialization (d')", "Degree",#
+           "Betweenness", "Closeness" )#
+#
+dd <- expand.grid(ypr=seq(from= min(specs$ypr, na.rm=TRUE),#
+                          to= max(specs$ypr, na.rm=TRUE),#
+                          length=10))#
+pp <- c("plants", "pols")#
+mods <- list(mod.pols, mod.plants)#
+names(mods) <- pp#
+#
+for(j in pp){#
+  for(i in 1:length(ys)){#
+    dd.ypr <- cbind(dd, 0)#
+    colnames(dd.ypr) <- c("ypr", ys[i])#
+      ypr.pi <- predict.int(mod= mods[[j]][[i]],#
+                            dd=dd.ypr,#
+                            y=ys[i],#
+                            family="gaussian")#
+#
+    plot.predict.ypr(new.dd=ypr.pi,#
+                     ylabel=ylabs[i],#
+                     dats=specs,#
+                     y1=ys[i],#
+                     extinction.method=j,#
+                     agg.col="GenusSpecies")#
+  }#
+}#
+## closeness only#
+#
+ypr.pi.pol <- predict.int(mod= mods$pol$closeness,#
+                      dd=dd.ypr,#
+                      y="closeness",#
+                      family="gaussian")#
+ypr.pi.plant <- predict.int(mod= mods$plant$closeness,#
+                      dd=dd.ypr,#
+                      y="closeness",#
+                      family="gaussian")#
+#
+plot.panels()
+rm(list=ls())#
+setwd('~/Dropbox/hedgerow_assembly/analysis/speciesLevel')#
+source('plotting/src/predictIntervals.R')#
+source('plotting/src/CIplotting.R')#
+source('plotting/src/plotPanels.R')#
+source('src/initialize.R')#
+#
+## ************************************************************#
+## specialization#
+## ************************************************************#
+#
+load(file=file.path(save.path, 'specs.Rdata'))#
+load(file=file.path(save.path, "mods/specs_ypr.Rdata"))#
+#
+ylabs <- c("Proportional Generality", "Specialization (d')", "Degree",#
+           "Betweenness", "Closeness" )#
+#
+dd <- expand.grid(ypr=seq(from= min(specs$ypr, na.rm=TRUE),#
+                          to= max(specs$ypr, na.rm=TRUE),#
+                          length=10))#
+pp <- c("plants", "pols")#
+mods <- list(mod.pols, mod.plants)#
+names(mods) <- pp#
+#
+for(j in pp){#
+  for(i in 1:length(ys)){#
+    dd.ypr <- cbind(dd, 0)#
+    colnames(dd.ypr) <- c("ypr", ys[i])#
+      ypr.pi <- predict.int(mod= mods[[j]][[i]],#
+                            dd=dd.ypr,#
+                            y=ys[i],#
+                            family="gaussian")#
+#
+    plot.predict.ypr(new.dd=ypr.pi,#
+                     ylabel=ylabs[i],#
+                     dats=specs,#
+                     y1=ys[i],#
+                     extinction.method=j,#
+                     agg.col="GenusSpecies")#
+  }#
+}#
+## closeness only#
+#
+ypr.pi.pol <- predict.int(mod= mods$pol$closeness,#
+                      dd=dd.ypr,#
+                      y="closeness",#
+                      family="gaussian")#
+ypr.pi.plant <- predict.int(mod= mods$plant$closeness,#
+                      dd=dd.ypr,#
+                      y="closeness",#
+                      family="gaussian")#
+#
+plot.panels()
+rm(list=ls())#
+setwd('~/Dropbox/hedgerow_assembly/analysis/speciesLevel')#
+source('plotting/src/predictIntervals.R')#
+source('plotting/src/CIplotting.R')#
+source('plotting/src/plotPanels.R')#
+source('src/initialize.R')#
+#
+## ************************************************************#
+## specialization#
+## ************************************************************#
+#
+load(file=file.path(save.path, 'specs.Rdata'))#
+load(file=file.path(save.path, "mods/specs_ypr.Rdata"))#
+#
+ylabs <- c("Proportional Generality", "Specialization (d')", "Degree",#
+           "Betweenness", "Closeness" )#
+#
+dd <- expand.grid(ypr=seq(from= min(specs$ypr, na.rm=TRUE),#
+                          to= max(specs$ypr, na.rm=TRUE),#
+                          length=10))#
+pp <- c("plants", "pols")#
+mods <- list(mod.pols, mod.plants)#
+names(mods) <- pp#
+#
+for(j in pp){#
+  for(i in 1:length(ys)){#
+    dd.ypr <- cbind(dd, 0)#
+    colnames(dd.ypr) <- c("ypr", ys[i])#
+      ypr.pi <- predict.int(mod= mods[[j]][[i]],#
+                            dd=dd.ypr,#
+                            y=ys[i],#
+                            family="gaussian")#
+#
+    plot.predict.ypr(new.dd=ypr.pi,#
+                     ylabel=ylabs[i],#
+                     dats=specs,#
+                     y1=ys[i],#
+                     extinction.method=j,#
+                     agg.col="GenusSpecies")#
+  }#
+}#
+## closeness only#
+#
+ypr.pi.pol <- predict.int(mod= mods$pol$closeness,#
+                      dd=dd.ypr,#
+                      y="closeness",#
+                      family="gaussian")#
+ypr.pi.plant <- predict.int(mod= mods$plant$closeness,#
+                      dd=dd.ypr,#
+                      y="closeness",#
+                      family="gaussian")#
+#
+plot.panels()
+rm(list=ls())#
+setwd('~/Dropbox/hedgerow_assembly/analysis/speciesLevel')#
+source('plotting/src/predictIntervals.R')#
+source('plotting/src/CIplotting.R')#
+source('plotting/src/plotPanels.R')#
+source('src/initialize.R')#
+#
+## ************************************************************#
+## specialization#
+## ************************************************************#
+#
+load(file=file.path(save.path, 'specs.Rdata'))#
+load(file=file.path(save.path, "mods/specs_ypr.Rdata"))#
+#
+ylabs <- c("Proportional Generality", "Specialization (d')", "Degree",#
+           "Betweenness", "Closeness" )#
+#
+dd <- expand.grid(ypr=seq(from= min(specs$ypr, na.rm=TRUE),#
+                          to= max(specs$ypr, na.rm=TRUE),#
+                          length=10))#
+pp <- c("plants", "pols")#
+mods <- list(mod.pols, mod.plants)#
+names(mods) <- pp#
+#
+for(j in pp){#
+  for(i in 1:length(ys)){#
+    dd.ypr <- cbind(dd, 0)#
+    colnames(dd.ypr) <- c("ypr", ys[i])#
+      ypr.pi <- predict.int(mod= mods[[j]][[i]],#
+                            dd=dd.ypr,#
+                            y=ys[i],#
+                            family="gaussian")#
+#
+    plot.predict.ypr(new.dd=ypr.pi,#
+                     ylabel=ylabs[i],#
+                     dats=specs,#
+                     y1=ys[i],#
+                     extinction.method=j,#
+                     agg.col="GenusSpecies")#
+  }#
+}#
+## closeness only#
+#
+ypr.pi.pol <- predict.int(mod= mods$pol$closeness,#
+                      dd=dd.ypr,#
+                      y="closeness",#
+                      family="gaussian")#
+ypr.pi.plant <- predict.int(mod= mods$plant$closeness,#
+                      dd=dd.ypr,#
+                      y="closeness",#
+                      family="gaussian")#
+#
+plot.panels()
+rm(list=ls())#
+library(nimble)#
+setwd('~/Dropbox/occupancy-nimble/multiSpp-singleSea')#
+source('src/plotting.R')#
+#
+## original model jags and nimble#
+load(file="saved/orig.Rdata")#
+#
+## vectorized, likelihood for latent state, derived quantity#
+## calculation#
+load(file="saved/opt1.Rdata")#
+#
+## option 1 + custom block sampler on species random effect for each#
+## species#
+load(file="saved/opt2.Rdata")#
+#
+## option 1 + custom block sampler on species random effect for each#
+## random effect type#
+load(file="saved/opt3.Rdata")#
+#
+## option 1 + sigma sampler on random effects#
+load(file="saved/opt4.Rdata")#
+#
+ms.ss.opt1[[1]] <- rename_MCMC_comparison_method('nimble', 'remove_z',#
+                                                 comparison=ms.ss.opt1[[1]])#
+ms.ss.opt2[[1]] <- rename_MCMC_comparison_method('nimbleOpt2', 'block_1',#
+                                                 comparison=ms.ss.opt2[[1]])#
+ms.ss.opt3[[1]] <- rename_MCMC_comparison_method('nimbleOpt3',#
+                                                 'block_2',#
+                                                 comparison=ms.ss.opt3[[1]])#
+ms.ss.opt4[[1]] <- rename_MCMC_comparison_method('nimbleOpt4',#
+                                                 'sigma sampler',#
+                                                 comparison=ms.ss.opt4[[1]])#
+#
+## compare mcmcs#
+ms.ss.occ.all <- combine_MCMC_comparison_results(ms.ss.orig[[1]],#
+                                                 ms.ss.opt1[[1]],#
+                                                 ms.ss.opt2[[1]],#
+                                                 ms.ss.opt3[[1]],#
+                                                 ms.ss.opt4[[1]],#
+                                                 name = "ms.ss" )#
+#
+make_MCMC_comparison_pages(ms.ss.occ.all, dir="figures/comparisons")#
+## look at samples#
+#
+checkChains(ms.ss.occ.all[[1]]$samples,#
+            f.path = "figures/comparisons/chains/%s.pdf")
+rm(list=ls())#
+library(nimble)#
+setwd('~/Dropbox/occupancy-nimble/multiSpp-singleSea')#
+source('src/plotting.R')#
+#
+## original model jags and nimble#
+load(file="saved/orig.Rdata")#
+#
+## vectorized, likelihood for latent state, derived quantity#
+## calculation#
+load(file="saved/opt1.Rdata")#
+#
+## option 1 + custom block sampler on species random effect for each#
+## species#
+load(file="saved/opt2.Rdata")#
+#
+## ## option 1 + custom block sampler on species random effect for each#
+## ## random effect type#
+## load(file="saved/opt3.Rdata")#
+#
+## option 1 + sigma sampler on random effects#
+load(file="saved/opt4.Rdata")#
+#
+ms.ss.opt1[[1]] <- rename_MCMC_comparison_method('nimble', 'remove_z',#
+                                                 comparison=ms.ss.opt1[[1]])#
+ms.ss.opt2[[1]] <- rename_MCMC_comparison_method('nimbleOpt2', 'block_1',#
+                                                 comparison=ms.ss.opt2[[1]])#
+## ms.ss.opt3[[1]] <- rename_MCMC_comparison_method('nimbleOpt3',#
+##                                                  'block_2',#
+##                                                  comparison=ms.ss.opt3[[1]])#
+ms.ss.opt4[[1]] <- rename_MCMC_comparison_method('nimbleOpt4',#
+                                                 'sigma sampler',#
+                                                 comparison=ms.ss.opt4[[1]])#
+#
+## compare mcmcs#
+ms.ss.occ.all <- combine_MCMC_comparison_results(ms.ss.orig[[1]],#
+                                                 ms.ss.opt1[[1]],#
+                                                 ms.ss.opt2[[1]],#
+                                                 ## ms.ss.opt3[[1]],#
+                                                 ms.ss.opt4[[1]],#
+                                                 name = "ms.ss" )#
+#
+make_MCMC_comparison_pages(ms.ss.occ.all, dir="figures/comparisons")#
+## look at samples#
+#
+checkChains(ms.ss.occ.all[[1]]$samples,#
+            f.path = "figures/comparisons/chains/%s.pdf")
