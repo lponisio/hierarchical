@@ -51,6 +51,7 @@ input1 <- list(code=ss.ms.occ,
                data=model.data,
                inits=inits)
 
+monitors <- c("phi", "gamma", "psi")
 
 ss.ms.opt4 <- compareMCMCs(input1,
                            MCMCs=c('nimble', 'autoBlock'),
@@ -85,6 +86,7 @@ MCMCdefs.opt5 <- list('nimbleOpt5' = quote({
 
 ## *********************************************************************
 ## run with compareMCMCs
+## *********************************************************************
 
 input1 <- list(code=ss.ms.occ,
                constants=constants,
@@ -101,3 +103,48 @@ ss.ms.opt5 <- compareMCMCs(input1,
                            check=FALSE)
 
 save(ss.ms.opt5, file="saved/opt5.Rdata")
+
+
+## *********************************************************************
+
+## build model
+R.model <- nimbleModel(code=ss.ms.occ,
+                       constants=constants,
+                       data=model.data,
+                       inits=inits,
+                       check=FALSE)
+message('R model created')
+
+
+## configure and build mcmc
+mcmc.spec <- configureMCMC(R.model,
+                           print=FALSE,
+                           monitors = monitors,
+                           thin=1)
+mcmc <- buildMCMC(mcmc.spec)
+message('MCMC built')
+
+## compile model in C++
+C.model <- compileNimble(R.model)
+C.mcmc <- compileNimble(mcmc, project = R.model)
+message('NIMBLE model compiled')
+
+source('../cppp/src/calcCPPP.R', chdir = TRUE)
+options(mc.cores=6)
+
+generateCPPP(R.model,
+             C.model,
+             C.mcmc,
+             mcmc,
+             dataName = 'y',
+             paramNames = monitors, 
+             MCMCIter = 1000, 
+             NSamp = 1000,
+             NPDist = 100,
+             thin = 1)
+
+
+list(code=ss.ms.occ,
+               constants=constants,
+               data=model.data,
+               inits=inits)

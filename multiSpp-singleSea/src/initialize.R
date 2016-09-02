@@ -1,6 +1,6 @@
 ## library(devtools)
 ## install_github("nimble-dev/nimble",
-##                ref = "newNodeFxns",
+##                ref = "devel",
 ##                subdir = "packages/nimble")
 
 library(nimble)
