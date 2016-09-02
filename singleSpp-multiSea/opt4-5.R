@@ -106,7 +106,7 @@ save(ss.ms.opt5, file="saved/opt5.Rdata")
 
 
 ## *********************************************************************
-
+options(error=recover)
 ## build model
 R.model <- nimbleModel(code=ss.ms.occ,
                        constants=constants,

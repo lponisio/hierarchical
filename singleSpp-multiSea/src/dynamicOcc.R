@@ -42,7 +42,7 @@ dbern_vec <- nimbleFunction(
 ## always treat it as 1.  It should not be used as the length needed
 rbern_vec <- nimbleFunction(
   run = function(n = integer(), p = double(), length = double()) {
-    declare(ans, double(1))
+    ans <- double(1)
     setSize(ans, length)
     for(i in 1:length) ans[i] <- rbinom(1, size = 1, prob = p)
     returnType(double(1))
@@ -86,7 +86,7 @@ dbern_matrix <- nimbleFunction(
 
 rbern_matrix <- nimbleFunction(
   run = function(n = integer(), p = double(2)) {
-    declare(ans, double(2))
+    ans = double(2)
     nrow = p[1]
     ncol = p[2]
     setSize(ans, nrow, ncol)
@@ -294,7 +294,7 @@ rDynamicOccupancy <- nimbleFunction(
     p = double(1),
     log = integer(0, default = 0)) {
     nyear <- length(p)
-    declare(ans, double(2))
+    ans <- double(2)
     setSize(ans, nrep, nyear)
     ## could populate ans here, but I'm just doing this as a placeholder
     returnType(double(2))
@@ -313,7 +313,3 @@ registerDistributions(list(
       'gamma = double(1)',
       'p = double(1)'))
   ))
-
-## *********************************************************************
-## misc functions
-## *********************************************************************
