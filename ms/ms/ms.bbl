@@ -1,17 +1,5 @@
-\begin{thebibliography}{6}
+\begin{thebibliography}{3}
 \providecommand{\natexlab}[1]{#1}
-
-\bibitem[{Hines \emph{et~al.}(2010)Hines, Nichols, Royle, MacKenzie,
-  Gopalaswamy, Kumar \& Karanth}]{hines2010tigers}
-Hines, J., Nichols, J., Royle, J., MacKenzie, D., Gopalaswamy, A., Kumar, N. \&
-  Karanth, K. (2010) Tigers on trails: occupancy modeling for cluster sampling.
-\newblock \emph{Ecological Applications}, \textbf{20}, 1456--1466.
-
-\bibitem[{Iknayan \emph{et~al.}(2014)Iknayan, Tingley, Furnas \&
-  Beissinger}]{iknayan2014detecting}
-Iknayan, K.J., Tingley, M.W., Furnas, B.J. \& Beissinger, S.R. (2014) Detecting
-  diversity: emerging methods to estimate species diversity.
-\newblock \emph{Trends in ecology \& evolution}, \textbf{29}, 97--106.
 
 \bibitem[{MacKenzie \emph{et~al.}(2006)MacKenzie, Nichols, Royle, Pollock,
   Bailey \& Hines}]{mackenzie-2006}
@@ -31,11 +19,5 @@ M'Gonigle, L., Ponisio, L., Cutler, K. \& Kremen, C. (2015) Habitat restoration
 Royle, A. \& K\'ery, M. (2007) A bayesian state-space formulation of dynamic
   occupancy models.
 \newblock \emph{Ecology}, \textbf{88}, 1813--1823.
-
-\bibitem[{Welsh \emph{et~al.}(2013)Welsh, Lindenmayer \&
-  Donnelly}]{welsh2013fitting}
-Welsh, A.H., Lindenmayer, D.B. \& Donnelly, C.F. (2013) Fitting and
-  interpreting occupancy models.
-\newblock \emph{PLoS One}, \textbf{8}, e52015.
 
 \end{thebibliography}

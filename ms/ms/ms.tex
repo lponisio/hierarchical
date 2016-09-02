@@ -26,7 +26,8 @@
 }
 
 \def\title{Increasing the tractability of occupancy models}
-\def\author{Lauren C.\ Ponisio$^{1,2}$, Perry de Valpine$^1$}
+\def\author{Lauren C.\ Ponisio$^{1,2}$, Nicholas Michaud$^1$, Perry de
+  Valpine$^1$}
 
 \def\runninghead{Occupancy model efficiency}
 \def\keywords{NIMBLE, Markov chain Monte Carlo, latent states, block
@@ -83,7 +84,28 @@
 \clearpage
 
 \begin{abstract}  
-place holder
+  \begin{enumerate}
+  \item occupancy models are everywhere, but model fitting and
+    assessment are extrememly computationally intensive
+  \item Using the NIMBLE package for R, we develop combined
+    computational approaches to improve computational efficiency
+    including user defined and automatic blocking of parameters for
+    MCMC, filtering over latent states, and customized MCMC samplers
+    for specific parameters. We test these approaches for three
+    representative occupancy models of varying levels of complexity
+    including a single species dynamic (i.e., multi-season) model with
+    spatial auto correlation, and a mutli-species model. We also use
+    calibrated posterior $p$-values to assess model fit.
+  \item These computation approaches lead to an improvement in MCMC
+    sampling efficiency, particularly with the more complex,
+    mutli-species model.
+  \item Ours results highlight the need for more customizable
+    approaches to MCMC to fit and assess hierachical models in order
+    to ensure occupancy models are accessible to practitioners. By
+    implementing MCMC procedures and model assessment techniques open
+    source software, we have made progress toward tis aim.
+  \item \textit{Implications:}
+  \end{enumerate}
 \end{abstract}
 
 \keywords
@@ -117,11 +139,13 @@ embedded in a larger hierarchical model. In such cases, practitioners
 may rely on Markov chain Monte Carlo (MCMC) to perform a Bayesian
 analysis. Such models are computationally intensive, and large models
 requiring hundreds or thousands of dimensions which require MCMC can
-be computationally impractical. To ensure occupancy models are
-accessible to practitioners, more efficient methods for estimating these
-models are necessary. 
+be computationally intensive. In addition, fitting these models is
+such a challenge that users often forgo adding any additional
+computation to asses model fit. To ensure occupancy models are
+accessible to practitioners, more efficient methods for fitting and
+assessing these models are necessary.
 
-%% model selection
+
 
 \section*{Materials \& Methods}
 \label{sec:methods}
