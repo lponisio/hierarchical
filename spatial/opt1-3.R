@@ -25,7 +25,8 @@ sp.mod <- nimbleCode({
   }
 
   rho[1:nsite] ~ dmnorm(zeros[1:nsite],
-                        cov = D.cov[1:nsite, 1:nsite]) 
+                        cov = D.cov[1:nsite, 1:nsite])
+
   ## derived quantities
   ## turning the distance matrix to covariance matrix
   D.cov[1:nsite, 1:nsite] <- (sigma^2)*exp(-delta*D[1:nsite, 1:nsite])
@@ -43,7 +44,7 @@ input1 <- list(code=sp.mod,
 ## *********************************************************************
 
 sp.opt1 <- compareMCMCs(input1,
-                            MCMCs=c("nimble", "autoBlock"),
+                            MCMCs=c("nimble", "autoblock"),
                             niter=niter,
                             burnin = burnin,
                             summary=FALSE,

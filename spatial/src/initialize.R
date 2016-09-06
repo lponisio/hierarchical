@@ -1,7 +1,11 @@
 ## library(devtools)
-## install_github("nimble-dev/nimble",
-##                ref = "devel",
-##                subdir = "packages/nimble")
+## ## install_github("nimble-dev/nimble",
+## ##                ref = "devel",
+## ##                subdir = "packages/nimble")
+
+## install_github("nlmichaud/nimble",
+##                subdir = "packages/nimble",
+##                branch = "msmModule")
 
 library(nimble)
 library(igraph)
