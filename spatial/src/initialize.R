@@ -1,11 +1,8 @@
 ## library(devtools)
-## ## install_github("nimble-dev/nimble",
-## ##                ref = "devel",
-## ##                subdir = "packages/nimble")
+## install_github("nimble-dev/nimble",
+##                ref = "devel",
+##                subdir = "packages/nimble")
 
-## install_github("nlmichaud/nimble",
-##                subdir = "packages/nimble",
-##                branch = "msmModule")
 
 library(nimble)
 library(igraph)
@@ -17,10 +14,6 @@ source("../all/runNimble.R")
 ## samplers
 source("../all/samplers/sampler_z.R")
 source("../all/samplers/sampler_reflective.R")
-
-
-expit <- function(x) 1/(1+exp(-x))
-logit <- function(x) log(x/(1-x))
 
 ## parameters
 ngrid <- 25
@@ -58,9 +51,11 @@ Xraster <- rasterFromXYZ(cbind(simgrid[, 1:2] - 0.5, X))
 elev <- raster(matrix(rnorm(n), ngrid, ngrid),
                xmn = 0, xmx = ngrid,
                ymn = 0, ymx = ngrid)
+elev <- scale(elev)
 
 ## calculate probabilities of occurrence
-psi <- expit(alpha + beta1 * values(elev) +  values(Xraster))
+expit <- function(x) 1/(1 + exp(-x))
+psi <- expit(alpha + beta1 * raster::values(elev) +  raster::values(Xraster))
 
 ## Latent occurrence state
 z <- rbinom(n = n, size = 1, prob = psi) 
@@ -114,7 +109,7 @@ monitors <- c("delta", "sigma", "psi", "p", "alpha", "b1")
 
 
 ## MCMC settings
-scale <- 5e1
+scale <- 5e1^2
 burnin <- 1e1*scale
 niter <- (1e3)*scale
 

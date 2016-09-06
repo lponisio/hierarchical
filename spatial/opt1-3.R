@@ -4,7 +4,7 @@ source('src/initialize.R')
 
 sp.mod <- nimbleCode({
   ## priors
-  delta ~ dunif(0, 10)
+  delta ~ dunif(0, 1)
   sigma ~ dunif(0, 10)
   p ~ dunif(0, 1)
   alpha ~ dnorm(0, 0.001)
@@ -44,7 +44,7 @@ input1 <- list(code=sp.mod,
 ## *********************************************************************
 
 sp.opt1 <- compareMCMCs(input1,
-                            MCMCs=c("nimble", "autoblock"),
+                            MCMCs=c("nimble", "autoBlock"),
                             niter=niter,
                             burnin = burnin,
                             summary=FALSE,
@@ -71,14 +71,18 @@ MCMCdefs.opt2 <- list('nimbleOpt2' = quote({
   for(znode in znodes) customSpec$addSampler(target = znode,
                                              type = custom_z_sampler,
                                              print=FALSE)
-
+  ## slice sampler for 0,1 varaibles
   customSpec$removeSamplers('p', print=FALSE)
-  ## happens to be all top nodes
-  zeroOneNodes <- Rmodel$getNodeNames(topOnly = TRUE)
-  for(zon in zeroOneNodes) customSpec$addSampler(target = zon,
+  customSpec$addSampler(target = 'p',
                                                  type =
                                                    "slice",
                                                  print=FALSE)
+  ## multivariate normal sampler
+  ## customSpec$removeSamplers('rho', print=FALSE)
+  ## customSpec$addSampler(target = 'rho',
+  ##                                                type =
+  ##                                                  "ess",
+  ##                                                print=FALSE)
   customSpec
 }))
 
@@ -112,13 +116,18 @@ MCMCdefs.opt3 <- list('nimbleOpt3' = quote({
                                              type = custom_z_sampler,
                                              print=FALSE)
 
+  ## reflective for 0,1 varaibles
   customSpec$removeSamplers('p', print=FALSE)
-  ## happens to be all top nodes
-  zeroOneNodes <- Rmodel$getNodeNames(topOnly = TRUE)
-  for(zon in zeroOneNodes) customSpec$addSampler(target = zon,
+  customSpec$addSampler(target = 'p',
                                                  type =
-                                                   sampler_RW_reflect,
+                                                   "sampler_RW_reflect",
                                                  print=FALSE)
+  ## multivariate normal sampler
+  ## customSpec$removeSamplers('rho', print=FALSE)
+  ## customSpec$addSampler(target = 'rho',
+  ##                                                type =
+  ##                                                  "ess",
+  ##                                                print=FALSE)
   customSpec
 }))
 
@@ -135,3 +144,8 @@ sp.opt3 <- compareMCMCs(input1,
                            check=FALSE)
 
 save(sp.opt3, file="saved/opt3.Rdata")
+
+
+## *********************************************************************
+## opt:  automated factor slice sampler
+## *********************************************************************

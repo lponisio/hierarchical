@@ -2,6 +2,7 @@
 ## shifts the magnitude of a set of other nodes by the same value,
 ## also on a log scale.  This helps mixing for a set of random effects
 ## and their shared standard deviation
+
 sampler_RW_log_shift <- nimbleFunction(
   contains = sampler_BASE,
   setup = function(model, mvSaved, target, control) {

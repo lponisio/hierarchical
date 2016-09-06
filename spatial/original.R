@@ -2,19 +2,11 @@ rm(list=ls())
 setwd("~/Dropbox/occupancy-nimble/spatial")
 source('src/initialize.R')
 library(rjags)
-load.module("msm")
-
-mexp <- nimbleFunction(
-  run = function(A = double(2)){
-    returnType(double(2))
-    outMat <- exp(A)
-    return(outMat)
-  })
 
 sp.mod <- nimbleCode({
   ## priors
-  delta ~ dunif(0.1, 10)
-  sigma ~ dunif(0.1, 10)
+  delta ~ dunif(0, 1)
+  sigma ~ dunif(0, 10)
   p ~ dunif(0, 1)
   alpha ~ dnorm(0, 0.001)
   b1 ~ dnorm(0, 0.001)
@@ -34,11 +26,21 @@ sp.mod <- nimbleCode({
   }
 
   rho[1:nsite] ~ dmnorm(zeros[1:nsite],
-                        D.cov[1:nsite, 1:nsite])
+                        D.tau[1:nsite, 1:nsite])
 
   ## derived quantities
   ## turning the distance matrix to covariance matrix
-  D.cov[1:nsite, 1:nsite]  <- (sigma^2)*mexp(-delta*D[1:nsite, 1:nsite])
+  ## temp.cov[1:nsite, 1:nsite] <- -delta*D[1:nsite, 1:nsite]
+  ## D.cov[1:nsite, 1:nsite]  <- (sigma^2)*
+  ##                                     mexp(temp.cov[1:nsite, 1:nsite])
+  ## D.tau[1:nsite, 1:nsite] <- inverse(D.cov[1:nsite, 1:nsite])
+  for(i in 1:nsite){
+    for(j in 1:nsite){
+      temp.cov[i, j] <- -delta*D[i, j]
+      D.cov[i, j]  <- (sigma^2)* exp(temp.cov[i, j])
+    }
+  }
+  D.tau[1:nsite, 1:nsite] <- inverse(D.cov[1:nsite, 1:nsite])
   
 })
 
@@ -53,20 +55,13 @@ input1 <- list(code=sp.mod,
 ## *********************************************************************
 
 sp.orig <- compareMCMCs(input1,
-                            MCMCs=c("jags"),
-                            niter=niter,
-                            burnin = burnin,
-                            summary=FALSE,
-                            check=FALSE)
+                        MCMCs=c("jags"),
+                        niter=niter,
+                        burnin = burnin,
+                        summary=FALSE,
+                        check=FALSE)
 
 save(sp.orig, file="saved/orig.Rdata")
 
 checkChains(sp.orig[[1]]$samples,
             f.path = "figures/chains/%s.pdf")
-
-
-
-
-
-eigen((.5^2)*exp(-.5*model.data$D))
-
