@@ -28,7 +28,7 @@ runNim <- function(code, ## model created by nimbleCode()
   message('NIMBLE model compiled')
 
   ## run model
-  print('running model')
+  message('running model')
   C.mcmc$run(niter)
   return(C.mcmc)
 }

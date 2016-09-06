@@ -226,7 +226,7 @@ save(ms.ss.opt3, file="saved/opt3.Rdata")
 ## *********************************************************************
 ## ## option 4: sigma sampler
 ## *********************************************************************
-source('src/sampler_RW_shift.R')
+
 ## remove the samples, add block samplers
 MCMCdefs.opt4 <- list('nimbleOpt4' = quote({
   customSpec <- configureMCMC(Rmodel)

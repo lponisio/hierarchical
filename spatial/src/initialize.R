@@ -7,6 +7,14 @@ library(nimble)
 library(igraph)
 library(raster)
 
+source("../all/plotting.R")
+source("../all/runNimble.R")
+
+## samplers
+source("../all/samplers/sampler_z.R")
+source("../all/samplers/sampler_reflective.R")
+
+
 expit <- function(x) 1/(1+exp(-x))
 logit <- function(x) log(x/(1-x))
 
@@ -74,10 +82,24 @@ for (j in 1:nreps){
 ## NA for "sites" that are not sampled
 ysample <- y
 ysample[-sites, ] <- NA
+## drop ys that are not sampled for this analysis
+y <- ysample[sites,]
+
+## data zs with 0s set to NAs
+zs <- apply(y, 1, max)
+zs[zs == 0] <- NA
+
+## initial conditions, NAs where 1s are in y, and 1s are where NA
+zinits <- zs
+zinits[zinits == 1] <- 2
+zinits[is.na(zinits)] <- 1
+zinits[zinits == 2] <- NA
+inits <- list(z = zinits)
 
 ## model data
 model.data <- list(D = distance[sites, sites],
-                   y = ysample[sites,],
+                   y = y,
+                   z = zs,
                    zeros=rep(0, nsite),
                    elev = fulldata$elevation[sites])
 ## constants
@@ -86,11 +108,9 @@ constants <- list(nsite = nsite, nreps=nreps)
 ## parameters to monitor
 monitors <- c("delta", "sigma", "psi", "p", "alpha", "b1")
 
-## inits
-inits <- list()
 
 ## MCMC settings
-scale <- 1e1
+scale <- 5e1
 burnin <- 1e1*scale
 niter <- (1e3)*scale
 
