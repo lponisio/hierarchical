@@ -27,11 +27,6 @@ ss.ms.occ <- nimbleCode({
     }
   }
 
-
-  ##  not beneficial to vectorize over i or k, because each z[i,k] and
-  ## p[k] is a different variable with different graph edges But it
-  ## would make sense to vectorize over j, I believe.
-
   for (i in 1:nsite){
       for (k in 1:nyear){
           muy[i,k] <- z[i,k]*p[k]

@@ -6,7 +6,6 @@ sp.mod <- nimbleCode({
   ## priors
   delta ~ dunif(0, 10)
   sigma ~ dunif(0, 10)
-  psi ~ dunif(0, 1)
   p ~ dunif(0, 1)
   alpha ~ dnorm(0, 0.001)
   b1 ~ dnorm(0, 0.001)

@@ -6,7 +6,6 @@ sp.mod <- nimbleCode({#
   ## priors#
   delta ~ dunif(0, 10)#
   sigma ~ dunif(0, 10)#
-  psi ~ dunif(0, 1)#
   p ~ dunif(0, 1)#
   alpha ~ dnorm(0, 0.001)#
   b1 ~ dnorm(0, 0.001)#
@@ -43,34 +42,186 @@ sp.mod.opt1 <- compareMCMCs(input1,#
                             summary=FALSE,#
                             check=FALSE)#
 #
-save(sp.mod.opt1, file="saved/opt1.Rdata")#
+## save(sp.mod.opt1, file="saved/opt1.Rdata")#
 #
-checkChains(sp.mod.opt1[[1]]$samples,#
-            f.path = "figures/chains/%s.pdf")
-constants
-names(data.mod)
-names(model.data)
-length(zeros)
-length(model.data$zeros)
-model.data$y
-## model data#
-model.data <- list(D = distance,#
-                   y = ysample,#
-                   zeros=rep(0, n),#
-                   elev = fulldata$elevation)#
-## constants
-model.data$y
+## checkChains(sp.mod.opt1[[1]]$samples,#
+##             f.path = "figures/chains/%s.pdf")
+rm(list=ls())#
+setwd("~/Dropbox/occupancy-nimble/spatial")#
+source('src/initialize.R')
+rm(list=ls())#
+setwd("~/Dropbox/occupancy-nimble/spatial")#
+source('src/initialize.R')
+library(nimble)#
+library(igraph)#
+library(raster)#
+library(lattice)#
+library(mvtnorm)#
+#
+expit <- function(x) 1/(1+exp(-x))#
+logit <- function(x) log(x/(1-x))#
+#
+## parameters#
+ngrid <- 25#
+nsite <- 20#
+nreps <- 5#
+#
+alpha <- 0.1#
+beta1 <- 2#
+p <- 0.6#
+sigma <- 0.5#
+delta <- 0.05#
+#
+set.seed(44)#
+#
+rmvn <- function(n, mu = 0, V = matrix(1)) {#
+  p <- length(mu)#
+  if (any(is.na(match(dim(V), p)))) #
+    stop("Dimension problem!")#
+  D <- chol(V)#
+  t(matrix(rnorm(n * p), ncol = p) %*% D + rep(mu, rep(n, p)))#
+}
+## Set up a square lattice region#
+simgrid <- expand.grid(1:ngrid, 1:ngrid)#
+n <- nrow(simgrid)#
+#
+## Set up distance matrix#
+distance <- as.matrix(dist(simgrid))#
+#
+## Generate spatial random variable#
+X <- rmvn(1, rep(0, n),  (sigma^2)*exp(-delta * distance))#
+Xraster <- rasterFromXYZ(cbind(simgrid[, 1:2] - 0.5, X))#
+#
+## simulate elevation data#
+elev <- raster(matrix(rnorm(n), ngrid, ngrid),#
+               xmn = 0, xmx = ngrid,#
+               ymn = 0, ymx = ngrid)#
+#
+## calculate probabilities of occurrence#
+psi <- expit(alpha + beta1 * values(elev) +  values(Xraster))#
+#
+## Latent occurrence state#
+z <- rbinom(n = n, size = 1, prob = psi) #
+z <- rasterFromXYZ(cbind(coordinates(elev), z))#
+#
+coords <- coordinates(z)#
+fulldata <- data.frame(coords,#
+                       elevation = extract(elev, coords),#
+                       Xvar = extract(Xraster, coords),#
+                       z = extract(z, coords))#
+#
+## subsample at "sites"#
+sites <- sample(1:n, nsite)#
+#
+## Observation process: Sample detection/nondetection observations#
+## from a Bernoulli(with p) if z=1#
+y <- matrix(NA, nrow = n, ncol = nreps)#
+#
+for (j in 1:nreps){#
+  y[,j] <- rbinom(n = n, size = 1, prob = fulldata$z * p)#
+}#
+#
+## NA for "sites" that are not sampled#
+ysample <- y#
+ysample[-sites, ] <- NA
+## library(devtools)#
+## install_github("nimble-dev/nimble",#
+##                ref = "devel",#
+##                subdir = "packages/nimble")#
+#
+library(nimble)#
+library(igraph)#
+library(raster)#
+library(lattice)#
+library(mvtnorm)#
+#
+expit <- function(x) 1/(1+exp(-x))#
+logit <- function(x) log(x/(1-x))#
+#
+## parameters#
+ngrid <- 25#
+nsite <- 20#
+nreps <- 5#
+#
+alpha <- 0.1#
+beta1 <- 2#
+p <- 0.6#
+psi <- 0.7#
+sigma <- 0.5#
+delta <- 0.05#
+#
+set.seed(44)#
+#
+rmvn <- function(n, mu = 0, V = matrix(1)) {#
+  p <- length(mu)#
+  if (any(is.na(match(dim(V), p)))) #
+    stop("Dimension problem!")#
+  D <- chol(V)#
+  t(matrix(rnorm(n * p), ncol = p) %*% D + rep(mu, rep(n, p)))#
+}#
+#
+## Set up a square lattice region#
+simgrid <- expand.grid(1:ngrid, 1:ngrid)#
+n <- nrow(simgrid)#
+#
+## Set up distance matrix#
+distance <- as.matrix(dist(simgrid))#
+#
+## Generate spatial random variable#
+X <- rmvn(1, rep(0, n),  (sigma^2)*exp(-delta * distance))#
+Xraster <- rasterFromXYZ(cbind(simgrid[, 1:2] - 0.5, X))#
+#
+## simulate elevation data#
+elev <- raster(matrix(rnorm(n), ngrid, ngrid),#
+               xmn = 0, xmx = ngrid,#
+               ymn = 0, ymx = ngrid)#
+#
+## calculate probabilities of occurrence#
+psi <- expit(alpha + beta1 * values(elev) +  values(Xraster))#
+#
+## Latent occurrence state#
+z <- rbinom(n = n, size = 1, prob = psi) #
+z <- rasterFromXYZ(cbind(coordinates(elev), z))#
+#
+coords <- coordinates(z)#
+fulldata <- data.frame(coords,#
+                       elevation = extract(elev, coords),#
+                       Xvar = extract(Xraster, coords),#
+                       z = extract(z, coords))#
+#
+## subsample at "sites"#
+sites <- sample(1:n, nsite)#
+#
+## Observation process: Sample detection/nondetection observations#
+## from a Bernoulli(with p) if z=1#
+y <- matrix(NA, nrow = n, ncol = nreps)#
+#
+for (j in 1:nreps){#
+  y[,j] <- rbinom(n = n, size = 1, prob = fulldata$z * p)#
+}#
+#
+## NA for "sites" that are not sampled#
+ysample <- y#
+ysample[-sites, ] <- NA#
+#
 ## model data#
 model.data <- list(D = distance[sites, sites],#
                    y = ysample[sites,],#
                    zeros=rep(0, nsite),#
-                   elev = fulldata$elevation[sites])
-dim(model.data$D)
-dim(model.data$y)
-dim(model.data$zeros)
-dim(model.data$zero)
-length(model.data$zeros)
-length(model.data$elev)
+                   elev = fulldata$elevation[sites])#
+## constants#
+constants <- list(nsite = nsite, nreps=nreps)#
+#
+## parameters to monitor#
+monitors <- c("delta", "sigma", "psi", "p", "alpha", "b1")#
+#
+## inits#
+inits <- list()#
+#
+## MCMC settings#
+scale <- 1e1#
+burnin <- 1e1*scale#
+niter <- (1e3)*scale
 rm(list=ls())#
 setwd("~/Dropbox/occupancy-nimble/spatial")#
 source('src/initialize.R')#
@@ -79,7 +230,6 @@ sp.mod <- nimbleCode({#
   ## priors#
   delta ~ dunif(0, 10)#
   sigma ~ dunif(0, 10)#
-  psi ~ dunif(0, 1)#
   p ~ dunif(0, 1)#
   alpha ~ dnorm(0, 0.001)#
   b1 ~ dnorm(0, 0.001)#
@@ -114,13 +264,516 @@ sp.mod.opt1 <- compareMCMCs(input1,#
                             niter=niter,#
                             burnin = burnin,#
                             summary=FALSE,#
-                            check=FALSE)#
+                            check=FALSE)
+## library(devtools)#
+## install_github("nimble-dev/nimble",#
+##                ref = "devel",#
+##                subdir = "packages/nimble")#
 #
-save(sp.mod.opt1, file="saved/opt1.Rdata")#
+library(nimble)#
+library(igraph)#
+library(raster)#
+library(lattice)#
+library(mvtnorm)#
 #
-checkChains(sp.mod.opt1[[1]]$samples,#
-            f.path = "figures/chains/%s.pdf")
-nsite
-nrep
-nreps
-?compareMCMCs
+expit <- function(x) 1/(1+exp(-x))#
+logit <- function(x) log(x/(1-x))#
+#
+## parameters#
+ngrid <- 25#
+nsite <- 20#
+nreps <- 5#
+#
+alpha <- 0.1#
+beta1 <- 2#
+p <- 0.6#
+psi <- 0.7#
+sigma <- 0.5#
+delta <- 0.05#
+#
+set.seed(44)#
+#
+rmvn <- function(n, mu = 0, V = matrix(1)) {#
+  p <- length(mu)#
+  if (any(is.na(match(dim(V), p)))) #
+    stop("Dimension problem!")#
+  D <- chol(V)#
+  t(matrix(rnorm(n * p), ncol = p) %*% D + rep(mu, rep(n, p)))#
+}#
+#
+## Set up a square lattice region#
+simgrid <- expand.grid(1:ngrid, 1:ngrid)#
+n <- nrow(simgrid)#
+#
+## Set up distance matrix#
+distance <- as.matrix(dist(simgrid))#
+#
+## Generate spatial random variable#
+X <- rmvn(1, rep(0, n),  (sigma^2)*exp(-delta * distance))#
+Xraster <- rasterFromXYZ(cbind(simgrid[, 1:2] - 0.5, X))#
+#
+## simulate elevation data#
+elev <- raster(matrix(rnorm(n), ngrid, ngrid),#
+               xmn = 0, xmx = ngrid,#
+               ymn = 0, ymx = ngrid)#
+#
+## calculate probabilities of occurrence#
+psi <- expit(alpha + beta1 * values(elev) +  values(Xraster))#
+#
+## Latent occurrence state#
+z <- rbinom(n = n, size = 1, prob = psi) #
+z <- rasterFromXYZ(cbind(coordinates(elev), z))#
+#
+coords <- coordinates(z)#
+fulldata <- data.frame(coords,#
+                       elevation = extract(elev, coords),#
+                       Xvar = extract(Xraster, coords),#
+                       z = extract(z, coords))#
+#
+## subsample at "sites"#
+sites <- sample(1:n, nsite)#
+#
+## Observation process: Sample detection/nondetection observations#
+## from a Bernoulli(with p) if z=1#
+y <- matrix(NA, nrow = n, ncol = nreps)#
+#
+for (j in 1:nreps){#
+  y[,j] <- rbinom(n = n, size = 1, prob = fulldata$z * p)#
+}#
+#
+## NA for "sites" that are not sampled#
+ysample <- y#
+ysample[-sites, ] <- NA#
+#
+## model data#
+model.data <- list(D = distance[sites, sites],#
+                   y = ysample[sites,],#
+                   zeros=rep(0, nsite),#
+                   elev = fulldata$elevation[sites])#
+## constants#
+constants <- list(nsite = nsite, nreps=nreps)#
+#
+## parameters to monitor#
+monitors <- c("delta", "sigma", "psi", "p", "alpha", "b1")#
+#
+## inits#
+inits <- list()#
+#
+## MCMC settings#
+scale <- 1e1#
+burnin <- 1e1*scale#
+niter <- (1e3)*scale
+constants
+rm(list=ls())#
+setwd("~/Dropbox/occupancy-nimble/spatial")#
+source('src/initialize.R')#
+#
+sp.mod <- nimbleCode({#
+  ## priors#
+  delta ~ dunif(0, 10)#
+  sigma ~ dunif(0, 10)#
+  p ~ dunif(0, 1)#
+  alpha ~ dnorm(0, 0.001)#
+  b1 ~ dnorm(0, 0.001)#
+#
+  ## Likelihood#
+  ## Ecological model for true occurrence#
+  for (i in 1:nsite) {#
+    z[i] ~ dbern(psi[i])#
+    logit(psi[i]) <- alpha + b1*elev[i] + rho[i]#
+    p.eff[i] <- z[i] * p#
+#
+    ## Observation model for replicated detection/nondetection#
+    ## observations#
+    for (j in 1:nreps) {#
+      y[i,j] ~ dbern(p.eff[i])#
+    }#
+  }#
+#
+  rho[1:nsite] ~ dmnorm(zeros[1:nsite],#
+                        cov = D.cov[1:nsite, 1:nsite]) #
+  ## derived quantities#
+  ## turning the distance matrix to covariance matrix#
+  D.cov[1:nsite, 1:nsite] <- (sigma^2)*exp(-delta*D[1:nsite, 1:nsite])#
+})#
+#
+input1 <- list(code=sp.mod,#
+               constants=constants,#
+               data=model.data,#
+               inits=inits)#
+sp.mod.opt1 <- compareMCMCs(input1,#
+                            MCMCs=c('nimble'),#
+                            niter=niter,#
+                            burnin = burnin,#
+                            summary=FALSE,#
+                            check=FALSE)
+rm(list=ls())#
+setwd("~/Dropbox/occupancy-nimble/spatial")#
+source('src/initialize.R')#
+#
+sp.mod <- nimbleCode({#
+  ## priors#
+  delta ~ dunif(0, 10)#
+  sigma ~ dunif(0, 10)#
+  p ~ dunif(0, 1)#
+  alpha ~ dnorm(0, 0.001)#
+  b1 ~ dnorm(0, 0.001)#
+#
+  ## Likelihood#
+  ## Ecological model for true occurrence#
+  for (i in 1:nsite) {#
+    z[i] ~ dbern(psi[i])#
+    logit(psi[i]) <- alpha + b1*elev[i] + rho[i]#
+    p.eff[i] <- z[i] * p#
+#
+    ## Observation model for replicated detection/nondetection#
+    ## observations#
+    for (j in 1:nreps) {#
+      y[i,j] ~ dbern(p.eff[i])#
+    }#
+  }#
+#
+  rho[1:nsite] ~ dmnorm(zeros[1:nsite],#
+                        cov = D.cov[1:nsite, 1:nsite]) #
+  ## derived quantities#
+  ## turning the distance matrix to covariance matrix#
+  D.cov[1:nsite, 1:nsite] <- (sigma^2)*exp(-delta*D[1:nsite, 1:nsite])#
+})
+constants
+## library(devtools)#
+## install_github("nimble-dev/nimble",#
+##                ref = "devel",#
+##                subdir = "packages/nimble")#
+#
+library(nimble)#
+library(igraph)#
+library(raster)#
+library(lattice)#
+library(mvtnorm)#
+#
+expit <- function(x) 1/(1+exp(-x))#
+logit <- function(x) log(x/(1-x))#
+#
+## parameters#
+ngrid <- 25#
+nsite <- 20#
+nreps <- 5#
+#
+alpha <- 0.1#
+beta1 <- 2#
+p <- 0.6#
+psi <- 0.7#
+sigma <- 0.5#
+delta <- 0.05#
+#
+set.seed(44)#
+#
+rmvn <- function(n, mu = 0, V = matrix(1)) {#
+  p <- length(mu)#
+  if (any(is.na(match(dim(V), p)))) #
+    stop("Dimension problem!")#
+  D <- chol(V)#
+  t(matrix(rnorm(n * p), ncol = p) %*% D + rep(mu, rep(n, p)))#
+}#
+#
+## Set up a square lattice region#
+simgrid <- expand.grid(1:ngrid, 1:ngrid)#
+n <- nrow(simgrid)#
+#
+## Set up distance matrix#
+distance <- as.matrix(dist(simgrid))#
+#
+## Generate spatial random variable#
+X <- rmvn(1, rep(0, n),  (sigma^2)*exp(-delta * distance))#
+Xraster <- rasterFromXYZ(cbind(simgrid[, 1:2] - 0.5, X))#
+#
+## simulate elevation data#
+elev <- raster(matrix(rnorm(n), ngrid, ngrid),#
+               xmn = 0, xmx = ngrid,#
+               ymn = 0, ymx = ngrid)#
+#
+## calculate probabilities of occurrence#
+psi <- expit(alpha + beta1 * values(elev) +  values(Xraster))#
+#
+## Latent occurrence state#
+z <- rbinom(n = n, size = 1, prob = psi) #
+z <- rasterFromXYZ(cbind(coordinates(elev), z))#
+#
+coords <- coordinates(z)#
+fulldata <- data.frame(coords,#
+                       elevation = extract(elev, coords),#
+                       Xvar = extract(Xraster, coords),#
+                       z = extract(z, coords))#
+#
+## subsample at "sites"#
+sites <- sample(1:n, nsite)#
+#
+## Observation process: Sample detection/nondetection observations#
+## from a Bernoulli(with p) if z=1#
+y <- matrix(NA, nrow = n, ncol = nreps)#
+#
+for (j in 1:nreps){#
+  y[,j] <- rbinom(n = n, size = 1, prob = fulldata$z * p)#
+}#
+#
+## NA for "sites" that are not sampled#
+ysample <- y#
+ysample[-sites, ] <- NA#
+#
+## model data#
+model.data <- list(D = distance[sites, sites],#
+                   y = ysample[sites,],#
+                   zeros=rep(0, nsite),#
+                   elev = fulldata$elevation[sites])#
+## constants#
+constants <- list(nsite = nsite, nreps=nreps)#
+#
+## parameters to monitor#
+monitors <- c("delta", "sigma", "psi", "p", "alpha", "b1")#
+#
+## inits#
+inits <- list()#
+#
+## MCMC settings#
+scale <- 1e1#
+burnin <- 1e1*scale#
+niter <- (1e3)*scale
+constants
+sp.mod <- nimbleCode({#
+  ## priors#
+  delta ~ dunif(0, 10)#
+  sigma ~ dunif(0, 10)#
+  p ~ dunif(0, 1)#
+  alpha ~ dnorm(0, 0.001)#
+  b1 ~ dnorm(0, 0.001)#
+#
+  ## Likelihood#
+  ## Ecological model for true occurrence#
+  for (i in 1:nsite) {#
+    z[i] ~ dbern(psi[i])#
+    logit(psi[i]) <- alpha + b1*elev[i] + rho[i]#
+    p.eff[i] <- z[i] * p#
+#
+    ## Observation model for replicated detection/nondetection#
+    ## observations#
+    for (j in 1:nreps) {#
+      y[i,j] ~ dbern(p.eff[i])#
+    }#
+  }#
+#
+  rho[1:nsite] ~ dmnorm(zeros[1:nsite],#
+                        cov = D.cov[1:nsite, 1:nsite]) #
+  ## derived quantities#
+  ## turning the distance matrix to covariance matrix#
+  D.cov[1:nsite, 1:nsite] <- (sigma^2)*exp(-delta*D[1:nsite, 1:nsite])#
+})#
+#
+input1 <- list(code=sp.mod,#
+               constants=constants,#
+               data=model.data,#
+               inits=inits)
+rm(list=ls())#
+setwd("~/Dropbox/occupancy-nimble/spatial")#
+source('src/initialize.R')#
+#
+sp.mod <- nimbleCode({#
+  ## priors#
+  delta ~ dunif(0, 10)#
+  sigma ~ dunif(0, 10)#
+  p ~ dunif(0, 1)#
+  alpha ~ dnorm(0, 0.001)#
+  b1 ~ dnorm(0, 0.001)#
+#
+  ## Likelihood#
+  ## Ecological model for true occurrence#
+  for (i in 1:nsite) {#
+    z[i] ~ dbern(psi[i])#
+    logit(psi[i]) <- alpha + b1*elev[i] + rho[i]#
+    p.eff[i] <- z[i] * p#
+#
+    ## Observation model for replicated detection/nondetection#
+    ## observations#
+    for (j in 1:nreps) {#
+      y[i,j] ~ dbern(p.eff[i])#
+    }#
+  }#
+#
+  rho[1:nsite] ~ dmnorm(zeros[1:nsite],#
+                        cov = D.cov[1:nsite, 1:nsite]) #
+  ## derived quantities#
+  ## turning the distance matrix to covariance matrix#
+  D.cov[1:nsite, 1:nsite] <- (sigma^2)*exp(-delta*D[1:nsite, 1:nsite])#
+})#
+#
+input1 <- list(code=sp.mod,#
+               constants=constants,#
+               data=model.data,#
+               inits=inits)
+## library(devtools)#
+## install_github("nimble-dev/nimble",#
+##                ref = "devel",#
+##                subdir = "packages/nimble")#
+#
+library(nimble)#
+library(igraph)#
+library(raster)#
+library(lattice)#
+library(mvtnorm)#
+#
+expit <- function(x) 1/(1+exp(-x))#
+logit <- function(x) log(x/(1-x))#
+#
+## parameters#
+ngrid <- 25#
+nsite <- 20#
+nreps <- 5#
+#
+alpha <- 0.1#
+beta1 <- 2#
+p <- 0.6#
+psi <- 0.7#
+sigma <- 0.5#
+delta <- 0.05#
+#
+set.seed(44)#
+#
+rmvn <- function(n, mu = 0, V = matrix(1)) {#
+  p <- length(mu)#
+  if (any(is.na(match(dim(V), p)))) #
+    stop("Dimension problem!")#
+  D <- chol(V)#
+  t(matrix(rnorm(n * p), ncol = p) %*% D + rep(mu, rep(n, p)))#
+}#
+#
+## Set up a square lattice region#
+simgrid <- expand.grid(1:ngrid, 1:ngrid)#
+n <- nrow(simgrid)#
+#
+## Set up distance matrix#
+distance <- as.matrix(dist(simgrid))#
+#
+## Generate spatial random variable#
+X <- rmvn(1, rep(0, n),  (sigma^2)*exp(-delta * distance))#
+Xraster <- rasterFromXYZ(cbind(simgrid[, 1:2] - 0.5, X))#
+#
+## simulate elevation data#
+elev <- raster(matrix(rnorm(n), ngrid, ngrid),#
+               xmn = 0, xmx = ngrid,#
+               ymn = 0, ymx = ngrid)#
+#
+## calculate probabilities of occurrence#
+psi <- expit(alpha + beta1 * values(elev) +  values(Xraster))#
+#
+## Latent occurrence state#
+z <- rbinom(n = n, size = 1, prob = psi) #
+z <- rasterFromXYZ(cbind(coordinates(elev), z))#
+#
+coords <- coordinates(z)#
+fulldata <- data.frame(coords,#
+                       elevation = extract(elev, coords),#
+                       Xvar = extract(Xraster, coords),#
+                       z = extract(z, coords))#
+#
+## subsample at "sites"#
+sites <- sample(1:n, nsite)#
+#
+## Observation process: Sample detection/nondetection observations#
+## from a Bernoulli(with p) if z=1#
+y <- matrix(NA, nrow = n, ncol = nreps)#
+#
+for (j in 1:nreps){#
+  y[,j] <- rbinom(n = n, size = 1, prob = fulldata$z * p)#
+}#
+#
+## NA for "sites" that are not sampled#
+ysample <- y#
+ysample[-sites, ] <- NA#
+#
+## model data#
+model.data <- list(D = distance[sites, sites],#
+                   y = ysample[sites,],#
+                   zeros=rep(0, nsite),#
+                   elev = fulldata$elevation[sites])#
+## constants#
+constants <- list(nsite = nsite, nreps=nreps)#
+#
+## parameters to monitor#
+monitors <- c("delta", "sigma", "psi", "p", "alpha", "b1")#
+#
+## inits#
+inits <- list()#
+#
+## MCMC settings#
+scale <- 1e1#
+burnin <- 1e1*scale#
+niter <- (1e3)*scale
+sp.mod <- nimbleCode({#
+  ## priors#
+  delta ~ dunif(0, 10)#
+  sigma ~ dunif(0, 10)#
+  p ~ dunif(0, 1)#
+  alpha ~ dnorm(0, 0.001)#
+  b1 ~ dnorm(0, 0.001)#
+#
+  ## Likelihood#
+  ## Ecological model for true occurrence#
+  for (i in 1:nsite) {#
+    z[i] ~ dbern(psi[i])#
+    logit(psi[i]) <- alpha + b1*elev[i] + rho[i]#
+    p.eff[i] <- z[i] * p#
+#
+    ## Observation model for replicated detection/nondetection#
+    ## observations#
+    for (j in 1:nreps) {#
+      y[i,j] ~ dbern(p.eff[i])#
+    }#
+  }#
+#
+  rho[1:nsite] ~ dmnorm(zeros[1:nsite],#
+                        cov = D.cov[1:nsite, 1:nsite]) #
+  ## derived quantities#
+  ## turning the distance matrix to covariance matrix#
+  D.cov[1:nsite, 1:nsite] <- (sigma^2)*exp(-delta*D[1:nsite, 1:nsite])#
+})#
+#
+input1 <- list(code=sp.mod,#
+               constants=constants,#
+               data=model.data,#
+               inits=inits)
+rm(list=ls())#
+setwd("~/Dropbox/occupancy-nimble/spatial")#
+source('src/initialize.R')#
+#
+sp.mod <- nimbleCode({#
+  ## priors#
+  delta ~ dunif(0, 10)#
+  sigma ~ dunif(0, 10)#
+  p ~ dunif(0, 1)#
+  alpha ~ dnorm(0, 0.001)#
+  b1 ~ dnorm(0, 0.001)#
+#
+  ## Likelihood#
+  ## Ecological model for true occurrence#
+  for (i in 1:nsite) {#
+    z[i] ~ dbern(psi[i])#
+    logit(psi[i]) <- alpha + b1*elev[i] + rho[i]#
+    p.eff[i] <- z[i] * p#
+#
+    ## Observation model for replicated detection/nondetection#
+    ## observations#
+    for (j in 1:nreps) {#
+      y[i,j] ~ dbern(p.eff[i])#
+    }#
+  }#
+#
+  rho[1:nsite] ~ dmnorm(zeros[1:nsite],#
+                        cov = D.cov[1:nsite, 1:nsite]) #
+  ## derived quantities#
+  ## turning the distance matrix to covariance matrix#
+  D.cov[1:nsite, 1:nsite] <- (sigma^2)*exp(-delta*D[1:nsite, 1:nsite])#
+})#
+#
+input1 <- list(code=sp.mod,#
+               constants=constants,#
+               data=model.data,#
+               inits=inits)

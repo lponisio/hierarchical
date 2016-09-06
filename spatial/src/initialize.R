@@ -4,13 +4,8 @@
 ##                subdir = "packages/nimble")
 
 library(nimble)
-library(mcmcplots)
 library(igraph)
 library(raster)
-library(lattice)
-library(mvtnorm)
-source("src/runNimble.R")
-source("src/plotting.R")
 
 expit <- function(x) 1/(1+exp(-x))
 logit <- function(x) log(x/(1-x))
@@ -23,6 +18,7 @@ nreps <- 5
 alpha <- 0.1
 beta1 <- 2
 p <- 0.6
+psi <- 0.7
 sigma <- 0.5
 delta <- 0.05
 
