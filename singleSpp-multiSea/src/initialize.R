@@ -6,9 +6,14 @@
 library(nimble)
 library(mcmcplots)
 library(igraph)
-source("src/runNimble.R")
 source("src/dynamicOcc.R")
 source("src/dataGen.R")
+source("../all/plotting.R")
+source("../all/runNimble.R")
+
+## samplers
+source("../all/samplers/sampler_z.R")
+source("../all/samplers/sampler_reflective.R")
 
 ## *********************************************************************
 ##  Dynamic (multi-season) site-occupancy models
