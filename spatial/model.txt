@@ -1,7 +1,7 @@
 model
 {
-    delta ~ dunif(0, 10)
-    sigma ~ dunif(0, 10)
+    delta ~ dunif(0.1, 10)
+    sigma ~ dunif(0.1, 10)
     p ~ dunif(0, 1)
     alpha ~ dnorm(0, 0.001)
     b1 ~ dnorm(0, 0.001)
@@ -14,5 +14,5 @@ model
         }
     }
     rho[1:nsite] ~ dmnorm(zeros[1:nsite], D.cov[1:nsite, 1:nsite])
-    D.cov[1:nsite, 1:nsite] <- (sigma^2) * exp(-delta * D[1:nsite, 1:nsite])
+    D.cov[1:nsite, 1:nsite] <- (sigma^2) * mexp(-delta * D[1:nsite, 1:nsite])
 }

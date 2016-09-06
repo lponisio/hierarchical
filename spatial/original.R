@@ -4,11 +4,17 @@ source('src/initialize.R')
 library(rjags)
 load.module("msm")
 
+mexp <- nimbleFunction(
+  run = function(A = double(2)){
+    returnType(double(2))
+    outMat <- exp(A)
+    return(outMat)
+  })
 
 sp.mod <- nimbleCode({
   ## priors
-  delta ~ dunif(0, 10)
-  sigma ~ dunif(0, 10)
+  delta ~ dunif(0.1, 10)
+  sigma ~ dunif(0.1, 10)
   p ~ dunif(0, 1)
   alpha ~ dnorm(0, 0.001)
   b1 ~ dnorm(0, 0.001)
@@ -32,7 +38,7 @@ sp.mod <- nimbleCode({
 
   ## derived quantities
   ## turning the distance matrix to covariance matrix
-  D.cov[1:nsite, 1:nsite] <- (sigma^2)*mexp(-delta*D[1:nsite, 1:nsite])
+  D.cov[1:nsite, 1:nsite]  <- (sigma^2)*mexp(-delta*D[1:nsite, 1:nsite])
   
 })
 
@@ -57,4 +63,10 @@ save(sp.orig, file="saved/orig.Rdata")
 
 checkChains(sp.orig[[1]]$samples,
             f.path = "figures/chains/%s.pdf")
+
+
+
+
+
+eigen((.5^2)*exp(-.5*model.data$D))
 
