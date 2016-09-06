@@ -1,12 +1,12 @@
 rm(list=ls())
-setwd("~/Dropbox/occupancy-nimble/spatial")
+##setwd("~/Dropbox/occupancy-nimble/spatial")
 source('src/initialize.R')
 
 sp.mod <- nimbleCode({
   ## priors
   delta ~ dunif(0, 10)
   sigma ~ dunif(0, 10)
-  psi ~ dunif(0, 1)
+##  psi ~ dunif(0, 1)
   p ~ dunif(0, 1)
   alpha ~ dnorm(0, 0.001)
   b1 ~ dnorm(0, 0.001)
@@ -38,6 +38,7 @@ input1 <- list(code=sp.mod,
                data=model.data,
                inits=inits)
 
+sp.mod.1 <- nimbleModel(sp.mod, constants = constants, data = model.data, inits = inits, debug = TRUE)
 
 sp.mod.opt1 <- compareMCMCs(input1,
                             MCMCs=c('nimble'),

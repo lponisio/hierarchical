@@ -1,5 +1,8 @@
-rm(list=ls())
-setwd("~/Dropbox/occupancy-nimble/singleSpp-multiSea")
+allObjs <- ls()
+allObjs <- allObjs[!allObjs %in% doNotCleanUp]
+rm(list=allObjs)
+gc()
+##setwd("~/Dropbox/occupancy-nimble/singleSpp-multiSea")
 source('src/initialize.R')
 
 ## *********************************************************************
@@ -67,4 +70,4 @@ ss.ms.opt1 <- compareMCMCs(input1,
                                 summary=FALSE,
                            check=FALSE)
 
-save(ss.ms.opt1, file="saved/opt1.Rdata")
+save(ss.ms.opt1, file=file.path(outputDir,"saved","opt1.Rdata"))

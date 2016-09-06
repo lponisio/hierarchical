@@ -1,5 +1,8 @@
-rm(list=ls())
-setwd("~/Dropbox/occupancy-nimble/singleSpp-multiSea")
+allObjs <- ls()
+allObjs <- allObjs[!allObjs %in% doNotCleanUp]
+rm(list=allObjs)
+gc()
+##setwd("~/Dropbox/occupancy-nimble/singleSpp-multiSea")
 
 ## original model
 source('original.R')

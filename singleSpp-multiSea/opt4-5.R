@@ -1,5 +1,8 @@
-rm(list=ls())
-setwd("~/Dropbox/occupancy-nimble/singleSpp-multiSea")
+allObjs <- ls()
+allObjs <- allObjs[!allObjs %in% doNotCleanUp]
+rm(list=allObjs)
+gc()
+##setwd("~/Dropbox/occupancy-nimble/singleSpp-multiSea")
 source('src/initialize.R')
 
 ## *********************************************************************
@@ -54,13 +57,13 @@ input1 <- list(code=ss.ms.occ,
 monitors <- c("phi", "gamma", "psi")
 
 ss.ms.opt4 <- compareMCMCs(input1,
-                           MCMCs=c('nimble', 'autoBlock'),
+                           MCMCs=c('nimble', 'autoBlock', 'nimble_slice'),
                            niter=niter,
                            burnin = burnin,
                            summary=FALSE,
                            check=FALSE)
 
-save(ss.ms.opt4, file="saved/opt4.Rdata")
+save(ss.ms.opt4, file=file.path(outputDir,"saved","opt4.Rdata"))
 
 
 ## *********************************************************************
@@ -102,49 +105,49 @@ ss.ms.opt5 <- compareMCMCs(input1,
                            summary=FALSE,
                            check=FALSE)
 
-save(ss.ms.opt5, file="saved/opt5.Rdata")
+save(ss.ms.opt5, file=file.path(outputDir,"saved","opt5.Rdata"))
 
 
-## *********************************************************************
-options(error=recover)
-## build model
-R.model <- nimbleModel(code=ss.ms.occ,
-                       constants=constants,
-                       data=model.data,
-                       inits=inits,
-                       check=FALSE)
-message('R model created')
+## ## *********************************************************************
+## options(error=recover)
+## ## build model
+## R.model <- nimbleModel(code=ss.ms.occ,
+##                        constants=constants,
+##                        data=model.data,
+##                        inits=inits,
+##                        check=FALSE)
+## message('R model created')
 
 
-## configure and build mcmc
-mcmc.spec <- configureMCMC(R.model,
-                           print=FALSE,
-                           monitors = monitors,
-                           thin=1)
-mcmc <- buildMCMC(mcmc.spec)
-message('MCMC built')
+## ## configure and build mcmc
+## mcmc.spec <- configureMCMC(R.model,
+##                            print=FALSE,
+##                            monitors = monitors,
+##                            thin=1)
+## mcmc <- buildMCMC(mcmc.spec)
+## message('MCMC built')
 
-## compile model in C++
-C.model <- compileNimble(R.model)
-C.mcmc <- compileNimble(mcmc, project = R.model)
-message('NIMBLE model compiled')
+## ## compile model in C++
+## C.model <- compileNimble(R.model)
+## C.mcmc <- compileNimble(mcmc, project = R.model)
+## message('NIMBLE model compiled')
 
-source('../cppp/src/calcCPPP.R', chdir = TRUE)
-options(mc.cores=6)
+## source('../cppp/src/calcCPPP.R', chdir = TRUE)
+## options(mc.cores=6)
 
-generateCPPP(R.model,
-             C.model,
-             C.mcmc,
-             mcmc,
-             dataName = 'y',
-             paramNames = monitors, 
-             MCMCIter = 1000, 
-             NSamp = 1000,
-             NPDist = 100,
-             thin = 1)
+## generateCPPP(R.model,
+##              C.model,
+##              C.mcmc,
+##              mcmc,
+##              dataName = 'y',
+##              paramNames = monitors, 
+##              MCMCIter = 1000, 
+##              NSamp = 1000,
+##              NPDist = 100,
+##              thin = 1)
 
 
-list(code=ss.ms.occ,
-               constants=constants,
-               data=model.data,
-               inits=inits)
+## list(code=ss.ms.occ,
+##                constants=constants,
+##                data=model.data,
+##                inits=inits)

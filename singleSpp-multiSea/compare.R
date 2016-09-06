@@ -30,9 +30,10 @@ ss.ms.opt2[[1]] <- rename_MCMC_comparison_method('nimbleOpt2',
 ss.ms.opt3[[1]] <- rename_MCMC_comparison_method('nimbleOpt3',
                                                  'reflective',
                                                  comparison=ss.ms.opt3[[1]])
-ss.ms.opt4[[1]] <- rename_MCMC_comparison_method(c('nimble', 'autoBlock'),
+ss.ms.opt4[[1]] <- rename_MCMC_comparison_method(c('nimble', 'autoBlock', 'nimble_slice'),
                                                  c('no z',
-                                                   'no z, autoBlock'),
+                                                   'no z, autoBlock',
+                                                   'no z, slice'),
                                                  comparison=ss.ms.opt4[[1]])
 ss.ms.opt5[[1]] <- rename_MCMC_comparison_method('nimbleOpt5',
                                                  'block phi gam',
