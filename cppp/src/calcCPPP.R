@@ -2,22 +2,21 @@ library(parallel)
 ## draws a random number from the posterior, reassigned it as the
 ## paramter value, simulates data from the model
 pppFunc <- nimbleFunction(
-  setup = function(model, dataName, paramNames, MCMCmv, MCMCIter, thin){
+  setup = function(model, dataNames, paramNames, mcmcMV, MCMCIter, thin){
     paramDependencies <- model$getDependencies(paramNames)
   },
   run = function(N = integer(0)){
     deviances <- numeric(N)
     for(i in 1:N){
       randNum <- ceiling(runif(1, 0, MCMCIter/thin -1 ))
-      nimCopy(MCMCmv, model, paramNames, row = randNum)
+      nimCopy(mcmcMV, model, paramNames, row = randNum)
       calculate(model, paramDependencies)
-      simulate(model, dataName)
+      simulate(model, dataNames, includeData = TRUE)
       deviances[i] <- calculate(model)
     }
     return(deviances)
     returnType(double(1))
-  }
-  )
+  })
 
 
 
@@ -25,17 +24,18 @@ generateCPPP <-  function(R.model,
                           C.model,
                           C.mcmc,
                           mcmc,
-                          dataName,
+                          dataNames,
                           paramNames, ## vector of parameters to monitor
                           MCMCIter, ## number of samples
                           NSamp,
                           NPDist,
                           thin,...){
+  
   ## calculate proportion of deviances that are greater or equal to
   ## the observed value
   calcCPPP <- function(MCMCIter, C.model, NSamp,
                        C.pppFunc, C.mcmc){
-
+    
     C.mcmc$run(MCMCIter)  
     observedDisc <- calculate(C.model)  
     otherDiscs <- C.pppFunc$run(NSamp)
@@ -51,11 +51,7 @@ generateCPPP <-  function(R.model,
                          paramNames,
                          paramDependencies,
                          NSamp, thin){
-    randNum <- ceiling(runif(1, 0, MCMCIter/thin - 1))
-    mcmc.samples <- as.matrix(C.mcmc$mvSamples)
-    values(C.model, paramNames) <- mcmc.samples[randNum,]
-    calculate(C.model, paramDependencies)
-    simulate(C.model, dataName)
+    simulate(C.model,  includeData =  TRUE)
     out <- calcCPPP(MCMCIter, C.model, NSamp, C.pppFunc, C.mcmc)
     return(out)
   }
@@ -64,7 +60,7 @@ generateCPPP <-  function(R.model,
   paramDependencies <- C.model$getDependencies(paramNames)
   mcmcMV <- mcmc$mvSamples
   modelpppFunc <- pppFunc(R.model,
-                          dataName,
+                          dataNames,
                           paramNames,
                           mcmcMV,
                           MCMCIter,
@@ -93,3 +89,4 @@ generateCPPP <-  function(R.model,
               obs=obs.cppp,
               sim=sim.cppp))
 }
+
