@@ -26,12 +26,6 @@ dBernDetectionMatrix <- nimbleFunction(
         }
       }
       ans <- ans + log(occProb[j] * probDetectionHistoryGivenOccupied + (1-occProb[j]) * probDetectionHistoryGivenUnoccupied)
-      ## old code that looks like it was wrong:       
-      ##       for(k in 1:num_reps[j]) {
-      ##       if(x[j,k] == 1) ans <- ans + log(occProb[j] * detectionProb[j,k])
-      ##       else ans <- ans + log(occProb[j] * (1-detectionProb[j,k]) +
-      ##                             (1-occProb[j]))
-      ##     }
     }
     if(log) return(ans)
     return(exp(ans))
@@ -62,11 +56,7 @@ rBernDetectionMatrix <- nimbleFunction(
           ans[j, k] <- 0
         }
       }
-      ## old code that looks like it was wrong
-      ##      for(k in 1:num_reps[j]) {
-      ##        if(runif(1,0,1) < occProb[j] * detectionProb[j, k]) ans[j, k] <- 1
-      ##        else ans[j, k] <- 0
-      ##      }
+
     }
     return(ans)
   })
@@ -84,33 +74,4 @@ registerDistributions(list(dBernDetectionMatrix = list(
 
 
 
-
-
-## The next three calls would set up the Bernoulli + detection
-## probability distribution if we were doing it one observartion at a
-## time.  I wrote this and then decided to replace it with the matrix
-## version below:
-
-
-
-## dBernDetection <- nimbleFunction(
-##     run = function(x = double(), occProb = double(), detectionProb = double(), log = double(0, default = 0)) {
-##         returnType(double())
-##         if(x == 1) ans <- occProb * detectionProb
-##         else ans <- occProb * (1-detectionProb) + (1-occProb)
-##         if(log) return(log(ans))
-##         return(ans)
-##     })
-## rBernDetection <- nimbleFunction(
-##     run = function(n = integer(), occProb = double(), detectionProb = double()) {
-##         returnType(double())
-##         if(runif(1,0,1) < occProb * detectionProb) return(1)
-##         return(0)
-##     })
-## registerDistributions(list(dBernDetection = list(
-##     BUGSdist = "dBernDetection(occProb, detectionProb)",
-##     Rdist = "dBernDetection(occProb, detectionProb)",
-##     range = c(0, 1),
-##     types = c('value = double()', 'occProb = double(0)', 'detectionProb = double(0)'))
-##   ))
 

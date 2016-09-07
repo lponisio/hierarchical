@@ -1,10 +1,10 @@
-rm(list=ls())
-gctorture()
+rm(list=ls()) 
 setwd('~/Dropbox/nimble/occupancy/analysis/multiSpp-singleSea')
 
 ## don't agument data
 n_zeroes <- 0
 source('src/initialize.R')
+distributionsInputList <- nimble:::distributionsInputList
 
 ## *********************************************************************
 ## multi-species site-occupancy models: vectorized with custom

@@ -1,17 +1,16 @@
 rm(list=ls())#
-#
 setwd("~/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea")#
 source('src/initialize.R')#
-data <- genDynamicOccData()#
-model.input <- prepModDataOcc(data, include.zs=FALSE)#
-## *********************************************************************#
-##  Multi-season occupancy model: option 4-5 remove latent states using#
-##  user-defined NIMBLE function#
-##  *********************************************************************#
 #
-## Specify model in NIMBLE#
+data <- genDynamicOccData()#
+model.input <- prepModDataOcc(data)#
+#
+## *********************************************************************#
+##  Multi-season occupancy model: custom z sampler#
+## *********************************************************************#
+#
 ss.ms.occ <- nimbleCode({#
-  ##  priors#
+  ## Specify priors#
   psi1 ~ dunif(0, 1)#
 #
   for(k in 1:(nyear-1)){#
@@ -22,87 +21,212 @@ ss.ms.occ <- nimbleCode({#
   p[nyear] ~ dunif(0, 1)#
 #
   ## Ecological submodel: Define state conditional on parameters#
-  for(i in 1:nsite) {#
-    ## removes the z's and muZ's from the model and compute#
-    ## the probability of all reps over all years for one site.#
-    y[i, 1:nrep, 1:nyear] ~ dDynamicOccupancy(nrep,#
-                                              psi1,#
-                                              phi[1:(nyear-1)],#
-                                              gamma[1:(nyear-1)],#
-                                              p[1:nyear])#
+  for (i in 1:nsite){#
+    z[i,1] ~ dbern(psi1)#
+    for (k in 2:nyear){#
+      muZ[i,k]<- z[i,k-1]*phi[k-1] + (1-z[i,k-1])*gamma[k-1]#
+      z[i,k] ~ dbern(muZ[i,k])#
+    }#
+  }#
+#
+  ## Observation model#
+  for (i in 1:nsite){#
+    for (j in 1:nrep){#
+      for (k in 1:nyear){#
+        muy[i,j,k] <- z[i,k]*p[k]#
+        y[i,j,k] ~ dbern(muy[i,j,k])#
+      }#
+    }#
   }#
   psi[1] <- psi1#
 })#
 #
-## *********************************************************************#
-## opt 4 run with compareMCMCs#
-## *********************************************************************#
-#
 input1 <- c(code=ss.ms.occ,#
-            model.input)#
+           model.input)#
 #
-ss.ms.opt4 <- compareMCMCs(input1,#
-                           MCMCs=c('nimble', 'autoBlock'),#
-                           niter=niter,#
+## *********************************************************************#
+## opt 2: add custom z sampler and slice on uniform(0,1) nodes#
+## *********************************************************************#
+#
+MCMCdefs.opt2 <- list('nimbleOpt2' = quote({#
+  customSpec <- configureMCMC(Rmodel)#
+  customSpec$removeSamplers('phi', print=FALSE)#
+  customSpec$removeSamplers('gamma', print=FALSE)#
+  customSpec$removeSamplers('p', print=FALSE)#
+  customSpec$removeSamplers('psi1', print=FALSE)#
+  ## happens to be all top nodes#
+  zeroOneNodes <- Rmodel$getNodeNames(topOnly = TRUE)#
+  for(zon in zeroOneNodes) customSpec$addSampler(target = zon,#
+                                                 type =#
+                                                   "slice",#
+                                                 print=FALSE)#
+  customSpec#
+}))#
+#
+## *********************************************************************#
+## run with compareMCMCs#
+#
+ss.ms.opt2 <- compareMCMCs(input1,#
+                           MCMCs=c('nimbleOpt2'),#
+                           MCMCdefs = MCMCdefs.opt2,#
+                           niter= niter,#
                            burnin = burnin,#
                            summary=FALSE,#
-                           check=FALSE)
-rm(list=ls())#
+                           check=FALSE)#
 #
-setwd("~/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea")#
-source('src/initialize.R')#
-data <- genDynamicOccData()#
-model.input <- prepModDataOcc(data, include.zs=FALSE)
-model.input$data
-names(model.input$data)
-names(model.input$inits)
-model.input$inits
-rm(list=ls())#
-#
-setwd("~/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea")#
-source('src/initialize.R')#
-data <- genDynamicOccData()#
-model.input <- prepModDataOcc(data, include.zs=FALSE)#
+save(ss.ms.opt2, file=file.path(save.dir, "opt2.Rdata"))
 ## *********************************************************************#
-##  Multi-season occupancy model: option 4-5 remove latent states using#
-##  user-defined NIMBLE function#
-##  *********************************************************************#
+## model assessment#
+## *********************************************************************#
+## build model#
+R.model <- nimbleModel(code=ss.ms.occ,#
+                       constants=input1$constants,#
+                       data=input1$data,#
+                       inits=input1$inits,#
+                       check=FALSE)#
+message('R model created')#
 #
-## Specify model in NIMBLE#
-ss.ms.occ <- nimbleCode({#
-  ##  priors#
-  psi1 ~ dunif(0, 1)#
+customSpec <- configureMCMC(R.model,#
+                            monitors=input1$monitors)#
+customSpec$removeSamplers('phi', print=FALSE)#
+customSpec$removeSamplers('gamma', print=FALSE)#
+customSpec$removeSamplers('p', print=FALSE)#
+customSpec$removeSamplers('psi1', print=FALSE)#
+## happens to be all top nodes#
+zeroOneNodes <- R.model$getNodeNames(topOnly = TRUE)#
+for(zon in zeroOneNodes) customSpec$addSampler(target = zon,#
+                                                 type =#
+                                                   "slice",#
+                                                 print=FALSE)#
 #
-  for(k in 1:(nyear-1)){#
-    phi[k] ~ dunif(0, 1)#
-    gamma[k] ~ dunif(0, 1)#
-    p[k] ~ dunif(0, 1)#
+mcmc <- buildMCMC(customSpec)#
+message('MCMC built')#
+#
+## compile model in C++#
+C.model <- compileNimble(R.model)#
+C.mcmc <- compileNimble(mcmc, project = R.model)#
+message('NIMBLE model compiled')#
+#
+source('../cppp/src/calcCPPP.R', chdir = TRUE)#
+options(mc.cores=2)
+test.opt2 <- generateCPPP(R.model,#
+             C.model,#
+             C.mcmc,#
+             mcmc,#
+             dataName = 'y',#
+             paramNames = input1$monitors, #
+             MCMCIter = 1000, #
+             NSamp = 100,#
+             NPDist = 10,#
+             thin = 1)
+test.opt2
+library(parallel)#
+## draws a random number from the posterior, reassigned it as the#
+## paramter value, simulates data from the model#
+pppFunc <- nimbleFunction(#
+  setup = function(model, dataNames, paramNames, mcmcMV, MCMCIter, thin){#
+    paramDependencies <- model$getDependencies(paramNames)#
+  },#
+  run = function(N = integer(0)){#
+    deviances <- numeric(N)#
+    for(i in 1:N){#
+      randNum <- ceiling(runif(1, 0, MCMCIter/thin -1 ))#
+      nimCopy(mcmcMV, model, paramNames, row = randNum)#
+      calculate(model, paramDependencies)#
+      simulate(model, dataNames, includeData = TRUE)#
+      deviances[i] <- calculate(model)#
+    }#
+    return(deviances)#
+    returnType(double(1))#
+  })#
+generateCPPP <-  function(R.model,#
+                          C.model,#
+                          C.mcmc,#
+                          mcmc,#
+                          dataNames,#
+                          paramNames, ## vector of parameters to monitor#
+                          MCMCIter, ## number of samples#
+                          NSamp,#
+                          NPDist,#
+                          thin,...){#
+  ## calculate proportion of deviances that are greater or equal to#
+  ## the observed value#
+  calcCPPP <- function(MCMCIter, C.model, NSamp,#
+                       C.pppFunc, C.mcmc){#
+    C.mcmc$run(MCMCIter)#
+    browser()#
+    observedDisc <- calculate(C.model)  #
+    otherDiscs <- C.pppFunc$run(NSamp)#
+    pre.pp <- mean(otherDiscs >= observedDisc)#
+    return(pre.pp)    #
   }#
-  p[nyear] ~ dunif(0, 1)#
 #
-  ## Ecological submodel: Define state conditional on parameters#
-  for(i in 1:nsite) {#
-    ## removes the z's and muZ's from the model and compute#
-    ## the probability of all reps over all years for one site.#
-    y[i, 1:nrep, 1:nyear] ~ dDynamicOccupancy(nrep,#
-                                              psi1,#
-                                              phi[1:(nyear-1)],#
-                                              gamma[1:(nyear-1)],#
-                                              p[1:nyear])#
+  ## simulate the distribution of posterior predictive pvalues#
+  simPppDist <- function(interation,#
+                         MCMCIter,#
+                         C.mcmc,#
+                         C.model,#
+                         paramNames,#
+                         paramDependencies,#
+                         NSamp, thin){#
+    simulate(C.model,  includeData =  TRUE)#
+    out <- calcCPPP(MCMCIter, C.model, NSamp, C.pppFunc, C.mcmc)#
+    return(out)#
   }#
-  psi[1] <- psi1#
-})#
 #
-## *********************************************************************#
-## opt 4 run with compareMCMCs#
-## *********************************************************************#
+  ## sample posterior, simulate data from sample #
+  paramDependencies <- C.model$getDependencies(paramNames)#
+  mcmcMV <- mcmc$mvSamples#
+  modelpppFunc <- pppFunc(R.model,#
+                          dataNames,#
+                          paramNames,#
+                          mcmcMV,#
+                          MCMCIter,#
+                          thin)#
 #
-input1 <- c(code=ss.ms.occ,#
-            model.input)#
+  C.pppFunc <- compileNimble(modelpppFunc, project = R.model)#
 #
-ss.ms.opt4 <- compareMCMCs(input1,#
-                           MCMCs=c('nimble', 'autoBlock'),#
-                           niter=niter,#
-                           burnin = burnin,#
-                           summary=FALSE,#
-                           check=FALSE)
+  ## calculate deviances#
+  obs.cppp <- calcCPPP(MCMCIter, C.model, NSamp, C.pppFunc, C.mcmc)#
+#
+  ## refits model with sampled data, reruns, enter inner loop,#
+  ## calculates distbution of PPPs#
+  sim.cppp <- unlist(mclapply(1:NPDist, simPppDist,#
+                              MCMCIter,#
+                              C.mcmc,#
+                              C.model,#
+                              paramNames,#
+                              paramDependencies,#
+                              NSamp,#
+                              thin))#
+  ## calculates the number of simulated ppp that fall below the obs#
+  out.cppp <- mean(obs.cppp <= sim.cppp)  #
+  return(list(cppp=out.cppp,#
+              obs=obs.cppp,#
+              sim=sim.cppp))#
+}
+test.opt2 <- generateCPPP(R.model,#
+             C.model,#
+             C.mcmc,#
+             mcmc,#
+             dataName = 'y',#
+             paramNames = input1$monitors, #
+             MCMCIter = 1000, #
+             NSamp = 100,#
+             NPDist = 10,#
+             thin = 1)
+C.mcmc
+C.mcmc$mvSamples[1,]
+C.mcmc$mvSamples[10]
+C.mcmc$mvSamples[[10]]
+C.mcmc$mvSamples[1,]
+class(C.mcmc$mvSamples)
+class(C.mcmc$mvSamples[1,])
+class(C.mcmc$mvSamples[2,])
+C.mcmc$mvSamples[2,]
+as.matrix(C.mcmc$mvSamples)
+head(as.matrix(C.mcmc$mvSamples))
+obs <- apply(as.matrix(C.mcmc$mvSamples), 1, function(x){#
+      values(C.model, paramNames) <- x  #
+      observedDisc <- calculate(C.model)  #
+    })

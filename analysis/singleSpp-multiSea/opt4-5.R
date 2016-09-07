@@ -4,7 +4,7 @@ setwd("~/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea")
 source('src/initialize.R')
 data <- genDynamicOccData()
 model.input <- prepModDataOcc(data, include.zs=FALSE)
-
+distributionsInputList <- nimble:::distributionsInputList
 
 ## *********************************************************************
 ##  Multi-season occupancy model: option 4-5 remove latent states using

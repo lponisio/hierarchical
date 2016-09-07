@@ -34,10 +34,15 @@ generateCPPP <-  function(R.model,
   ## calculate proportion of deviances that are greater or equal to
   ## the observed value
   calcCPPP <- function(MCMCIter, C.model, NSamp,
-                       C.pppFunc, C.mcmc){
+                       C.pppFunc, C.mcmc, paramNames){
     
-    C.mcmc$run(MCMCIter)  
-    observedDisc <- calculate(C.model)  
+    C.mcmc$run(MCMCIter)
+
+    observedDisc <- mean(apply(as.matrix(C.mcmc$mvSamples), 1, function(x){
+      values(C.model, paramNames) <- x  
+      observedDisc <- calculate(C.model)  
+    }), na.rm=TRUE)
+    ## observedDisc <- calculate(C.model)
     otherDiscs <- C.pppFunc$run(NSamp)
     pre.pp <- mean(otherDiscs >= observedDisc)
     return(pre.pp)    
@@ -52,7 +57,7 @@ generateCPPP <-  function(R.model,
                          paramDependencies,
                          NSamp, thin){
     simulate(C.model,  includeData =  TRUE)
-    out <- calcCPPP(MCMCIter, C.model, NSamp, C.pppFunc, C.mcmc)
+    out <- calcCPPP(MCMCIter, C.model, NSamp, C.pppFunc, C.mcmc, paramNames)
     return(out)
   }
 

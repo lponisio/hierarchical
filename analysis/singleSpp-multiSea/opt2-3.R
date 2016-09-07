@@ -112,15 +112,15 @@ message('NIMBLE model compiled')
 source('../cppp/src/calcCPPP.R', chdir = TRUE)
 options(mc.cores=2)
 
-generateCPPP(R.model,
+test.opt2 <- generateCPPP(R.model,
              C.model,
              C.mcmc,
              mcmc,
              dataName = 'y',
              paramNames = input1$monitors, 
              MCMCIter = 1000, 
-             NSamp = 1000,
-             NPDist = 100,
+             NSamp = 100,
+             NPDist = 10,
              thin = 1)
 
 
