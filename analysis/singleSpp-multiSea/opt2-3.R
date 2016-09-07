@@ -88,12 +88,20 @@ R.model <- nimbleModel(code=ss.ms.occ,
                        check=FALSE)
 message('R model created')
 
-## configure and build mcmc
-mcmc.spec <- configureMCMC(R.model,
-                           print=FALSE,
-                           monitors = monitors,
-                           thin=1)
-mcmc <- buildMCMC(mcmc.spec)
+customSpec <- configureMCMC(R.model,
+                            monitors=input1$monitors)
+customSpec$removeSamplers('phi', print=FALSE)
+customSpec$removeSamplers('gamma', print=FALSE)
+customSpec$removeSamplers('p', print=FALSE)
+customSpec$removeSamplers('psi1', print=FALSE)
+## happens to be all top nodes
+zeroOneNodes <- R.model$getNodeNames(topOnly = TRUE)
+for(zon in zeroOneNodes) customSpec$addSampler(target = zon,
+                                                 type =
+                                                   "slice",
+                                                 print=FALSE)
+
+mcmc <- buildMCMC(customSpec)
 message('MCMC built')
 
 ## compile model in C++
@@ -102,14 +110,14 @@ C.mcmc <- compileNimble(mcmc, project = R.model)
 message('NIMBLE model compiled')
 
 source('../cppp/src/calcCPPP.R', chdir = TRUE)
-options(mc.cores=6)
+options(mc.cores=2)
 
 generateCPPP(R.model,
              C.model,
              C.mcmc,
              mcmc,
              dataName = 'y',
-             paramNames = monitors, 
+             paramNames = input1$monitors, 
              MCMCIter = 1000, 
              NSamp = 1000,
              NPDist = 100,
