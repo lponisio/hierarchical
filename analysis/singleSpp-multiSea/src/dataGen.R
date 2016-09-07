@@ -135,3 +135,41 @@ genMultiSpecOccData <- function(p_beta = 0.7,
   }
   return(x)
 }
+
+
+## prep data for nimble model
+prepModDataOcc <- function(data,
+                           monitors = c("psi",
+                             "phi",
+                             "gamma",
+                             "p"),
+                           include.zs=TRUE){
+  ## data zs with 0s set to NAs
+  zs <- apply(data$y, c(1, 3), max)
+  zs[zs == 0] <- NA
+
+  ## initial condiations, NAs where 1s are in z, and 1s are where NA
+  zinits <- zs
+  zinits[zinits == 1] <- 2
+  zinits[is.na(zinits)] <- 1
+  zinits[zinits == 2] <- NA
+  inits <- list(z = zinits)
+
+  ## constants
+  constants <- list(nsite = dim(data$y)[1],
+                    nrep = dim(data$y)[2],
+                    nyear = dim(data$y)[3])
+  if(include.zs){
+    model.data <- list(y = data$y, z = zs)
+    inits <- list(z = zinits)
+  } else{
+    model.data <- list(y = data$y)
+    inits <- list()
+  }
+  model.input <- list(data=model.data,
+                      monitors=monitors,
+                      constants=constants,
+                      inits=inits)
+  return(model.input)
+}
+

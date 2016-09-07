@@ -19,6 +19,7 @@ species_groups <- read.csv("data/species_groups.csv")
 survey_dates <- read.csv("data/survey_dates.csv")
 habitat <- read.csv("data/habitat.csv")
 
+
 ## reformat data
 data <- reformatData(survey_data,
                       survey_dates,

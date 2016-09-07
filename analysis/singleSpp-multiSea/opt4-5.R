@@ -1,7 +1,10 @@
 rm(list=ls())
-gctorture()
+
 setwd("~/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea")
 source('src/initialize.R')
+data <- genDynamicOccData()
+model.input <- prepModDataOcc(data, include.zs=FALSE)
+
 
 ## *********************************************************************
 ##  Multi-season occupancy model: option 4-5 remove latent states using
@@ -30,29 +33,15 @@ ss.ms.occ <- nimbleCode({
                                               gamma[1:(nyear-1)],
                                               p[1:nyear])
   }
-
-  ## Derived parameters: Sample and population occupancy, growth rate
-  ## and turnover
   psi[1] <- psi1
-  n.occ[1]<- sum(z[1:nsite,1])
-  for (k in 2:nyear){
-    psi[k] <- psi[k-1]*phi[k-1] + (1-psi[k-1])*gamma[k-1]
-    n.occ[k] <- sum(z[1:nsite,k])
-    growthr[k-1] <- psi[k]/psi[k-1]
-    turnover[k-1] <- (1 - psi[k-1]) * gamma[k-1]/psi[k]
-  }
 })
 
 ## *********************************************************************
 ## opt 4 run with compareMCMCs
 ## *********************************************************************
 
-input1 <- list(code=ss.ms.occ,
-               constants=constants,
-               data=model.data,
-               inits=inits)
-
-monitors <- c("phi", "gamma", "psi")
+input1 <- c(code=ss.ms.occ,
+            model.input)
 
 ss.ms.opt4 <- compareMCMCs(input1,
                            MCMCs=c('nimble', 'autoBlock'),

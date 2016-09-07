@@ -40,11 +40,6 @@ sp.mod <- nimbleCode({
 input1 <- c(code=sp.mod,
             model.input)
 
-## MCMC settings
-scale <- 1e1
-burnin <- 1e1*scale
-niter <- (1e3)*scale
-
 ## *********************************************************************
 ## opt 1:vanilla nimble and auto block
 ## *********************************************************************

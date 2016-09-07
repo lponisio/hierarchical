@@ -1,7 +1,9 @@
 rm(list=ls())
-gctorture() 
 setwd("~/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea")
 source('src/initialize.R')
+
+data <- genDynamicOccData()
+model.input <- prepModDataOcc(data)
 
 ## *********************************************************************
 ##  Multi-season occupancy model: custom z sampler
@@ -36,23 +38,11 @@ ss.ms.occ <- nimbleCode({
       }
     }
   }
-
-  ## Derived parameters: Sample and population occupancy, growth rate
-  ## and turnover
   psi[1] <- psi1
-  n.occ[1]<-sum(z[1:nsite,1])
-  for (k in 2:nyear){
-    psi[k] <- psi[k-1]*phi[k-1] + (1-psi[k-1])*gamma[k-1]
-    n.occ[k] <- sum(z[1:nsite,k])
-    growthr[k-1] <- psi[k]/psi[k-1]
-    turnover[k-1] <- (1 - psi[k-1]) * gamma[k-1]/psi[k]
-  }
 })
 
-input1 <- list(code=ss.ms.occ,
-               constants=constants,
-               data=model.data,
-               inits=inits)
+input1 <- c(code=ss.ms.occ,
+           model.input)
 
 ## *********************************************************************
 ## opt 2: add custom z sampler and slice on uniform(0,1) nodes
@@ -60,16 +50,6 @@ input1 <- list(code=ss.ms.occ,
 
 MCMCdefs.opt2 <- list('nimbleOpt2' = quote({
   customSpec <- configureMCMC(Rmodel)
-  ## identify samplers to replace
-  znodes <- Rmodel$expandNodeNames('z')
-  znodes <- znodes[!Rmodel$isData(znodes)]
-  ## remove samplers
-  customSpec$removeSamplers(znodes, print=FALSE)
-  ## add custom samples
-  for(znode in znodes) customSpec$addSampler(target = znode,
-                                             type = custom_z_sampler,
-                                             print=FALSE)
-
   customSpec$removeSamplers('phi', print=FALSE)
   customSpec$removeSamplers('gamma', print=FALSE)
   customSpec$removeSamplers('p', print=FALSE)
@@ -103,16 +83,6 @@ save(ss.ms.opt2, file=file.path(save.dir, "opt2.Rdata"))
 
 MCMCdefs.opt3 <- list('nimbleOpt3' = quote({
   customSpec <- configureMCMC(Rmodel)
-  ## identify samplers to replace
-  znodes <- Rmodel$expandNodeNames('z')
-  znodes <- znodes[!Rmodel$isData(znodes)]
-  ## remove samplers
-  customSpec$removeSamplers(znodes, print=FALSE)
-  ## add custom samples
-  for(znode in znodes) customSpec$addSampler(target = znode,
-                                             type = custom_z_sampler,
-                                             print=FALSE)
-
   customSpec$removeSamplers('phi', print=FALSE)
   customSpec$removeSamplers('gamma', print=FALSE)
   customSpec$removeSamplers('p', print=FALSE)

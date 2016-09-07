@@ -69,7 +69,6 @@ prepModData <- function(fulldata, y, distance, nsite,
                           "p", "alpha", "b1")){
   ## subsample at "sites"
   sites <- sample(1:nrow(fulldata), nsite)
-
   y <- y[sites,]
   
   ## data zs with 0s set to NAs

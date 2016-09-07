@@ -6,7 +6,7 @@ save.dir <- "../../../saved/singleSpp-multiSea/saved"
 load(file=file.path(save.dir, "orig.Rdata"))
 
 ## vectorized bernuli calls
-load(file=file.path(save.dir, "opt1.Rdata"))
+## load(file=file.path(save.dir, "opt1.Rdata"))
 
 ## custom sampler for zs, slice for other parms
 load(file=file.path(save.dir, "opt2.Rdata"))
@@ -22,8 +22,8 @@ load(file=file.path(save.dir, "opt4.Rdata"))
 load(file=file.path(save.dir, "opt5.Rdata")) 
 
 ## rename results
-ss.ms.opt1[[1]] <- rename_MCMC_comparison_method('nimble', 'vectorized',
-                                                 comparison=ss.ms.opt1[[1]])
+## ss.ms.opt1[[1]] <- rename_MCMC_comparison_method('nimble', 'vectorized',
+##                                                  comparison=ss.ms.opt1[[1]])
 ss.ms.opt2[[1]] <- rename_MCMC_comparison_method('nimbleOpt2',
                                                  'slice',
                                                  comparison=ss.ms.opt2[[1]])
@@ -39,7 +39,7 @@ ss.ms.opt5[[1]] <- rename_MCMC_comparison_method('nimbleOpt5',
                                                  comparison=ss.ms.opt5[[1]])
 ## compare mcmcs
 ss.ms.occ.all <- combine_MCMC_comparison_results(ss.ms.orig[[1]],
-                                                 ss.ms.opt1[[1]],
+                                                 ## ss.ms.opt1[[1]],
                                                  ss.ms.opt2[[1]],
                                                  ss.ms.opt3[[1]],
                                                  ss.ms.opt4[[1]],

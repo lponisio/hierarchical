@@ -1,7 +1,9 @@
 rm(list=ls())
-gctorture()
 setwd("~/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea")
 source('src/initialize.R')
+
+data <- genDynamicOccData()
+model.input <- prepModDataOcc(data)
 
 ## *********************************************************************
 ##  Multi-season occupancy model: option 1: user defined distribution
@@ -34,27 +36,14 @@ ss.ms.occ <- nimbleCode({
           y[i,1:nrep,k] ~ dbern_vec(muy[i,k], nrep)
     }
   }
-
-  ## Derived parameters: Sample and population occupancy, growth rate
-  ## and turnover
   psi[1] <- psi1
-  n.occ[1]<-sum(z[1:nsite,1])
-  for (k in 2:nyear){
-    psi[k] <- psi[k-1]*phi[k-1] + (1-psi[k-1])*gamma[k-1]
-    n.occ[k] <- sum(z[1:nsite,k])
-    growthr[k-1] <- psi[k]/psi[k-1]
-    turnover[k-1] <- (1 - psi[k-1]) * gamma[k-1]/psi[k]
-  }
 })
 
 ## *********************************************************************
 ## run with compareMCMCs
 
-input1 <- list(code=ss.ms.occ,
-                       constants=constants,
-                       data=model.data,
-                       inits=inits)
-
+input1 <- c(model.input,
+            code=ss.ms.occ)
 
 ss.ms.opt1 <- compareMCMCs(input1,
                                 MCMCs=c('nimble'),
