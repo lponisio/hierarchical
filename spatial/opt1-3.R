@@ -1,4 +1,5 @@
 rm(list=ls())
+gctorture()
 setwd("~/Dropbox/occupancy-nimble/spatial")
 source('src/initialize.R')
 
