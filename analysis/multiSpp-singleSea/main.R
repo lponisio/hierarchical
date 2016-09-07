@@ -1,5 +1,6 @@
 rm(list=ls())
-setwd('~/Dropbox/nimble/occupancy/multiSpp-singleSea')
+gctorture()
+setwd('~/Dropbox/nimble/occupancy/analysis/multiSpp-singleSea')
 
 ## original model
 source('original.R')

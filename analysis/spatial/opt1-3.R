@@ -1,6 +1,6 @@
 rm(list=ls())
 gctorture()
-setwd("~/Dropbox/occupancy-nimble/spatial")
+setwd("~/Dropbox/nimble/occupancy/analysis/spatial")
 source('src/initialize.R')
 
 sp.mod <- nimbleCode({
@@ -39,7 +39,6 @@ input1 <- list(code=sp.mod,
                data=model.data,
                inits=inits)
 
-
 ## *********************************************************************
 ## opt 1:vanilla nimble and auto block
 ## *********************************************************************
@@ -51,11 +50,7 @@ sp.opt1 <- compareMCMCs(input1,
                             summary=FALSE,
                             check=FALSE)
 
-save(sp.opt1, file="saved/opt1.Rdata")
-
-checkChains(sp.opt1[[1]]$samples,
-            f.path = "figures/chains/%s.pdf")
-
+save(sp.opt1, file=file.path(save.dir, "opt1.Rdata"))
 
 ## *********************************************************************
 ## opt 2: add custom z sampler and slice on uniform(0,1) nodes
@@ -98,8 +93,7 @@ sp.opt2 <- compareMCMCs(input1,
                            summary=FALSE,
                            check=FALSE)
 
-save(sp.opt2, file="saved/opt2.Rdata")
-
+save(sp.opt2, file=file.path(save.dir, "opt2.Rdata"))
 
 ## *********************************************************************
 ## opt3:  add custom z sampler and reflective samplers
@@ -144,7 +138,7 @@ sp.opt3 <- compareMCMCs(input1,
                            summary=FALSE,
                            check=FALSE)
 
-save(sp.opt3, file="saved/opt3.Rdata")
+save(sp.opt3, file=file.path(save.dir, "opt3.Rdata"))
 
 
 ## *********************************************************************

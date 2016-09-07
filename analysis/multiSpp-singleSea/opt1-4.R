@@ -1,5 +1,6 @@
 rm(list=ls())
-setwd('~/Dropbox/occupancy-nimble/multiSpp-singleSea')
+gctorture()
+setwd('~/Dropbox/nimble/occupancy/analysis/multiSpp-singleSea')
 
 ## don't agument data
 n_zeroes <- 0
@@ -141,7 +142,7 @@ ms.ss.opt1 <- compareMCMCs(input1,
                            summary=FALSE,
                            check=FALSE)
 
-save(ms.ss.opt1, file="saved/opt1.Rdata")
+save(ms.ss.opt1, file=file.path(save.dir, "opt1.Rdata"))
 
 
 ## *********************************************************************
@@ -176,7 +177,7 @@ ms.ss.opt2 <- compareMCMCs(input1,
                            summary=FALSE,
                            check=FALSE)
 
-save(ms.ss.opt2, file="saved/opt2.Rdata")
+save(ms.ss.opt2, file=file=file.path(save.dir, "opt2.Rdata"))
 
 ## *********************************************************************
 ## ## option 3: block sampler for species random effects for each
@@ -219,9 +220,7 @@ ms.ss.opt3 <- compareMCMCs(input1,
                            summary=FALSE,
                            check=FALSE)
 
-save(ms.ss.opt3, file="saved/opt3.Rdata")
-
-
+save(ms.ss.opt3, file=save.dir(file=file.path(save.dir, "opt3.Rdata"))
 
 ## *********************************************************************
 ## ## option 4: sigma sampler
@@ -257,4 +256,4 @@ ms.ss.opt4 <- compareMCMCs(input1,
                            summary=FALSE,
                            check=FALSE)
 
-save(ms.ss.opt4, file="saved/opt4.Rdata")
+save(ms.ss.opt4, file=file.path(save.dir, "opt4.Rdata"))

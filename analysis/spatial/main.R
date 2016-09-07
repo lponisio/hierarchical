@@ -1,5 +1,5 @@
 rm(list=ls())
-setwd("~/Dropbox/occupancy-nimble/spatial")
+setwd("~/Dropbox/nimble/occupancy/analysis/spatial")
 
 ## original model
 source('original.R')

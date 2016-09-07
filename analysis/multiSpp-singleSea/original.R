@@ -1,5 +1,6 @@
 rm(list=ls())
-setwd('~/Dropbox/occupancy-nimble/multiSpp-singleSea')
+gctorture()
+setwd('~/Dropbox/nimble/occupancy/analysis/multiSpp-singleSea')
 
 ## don't augment data
 n_zeroes <- 0
@@ -145,4 +146,4 @@ ms.ss.orig <- compareMCMCs(input1,
                            summary=FALSE,
                            check=FALSE)
 
-save(ms.ss.orig, file="saved/orig.Rdata")
+save(ms.ss.orig, file="../../saved/orig.Rdata")

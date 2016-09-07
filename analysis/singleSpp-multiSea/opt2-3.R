@@ -1,6 +1,6 @@
 rm(list=ls())
 gctorture() 
-setwd("~/Dropbox/occupancy-nimble/singleSpp-multiSea")
+setwd("~/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea")
 source('src/initialize.R')
 
 ## *********************************************************************
@@ -94,7 +94,7 @@ ss.ms.opt2 <- compareMCMCs(input1,
                            summary=FALSE,
                            check=FALSE)
 
-save(ss.ms.opt2, file="saved/opt2.Rdata")
+save(ss.ms.opt2, file=file.path(save.dir, "opt2.Rdata"))
 
 
 ## *********************************************************************
@@ -138,57 +138,5 @@ ss.ms.opt3 <- compareMCMCs(input1,
                            summary=FALSE,
                            check=FALSE)
 
-save(ss.ms.opt3, file="saved/opt3.Rdata")
+save(ss.ms.opt3, file=file.path(save.dir, "opt3.Rdata"))
 
-
-
-
-## this is now the default
-## ## *********************************************************************
-## ## add custom z sampler with slice for other parameters
-## ## *********************************************************************
-
-## MCMCdefs.opt2 <- list('nimbleOpt2' = quote({
-##   customSpec <- configureMCMC(Rmodel)
-##   ## identify samplers to replace
-##   znodes <- Rmodel$expandNodeNames('z')
-##   znodes <- znodes[!Rmodel$isData(znodes)]
-##   ## remove samplers
-##   customSpec$removeSamplers(znodes, print=FALSE)
-##   ## add custom samplers to each z node
-##   for(znode in znodes) customSpec$addSampler(target = znode,
-##                                              type = custom_z_sampler,
-##                                              print=FALSE)
-##   ## add slice samplers to non-z params
-##   customSpec$removeSamplers('phi', print=FALSE)
-##   customSpec$removeSamplers('gamma', print=FALSE)
-##   customSpec$removeSamplers('p', print=FALSE)
-##   customSpec$removeSamplers('psi1', print=FALSE)
-##   ## happens to be all top nodes
-##   zeroOneNodes <- Rmodel$getNodeNames(topOnly = TRUE)
-##   for(zon in zeroOneNodes) customSpec$addSampler(target = zon,
-##                                                  type =
-##                                                    'slice',
-##                                                  print=FALSE)
-##   customSpec
-## }))
-
-
-## now the auto blokc default
-## ## *********************************************************************
-## ## add custom z sampler with auto block for other parameters
-## ## *********************************************************************
-
-## MCMCdefs.opt2b <- list('nimbleOpt2b' = quote({
-##   customSpec <- configureMCMC(Rmodel, autoBlock=TRUE)
-##   ## identify samplers to replace
-##   znodes <- Rmodel$expandNodeNames('z')
-##   znodes <- znodes[!Rmodel$isData(znodes)]
-##   ## remove samplers
-##   customSpec$removeSamplers(znodes, print=FALSE)
-##   ## add custom samplers to each z node
-##   for(znode in znodes) customSpec$addSampler(target = znode,
-##                                              type = custom_z_sampler,
-##                                              print=FALSE)
-##   customSpec
-## }))

@@ -1,6 +1,6 @@
 rm(list=ls())
 gctorture()
-setwd("~/Dropbox/occupancy-nimble/singleSpp-multiSea")
+setwd("~/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea")
 source('src/initialize.R')
 
 ## *********************************************************************
@@ -61,7 +61,7 @@ ss.ms.opt4 <- compareMCMCs(input1,
                            summary=FALSE,
                            check=FALSE)
 
-save(ss.ms.opt4, file="saved/opt4.Rdata")
+save(ss.ms.opt4, file=file.path(save.dir, "opt4.Rdata"))
 
 
 ## *********************************************************************
@@ -103,7 +103,7 @@ ss.ms.opt5 <- compareMCMCs(input1,
                            summary=FALSE,
                            check=FALSE)
 
-save(ss.ms.opt5, file="saved/opt5.Rdata")
+save(ss.ms.opt5, file=file.path(save.dir, "opt5.Rdata"))
 
 
 ## *********************************************************************

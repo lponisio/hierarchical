@@ -1,8 +1,7 @@
 rm(list=ls())
 gctorture()
-setwd("~/Dropbox/occupancy-nimble/spatial")
+setwd("~/Dropbox/nimble/occupancy/analysis/spatial")
 source('src/initialize.R')
-library(rjags)
 
 sp.mod <- nimbleCode({
   ## priors

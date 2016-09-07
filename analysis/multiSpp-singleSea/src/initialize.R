@@ -13,6 +13,8 @@ source('../all/sampelrs/sampler_RW_shift.R')
 source("src/reformatData.R")
 source("src/multispeciesOcc.R")
 
+save.dir <-  "../../saved/multiSpp-singleSea/saved"
+
 survey_data <- read.csv("data/occupancy_data.csv")
 species_groups <- read.csv("data/species_groups.csv")
 survey_dates <- read.csv("data/survey_dates.csv")

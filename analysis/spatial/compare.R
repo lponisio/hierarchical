@@ -1,18 +1,18 @@
 rm(list=ls())
-setwd('~/Dropbox/occupancy-nimble/spatial')
-source('src/initialize.R')
+setwd("~/Dropbox/nimble/occupancy/analysis/spatial")
+save.dir <-  "../../../saved/spatial/saved"
 
 ## original model jags and nimble
-load(file="saved/orig.Rdata")
+load(file=file.path(save.dir, "orig.Rdata"))
 
 ## vanilla nimble and auto block
-load(file="saved/opt1.Rdata")
+load(file=file.path(save.dir, "opt1.Rdata"))
 
 ## custom sampler for zs, slice for other parms
-load(file="saved/opt2.Rdata")
+load(file=file.path(save.dir, "opt2.Rdata"))
 
 ## custom sampler for zs, reflective sampler for other parms
-load(file="saved/opt3.Rdata")
+load(file=file.path(save.dir, "opt3.Rdata"))
 
 ## rename results
 sp.opt2[[1]] <- rename_MCMC_comparison_method('nimbleOpt2',
@@ -28,4 +28,5 @@ sp.occ.all <- combine_MCMC_comparison_results(sp.orig[[1]],
                                                  sp.opt3[[1]],
                                                  name = "sp" )
 
-make_MCMC_comparison_pages(sp.occ.all, dir="figures/comparisons")
+make_MCMC_comparison_pages(sp.occ.all,
+                           dir=file.path(save.dir, "figures/comparisons"))

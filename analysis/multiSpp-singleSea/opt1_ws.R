@@ -1,5 +1,5 @@
 rm(list=ls())
-setwd('~/Dropbox/occupancy-nimble/multiSpp-singleSea')
+setwd('~/Dropbox/nimble/occupancy/analysis/multiSpp-singleSea')
 
 ## Value for data augmentation (n_zeroes is an arbitrarily large value)
 n_zeroes <- 50
@@ -124,30 +124,3 @@ out.samp <- runNim(code = multispecies_occupancy,
                    monitors = monitors,
                    niter = niter,
                    thin = thin)
-
-## extract posterior samples and plot
-
-out.post <- as.matrix(out.samp$mvSamples)
-mcmcplot(out.post, filename = "kelly",
-         dir = file.path(getwd(), 'figures/ms-ssOcc/nimble'))
-
-
-## with different MCMC samplers
-out.suite <- MCMCsuite(
-  code = multispecies_occupancy,
-  inits = inits,
-  constants = constants,
-  data = model_data,
-  monitors = monitors,
-  niter=niter,
-  burnin = burnin,
-  thin=thin,
-  MCMCs = c('jags', 'nimble', 'nimble_slice',
-            'autoBlock'),
-  calculateEfficiency = TRUE,
-  plotName = 'figures/ms-ssOcc/suite'
-)
-
-
-
-

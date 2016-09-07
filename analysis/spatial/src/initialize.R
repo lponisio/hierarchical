@@ -11,6 +11,8 @@ library(raster)
 source("../all/plotting.R")
 source("../all/runNimble.R")
 
+save.dir <-  "../../../saved/spatial/saved"
+
 ## samplers
 source("../all/samplers/sampler_z.R")
 source("../all/samplers/sampler_reflective.R")
