@@ -78,35 +78,47 @@ save(ss.ms.opt2, file=file.path(save.dir, "opt2.Rdata"))
 
 
 ## *********************************************************************
-## opt3:  add custom z sampler and reflective samplers
+## model assessment
 ## *********************************************************************
+## build model
+R.model <- nimbleModel(code=ss.ms.occ,
+                       constants=input1$constants,
+                       data=input1$data,
+                       inits=input1$inits,
+                       check=FALSE)
+message('R model created')
 
-MCMCdefs.opt3 <- list('nimbleOpt3' = quote({
-  customSpec <- configureMCMC(Rmodel)
-  customSpec$removeSamplers('phi', print=FALSE)
-  customSpec$removeSamplers('gamma', print=FALSE)
-  customSpec$removeSamplers('p', print=FALSE)
-  customSpec$removeSamplers('psi1', print=FALSE)
-  ## happens to be all top nodes
-  zeroOneNodes <- Rmodel$getNodeNames(topOnly = TRUE)
-  for(zon in zeroOneNodes) customSpec$addSampler(target = zon,
-                                                 type =
-                                                   sampler_RW_reflect,
-                                                 print=FALSE)
-  customSpec
-}))
+## configure and build mcmc
+mcmc.spec <- configureMCMC(R.model,
+                           print=FALSE,
+                           monitors = monitors,
+                           thin=1)
+mcmc <- buildMCMC(mcmc.spec)
+message('MCMC built')
+
+## compile model in C++
+C.model <- compileNimble(R.model)
+C.mcmc <- compileNimble(mcmc, project = R.model)
+message('NIMBLE model compiled')
+
+source('../cppp/src/calcCPPP.R', chdir = TRUE)
+options(mc.cores=6)
+
+generateCPPP(R.model,
+             C.model,
+             C.mcmc,
+             mcmc,
+             dataName = 'y',
+             paramNames = monitors, 
+             MCMCIter = 1000, 
+             NSamp = 1000,
+             NPDist = 100,
+             thin = 1)
 
 
-## *********************************************************************
-## run with compareMCMCs
+list(code=ss.ms.occ,
+               constants=constants,
+               data=model.data,
+               inits=inits)
 
-ss.ms.opt3 <- compareMCMCs(input1,
-                           MCMCs=c('nimbleOpt3'),
-                           MCMCdefs = MCMCdefs.opt3,
-                           niter= niter,
-                           burnin = burnin,
-                           summary=FALSE,
-                           check=FALSE)
-
-save(ss.ms.opt3, file=file.path(save.dir, "opt3.Rdata"))
 

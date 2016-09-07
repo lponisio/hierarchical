@@ -44,7 +44,7 @@ input1 <- c(code=ss.ms.occ,
             model.input)
 
 ss.ms.opt4 <- compareMCMCs(input1,
-                           MCMCs=c('nimble', 'autoBlock'),
+                           MCMCs=c('nimble', 'autoBlock', 'nimble_slice'),
                            niter=niter,
                            burnin = burnin,
                            summary=FALSE,
@@ -96,7 +96,7 @@ save(ss.ms.opt5, file=file.path(save.dir, "opt5.Rdata"))
 
 
 ## *********************************************************************
-options(error=recover)
+
 ## build model
 R.model <- nimbleModel(code=ss.ms.occ,
                        constants=constants,
