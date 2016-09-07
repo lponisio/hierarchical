@@ -1,0 +1,68 @@
+rm(list=ls())
+gctorture()
+setwd("~/Dropbox/occupancy-nimble/spatial")
+source('src/initialize.R')
+library(rjags)
+
+sp.mod <- nimbleCode({
+  ## priors
+  delta ~ dunif(0, 1)
+  sigma ~ dunif(0, 10)
+  p ~ dunif(0, 1)
+  alpha ~ dnorm(0, 0.001)
+  b1 ~ dnorm(0, 0.001)
+
+  ## Likelihood
+  ## Ecological model for true occurrence
+  for (i in 1:nsite) {
+    z[i] ~ dbern(psi[i])
+    logit(psi[i]) <- alpha + b1*elev[i] + rho[i]
+    p.eff[i] <- z[i] * p
+
+    ## Observation model for replicated detection/nondetection
+    ## observations
+    for (j in 1:nreps) {
+      y[i,j] ~ dbern(p.eff[i])
+    }
+  }
+
+  rho[1:nsite] ~ dmnorm(zeros[1:nsite],
+                        D.tau[1:nsite, 1:nsite])
+
+  ## derived quantities
+  ## turning the distance matrix to covariance matrix
+  ## temp.cov[1:nsite, 1:nsite] <- -delta*D[1:nsite, 1:nsite]
+  ## D.cov[1:nsite, 1:nsite]  <- (sigma^2)*
+  ##                                     mexp(temp.cov[1:nsite, 1:nsite])
+  ## D.tau[1:nsite, 1:nsite] <- inverse(D.cov[1:nsite, 1:nsite])
+  for(i in 1:nsite){
+    for(j in 1:nsite){
+      temp.cov[i, j] <- -delta*D[i, j]
+      D.cov[i, j]  <- (sigma^2)* exp(temp.cov[i, j])
+    }
+  }
+  D.tau[1:nsite, 1:nsite] <- inverse(D.cov[1:nsite, 1:nsite])
+  
+})
+
+input1 <- list(code=sp.mod,
+               constants=constants,
+               data=model.data,
+               inits=inits)
+
+
+## *********************************************************************
+## opt 1:vanilla nimble and auto block
+## *********************************************************************
+
+sp.orig <- compareMCMCs(input1,
+                        MCMCs=c("jags"),
+                        niter=niter,
+                        burnin = burnin,
+                        summary=FALSE,
+                        check=FALSE)
+
+save(sp.orig, file="saved/orig.Rdata")
+
+checkChains(sp.orig[[1]]$samples,
+            f.path = "figures/chains/%s.pdf")
