@@ -4,7 +4,6 @@
 ##                subdir = "packages/nimble")
 
 library(nimble)
-library(mcmcplots)
 library(igraph)
 library(reshape)
 source("../all/plotting.R")

@@ -4,7 +4,6 @@
 ##                subdir = "packages/nimble")
 
 library(nimble)
-library(mcmcplots)
 library(igraph)
 source("src/dynamicOcc.R")
 source("src/dataGen.R")

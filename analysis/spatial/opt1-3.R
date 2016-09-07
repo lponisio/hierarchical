@@ -1,7 +1,10 @@
 rm(list=ls())
-gctorture()
 setwd("~/Dropbox/nimble/occupancy/analysis/spatial")
 source('src/initialize.R')
+
+dats <- genSpatialOccData()
+model.input <- prepModData(dats$data, dats$y, dats$distance,
+                           nsite=25)
 
 sp.mod <- nimbleCode({
   ## priors
@@ -34,21 +37,24 @@ sp.mod <- nimbleCode({
   
 })
 
-input1 <- list(code=sp.mod,
-               constants=constants,
-               data=model.data,
-               inits=inits)
+input1 <- c(code=sp.mod,
+            model.input)
+
+## MCMC settings
+scale <- 1e1
+burnin <- 1e1*scale
+niter <- (1e3)*scale
 
 ## *********************************************************************
 ## opt 1:vanilla nimble and auto block
 ## *********************************************************************
 
 sp.opt1 <- compareMCMCs(input1,
-                            MCMCs=c("nimble", "autoBlock"),
-                            niter=niter,
-                            burnin = burnin,
-                            summary=FALSE,
-                            check=FALSE)
+                        MCMCs=c("nimble", "autoBlock"),
+                        niter=niter,
+                        burnin = burnin,
+                        summary=FALSE,
+                        check=FALSE)
 
 save(sp.opt1, file=file.path(save.dir, "opt1.Rdata"))
 
@@ -70,9 +76,9 @@ MCMCdefs.opt2 <- list('nimbleOpt2' = quote({
   ## slice sampler for 0,1 varaibles
   customSpec$removeSamplers('p', print=FALSE)
   customSpec$addSampler(target = 'p',
-                                                 type =
-                                                   "slice",
-                                                 print=FALSE)
+                        type =
+                        "slice",
+                        print=FALSE)
   ## multivariate normal sampler
   ## customSpec$removeSamplers('rho', print=FALSE)
   ## customSpec$addSampler(target = 'rho',
@@ -86,12 +92,12 @@ MCMCdefs.opt2 <- list('nimbleOpt2' = quote({
 ## run with compareMCMCs
 
 sp.opt2 <- compareMCMCs(input1,
-                           MCMCs=c('nimbleOpt2'),
-                           MCMCdefs = MCMCdefs.opt2,
-                           niter= niter,
-                           burnin = burnin,
-                           summary=FALSE,
-                           check=FALSE)
+                        MCMCs=c('nimbleOpt2'),
+                        MCMCdefs = MCMCdefs.opt2,
+                        niter= niter,
+                        burnin = burnin,
+                        summary=FALSE,
+                        check=FALSE)
 
 save(sp.opt2, file=file.path(save.dir, "opt2.Rdata"))
 
@@ -114,9 +120,9 @@ MCMCdefs.opt3 <- list('nimbleOpt3' = quote({
   ## reflective for 0,1 varaibles
   customSpec$removeSamplers('p', print=FALSE)
   customSpec$addSampler(target = 'p',
-                                                 type =
-                                                   "sampler_RW_reflect",
-                                                 print=FALSE)
+                        type =
+                        "sampler_RW_reflect",
+                        print=FALSE)
   ## multivariate normal sampler
   ## customSpec$removeSamplers('rho', print=FALSE)
   ## customSpec$addSampler(target = 'rho',
@@ -131,12 +137,12 @@ MCMCdefs.opt3 <- list('nimbleOpt3' = quote({
 ## run with compareMCMCs
 
 sp.opt3 <- compareMCMCs(input1,
-                           MCMCs=c('nimbleOpt3'),
-                           MCMCdefs = MCMCdefs.opt3,
-                           niter= niter,
-                           burnin = burnin,
-                           summary=FALSE,
-                           check=FALSE)
+                        MCMCs=c('nimbleOpt3'),
+                        MCMCdefs = MCMCdefs.opt3,
+                        niter= niter,
+                        burnin = burnin,
+                        summary=FALSE,
+                        check=FALSE)
 
 save(sp.opt3, file=file.path(save.dir, "opt3.Rdata"))
 

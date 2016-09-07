@@ -177,7 +177,7 @@ ms.ss.opt2 <- compareMCMCs(input1,
                            summary=FALSE,
                            check=FALSE)
 
-save(ms.ss.opt2, file=file=file.path(save.dir, "opt2.Rdata"))
+save(ms.ss.opt2, file=file.path(save.dir, "opt2.Rdata"))
 
 ## *********************************************************************
 ## ## option 3: block sampler for species random effects for each
@@ -220,7 +220,7 @@ ms.ss.opt3 <- compareMCMCs(input1,
                            summary=FALSE,
                            check=FALSE)
 
-save(ms.ss.opt3, file=save.dir(file=file.path(save.dir, "opt3.Rdata"))
+save(ms.ss.opt3, file=file.path(save.dir, "opt3.Rdata"))
 
 ## *********************************************************************
 ## ## option 4: sigma sampler

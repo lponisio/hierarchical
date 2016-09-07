@@ -2,7 +2,7 @@ logit <- function(x) {
   log(x/(1 - x))
 }
 
-antilogit <- function(x) {
+expit <- function(x) {
   exp(x)/(1 + exp(x))
 }
 
@@ -95,7 +95,7 @@ genMultiSpecOccData <- function(p_beta = 0.7,
 
   mup <- logit(p_p)
   lp <- rnorm(nspec, mup, sdp)
-  p <- antilogit(lp)
+  p <- expit(lp)
 
   ## initial occupancy states
   rho0 <- runif(nspec, 0, 1)
@@ -113,11 +113,11 @@ genMultiSpecOccData <- function(p_beta = 0.7,
       for (t in 1:nyear) {
         if (t == 1) {
           lpsi[j, i, t] <- beta[i] + rho[i] * z0[j, i]
-          psi[j, i, t] <- antilogit(lpsi[j, i, t])
+          psi[j, i, t] <- expit(lpsi[j, i, t])
           z[j, i, t] <- rbinom(1, 1, psi[j, i, t])
         } else {
           lpsi[j, i, t] <- beta[i] + rho[i] * z[j, i, t - 1]
-          psi[j, i, t] <- antilogit(lpsi[j, i, t])
+          psi[j, i, t] <- expit(lpsi[j, i, t])
           z[j, i, t] <- rbinom(1, 1, psi[j, i, t])
         }
       }
