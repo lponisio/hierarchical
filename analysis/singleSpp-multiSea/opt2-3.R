@@ -12,7 +12,8 @@ model.input <- prepModDataOcc(data)
 ss.ms.occ <- nimbleCode({
   ## Specify priors
   psi1 ~ dunif(0, 1)
-
+  
+  psi[1] <- psi1
   for(k in 1:(nyear-1)){
     phi[k] ~ dunif(0, 1)
     gamma[k] ~ dunif(0, 1)
@@ -38,7 +39,7 @@ ss.ms.occ <- nimbleCode({
       }
     }
   }
-  psi[1] <- psi1
+
 })
 
 input1 <- c(code=ss.ms.occ,

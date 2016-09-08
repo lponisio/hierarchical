@@ -12,10 +12,6 @@ source("../all/runNimble.R")
 
 save.dir <- "../../../saved/singleSpp-multiSea/saved"
 
-## samplers
-source("../all/samplers/sampler_z.R")
-source("../all/samplers/sampler_reflective.R")
-
 ## MCMC settings
 scale <- 1e1
 burnin <- 1e1*scale

@@ -16,6 +16,7 @@ ss.ms.occ <- nimbleCode({
   ##  priors
   psi1 ~ dunif(0, 1)
 
+  psi[1] <- psi1
   for(k in 1:(nyear-1)){
     phi[k] ~ dunif(0, 1)
     gamma[k] ~ dunif(0, 1)
@@ -33,7 +34,6 @@ ss.ms.occ <- nimbleCode({
                                               gamma[1:(nyear-1)],
                                               p[1:nyear])
   }
-  psi[1] <- psi1
 })
 
 ## *********************************************************************

@@ -8,24 +8,25 @@ expit <- function(x) {
 
 ##  Generation and analysis of simulated data for multi season
 ##  occupancy model
+
+## Function to simulate detection/nondetection data for dynamic site-occ model
+## Annual variation in probabilities of patch survival, colonization and
+## detection is specified by the bounds of a uniform distribution.
+
+## Function arguments:
+## R - Number of sites
+## J - Number of replicate surveys
+## K - Number of years
+## psi1 - occupancy probability in first year
+## range.p - bounds of uniform distribution from which annual p drawn
+## range.psi and range.gamma - same for survival and colonization probability
+
 genDynamicOccData <- function(R = 250,
                               J = 3, K = 10,
                               psi1 = 0.4,
                               range.p = c(0.2, 0.4),
                               range.phi = c(0.6, 0.8),
                               range.gamma = c(0, 0.1)) {
-  ## Function to simulate detection/nondetection data for dynamic site-occ model
-  ## Annual variation in probabilities of patch survival, colonization and
-  ## detection is specified by the bounds of a uniform distribution.
-
-  ## Function arguments:
-  ## R - Number of sites
-  ## J - Number of replicate surveys
-  ## K - Number of years
-  ## psi1 - occupancy probability in first year
-  ## range.p - bounds of uniform distribution from which annual p drawn
-  ## range.psi and range.gamma - same for survival and colonization probability
-
   ## Set up some required arrays
   site <- 1:R					## Sites
   year <- 1:K					## Years
@@ -73,69 +74,6 @@ genDynamicOccData <- function(R = 250,
               phi = phi, gamma = gamma, p = p, y = y))
 }
 
-## http://www.r-bloggers.com/multi-species-dynamic-occupancy-model-with-r-and-jags/
-
-genMultiSpecOccData <- function(p_beta = 0.7,
-                                sdbeta = 2,
-                                p_rho = 0.8,
-                                sdrho = 1,
-                                nsite = 150,
-                                nspec = 6,
-                                nyear = 1,
-                                nrep = 5,
-                                p_p = 0.7,
-                                sdp = 1.5) {
-  ## community level hyperparameters
-  mubeta <- logit(p_beta)
-  murho <- logit(p_rho)
-
-  ## species specific random effects
-  beta <- rnorm(nspec, mubeta, sdbeta)
-  rho <- rnorm(nspec, murho, sdrho)
-
-  mup <- logit(p_p)
-  lp <- rnorm(nspec, mup, sdp)
-  p <- expit(lp)
-
-  ## initial occupancy states
-  rho0 <- runif(nspec, 0, 1)
-  z0 <- array(dim = c(nsite, nspec))
-  for (i in 1:nspec) {
-    z0[, i] <- rbinom(nsite, 1, rho0[i])
-  }
-
-  ## subsequent occupancy
-  z <- array(dim = c(nsite, nspec, nyear))
-  lpsi <- array(dim = c(nsite, nspec, nyear))
-  psi <- array(dim = c(nsite, nspec, nyear))
-  for (j in 1:nsite) {
-    for (i in 1:nspec) {
-      for (t in 1:nyear) {
-        if (t == 1) {
-          lpsi[j, i, t] <- beta[i] + rho[i] * z0[j, i]
-          psi[j, i, t] <- expit(lpsi[j, i, t])
-          z[j, i, t] <- rbinom(1, 1, psi[j, i, t])
-        } else {
-          lpsi[j, i, t] <- beta[i] + rho[i] * z[j, i, t - 1]
-          psi[j, i, t] <- expit(lpsi[j, i, t])
-          z[j, i, t] <- rbinom(1, 1, psi[j, i, t])
-        }
-      }
-    }
-  }
-  x <- array(dim = c(nsite, nspec, nyear, nrep))
-  for (j in 1:nsite) {
-    for (i in 1:nspec) {
-      for (t in 1:nyear) {
-        for (k in 1:nrep) {
-          x[j, i, t, k] <- rbinom(1, 1, p[i] * z[j, i, t])
-        }
-      }
-    }
-  }
-  return(x)
-}
-
 
 ## prep data for nimble model
 prepModDataOcc <- function(data,
@@ -172,4 +110,67 @@ prepModDataOcc <- function(data,
                       inits=inits)
   return(model.input)
 }
+
+
+
+## genMultiSpecOccData <- function(p_beta = 0.7,
+##                                 sdbeta = 2,
+##                                 p_rho = 0.8,
+##                                 sdrho = 1,
+##                                 nsite = 150,
+##                                 nspec = 6,
+##                                 nyear = 1,
+##                                 nrep = 5,
+##                                 p_p = 0.7,
+##                                 sdp = 1.5) {
+##   ## community level hyperparameters
+##   mubeta <- logit(p_beta)
+##   murho <- logit(p_rho)
+
+##   ## species specific random effects
+##   beta <- rnorm(nspec, mubeta, sdbeta)
+##   rho <- rnorm(nspec, murho, sdrho)
+
+##   mup <- logit(p_p)
+##   lp <- rnorm(nspec, mup, sdp)
+##   p <- expit(lp)
+
+##   ## initial occupancy states
+##   rho0 <- runif(nspec, 0, 1)
+##   z0 <- array(dim = c(nsite, nspec))
+##   for (i in 1:nspec) {
+##     z0[, i] <- rbinom(nsite, 1, rho0[i])
+##   }
+
+##   ## subsequent occupancy
+##   z <- array(dim = c(nsite, nspec, nyear))
+##   lpsi <- array(dim = c(nsite, nspec, nyear))
+##   psi <- array(dim = c(nsite, nspec, nyear))
+##   for (j in 1:nsite) {
+##     for (i in 1:nspec) {
+##       for (t in 1:nyear) {
+##         if (t == 1) {
+##           lpsi[j, i, t] <- beta[i] + rho[i] * z0[j, i]
+##           psi[j, i, t] <- expit(lpsi[j, i, t])
+##           z[j, i, t] <- rbinom(1, 1, psi[j, i, t])
+##         } else {
+##           lpsi[j, i, t] <- beta[i] + rho[i] * z[j, i, t - 1]
+##           psi[j, i, t] <- expit(lpsi[j, i, t])
+##           z[j, i, t] <- rbinom(1, 1, psi[j, i, t])
+##         }
+##       }
+##     }
+##   }
+##   x <- array(dim = c(nsite, nspec, nyear, nrep))
+##   for (j in 1:nsite) {
+##     for (i in 1:nspec) {
+##       for (t in 1:nyear) {
+##         for (k in 1:nrep) {
+##           x[j, i, t, k] <- rbinom(1, 1, p[i] * z[j, i, t])
+##         }
+##       }
+##     }
+##   }
+##   return(x)
+## }
 
