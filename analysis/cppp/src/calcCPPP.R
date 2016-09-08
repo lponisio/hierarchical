@@ -20,6 +20,7 @@ pppFunc <- nimbleFunction(
 
 
 
+
 generateCPPP <-  function(R.model,
                           C.model,
                           C.mcmc,
@@ -34,15 +35,11 @@ generateCPPP <-  function(R.model,
   ## calculate proportion of deviances that are greater or equal to
   ## the observed value
   calcCPPP <- function(MCMCIter, C.model, NSamp,
-                       C.pppFunc, C.mcmc, paramNames){
+                       C.pppFunc, C.averageFunc,
+                       C.mcmc, paramNames){
     
     C.mcmc$run(MCMCIter)
-
-    observedDisc <- mean(apply(as.matrix(C.mcmc$mvSamples), 1, function(x){
-      values(C.model, paramNames) <- x  
-      observedDisc <- calculate(C.model)  
-    }), na.rm=TRUE)
-    ## observedDisc <- calculate(C.model)
+    observedDisc <- C.averageFunc$run()
     otherDiscs <- C.pppFunc$run(NSamp)
     pre.pp <- mean(otherDiscs >= observedDisc)
     return(pre.pp)    
@@ -52,14 +49,33 @@ generateCPPP <-  function(R.model,
   simPppDist <- function(interation,
                          MCMCIter,
                          C.mcmc,
+                         C.pppFunc,
+                         C.averageFunc,
                          C.model,
                          paramNames,
                          paramDependencies,
                          NSamp, thin){
     simulate(C.model,  includeData =  TRUE)
-    out <- calcCPPP(MCMCIter, C.model, NSamp, C.pppFunc, C.mcmc, paramNames)
+    out <- calcCPPP(MCMCIter, C.model, NSamp, C.pppFunc, C.averageFunc, C.mcmc, paramNames)
     return(out)
   }
+  
+  
+  discAverageFunc <- nimbleFunction(
+    setup = function(model, paramNames, mcmcMV, MCMCIter, thin){
+    },
+    run = function(){
+      mcmcSamps <-floor(MCMCIter/thin)
+      discMean <- 0
+      for(i in 1:mcmcSamps){
+        copy(mcmcMV, model, paramNames, paramNames, row = i)
+        discMean <- discMean + calculate(model)
+      }
+      discMean <- discMean / mcmcSamps
+      returnType(double(0))
+      return(discMean)
+    }
+  )
 
   ## sample posterior, simulate data from sample 
   paramDependencies <- C.model$getDependencies(paramNames)
@@ -70,11 +86,14 @@ generateCPPP <-  function(R.model,
                           mcmcMV,
                           MCMCIter,
                           thin)
+  
+  modelAverageFunc <- discAverageFunc(R.model, paramNames, mcmcMV, MCMCIter, thin)
 
   C.pppFunc <- compileNimble(modelpppFunc, project = R.model)
+  C.averageFunc <- compileNimble(modelAverageFunc, project = R.model)
 
   ## calculate deviances
-  obs.cppp <- calcCPPP(MCMCIter, C.model, NSamp, C.pppFunc, C.mcmc)
+  obs.cppp <- calcCPPP(MCMCIter, C.model, NSamp, C.pppFunc, C.averageFunc, C.mcmc, paramNames)
 
   ## refits model with sampled data, reruns, enter inner loop,
   ## calculates distbution of PPPs
