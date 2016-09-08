@@ -15,7 +15,7 @@ genSpatialOccData <- function(ngrid = 25,
                               beta1 = 2,
                               p = 0.6,
                               sigma = 0.5,
-                              delta = 0.05){
+                              delta = 2){
 
   ## Set up a square lattice region
   simgrid <- expand.grid(1:ngrid, 1:ngrid)
@@ -24,7 +24,7 @@ genSpatialOccData <- function(ngrid = 25,
   ## Set up distance matrix
   distance <- as.matrix(dist(simgrid))
 
-  ## Generate spatial random variable
+  ## Generate spatial random 
   X <- rmvn(1, rep(0, n),  (sigma^2)*exp(-delta * distance))
   Xraster <- rasterFromXYZ(cbind(simgrid[, 1:2] - 0.5, X))
 
@@ -35,7 +35,6 @@ genSpatialOccData <- function(ngrid = 25,
   elev <- scale(elev)
 
   ## calculate probabilities of occurrence
-  expit <- function(x) 1/(1 + exp(-x))
   psi <- expit(alpha + beta1 * raster::values(elev) +
                raster::values(Xraster))
 

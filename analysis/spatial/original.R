@@ -1,11 +1,23 @@
 rm(list=ls())
-gctorture()
 setwd("~/Dropbox/nimble/occupancy/analysis/spatial")
 source('src/initialize.R')
+library(rjags)
+load.module("msm")
+
+dats <- genSpatialOccData()
+model.input <- prepModData(dats$data, dats$y, dats$distance,
+                           nsite=25)
+
+mexp <- nimbleFunction(
+  run = function(A = double(2)){
+    returnType(double(2))
+    outMat <- exp(A)
+    return(outMat)
+  })
 
 sp.mod <- nimbleCode({
   ## priors
-  delta ~ dunif(0, 1)
+  delta ~ dunif(0, 10)
   sigma ~ dunif(0, 10)
   p ~ dunif(0, 1)
   alpha ~ dnorm(0, 0.001)
@@ -31,24 +43,22 @@ sp.mod <- nimbleCode({
   ## derived quantities
   ## turning the distance matrix to covariance matrix
   ## temp.cov[1:nsite, 1:nsite] <- -delta*D[1:nsite, 1:nsite]
-  ## D.cov[1:nsite, 1:nsite]  <- (sigma^2)*
-  ##                                     mexp(temp.cov[1:nsite, 1:nsite])
-  ## D.tau[1:nsite, 1:nsite] <- inverse(D.cov[1:nsite, 1:nsite])
+  ## D.cov[1:nsite, 1:nsite]  <- (sigma^2)*mexp(-delta*D[1:nsite, 1:nsite])
+
   for(i in 1:nsite){
     for(j in 1:nsite){
       temp.cov[i, j] <- -delta*D[i, j]
       D.cov[i, j]  <- (sigma^2)* exp(temp.cov[i, j])
     }
   }
+  
   D.tau[1:nsite, 1:nsite] <- inverse(D.cov[1:nsite, 1:nsite])
   
 })
 
-input1 <- list(code=sp.mod,
-               constants=constants,
-               data=model.data,
-               inits=inits)
 
+input1 <- c(code=sp.mod,
+            model.input)
 
 ## *********************************************************************
 ## opt 1:vanilla nimble and auto block

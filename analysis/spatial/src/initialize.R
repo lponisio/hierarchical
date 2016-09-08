@@ -11,10 +11,6 @@ source("../all/plotting.R")
 source("../all/runNimble.R")
 source("src/dataGen.R")
 
-## samplers
-source("../all/samplers/sampler_z.R")
-source("../all/samplers/sampler_reflective.R")
-
 save.dir <-  "../../../saved/spatial/saved"
 
 ## MCMC settings

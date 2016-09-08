@@ -8,7 +8,7 @@ model.input <- prepModData(dats$data, dats$y, dats$distance,
 
 sp.mod <- nimbleCode({
   ## priors
-  delta ~ dunif(0, 1)
+  delta ~ dunif(0, 0.1)
   sigma ~ dunif(0, 10)
   p ~ dunif(0, 1)
   alpha ~ dnorm(0, 0.001)
