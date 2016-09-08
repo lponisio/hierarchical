@@ -37,7 +37,7 @@ generateCPPP <-  function(R.model,
                        C.pppFunc, C.mcmc, paramNames){
     
     C.mcmc$run(MCMCIter)
-
+    browser()
     observedDisc <- mean(apply(as.matrix(C.mcmc$mvSamples), 1, function(x){
       values(C.model, paramNames) <- x  
       observedDisc <- calculate(C.model)  
