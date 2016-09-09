@@ -2,13 +2,14 @@ rm(list=ls())
 setwd("~/Dropbox/nimble/occupancy/analysis/spatial")
 source('src/initialize.R')
 
+set.seed(44)
 dats <- genSpatialOccData()
 model.input <- prepModData(dats$data, dats$y, dats$distance,
-                           nsite=25)
+                           nsite=50)
 
 sp.mod <- nimbleCode({
   ## priors
-  delta ~ dunif(0, 0.1)
+  delta ~ dunif(0, 5)
   sigma ~ dunif(0, 10)
   p ~ dunif(0, 1)
   alpha ~ dnorm(0, 0.001)
@@ -56,30 +57,28 @@ save(sp.opt1, file=file.path(save.dir, "opt1.Rdata"))
 ## *********************************************************************
 ## opt 2: add custom z sampler and slice on uniform(0,1) nodes
 ## *********************************************************************
+library(devtools)
+install_github("nlmichaud/nimble/packages/nimble", ref= "AFSliceSampler")
 
 MCMCdefs.opt2 <- list('nimbleOpt2' = quote({
   customSpec <- configureMCMC(Rmodel)
-  ## identify samplers to replace
-  znodes <- Rmodel$expandNodeNames('z')
-  znodes <- znodes[!Rmodel$isData(znodes)]
-  ## remove samplers
-  customSpec$removeSamplers(znodes, print=FALSE)
-  ## add custom samples
-  for(znode in znodes) customSpec$addSampler(target = znode,
-                                             type = custom_z_sampler,
-                                             print=FALSE)
   ## slice sampler for 0,1 varaibles
   customSpec$removeSamplers('p', print=FALSE)
   customSpec$addSampler(target = 'p',
                         type =
                         "slice",
                         print=FALSE)
-  ## multivariate normal sampler
-  ## customSpec$removeSamplers('rho', print=FALSE)
-  ## customSpec$addSampler(target = 'rho',
-  ##                                                type =
-  ##                                                  "ess",
-  ##                                                print=FALSE)
+  ## multivariate slice sampler
+  customSpec$removeSamplers('rho', print=FALSE)
+  customSpec$addSampler(target = 'rho',
+                                                 type =
+                                                   "AF_slice",
+                                                 print=FALSE,
+                        control = list(sliceWidths =
+                          rep(1, input1$constants$nsite),
+                          sliceFactorBurnInIters = 5000,
+                          sliceFactorAdaptInterval = 200,
+                          sliceSliceAdaptIters = 200))
   customSpec
 }))
 
@@ -95,53 +94,3 @@ sp.opt2 <- compareMCMCs(input1,
                         check=FALSE)
 
 save(sp.opt2, file=file.path(save.dir, "opt2.Rdata"))
-
-## *********************************************************************
-## opt3:  add custom z sampler and reflective samplers
-## *********************************************************************
-
-MCMCdefs.opt3 <- list('nimbleOpt3' = quote({
-  customSpec <- configureMCMC(Rmodel)
-  ## identify samplers to replace
-  znodes <- Rmodel$expandNodeNames('z')
-  znodes <- znodes[!Rmodel$isData(znodes)]
-  ## remove samplers
-  customSpec$removeSamplers(znodes, print=FALSE)
-  ## add custom samples
-  for(znode in znodes) customSpec$addSampler(target = znode,
-                                             type = custom_z_sampler,
-                                             print=FALSE)
-
-  ## reflective for 0,1 varaibles
-  customSpec$removeSamplers('p', print=FALSE)
-  customSpec$addSampler(target = 'p',
-                        type =
-                        "sampler_RW_reflect",
-                        print=FALSE)
-  ## multivariate normal sampler
-  ## customSpec$removeSamplers('rho', print=FALSE)
-  ## customSpec$addSampler(target = 'rho',
-  ##                                                type =
-  ##                                                  "ess",
-  ##                                                print=FALSE)
-  customSpec
-}))
-
-
-## *********************************************************************
-## run with compareMCMCs
-
-sp.opt3 <- compareMCMCs(input1,
-                        MCMCs=c('nimbleOpt3'),
-                        MCMCdefs = MCMCdefs.opt3,
-                        niter= niter,
-                        burnin = burnin,
-                        summary=FALSE,
-                        check=FALSE)
-
-save(sp.opt3, file=file.path(save.dir, "opt3.Rdata"))
-
-
-## *********************************************************************
-## opt:  automated factor slice sampler
-## *********************************************************************

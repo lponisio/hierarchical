@@ -25,7 +25,7 @@
   \textcolor{blue}{#1}
 }
 
-\def\title{Increasing the tractability of occupancy models}
+\def\title{Something occupancy models}
 \def\author{Lauren C.\ Ponisio$^{1,2}$, Nicholas Michaud$^1$, Perry de
   Valpine$^1$}
 
@@ -86,24 +86,30 @@
 \begin{abstract}  
   \begin{enumerate}
   \item occupancy models are everywhere, but model fitting and
-    assessment are extrememly computationally intensive
+    assessment are extremely computationally intensive
+  \item because models are so computationally intensive, users often
+    forgo model assessment (determining if a model provides an
+    adequate fit to a particular dataset) because if involves
+    simulating from and refitting the model many times.
   \item Using the NIMBLE package for R, we develop combined
-    computational approaches to improve computational efficiency
-    including user defined and automatic blocking of parameters for
-    MCMC, filtering over latent states, and customized MCMC samplers
-    for specific parameters. We test these approaches using three
-    representative occupancy models of varying levels of complexity
-    including a single species dynamic (i.e., multi-season) model with
-    spatial auto correlation, and a mutli-species model. We also use
-    calibrated posterior $p$-values to assess model fit.
+    computational approaches including user-defined and automatic
+    blocking of parameters for MCMC, filtering over latent states, and
+    customized MCMC samplers for specific parameters to improve
+    efficiency. We test these approaches using three representative
+    occupancy models of varying levels of complexity including a
+    single species model with spatial auto-correlation, a single
+    species dynamic (multi-season) model, and a multi-species
+    model. We also develop and implement methods for calculating
+    calibrated predistive posterior $p$-values to assess model fit
+    within the open source modeling software, NIMBLE.
   \item These computation approaches lead to an improvement in MCMC
-    sampling efficiency, particularly with the more complex,
-    mutli-species model.
+    sampling efficiency over, particularly with models including
+    random effects.
   \item Ours results highlight the need for more customizable
-    approaches to MCMC to fit and assess hierachical models in order
+    approaches to MCMC to fit and assess hierarchical models in order
     to ensure occupancy models are accessible to practitioners. By
-    implementing MCMC procedures and model assessment techniques open
-    source software, we have made progress toward this aim.
+    implementing MCMC procedures and model assessment techniques in
+    open source software, we have made progress toward this aim.
   \item \textit{Implications:}
   \end{enumerate}
 \end{abstract}
@@ -116,16 +122,16 @@
 \label{sec:introduction}
 
 Estimating the proportion of sites occupied by a species is common
-challange for many subdisciplines ecology and evolution including
-metapopulation, engangered and invasion biology. Greater acceptance of
-the biases of imperfect detection has lead to the development and
-proliferation of occupancy models, which model the occurrence of a
-species at a site as a latent state layered underneath a detection
-process \citep[e.g.,][]{mackenzie-2006, royle-2007-1813}. Now only a
-little over a decade after occupancy models were introduced to
-ecology, they are being used to model the occurence of everything from
-bees \citep{mgonigle-2015-x} to tigers \citep{hines2010tigers} in an
-endless variety of complexity.
+challenge for many sub-disciplines ecology and evolution including
+meta-population, endangered species and invasion biology. Greater
+acceptance of the baises introduced by imperfect detection has lead to
+the development and proliferation of occupancy models --- models where
+the occurrence of a species at a site as a latent state layered
+underneath a detection process \citep[e.g.,][]{mackenzie-2006,
+  royle-2007-1813}. Now only a little over a decade after occupancy
+models were introduced to ecology, they are being used to model the
+occurrence of everything from bees \citep{mgonigle-2015-x} to tigers
+\citep{hines2010tigers} in an endless variety of complexity.
 
 Occupancy models are part of a larger class of models known as Hidden
 Markov Models. For discrete Hidden Markov Models like occupancy models
@@ -133,21 +139,53 @@ where a species is either present or absent from a site, likelihood
 calculation involves summing over the distribution of latent
 states. Because estimating the effect of explanatory variables on site
 occupancy or shared variation of in occupancy across species is often
-of greatest interest to ecologsits
+of greatest interest to ecologists
 \citep[e.g.,][]{iknayan2014detecting}, the Hidden Markov Models are
-embedded in a larger hierarchical model. In such cases, practitioners
-may rely on Markov chain Monte Carlo (MCMC) to perform a Bayesian
-analysis. Such models are computationally intensive, and large models
-requiring hundreds or thousands of dimensions which require MCMC can
-be computationally intensive. In addition, fitting these models is
-such a challenge that users often forgo adding any additional
-computation to asses model fit. To ensure occupancy models are
-accessible to practitioners, more efficient methods for fitting and
-assessing these models are necessary.
+embedded within a hierarchical model. In such cases, practitioners
+generally rely on Markov chain Monte Carlo (MCMC) to perform a
+Bayesian analysis. Standard MCMC software will including the latent
+state varaibles in MCMC sampling \citep[e.g.,][]{plummer-2003-jags,
+  winbugs, openbugs}. Such models are computationally intensive, and
+large models requiring hundreds or thousands of dimensions which
+require MCMC can be intractable. Filtering over latent states to
+calculate model likelihoods inorder to limit MCMC sampling to
+top-level parameters \citep{turek2016efficient}
+
+In addition, fitting these models is such a challenge that users often
+forgo adding any additional computation to asses model fit.  A common
+idea behind evaluating whether a model provides an adequate fit to a
+particular dataset is that if data is simulated from the model, the
+simulated data should resemble the observed data. This is the basis of
+posterior predictive $P$-values, which compare the distribution of
+summary statistics calculated from simulated datasets to the observed
+statistic. Posterior predictive $P$-values alone, however, often fail
+to reject poor-fitting models \citep{bayarri-berger-00,
+  robins-etal-00, hjort-etal-06}. Methods for correcting posterior
+predictive $P$-values for better performance have been proposed
+\citep[e.g., calibrated posterior predictive $P$-values,
+][]{hjort-etal-06}, but refitting the model via MCMC iterativly.
+
+To ensure occupancy models are accessible to practitioners, more
+efficient methods for fitting and assessing these models are
+necessary.
 
 
 
 \section*{Materials \& Methods}
+
+A common idea behind evaluating whether a model provides an adequate
+fit to a particular dataset is that if data is simulated from the
+model, the simulated data should resemble the observed data. This is
+the basis of posterior predictive $P$-values, which compare the
+distribution of summary statistics calculated from simulated datasets
+to the observed statistic. Posterior predictive $P$-values alone,
+however, often fail to reject poor-fitting models
+\citep{bayarri-berger-00, robins-etal-00, hjort-etal-06}. Methods for
+correcting posterior predictive $P$-values for better performance have
+been proposed, but previously were too computationally intensive to be
+feasible \citep[e.g., calibrated posterior predictive $P$-values,
+][]{hjort-etal-06}.
+
 \label{sec:methods}
 
 

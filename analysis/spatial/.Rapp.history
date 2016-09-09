@@ -1,10 +1,14 @@
 rm(list=ls())#
-setwd("~/Dropbox/occupancy-nimble/spatial")#
+setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
 source('src/initialize.R')#
+#
+dats <- genSpatialOccData()#
+model.input <- prepModData(dats$data, dats$y, dats$distance,#
+                           nsite=25)#
 #
 sp.mod <- nimbleCode({#
   ## priors#
-  delta ~ dunif(0, 1)#
+  delta ~ dunif(0, 10)#
   sigma ~ dunif(0, 10)#
   p ~ dunif(0, 1)#
   alpha ~ dnorm(0, 0.001)#
@@ -32,459 +36,118 @@ sp.mod <- nimbleCode({#
   D.cov[1:nsite, 1:nsite] <- (sigma^2)*exp(-delta*D[1:nsite, 1:nsite])#
 })#
 #
-input1 <- list(code=sp.mod,#
-               constants=constants,#
-               data=model.data,#
-               inits=inits)#
-## *********************************************************************#
-## opt 1:vanilla nimble and auto block#
-## *********************************************************************#
-#
+input1 <- c(code=sp.mod,#
+            model.input)
 sp.opt1 <- compareMCMCs(input1,#
-                            MCMCs=c("nimble", "autoblock"),#
-                            niter=niter,#
-                            burnin = burnin,#
-                            summary=FALSE,#
-                            check=FALSE)#
+                        MCMCs=c("nimble", "autoBlock"),#
+                        niter=niter,#
+                        burnin = burnin,#
+                        summary=FALSE,#
+                        check=FALSE)#
 #
-save(sp.opt1, file="saved/opt1.Rdata")#
+save(sp.opt1, file=file.path(save.dir, "opt1.Rdata"))
+rm(list=ls())#
+library(nimble)#
+setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
+save.dir <-  "../../../saved/spatial/saved"#
 #
-checkChains(sp.opt1[[1]]$samples,#
-            f.path = "figures/chains/%s.pdf")#
-## *********************************************************************#
-## opt 2: add custom z sampler and slice on uniform(0,1) nodes#
-## *********************************************************************#
+## original model jags and nimble#
+load(file=file.path(save.dir, "orig.Rdata"))#
 #
-MCMCdefs.opt2 <- list('nimbleOpt2' = quote({#
-  customSpec <- configureMCMC(Rmodel)#
-  ## identify samplers to replace#
-  znodes <- Rmodel$expandNodeNames('z')#
-  znodes <- znodes[!Rmodel$isData(znodes)]#
-  ## remove samplers#
-  customSpec$removeSamplers(znodes, print=FALSE)#
-  ## add custom samples#
-  for(znode in znodes) customSpec$addSampler(target = znode,#
-                                             type = custom_z_sampler,#
-                                             print=FALSE)#
+## vanilla nimble and auto block#
+load(file=file.path(save.dir, "opt1.Rdata"))#
 #
-  customSpec$removeSamplers('p', print=FALSE)#
-  ## happens to be all top nodes#
-  zeroOneNodes <- Rmodel$getNodeNames(topOnly = TRUE)#
-  for(zon in zeroOneNodes) customSpec$addSampler(target = zon,#
-                                                 type =#
-                                                   "slice",#
-                                                 print=FALSE)#
-  browser()#
-  customSpec#
-}))
-MCMCdefs.opt2 <- list('nimbleOpt2' = quote({#
-  customSpec <- configureMCMC(Rmodel)#
-  ## identify samplers to replace#
-  znodes <- Rmodel$expandNodeNames('z')#
-  znodes <- znodes[!Rmodel$isData(znodes)]#
-  ## remove samplers#
-  customSpec$removeSamplers(znodes, print=FALSE)#
-  ## add custom samples#
-  for(znode in znodes) customSpec$addSampler(target = znode,#
-                                             type = custom_z_sampler,#
-                                             print=FALSE)#
+## custom sampler for zs, slice for other parms#
+load(file=file.path(save.dir, "opt2.Rdata"))#
 #
-  customSpec$removeSamplers('p', print=FALSE)#
-  ## happens to be all top nodes#
-  zeroOneNodes <- Rmodel$getNodeNames(topOnly = TRUE)#
-  for(zon in zeroOneNodes) customSpec$addSampler(target = zon,#
-                                                 type =#
-                                                   "slice",#
-                                                 print=FALSE)#
-  browser()#
-  customSpec#
-}))#
-#
-## *********************************************************************#
-## run with compareMCMCs#
-#
-sp.opt2 <- compareMCMCs(input1,#
-                           MCMCs=c('nimbleOpt2'),#
-                           MCMCdefs = MCMCdefs.opt2,#
-                           niter= niter,#
-                           burnin = burnin,#
-                           summary=FALSE,#
-                           check=FALSE)
-zeroOneNodes
-zeroOneNodes <- 'p'#
-  for(zon in zeroOneNodes) customSpec$addSampler(target = zon,#
-                                                 type =#
-                                                   "slice",#
-                                                 print=FALSE)
-Q
-Q
-MCMCdefs.opt2 <- list('nimbleOpt2' = quote({#
-  customSpec <- configureMCMC(Rmodel)#
-  ## identify samplers to replace#
-  znodes <- Rmodel$expandNodeNames('z')#
-  znodes <- znodes[!Rmodel$isData(znodes)]#
-  ## remove samplers#
-  customSpec$removeSamplers(znodes, print=FALSE)#
-  ## add custom samples#
-  for(znode in znodes) customSpec$addSampler(target = znode,#
-                                             type = custom_z_sampler,#
-                                             print=FALSE)#
-#
-  customSpec$removeSamplers('p', print=FALSE)#
-  ## happens to be all top nodes#
- customSpec$addSampler(target = 'p',#
-                                                 type =#
-                                                   "slice",#
-                                                 print=FALSE)#
-  browser()#
-  customSpec#
-}))
-sp.opt2 <- compareMCMCs(input1,#
-                           MCMCs=c('nimbleOpt2'),#
-                           MCMCdefs = MCMCdefs.opt2,#
-                           niter= niter,#
-                           burnin = burnin,#
-                           summary=FALSE,#
-                           check=FALSE)
-customSpec
-Rmodel$expandNodeNames('rho')
-Rmodel$expandNodeNames()
-Rmodel$expandNodeNames
-znodes <- Rmodel$expandNodeNames('z')
-znodes
-znodes <- Rmodel$expandNodeNames('rho')
-znodes
-customSpec$removeSamplers('rho', print=FALSE)
-customSpec$addSampler(target = 'rho',#
-                                                 type =#
-                                                   "ess",#
-                                                 print=FALSE)
-## *********************************************************************#
-## opt 2: add custom z sampler and slice on uniform(0,1) nodes#
-## *********************************************************************#
-#
-MCMCdefs.opt2 <- list('nimbleOpt2' = quote({#
-  customSpec <- configureMCMC(Rmodel)#
-  ## identify samplers to replace#
-  znodes <- Rmodel$expandNodeNames('z')#
-  znodes <- znodes[!Rmodel$isData(znodes)]#
-  ## remove samplers#
-  customSpec$removeSamplers(znodes, print=FALSE)#
-  ## add custom samples#
-  for(znode in znodes) customSpec$addSampler(target = znode,#
-                                             type = custom_z_sampler,#
-                                             print=FALSE)#
-#
-  customSpec$removeSamplers('p', print=FALSE)#
-  customSpec$addSampler(target = 'p',#
-                                                 type =#
-                                                   "slice",#
-                                                 print=FALSE)#
-  ## multivariate normal sampler#
-  customSpec$removeSamplers('rho', print=FALSE)#
-  customSpec$addSampler(target = 'rho',#
-                                                 type =#
-                                                   "ess",#
-                                                 print=FALSE)#
-  customSpec#
-}))
-Q
-## *********************************************************************#
-## opt 2: add custom z sampler and slice on uniform(0,1) nodes#
-## *********************************************************************#
-#
-MCMCdefs.opt2 <- list('nimbleOpt2' = quote({#
-  customSpec <- configureMCMC(Rmodel)#
-  ## identify samplers to replace#
-  znodes <- Rmodel$expandNodeNames('z')#
-  znodes <- znodes[!Rmodel$isData(znodes)]#
-  ## remove samplers#
-  customSpec$removeSamplers(znodes, print=FALSE)#
-  ## add custom samples#
-  for(znode in znodes) customSpec$addSampler(target = znode,#
-                                             type = custom_z_sampler,#
-                                             print=FALSE)#
-#
-  customSpec$removeSamplers('p', print=FALSE)#
-  customSpec$addSampler(target = 'p',#
-                                                 type =#
-                                                   "slice",#
-                                                 print=FALSE)#
-  ## multivariate normal sampler#
-  customSpec$removeSamplers('rho', print=FALSE)#
-  customSpec$addSampler(target = 'rho',#
-                                                 type =#
-                                                   "ess",#
-                                                 print=FALSE)#
-  customSpec#
-}))
-## *********************************************************************#
-## run with compareMCMCs#
-#
-sp.opt2 <- compareMCMCs(input1,#
-                           MCMCs=c('nimbleOpt2'),#
-                           MCMCdefs = MCMCdefs.opt2,#
-                           niter= niter,#
-                           burnin = burnin,#
-                           summary=FALSE,#
-                           check=FALSE)
-MCMCdefs.opt2 <- list('nimbleOpt2' = quote({#
-  browser()#
-  customSpec <- configureMCMC(Rmodel)#
-  ## identify samplers to replace#
-  znodes <- Rmodel$expandNodeNames('z')#
-  znodes <- znodes[!Rmodel$isData(znodes)]#
-  ## remove samplers#
-  customSpec$removeSamplers(znodes, print=FALSE)#
-  ## add custom samples#
-  for(znode in znodes) customSpec$addSampler(target = znode,#
-                                             type = custom_z_sampler,#
-                                             print=FALSE)#
-#
-  customSpec$removeSamplers('p', print=FALSE)#
-  customSpec$addSampler(target = 'p',#
-                                                 type =#
-                                                   "slice",#
-                                                 print=FALSE)#
-  ## multivariate normal sampler#
-  customSpec$removeSamplers('rho', print=FALSE)#
-  customSpec$addSampler(target = 'rho',#
-                                                 type =#
-                                                   "ess",#
-                                                 print=FALSE)#
-  customSpec#
-}))#
-#
-## *********************************************************************#
-## run with compareMCMCs#
-#
-sp.opt2 <- compareMCMCs(input1,#
-                           MCMCs=c('nimbleOpt2'),#
-                           MCMCdefs = MCMCdefs.opt2,#
-                           niter= niter,#
-                           burnin = burnin,#
-                           summary=FALSE,#
-                           check=FALSE)
-customSpec <- configureMCMC(Rmodel)
-Rmodel$getNodeNames
-Rmodel$getNodeNames()
-scale
+## rename results#
+sp.opt2[[1]] <- rename_MCMC_comparison_method('nimbleOpt2',#
+                                                 'slice',#
+                                                 comparison=sp.opt2[[1]])#
+## compare mcmcs#
+sp.occ.all <- combine_MCMC_comparison_results(sp.orig[[1]],#
+                                                 sp.opt1[[1]],#
+                                                 sp.opt2[[1]],#
+                                                 name = "sp" )#
+make_MCMC_comparison_pages(sp.occ.all,#
+                           dir=file.path(save.dir,#
+                             "../figures/comparisons"))
+checkChains(ms.ss.occ.all[[1]]$samples,#
+            f.path = file.path(save.dir,#
+            "../figures/comparisons/chains/%s.pdf")#
+)
+source('../all/plotting.R')
+checkChains(ms.ss.occ.all[[1]]$samples,#
+            f.path = file.path(save.dir,#
+            "../figures/comparisons/chains/%s.pdf")#
+)
+checkChains(sp.occ.all[[1]]$samples,#
+            f.path = file.path(save.dir,#
+            "../figures/comparisons/chains/%s.pdf")#
+)
+checkChains(sp.occ.all[[1]]$samples,#
+            f.path = file.path(save.dir,#
+            "../figures/chains/%s.pdf")#
+)
 ## MCMC settings#
-scale <- 5e1#
-burnin <- 1e1*scale#
-niter <- (1e3)*scale
-Q
-scale
-burnin
-niter
-rm(list=ls())#
-setwd('~/Dropbox/occupancy-nimble/spatial')#
-source('src/initialize.R')#
-#
-## original model jags and nimble#
-load(file="saved/orig.Rdata")#
-#
-## vanilla nimble and auto block#
-load(file="saved/opt1.Rdata")#
-#
-## custom sampler for zs, slice for other parms#
-load(file="saved/opt2.Rdata")#
-#
-## custom sampler for zs, reflective sampler for other parms#
-load(file="saved/opt3.Rdata")#
-#
-## rename results#
-sp.opt2[[1]] <- rename_MCMC_comparison_method('nimbleOpt2',#
-                                                 'slice',#
-                                                 comparison=sp.opt2[[1]])#
-sp.opt3[[1]] <- rename_MCMC_comparison_method('nimbleOpt3',#
-                                                 'reflective',#
-                                                 comparison=sp.opt3[[1]])#
-## compare mcmcs#
-sp.occ.all <- combine_MCMC_comparison_results(sp.orig[[1]],#
-                                                 sp.opt1[[1]],#
-                                                 sp.opt2[[1]],#
-                                                 sp.opt3[[1]],#
-                                                 name = "sp" )#
-#
-make_MCMC_comparison_pages(sp.occ.all, dir="figures/comparisons")
-## MCMC settings#
-scale <- 5e1^2#
-burnin <- 1e1*scale#
-niter <- (1e3)*scale
-niter
-scale <- 10e1
-burnin <- 1e1*scale#
-niter <- (1e3)*scale
-niter
-scale <- 9e1#
-burnin <- 1e1*scale#
-niter <- (1e3)*scale
-niter
-## MCMC settings#
-scale <- 1e1#
-burnin <- 1e2*scale#
-niter <- (1e4)*scale
-burnin
-niter
-## MCMC settings#
-scale <- 1e1^2#
+scale <- 1e2#
 burnin <- 1e1*scale#
 niter <- (1e3)*scale
 niter
 rm(list=ls())#
-setwd('~/Dropbox/occupancy-nimble/spatial')#
-source('src/initialize.R')#
+library(nimble)#
+setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
+save.dir <-  "../../../saved/spatial/saved"#
 #
 ## original model jags and nimble#
-load(file="saved/orig.Rdata")#
+load(file=file.path(save.dir, "orig.Rdata"))#
 #
 ## vanilla nimble and auto block#
-load(file="saved/opt1.Rdata")#
+load(file=file.path(save.dir, "opt1.Rdata"))#
 #
 ## custom sampler for zs, slice for other parms#
-load(file="saved/opt2.Rdata")#
-#
-## custom sampler for zs, reflective sampler for other parms#
-load(file="saved/opt3.Rdata")#
+load(file=file.path(save.dir, "opt2.Rdata"))#
 #
 ## rename results#
 sp.opt2[[1]] <- rename_MCMC_comparison_method('nimbleOpt2',#
                                                  'slice',#
                                                  comparison=sp.opt2[[1]])#
-sp.opt3[[1]] <- rename_MCMC_comparison_method('nimbleOpt3',#
-                                                 'reflective',#
-                                                 comparison=sp.opt3[[1]])#
 ## compare mcmcs#
 sp.occ.all <- combine_MCMC_comparison_results(sp.orig[[1]],#
                                                  sp.opt1[[1]],#
                                                  sp.opt2[[1]],#
-                                                 sp.opt3[[1]],#
                                                  name = "sp" )#
-#
-make_MCMC_comparison_pages(sp.occ.all, dir="figures/comparisons")
+make_MCMC_comparison_pages(sp.occ.all,#
+                           dir=file.path(save.dir,#
+                             "../figures/comparisons"))
 rm(list=ls())#
-setwd('~/Dropbox/occupancy-nimble/spatial')#
-source('src/initialize.R')#
+library(nimble)#
+setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
+source('../all/plotting.R')#
+save.dir <-  "../../../saved/spatial/saved"#
 #
 ## original model jags and nimble#
-load(file="saved/orig.Rdata")#
+load(file=file.path(save.dir, "orig.Rdata"))#
 #
 ## vanilla nimble and auto block#
-load(file="saved/opt1.Rdata")#
+load(file=file.path(save.dir, "opt1.Rdata"))#
 #
 ## custom sampler for zs, slice for other parms#
-load(file="saved/opt2.Rdata")#
-#
-## custom sampler for zs, reflective sampler for other parms#
-load(file="saved/opt3.Rdata")#
+load(file=file.path(save.dir, "opt2.Rdata"))#
 #
 ## rename results#
 sp.opt2[[1]] <- rename_MCMC_comparison_method('nimbleOpt2',#
                                                  'slice',#
                                                  comparison=sp.opt2[[1]])#
-sp.opt3[[1]] <- rename_MCMC_comparison_method('nimbleOpt3',#
-                                                 'reflective',#
-                                                 comparison=sp.opt3[[1]])#
 ## compare mcmcs#
 sp.occ.all <- combine_MCMC_comparison_results(sp.orig[[1]],#
                                                  sp.opt1[[1]],#
                                                  sp.opt2[[1]],#
-                                                 sp.opt3[[1]],#
                                                  name = "sp" )#
+make_MCMC_comparison_pages(sp.occ.all,#
+                           dir=file.path(save.dir,#
+                             "../figures/comparisons"))#
 #
-make_MCMC_comparison_pages(sp.occ.all, dir="figures/comparisons")
-rm(list=ls())#
-setwd('~/Dropbox/occupancy-nimble/spatial')#
-source('src/initialize.R')#
-#
-## original model jags and nimble#
-load(file="saved/orig.Rdata")#
-#
-## vanilla nimble and auto block#
-load(file="saved/opt1.Rdata")#
-#
-## custom sampler for zs, slice for other parms#
-load(file="saved/opt2.Rdata")#
-#
-## custom sampler for zs, reflective sampler for other parms#
-load(file="saved/opt3.Rdata")#
-#
-## rename results#
-sp.opt2[[1]] <- rename_MCMC_comparison_method('nimbleOpt2',#
-                                                 'slice',#
-                                                 comparison=sp.opt2[[1]])#
-sp.opt3[[1]] <- rename_MCMC_comparison_method('nimbleOpt3',#
-                                                 'reflective',#
-                                                 comparison=sp.opt3[[1]])#
-## compare mcmcs#
-sp.occ.all <- combine_MCMC_comparison_results(sp.orig[[1]],#
-                                                 sp.opt1[[1]],#
-                                                 sp.opt2[[1]],#
-                                                 sp.opt3[[1]],#
-                                                 name = "sp" )#
-#
-make_MCMC_comparison_pages(sp.occ.all, dir="figures/comparisons")
-rm(list=ls())#
-setwd('~/Dropbox/occupancy-nimble/spatial')#
-source('src/initialize.R')#
-#
-## original model jags and nimble#
-load(file="saved/orig.Rdata")#
-#
-## vanilla nimble and auto block#
-load(file="saved/opt1.Rdata")#
-#
-## custom sampler for zs, slice for other parms#
-load(file="saved/opt2.Rdata")#
-#
-## custom sampler for zs, reflective sampler for other parms#
-load(file="saved/opt3.Rdata")#
-#
-## rename results#
-sp.opt2[[1]] <- rename_MCMC_comparison_method('nimbleOpt2',#
-                                                 'slice',#
-                                                 comparison=sp.opt2[[1]])#
-sp.opt3[[1]] <- rename_MCMC_comparison_method('nimbleOpt3',#
-                                                 'reflective',#
-                                                 comparison=sp.opt3[[1]])#
-## compare mcmcs#
-sp.occ.all <- combine_MCMC_comparison_results(sp.orig[[1]],#
-                                                 sp.opt1[[1]],#
-                                                 sp.opt2[[1]],#
-                                                 sp.opt3[[1]],#
-                                                 name = "sp" )#
-#
-make_MCMC_comparison_pages(sp.occ.all, dir="figures/comparisons")
-rm(list=ls())#
-setwd('~/Dropbox/occupancy-nimble/spatial')#
-source('src/initialize.R')#
-#
-## original model jags and nimble#
-load(file="saved/orig.Rdata")#
-#
-## vanilla nimble and auto block#
-load(file="saved/opt1.Rdata")#
-#
-## custom sampler for zs, slice for other parms#
-load(file="saved/opt2.Rdata")#
-#
-## custom sampler for zs, reflective sampler for other parms#
-load(file="saved/opt3.Rdata")#
-#
-## rename results#
-sp.opt2[[1]] <- rename_MCMC_comparison_method('nimbleOpt2',#
-                                                 'slice',#
-                                                 comparison=sp.opt2[[1]])#
-sp.opt3[[1]] <- rename_MCMC_comparison_method('nimbleOpt3',#
-                                                 'reflective',#
-                                                 comparison=sp.opt3[[1]])#
-## compare mcmcs#
-sp.occ.all <- combine_MCMC_comparison_results(sp.orig[[1]],#
-                                                 sp.opt1[[1]],#
-                                                 sp.opt2[[1]],#
-                                                 sp.opt3[[1]],#
-                                                 name = "sp" )#
-#
-make_MCMC_comparison_pages(sp.occ.all, dir="figures/comparisons")
-gctorture()
+checkChains(sp.occ.all[[1]]$samples,#
+            f.path = file.path(save.dir,#
+            "../figures/chains/%s.pdf"))

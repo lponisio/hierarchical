@@ -51,5 +51,5 @@ make_MCMC_comparison_pages(ms.ss.occ.all,
 
 checkChains(ms.ss.occ.all[[1]]$samples,
             f.path = file.path(save.dir,
-            "../figures/comparisons/chains/%s.pdf")
+            "../figures/chains/%s.pdf")
 )

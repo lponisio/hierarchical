@@ -3,47 +3,44 @@ Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
 The top-level auxiliary file: ms.aux
 The style file: mee.bst
 Database file #1: refs.bib
-Warning--I didn't find a database entry for "hines2010tigers"
-Warning--I didn't find a database entry for "iknayan2014detecting"
-You've used 3 entries,
+You've used 8 entries,
             2811 wiz_defined-function locations,
-            604 strings with 5038 characters,
-and the built_in function-call counts, 2135 in all, are:
-= -- 171
-> -- 102
-< -- 1
-+ -- 41
-- -- 36
-* -- 184
-:= -- 339
-add.period$ -- 6
-call.type$ -- 3
-change.case$ -- 26
-chr.to.int$ -- 3
-cite$ -- 3
-duplicate$ -- 145
-empty$ -- 156
-format.name$ -- 47
-if$ -- 410
+            637 strings with 5881 characters,
+and the built_in function-call counts, 7255 in all, are:
+= -- 641
+> -- 264
+< -- 2
++ -- 103
+- -- 93
+* -- 671
+:= -- 1066
+add.period$ -- 16
+call.type$ -- 8
+change.case$ -- 70
+chr.to.int$ -- 8
+cite$ -- 8
+duplicate$ -- 561
+empty$ -- 590
+format.name$ -- 121
+if$ -- 1444
 int.to.chr$ -- 1
 int.to.str$ -- 1
-missing$ -- 29
-newline$ -- 16
-num.names$ -- 12
-pop$ -- 59
+missing$ -- 78
+newline$ -- 36
+num.names$ -- 32
+pop$ -- 147
 preamble$ -- 1
-purify$ -- 24
+purify$ -- 63
 quote$ -- 0
-skip$ -- 39
+skip$ -- 99
 stack$ -- 0
-substring$ -- 133
-swap$ -- 70
+substring$ -- 722
+swap$ -- 197
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 24
+type$ -- 69
 warning$ -- 0
-while$ -- 15
+while$ -- 45
 width$ -- 0
-write$ -- 38
-(There were 2 warnings)
+write$ -- 98

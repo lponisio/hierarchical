@@ -10,12 +10,12 @@ rmvn <- function(n, mu = 0, V = matrix(1)) {
 
 
 genSpatialOccData <- function(ngrid = 25,
-                              nreps = 5,
-                              alpha = 0.1,
+                              nreps = 10,
+                              alpha = 1,
                               beta1 = 2,
                               p = 0.6,
-                              sigma = 0.5,
-                              delta = 2){
+                              sigma = 1,
+                              delta = 0.5){
 
   ## Set up a square lattice region
   simgrid <- expand.grid(1:ngrid, 1:ngrid)
@@ -24,7 +24,7 @@ genSpatialOccData <- function(ngrid = 25,
   ## Set up distance matrix
   distance <- as.matrix(dist(simgrid))
 
-  ## Generate spatial random 
+  ## Generate spatial random
   X <- rmvn(1, rep(0, n),  (sigma^2)*exp(-delta * distance))
   Xraster <- rasterFromXYZ(cbind(simgrid[, 1:2] - 0.5, X))
 

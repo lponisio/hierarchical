@@ -4,9 +4,10 @@ source('src/initialize.R')
 library(rjags)
 load.module("msm")
 
+set.seed(444)
 dats <- genSpatialOccData()
 model.input <- prepModData(dats$data, dats$y, dats$distance,
-                           nsite=25)
+                           nsite=50)
 
 mexp <- nimbleFunction(
   run = function(A = double(2)){
@@ -17,7 +18,7 @@ mexp <- nimbleFunction(
 
 sp.mod <- nimbleCode({
   ## priors
-  delta ~ dunif(0, 10)
+  delta ~ dunif(0, 5)
   sigma ~ dunif(0, 10)
   p ~ dunif(0, 1)
   alpha ~ dnorm(0, 0.001)
@@ -71,7 +72,4 @@ sp.orig <- compareMCMCs(input1,
                         summary=FALSE,
                         check=FALSE)
 
-save(sp.orig, file="saved/orig.Rdata")
-
-checkChains(sp.orig[[1]]$samples,
-            f.path = "figures/chains/%s.pdf")
+save(sp.orig, file=file.path(save.dir, "orig.Rdata"))

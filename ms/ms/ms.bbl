@@ -1,5 +1,28 @@
-\begin{thebibliography}{3}
+\begin{thebibliography}{8}
 \providecommand{\natexlab}[1]{#1}
+
+\bibitem[{Bayarri \& Berger(2000)}]{bayarri-berger-00}
+Bayarri, M. \& Berger, J. (2000) P values for composite null models.
+\newblock \emph{Journal of the American Statistical Association}, \textbf{95},
+  1127--1142.
+
+\bibitem[{Hines \emph{et~al.}(2010)Hines, Nichols, Royle, MacKenzie,
+  Gopalaswamy, Kumar \& Karanth}]{hines2010tigers}
+Hines, J., Nichols, J., Royle, J., MacKenzie, D., Gopalaswamy, A., Kumar, N. \&
+  Karanth, K. (2010) Tigers on trails: occupancy modeling for cluster sampling.
+\newblock \emph{Ecological Applications}, \textbf{20}, 1456--1466.
+
+\bibitem[{Hjort \emph{et~al.}(2006)Hjort, Dahl \& Hognadottir}]{hjort-etal-06}
+Hjort, N.L., Dahl, F.A. \& Hognadottir, G. (2006) Post-processing posterior
+  predictive p values.
+\newblock \emph{Journal of the American Statistical Association}, \textbf{101},
+  1157--1174.
+
+\bibitem[{Iknayan \emph{et~al.}(2014)Iknayan, Tingley, Furnas \&
+  Beissinger}]{iknayan2014detecting}
+Iknayan, K.J., Tingley, M.W., Furnas, B.J. \& Beissinger, S.R. (2014) Detecting
+  diversity: emerging methods to estimate species diversity.
+\newblock \emph{Trends in ecology \& evolution}, \textbf{29}, 97--106.
 
 \bibitem[{MacKenzie \emph{et~al.}(2006)MacKenzie, Nichols, Royle, Pollock,
   Bailey \& Hines}]{mackenzie-2006}
@@ -14,6 +37,13 @@ M'Gonigle, L., Ponisio, L., Cutler, K. \& Kremen, C. (2015) Habitat restoration
   promotes pollinator persistence and colonization in intensively-managed
   agriculture.
 \newblock \emph{Ecol Appl}, \textbf{25}, 1557--1565.
+
+\bibitem[{Robins \emph{et~al.}(2000)Robins, van~der Vaart \&
+  Ventura}]{robins-etal-00}
+Robins, J., van~der Vaart, A. \& Ventura, V. (2000) Asymptotic distribution of
+  p values in composite null models.
+\newblock \emph{Journal of the American Statistical Association}, \textbf{95},
+  1143--1156.
 
 \bibitem[{Royle \& K\'ery(2007)}]{royle-2007-1813}
 Royle, A. \& K\'ery, M. (2007) A bayesian state-space formulation of dynamic
