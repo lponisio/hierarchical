@@ -43,7 +43,7 @@ ss.ms.occ <- nimbleCode({
 })
 
 input1 <- c(code=ss.ms.occ,
-           model.input)
+            model.input)
 
 ## *********************************************************************
 ## opt 2: add custom z sampler and slice on uniform(0,1) nodes
@@ -59,7 +59,7 @@ MCMCdefs.opt2 <- list('nimbleOpt2' = quote({
   zeroOneNodes <- Rmodel$getNodeNames(topOnly = TRUE)
   for(zon in zeroOneNodes) customSpec$addSampler(target = zon,
                                                  type =
-                                                   "slice",
+                                                 "slice",
                                                  print=FALSE)
   customSpec
 }))
@@ -82,52 +82,48 @@ MCMCdefs.opt2 <- list('nimbleOpt2' = quote({
 ## model assessment
 ## *********************************************************************
 ## build model
-R.model <- nimbleModel(code=ss.ms.occ,
+occ.R.model <- nimbleModel(code=ss.ms.occ,
                        constants=input1$constants,
                        data=input1$data,
                        inits=input1$inits,
                        check=FALSE)
 message('R model created')
 
-customSpec <- configureMCMC(R.model,
+customSpec <- configureMCMC(occ.R.model,
                             monitors=input1$monitors)
 customSpec$removeSamplers('phi', print=FALSE)
 customSpec$removeSamplers('gamma', print=FALSE)
 customSpec$removeSamplers('p', print=FALSE)
 customSpec$removeSamplers('psi1', print=FALSE)
 ## happens to be all top nodes
-zeroOneNodes <- R.model$getNodeNames(topOnly = TRUE)
+zeroOneNodes <- occ.R.model$getNodeNames(topOnly = TRUE)
 for(zon in zeroOneNodes) customSpec$addSampler(target = zon,
-                                                 type =
-                                                   "slice",
-                                                 print=FALSE)
+                                               type =
+                                               "slice",
+                                               print=FALSE)
 
-mcmc <- buildMCMC(customSpec)
+occ.mcmc <- buildMCMC(customSpec)
 message('MCMC built')
 
 ## compile model in C++
-C.model <- compileNimble(R.model)
-C.mcmc <- compileNimble(mcmc, project = R.model)
+occ.C.model <- compileNimble(occ.R.model)
+occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model)
 message('NIMBLE model compiled')
 
 source('../cppp/src/calcCPPP.R', chdir = TRUE)
 options(mc.cores=2)
 
-test.opt2 <- generateCPPP(R.model,
-             C.model,
-             C.mcmc,
-             mcmc,
-             dataName = 'y',
-             paramNames = input1$monitors, 
-             MCMCIter = 1000, 
-             NSamp = 100,
-             NPDist = 10,
-             thin = 1)
+test.opt2 <- generateCPPP(occ.R.model,
+                          occ.C.model,
+                          occ.C.mcmc,
+                          occ.mcmc,
+                          dataName = 'y',
+                          paramNames = input1$monitors, 
+                          MCMCIter = 100, 
+                          NSamp = 10,
+                          NPDist = 5,
+                          burnInProportion = 0.10,
+                          thin = 1)
 
-
-list(code=ss.ms.occ,
-               constants=constants,
-               data=model.data,
-               inits=inits)
 
 
