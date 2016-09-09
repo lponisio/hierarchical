@@ -67,15 +67,15 @@ MCMCdefs.opt2 <- list('nimbleOpt2' = quote({
 ## *********************************************************************
 ## run with compareMCMCs
 
-ss.ms.opt2 <- compareMCMCs(input1,
-                           MCMCs=c('nimbleOpt2'),
-                           MCMCdefs = MCMCdefs.opt2,
-                           niter= niter,
-                           burnin = burnin,
-                           summary=FALSE,
-                           check=FALSE)
+## ss.ms.opt2 <- compareMCMCs(input1,
+##                            MCMCs=c('nimbleOpt2'),
+##                            MCMCdefs = MCMCdefs.opt2,
+##                            niter= niter,
+##                            burnin = burnin,
+##                            summary=FALSE,
+##                            check=FALSE)
 
-save(ss.ms.opt2, file=file.path(save.dir, "opt2.Rdata"))
+## save(ss.ms.opt2, file=file.path(save.dir, "opt2.Rdata"))
 
 
 ## *********************************************************************

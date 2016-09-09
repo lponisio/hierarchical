@@ -44,7 +44,6 @@ generateCPPP <-  function(R.model,
     C.mcmc$run(MCMCIter)
     observedDisc <- C.averageFunc$run()
     if(!is.finite(observedDisc)) return(NA)
-
     otherDiscs <- C.pppFunc$run(NSamp)
     pre.pp <- mean(otherDiscs >= observedDisc)
     if(!is.finite(pre.pp))    pre.pp <- NA
