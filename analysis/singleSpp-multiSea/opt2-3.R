@@ -1,4 +1,4 @@
-rm(list=ls())
+# rm(list=ls())
 setwd("~/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea")
 source('src/initialize.R')
 
@@ -64,6 +64,13 @@ MCMCdefs.opt2 <- list('nimbleOpt2' = quote({
   customSpec
 }))
 
+simpSetMCMCDefs <- function(Rmodel, MCMCdefs, MCMCname) {
+  eval(MCMCdefs[[MCMCname]])
+}
+
+
+eval(MCMCdefs.opt2[['nimbleOpt2']])
+
 ## *********************************************************************
 ## run with compareMCMCs
 
@@ -87,21 +94,11 @@ occ.R.model <- nimbleModel(code=ss.ms.occ,
                        data=input1$data,
                        inits=input1$inits,
                        check=FALSE)
+
+
 message('R model created')
 
-customSpec <- configureMCMC(occ.R.model,
-                            monitors=input1$monitors)
-customSpec$removeSamplers('phi', print=FALSE)
-customSpec$removeSamplers('gamma', print=FALSE)
-customSpec$removeSamplers('p', print=FALSE)
-customSpec$removeSamplers('psi1', print=FALSE)
-## happens to be all top nodes
-zeroOneNodes <- occ.R.model$getNodeNames(topOnly = TRUE)
-for(zon in zeroOneNodes) customSpec$addSampler(target = zon,
-                                               type =
-                                               "slice",
-                                               print=FALSE)
-
+customSpec <- simpSetMCMCDefs(occ.R.model, MCMCdefs.opt2, 'nimbleOpt2')
 occ.mcmc <- buildMCMC(customSpec)
 message('MCMC built')
 
@@ -124,6 +121,4 @@ test.opt2 <- generateCPPP(occ.R.model,
                           NPDist = 5,
                           burnInProportion = 0.10,
                           thin = 1)
-
-
 

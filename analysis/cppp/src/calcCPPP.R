@@ -68,6 +68,8 @@ generateCPPP <-  function(R.model,
 
   burnIn <- ceiling(burnInProportion*(MCMCIter/thin))
   
+  origData <- nimble:::values(orig.C.model, dataNames)
+  
   ## sample posterior, simulate data from sample 
   paramDependencies <- orig.C.model$getDependencies(paramNames)
   mcmcMV <- orig.mcmc$mvSamples
@@ -115,6 +117,8 @@ generateCPPP <-  function(R.model,
 
   ## calculates the number of simulated ppp that fall below the obs
   out.cppp <- mean(obs.cppp <= sim.cppp, na.rm = TRUE)  
+  
+  nimble:::values(orig.C.model, dataNames) <- origData 
   
   return(list(cppp=out.cppp,
               obs=obs.cppp,
