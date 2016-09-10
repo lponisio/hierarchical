@@ -2,7 +2,7 @@ rm(list=ls())
 setwd("~/Dropbox/nimble/occupancy/analysis/spatial")
 source('src/initialize.R')
 
-set.seed(44)
+set.seed(444)
 dats <- genSpatialOccData()
 model.input <- prepModData(dats$data, dats$y, dats$distance,
                            nsite=50)
