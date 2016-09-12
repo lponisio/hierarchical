@@ -1,54 +1,78 @@
 library(parallel)
 ## draws a random number from the posterior, reassigned it as the
 ## paramter value, simulates data from the model
+
+discFuncGenerator <- nimbleFunction(
+  setup = function(model){},
+  run = function(){
+    output <- calculate(model)
+    returnType(double(0))
+    return(output)
+  }
+)
+
+discFuncGenerator <- nimbleFunction(
+  setup = function(model, ...){
+    params <- list(...)
+    dataNames <- params[[1]]
+  },
+  run = function(){
+    output <- max(values(model,dataNames))
+    returnType(double(0))
+    return(output)
+  }
+)
+
+
 pppFunc <- nimbleFunction(
   setup = function(model, dataNames, paramNames,
-    mcmcMV, MCMCIter, thin, burnIn){
+                   mcmcMV, MCMCIter, thin, burnIn, averageParams, ...){
     paramDependencies <- model$getDependencies(paramNames)
+    discFunc <- discFuncGenerator(model, ...)
   },
   run = function(N = integer(0)){
-    deviances <- numeric(N)
+    output <- numeric(N)
+    if(averageParams == 0){
+      discMean <- discFunc()
+    }
+    else{
+      mcmcSamps <-floor(MCMCIter/thin - burnIn)
+      discMean <- 0
+      for(i in 1:mcmcSamps){
+        copy(mcmcMV, model, paramNames, paramNames, row = i + burnIn)
+        discMean <- discMean + discFunc()
+      }
+      discMean <- discMean / mcmcSamps
+    }
+    if(is.nan(discMean)) return(NA)
     for(i in 1:N){
       randNum <- ceiling(runif(1, 0, (MCMCIter)/thin - burnIn - 1 ))
       nimCopy(mcmcMV, model, paramNames, row = burnIn + randNum)
       calculate(model, paramDependencies)
       simulate(model, dataNames, includeData = TRUE)
-      deviances[i] <- calculate(model)
+      deviance <- discFunc()
+      if(deviance >= discMean) output[i] <- 1
+      else output[i] <- 0
     }
-    return(deviances)
-    returnType(double(1))
+    out <- mean(output)
+    returnType(double(0))
+    return(out)
   })
 
 
 
-discAverageFunc <- nimbleFunction(
-  setup = function(model, paramNames, mcmcMV, MCMCIter, thin, burnIn){
-  },
-  run = function(){
-    mcmcSamps <-floor(MCMCIter/thin - burnIn)
-    discMean <- 0
-    for(i in 1:mcmcSamps){
-      copy(mcmcMV, model, paramNames, paramNames, row = i + burnIn)
-      discMean <- discMean + calculate(model)
-    }
-    discMean <- discMean / mcmcSamps
-    returnType(double(0))
-    return(discMean)
-  }
-  )
 
 ## calculate proportion of deviances that are greater or equal to the
 ## observed value
 calcCPPP <- function(MCMCIter,
                      NSamp,
                      C.pppFunc,
-                     C.averageFunc,
-                     cppp.C.mcmc){
-  cppp.C.mcmc$run(MCMCIter)
-  observedDisc <- C.averageFunc$run()
-  if(!is.finite(observedDisc)) return(NA)
-  otherDiscs <- C.pppFunc$run(NSamp)
-  pre.pp <- mean(otherDiscs >= observedDisc)
+                     cppp.C.mcmc,
+                     firstRun){
+  if(firstRun  == 0)
+    cppp.C.mcmc$run(MCMCIter)
+  
+  pre.pp <- C.pppFunc$run(NSamp)
   if(!is.finite(pre.pp))    pre.pp <- NA
   return(pre.pp)    
 }
@@ -64,7 +88,10 @@ generateCPPP <-  function(R.model,
                           NSamp,## number of samples from posterior
                           NPDist, ## number of simulated PPP values
                           burnInProportion, ## proportion of mcmc to drop
-                          thin,...){ ## thinning used in original mcmc run
+                          thin,
+                          discFuncGenerator, 
+                          averageParams, 
+                          ...){ ## thinning used in original mcmc run
 
   burnIn <- ceiling(burnInProportion*(MCMCIter/thin))
   
@@ -79,26 +106,29 @@ generateCPPP <-  function(R.model,
                           mcmcMV,
                           MCMCIter,
                           thin,
-                          burnIn)
+                          burnIn,
+                          averageParams,
+                          ...)
 
-  modelAverageFunc <- discAverageFunc(R.model,
-                                      paramNames,
-                                      mcmcMV,
-                                      MCMCIter,
-                                      thin,
-                                      burnIn)
+
+  # modelAverageFunc <- discAverageFunc(R.model,
+  #                                     paramNames,
+  #                                     mcmcMV,
+  #                                     MCMCIter,
+  #                                     thin,
+  #                                     burnIn)
 
   C.pppFunc <- compileNimble(modelpppFunc,
                              project = R.model)
-  C.averageFunc <- compileNimble(modelAverageFunc,
-                                 project = R.model)
+  # C.averageFunc <- compileNimble(modelAverageFunc,
+  #                                project = R.model)
 
   ## calculate deviances
   obs.cppp <- calcCPPP(MCMCIter,
                        NSamp,
                        C.pppFunc,
-                       C.averageFunc,
-                       orig.C.mcmc)
+                       orig.C.mcmc,
+                       firstRun = 1)
   print(obs.cppp)
 
   ## refits model with sampled data, reruns, enter inner loop,
@@ -109,8 +139,8 @@ generateCPPP <-  function(R.model,
     out <- calcCPPP(MCMCIter,
                     NSamp,
                     C.pppFunc,
-                    C.averageFunc,
-                    orig.C.mcmc)
+                    orig.C.mcmc,
+                    firstRun = 0)
     return(out)
   }
   sim.cppp <- unlist(lapply(1:NPDist, simPppDist))

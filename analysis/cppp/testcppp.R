@@ -44,6 +44,7 @@ message('MCMC built')
 ## compile model in C++
 D.model <- compileNimble(R.model)
 D.mcmc <- compileNimble(mcmc, project = R.model)
+D.mcmc$run(3000)
 message('NIMBLE model compiled')
 set.seed(4)
 output <- generateCPPP(R.model,
@@ -53,7 +54,9 @@ output <- generateCPPP(R.model,
              dataNames = 'x',
              paramNames = c('alpha','beta'), 
              MCMCIter = 3000, 
-             NSamp = 3000,
-             NPDist = 500,
+             NSamp = 100,
+             NPDist = 10,
              burnInProportion = .1,
-             thin = nthin)
+             thin = nthin,
+             averageParams = 1,
+             discArgs = c('alpha','beta'))
