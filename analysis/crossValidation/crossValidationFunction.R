@@ -1,4 +1,6 @@
+rm(list=ls())
 library(nimble)
+library(parallel)
 
 dyesCode <- nimbleCode({
   for (i in 1:BATCHES) {
@@ -23,7 +25,6 @@ data <- matrix(c(1545, 1540, 1595, 1445, 1595, 1520, 1440, 1555, 1550,
 
 dyesModel$setData(list(y = data))
 
-
 ## crossValCalculate <- function(row, MCMCOut, dataDimensions, saveData){
 ##   simDataArray <- array(MCMCOut[row,], dim = c(dataDimensions))
 ##   evalCode0 <- paste0("simData <- simDataArray[",rep(",", leaveOutIndex - 1), i, paste0(rep(",", length(dataDimensions) - leaveOutIndex)),"]")
@@ -32,8 +33,6 @@ dyesModel$setData(list(y = data))
 ##   return(discrep)
 ## }
 
-
-
 crossValCalculate <- function(row, MCMCOut, dataDimensions, saveData){
   simDataArray <- array(MCMCOut[row,], dim = c(dataDimensions))
   discrep <- sum((simDataArray - saveData)^2)
@@ -41,7 +40,8 @@ crossValCalculate <- function(row, MCMCOut, dataDimensions, saveData){
 }
 
 
-crossValidateOne <- function(model, dataNames,
+crossValidateOne <- function(model,
+                             dataNames,
                              MCMCIter,
                              burnIn, thin,
                              leaveOutIndex){
@@ -52,18 +52,13 @@ crossValidateOne <- function(model, dataNames,
   ## take the average of these for all data points? woo!
   newModel <- model$newModel()
   compileNimble(newModel)
-  modelMCMCConf <- configureMCMC(newModel, monitors = dataNames, thin = thin)
-  modelMCMC <- buildMCMC(modelMCMCConf)
-  C.modelMCMC <- compileNimble(modelMCMC,
-                               project = newModel)
-                               ## resetFunctions = (i != 1))
-  
   numBlocks <- newModel$getVarInfo(dataNames)[['maxs']][leaveOutIndex]
   dataDimensions <- newModel$getVarInfo(dataNames)[['maxs']]
   saveData <- array(values(newModel, dataNames), dim = c(dataDimensions))
 
   calcCrossVal <- function(i){
     tempData <- saveData
+    print(tempData)
     newModel$resetData()
     evalCode1 <- paste0("tempData[",rep(",", leaveOutIndex - 1), i,
                         paste0(rep(",", length(dataDimensions) -
@@ -72,23 +67,24 @@ crossValidateOne <- function(model, dataNames,
     evalCode2 <- paste0("modelDataList <- list(", dataNames, "= tempData)")
     eval(parse(text=evalCode2))
     newModel$setData(modelDataList)
-    ## modelMCMCConf <- configureMCMC(newModel, monitors = dataNames, thin = thin)
-    ## modelMCMC <- buildMCMC(modelMCMCConf)
-    ## C.modelMCMC <- compileNimble(modelMCMC,
-    ##                              project = newModel,
-    ##                              resetFunctions = (i != 1))
+    print(modelDataList)
+    modelMCMCConf <- configureMCMC(newModel,
+                                   monitors = dataNames, thin = thin)
+    modelMCMC <- buildMCMC(modelMCMCConf)
+    C.modelMCMC <- compileNimble(modelMCMC,
+                                 project = newModel,
+                                 resetFunctions = (i != 1))    
     C.modelMCMC$run(MCMCIter)
     MCMCout <- as.matrix(C.modelMCMC$mvSamples)
     sampNum <- dim(MCMCout)[1] 
-    crossValValue <- sapply(ceiling(burnIn/thin):sampNum,
+    crossValValue <- unlist(mclapply(ceiling(burnIn/thin):sampNum,
                             crossValCalculate, MCMCout,
-                            dataDimensions, saveData)
+                            dataDimensions, saveData))
     crossValAverage <- mean(crossValValue)
     return(crossValAverage)
   }
   crossVal <- mean(sapply(1:numBlocks, calcCrossVal))
-  ## model$setData(saveData)
-  return(crossValAverage)
+
+  return(crossVal)
 }
 output <- crossValidateOne(dyesModel, "y", 1000, 300, 2, 2)
-
