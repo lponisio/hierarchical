@@ -44,7 +44,17 @@ crossValidateOne <- function(model,
                              dataNames,
                              MCMCIter,
                              burnIn, thin,
-                             leaveOutIndex){
+                             leaveOutIndex
+                             MCMCdefs=NULL){
+  simpSetMCMCDefs <- function(Rmodel, MCMCdefs, MCMCname) {
+    eval(MCMCdefs[[MCMCname]])
+  }
+  if(!is.null(MCMCdefs){
+  ## eval(MCMCdefs.opt2[['nimbleOpt2']])
+    ## customSpec <- simpSetMCMCDefs(occ.R.model, MCMCdefs.opt2, 'nimbleOpt2')
+  }
+
+  
   ## fill in each element of data along leaveOutIndex with NAs.  then,
   ## data na values will be filled in as each mcmc runs.  These
   ## estimated data values can be compared to known data values, and
@@ -78,8 +88,8 @@ crossValidateOne <- function(model,
     MCMCout <- as.matrix(C.modelMCMC$mvSamples)
     sampNum <- dim(MCMCout)[1] 
     crossValValue <- unlist(mclapply(ceiling(burnIn/thin):sampNum,
-                            crossValCalculate, MCMCout,
-                            dataDimensions, saveData))
+                                     crossValCalculate, MCMCout,
+                                     dataDimensions, saveData))
     crossValAverage <- mean(crossValValue)
     return(crossValAverage)
   }

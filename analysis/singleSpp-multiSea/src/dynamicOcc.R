@@ -17,7 +17,7 @@ dbern_vec <- nimbleFunction(
   run = function(x = double(1),
     p = double(),
     length = double(),
-    log = integer(0, default = 0)) {
+    log = double(0, default = 0)) {
     if(length != dim(x)[1]) stop('In dbern_vec, length != length of x')
 
     ## For the scalar p case, one could also replace the following 6
@@ -41,7 +41,7 @@ dbern_vec <- nimbleFunction(
 ## note the n is really a dummy variable for future extensions.  we
 ## always treat it as 1.  It should not be used as the length needed
 rbern_vec <- nimbleFunction(
-  run = function(n = integer(), p = double(), length = double()) {
+  run = function(n = double(), p = double(), length = double()) {
     ans <- double(1)
     setSize(ans, length)
     for(i in 1:length) ans[i] <- rbinom(1, size = 1, prob = p)
@@ -64,7 +64,7 @@ registerDistributions(list(dbern_vec = list(
 dbern_matrix <- nimbleFunction(
   run = function(x = double(2),
     p = double(2),
-    log = integer(0, default = 0)) {
+    log = double(0, default = 0)) {
     nrow = dim(p)[1]
     ncol = dim(p)[2]
     if(nrow != dim(x)[1]){
@@ -85,7 +85,7 @@ dbern_matrix <- nimbleFunction(
   })
 
 rbern_matrix <- nimbleFunction(
-  run = function(n = integer(), p = double(2)) {
+  run = function(n = double(), p = double(2)) {
     ans = double(2)
     nrow = p[1]
     ncol = p[2]
@@ -115,12 +115,12 @@ dDynamicOccupancy <- nimbleFunction(
   ## I've checked that this runs and compiles, but I haven't tested if
   ## I got the logic right!
   run = function(x = double(2),
-    nrep = integer(),
+    nrep = double(),
     psi1 = double(),
     phi = double(1),
     gamma = double(1),
     p = double(1),
-    log = integer(0, default = 0)) {
+    log = double(0, default = 0)) {
     prob1 <- psi1 * p[1]
     numObs <- sum(x[,1]) ## do I have the right orientation?
     ## prob of the occupied sites out of the total sites given p
@@ -152,17 +152,16 @@ dDynamicOccupancy <- nimbleFunction(
   )
 
 rDynamicOccupancy <- nimbleFunction(
-  run = function(n = integer(),
-    nrep = integer(),
+  run = function(n = double(),
+    nrep = double(),
     psi1 = double(),
     phi = double(1),
     gamma = double(1),
     p = double(1),
-    log = integer(0, default = 0)) {
+    log = double(0, default = 0)) {
     nyear <- length(p)
-    ans <- double(2)
+    ans <- matrix()
     setSize(ans, nrep, nyear)
-    ## could populate ans here, but I'm just doing this as a placeholder
     returnType(double(2))
     return(ans)
   }
@@ -173,7 +172,7 @@ registerDistributions(list(
     BUGSdist = "dDynamicOccupancy(nrep, psi1, phi, gamma, p)",
     Rdist = "dDynamicOccupancy(nrep, psi1, phi, gamma, p)",
     types = c('value = double(2)',
-      'nrep = integer(0)',
+      'nrep = double(0)',
       'psi1 = double()',
       'phi = double(1)',
       'gamma = double(1)',

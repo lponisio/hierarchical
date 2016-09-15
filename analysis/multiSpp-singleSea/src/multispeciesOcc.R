@@ -7,7 +7,7 @@ dBernDetectionMatrix <- nimbleFunction(
     occProb = double(1),
     detectionProb = double(2),
     numReps = double(1),
-    log = double(0, default = 0)) {
+    log = double(0)) {
     returnType(double())
     num_points <- dim(x)[1]
     ans <- 0
@@ -33,13 +33,13 @@ dBernDetectionMatrix <- nimbleFunction(
     return(exp(ans))
   })
 
-## This is the corresponding "r" function for random simulation, which
-## we currently require but won't actually be used in this case
+## corresponding "r" function for random simulation
+
 rBernDetectionMatrix <- nimbleFunction(
-  run = function(n = integer(), occProb = double(1),
+  run = function(n = double(), occProb = double(1),
     detectionProb = double(2), numReps = double(1)) {
     returnType(double(2))
-    ans <- double(2)
+    ans <- matrix()
     num_points <- length(occProb)
     max_numReps <- dim(detectionProb)[2]
     setSize(ans, num_points, max_numReps)
@@ -70,7 +70,7 @@ registerDistributions(list(dBernDetectionMatrix = list(
                              types = c('value = double(2)',
                                'occProb = double(1)',
                                'detectionProb = double(2)',
-                               'numReps = integer(1)'))
+                               'numReps = double(1)'))
                            ))
 
 
