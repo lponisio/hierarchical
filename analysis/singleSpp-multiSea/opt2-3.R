@@ -1,5 +1,7 @@
 rm(list=ls())
-setwd("~/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea")
+#setwd("~/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea")
+setwd("C:/Users/iateb/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea")
+
 source('src/initialize.R')
 
 data <- genDynamicOccData()
@@ -92,6 +94,7 @@ occ.R.model <- nimbleModel(code=ss.ms.occ,
 occ.mcmc <- buildMCMC(occ.R.model)
 occ.C.model <- compileNimble(occ.R.model)
 occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model)
+occ.C.mcmc$run(10000)
 
 source('../cppp/src/calcCPPP.R', chdir = TRUE)
 options(mc.cores=1)
@@ -102,12 +105,12 @@ test.opt2 <- generateCPPP(occ.R.model,
                           occ.mcmc,
                           dataName = 'y',
                           paramNames = input1$monitors, 
-                          MCMCIter = 100, 
-                          NSamp = 10,
-                          NPDist = 5,
+                          MCMCIter = 10000, 
+                          NSamp = 1000,
+                          NPDist = 100,
                           burnInProportion = 0.10,
                           thin = 1,
                           averageParams = TRUE,
-                          discFuncGenerator=discFuncGenerator)
+                          discFuncGenerator=likeDiscFuncGenerator)
 
 
