@@ -4,7 +4,6 @@ setwd("~/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea")
 source('src/initialize.R')
 data <- genDynamicOccData()
 model.input <- prepModDataOcc(data, include.zs=FALSE)
-distributionsInputList <- nimble:::distributionsInputList
 
 ## *********************************************************************
 ##  Multi-season occupancy model: option 4-5 remove latent states using
@@ -36,12 +35,12 @@ ss.ms.occ <- nimbleCode({
   }
 })
 
+input1 <- c(code=ss.ms.occ,
+            model.input)
+
 ## *********************************************************************
 ## opt 4 run with compareMCMCs
 ## *********************************************************************
-
-input1 <- c(code=ss.ms.occ,
-            model.input)
 
 ss.ms.opt4 <- compareMCMCs(input1,
                            MCMCs=c('nimble', 'autoBlock', 'nimble_slice'),
@@ -78,12 +77,6 @@ MCMCdefs.opt5 <- list('nimbleOpt5' = quote({
 ## run with compareMCMCs
 ## *********************************************************************
 
-input1 <- list(code=ss.ms.occ,
-               constants=constants,
-               data=model.data,
-               inits=inits)
-
-
 ss.ms.opt5 <- compareMCMCs(input1,
                            MCMCs=c('nimbleOpt5'),
                            MCMCdefs = MCMCdefs.opt5,
@@ -97,44 +90,38 @@ save(ss.ms.opt5, file=file.path(save.dir, "opt5.Rdata"))
 
 ## *********************************************************************
 
-## build model
-R.model <- nimbleModel(code=ss.ms.occ,
-                       constants=constants,
-                       data=model.data,
-                       inits=inits,
+simpSetMCMCDefs <- function(Rmodel, MCMCdefs, MCMCname) {
+  eval(MCMCdefs[[MCMCname]])
+}
+
+occ.R.model <- nimbleModel(code=ss.ms.occ,
+                       constants=input1$constants,
+                       data=input1$data,
+                       inits=input1$inits,
                        check=FALSE)
-message('R model created')
 
-
-## configure and build mcmc
-mcmc.spec <- configureMCMC(R.model,
-                           print=FALSE,
-                           monitors = monitors,
-                           thin=1)
-mcmc <- buildMCMC(mcmc.spec)
-message('MCMC built')
+customSpec <- simpSetMCMCDefs(occ.R.model,
+                              MCMCdefs.opt5, 'nimbleOpt5')
+occ.mcmc <- buildMCMC(customSpec)
 
 ## compile model in C++
-C.model <- compileNimble(R.model)
-C.mcmc <- compileNimble(mcmc, project = R.model)
-message('NIMBLE model compiled')
+occ.C.model <- compileNimble(occ.R.model)
+occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model)
 
 source('../cppp/src/calcCPPP.R', chdir = TRUE)
-options(mc.cores=6)
+options(mc.cores=2)
 
-generateCPPP(R.model,
-             C.model,
-             C.mcmc,
-             mcmc,
-             dataName = 'y',
-             paramNames = monitors, 
-             MCMCIter = 1000, 
-             NSamp = 1000,
-             NPDist = 100,
-             thin = 1)
+opt5cppp <- generateCPPP(occ.R.model,
+                         occ.C.model,
+                         occ.C.mcmc,
+                         occ.mcmc,
+                         dataName = 'y',
+                         paramNames = input1$monitors, 
+                         MCMCIter = 100, 
+                         NSamp = 10,
+                         NPDist = 5,
+                         burnInProportion = 0.10,
+                         thin = 1,
+                         averageParams = 1,
+                         discArgs = input1$monitors)
 
-
-list(code=ss.ms.occ,
-               constants=constants,
-               data=model.data,
-               inits=inits)

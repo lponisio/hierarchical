@@ -146,8 +146,7 @@ prepMutiSpData <- function(survey.data,
                            species.groups,
                            habitat,
                            n.zeros,
-                           monitors = c('N', 'N.site', 'N.ground',
-                             'N.mid', 'mu.a1','mu.a2','mu.a3','mu.a4',
+                           monitors = c('N','mu.a1','mu.a2','mu.a3','mu.a4',
                              'sigma.a1','sigma.a2','sigma.a3','sigma.a4',
                              'cato.occ.mean', 'fcw.occ.mean',
                              'cato.det.mean', 'fcw.det.mean',
@@ -169,7 +168,7 @@ prepMutiSpData <- function(survey.data,
 
   ## Z data for whether or not a species was ever observed
   ## zs with 1s as 1s and 0s as NAs
-  zs <- apply(data$X, c(1, 3), max)
+  zs <- apply(data$X, c(1, 3), max, rm.na=TRUE)
   zs[zs == 0] <- NA
 
   model.data <- list(Z = zs,

@@ -3,10 +3,6 @@
 ##                ref = "devel",
 ##                subdir = "packages/nimble")
 
-## install_github("lponisio/nimble",
-##                ref = "userDistWorkArnd",
-##                subdir = "packages/nimble")
-
 library(nimble)
 library(igraph)
 library(reshape)
@@ -16,7 +12,7 @@ source('../all/samplers/sampler_RW_shift.R')
 source("src/reformatData.R")
 source("src/multispeciesOcc.R")
 
-save.dir <-  "../../saved/multiSpp-singleSea/saved"
+save.dir <-  "../../../saved/multiSpp-singleSea/saved"
 
 survey.data <- read.csv("data/occupancy_data.csv")
 species.groups <- read.csv("data/species_groups.csv")

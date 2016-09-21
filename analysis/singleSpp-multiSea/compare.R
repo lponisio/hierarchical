@@ -1,5 +1,7 @@
 rm(list=ls())
+library(nimble)
 setwd("~/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea")
+source('../all/plotting.R')
 save.dir <- "../../../saved/singleSpp-multiSea/saved"
 
 ## original model jags and nimble
@@ -41,3 +43,9 @@ ss.ms.occ.all <- combine_MCMC_comparison_results(ss.ms.orig[[1]],
 
 make_MCMC_comparison_pages(ss.ms.occ.all,
                            dir=file.path(save.dir, "../figures/comparisons"))
+
+
+checkChains(ss.ms.occ.all[[1]]$samples,
+            f.path = file.path(save.dir,
+            "../figures/chains/%s.pdf")
+)

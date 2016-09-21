@@ -1,4 +1,4 @@
-# rm(list=ls())
+rm(list=ls())
 setwd("~/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea")
 source('src/initialize.R')
 
@@ -13,7 +13,6 @@ ss.ms.occ <- nimbleCode({
   ## Specify priors
   psi1 ~ dunif(0, 1)
   
-  psi[1] <- psi1
   for(k in 1:(nyear-1)){
     phi[k] ~ dunif(0, 1)
     gamma[k] ~ dunif(0, 1)
@@ -64,13 +63,6 @@ MCMCdefs.opt2 <- list('nimbleOpt2' = quote({
   customSpec
 }))
 
-simpSetMCMCDefs <- function(Rmodel, MCMCdefs, MCMCname) {
-  eval(MCMCdefs[[MCMCname]])
-}
-
-
-eval(MCMCdefs.opt2[['nimbleOpt2']])
-
 ## *********************************************************************
 ## run with compareMCMCs
 
@@ -89,26 +81,20 @@ eval(MCMCdefs.opt2[['nimbleOpt2']])
 ## model assessment
 ## *********************************************************************
 ## build model
+
 occ.R.model <- nimbleModel(code=ss.ms.occ,
-                       constants=input1$constants,
-                       data=input1$data,
-                       inits=input1$inits,
-                       check=FALSE)
-
-
-message('R model created')
-
-customSpec <- simpSetMCMCDefs(occ.R.model, MCMCdefs.opt2, 'nimbleOpt2')
-occ.mcmc <- buildMCMC(customSpec)
-message('MCMC built')
-
-## compile model in C++
+                           constants=input1$constants,
+                           data=input1$data,
+                           inits=input1$inits,
+                           check=FALSE)
+## ad auto blocking
+## customSpec <- configureMCMC(occ.R.model, autoBlock=TRUE)
+occ.mcmc <- buildMCMC(occ.R.model)
 occ.C.model <- compileNimble(occ.R.model)
 occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model)
-message('NIMBLE model compiled')
 
 source('../cppp/src/calcCPPP.R', chdir = TRUE)
-options(mc.cores=2)
+options(mc.cores=1)
 
 test.opt2 <- generateCPPP(occ.R.model,
                           occ.C.model,
@@ -120,5 +106,8 @@ test.opt2 <- generateCPPP(occ.R.model,
                           NSamp = 10,
                           NPDist = 5,
                           burnInProportion = 0.10,
-                          thin = 1)
+                          thin = 1,
+                          averageParams = TRUE,
+                          discFuncGenerator=discFuncGenerator)
+
 

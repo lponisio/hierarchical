@@ -77,8 +77,7 @@ genDynamicOccData <- function(R = 250,
 
 ## prep data for nimble model
 prepModDataOcc <- function(data,
-                           monitors = c("psi",
-                             "phi",
+                           monitors = c("psi1", "phi",
                              "gamma",
                              "p"),
                            include.zs=TRUE){

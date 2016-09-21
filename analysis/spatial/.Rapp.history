@@ -1,14 +1,209 @@
 rm(list=ls())#
+library(nimble)#
+setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
+source('../all/plotting.R')#
+save.dir <-  "../../../saved/spatial/saved"#
+#
+## original model jags and nimble#
+load(file=file.path(save.dir, "orig.Rdata"))#
+#
+## vanilla nimble and auto block#
+load(file=file.path(save.dir, "opt1.Rdata"))#
+#
+## custom sampler for zs, slice for other parms#
+load(file=file.path(save.dir, "opt2.Rdata"))#
+#
+## rename results#
+sp.opt2[[1]] <- rename_MCMC_comparison_method('nimbleOpt2',#
+                                                 'slice',#
+                                                 comparison=sp.opt2[[1]])#
+## compare mcmcs#
+sp.occ.all <- combine_MCMC_comparison_results(sp.orig[[1]],#
+                                                 sp.opt1[[1]],#
+                                                 sp.opt2[[1]],#
+                                                 name = "sp" )#
+make_MCMC_comparison_pages(sp.occ.all,#
+                           dir=file.path(save.dir,#
+                             "../figures/comparisons"))#
+#
+checkChains(sp.occ.all[[1]]$samples,#
+            f.path = file.path(save.dir,#
+            "../figures/chains/%s.pdf"))
+seq(1:nrow(100), 10)
+seq(1:100, 10)
+seq(from=1, to=100, 10)
+rm(list=ls())#
 setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
 source('src/initialize.R')#
 #
-set.seed(4)#
+set.seed(444)#
 dats <- genSpatialOccData()#
 model.input <- prepModData(dats$data, dats$y, dats$distance,#
-                           nsite=25)
-X <- rmvn(1, rep(0, n),  (sigma^2)*exp(-delta * distance))#
-  Xraster <- rasterFromXYZ(cbind(simgrid[, 1:2] - 0.5, X))
-head(X)
-plot(Xraster)
-x
-X
+                           nsite=50)#
+#
+sp.mod <- nimbleCode({#
+  ## priors#
+  delta ~ dunif(0, 10)#
+  sigma ~ dunif(0, 10)#
+  p ~ dunif(0, 1)#
+  alpha ~ dnorm(0, 0.001)#
+  b1 ~ dnorm(0, 0.001)#
+#
+  ## Likelihood#
+  ## Ecological model for true occurrence#
+  for (i in 1:nsite) {#
+    z[i] ~ dbern(psi[i])#
+    logit(psi[i]) <- alpha + b1*elev[i] + rho[i]#
+    p.eff[i] <- z[i] * p#
+#
+    ## Observation model for replicated detection/nondetection#
+    ## observations#
+    for (j in 1:nreps) {#
+      y[i,j] ~ dbern(p.eff[i])#
+    }#
+  }#
+#
+  rho[1:nsite] ~ dmnorm(zeros[1:nsite],#
+                        cov = D.cov[1:nsite, 1:nsite])#
+#
+  ## derived quantities#
+  ## turning the distance matrix to covariance matrix#
+  D.cov[1:nsite, 1:nsite] <- (sigma^2)*exp(-delta*D[1:nsite, 1:nsite])#
+})#
+#
+input1 <- c(code=sp.mod,#
+            model.input)
+rm(list=ls())#
+setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
+source('src/initialize.R')#
+#
+set.seed(444)#
+dats <- genSpatialOccData()#
+model.input <- prepModData(dats$data, dats$y, dats$distance,#
+                           nsite=50)#
+#
+sp.mod <- nimbleCode({#
+  ## priors#
+  delta ~ dunif(0, 10)#
+  sigma ~ dunif(0, 10)#
+  p ~ dunif(0, 1)#
+  alpha ~ dnorm(0, 0.001)#
+  b1 ~ dnorm(0, 0.001)#
+#
+  ## Likelihood#
+  ## Ecological model for true occurrence#
+  for (i in 1:nsite) {#
+    z[i] ~ dbern(psi[i])#
+    logit(psi[i]) <- alpha + b1*elev[i] + rho[i]#
+    p.eff[i] <- z[i] * p#
+#
+    ## Observation model for replicated detection/nondetection#
+    ## observations#
+    for (j in 1:nreps) {#
+      y[i,j] ~ dbern(p.eff[i])#
+    }#
+  }#
+#
+  rho[1:nsite] ~ dmnorm(zeros[1:nsite],#
+                        cov = D.cov[1:nsite, 1:nsite])#
+#
+  ## derived quantities#
+  ## turning the distance matrix to covariance matrix#
+  D.cov[1:nsite, 1:nsite] <- (sigma^2)*exp(-delta*D[1:nsite, 1:nsite])#
+})#
+#
+input1 <- c(code=sp.mod,#
+            model.input)#
+#
+## *********************************************************************#
+## opt 1:vanilla nimble and auto block#
+## *********************************************************************#
+#
+sp.opt1 <- compareMCMCs(input1,#
+                        MCMCs=c("nimble", "autoBlock"),#
+                        niter=niter,#
+                        burnin = burnin,#
+                        summary=FALSE,#
+                        check=FALSE)
+rm(list=ls())#
+setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
+source('src/initialize.R')#
+#
+set.seed(444)#
+dats <- genSpatialOccData()#
+model.input <- prepModData(dats$data, dats$y, dats$distance,#
+                           nsite=50)
+sites <- seq(from=1, to=nrow(fulldata), nsite)
+sites
+sites <- seq(from=10, to=nrow(fulldata), nsite)
+sites
+y <- y[sites,]
+y
+nsite
+sites <- seq(from=10, to=nrow(fulldata), length=nsite)
+sites
+sites <- round(seq(from=10, to=nrow(fulldata), length=nsite))
+sites
+sites <- round(seq(from=1, to=nrow(fulldata), length=nsite))
+sites
+y <- y[sites,]
+Q
+rm(list=ls())#
+setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
+source('src/initialize.R')#
+#
+set.seed(444)#
+dats <- genSpatialOccData()#
+model.input <- prepModData(dats$data, dats$y, dats$distance,#
+                           nsite=50)
+rm(list=ls())#
+setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
+source('src/initialize.R')#
+#
+set.seed(444)#
+dats <- genSpatialOccData()#
+model.input <- prepModData(dats$data, dats$y, dats$distance,#
+                           nsite=50)#
+#
+sp.mod <- nimbleCode({#
+  ## priors#
+  delta ~ dunif(0, 10)#
+  sigma ~ dunif(0, 10)#
+  p ~ dunif(0, 1)#
+  alpha ~ dnorm(0, 0.001)#
+  b1 ~ dnorm(0, 0.001)#
+#
+  ## Likelihood#
+  ## Ecological model for true occurrence#
+  for (i in 1:nsite) {#
+    z[i] ~ dbern(psi[i])#
+    logit(psi[i]) <- alpha + b1*elev[i] + rho[i]#
+    p.eff[i] <- z[i] * p#
+#
+    ## Observation model for replicated detection/nondetection#
+    ## observations#
+    for (j in 1:nreps) {#
+      y[i,j] ~ dbern(p.eff[i])#
+    }#
+  }#
+#
+  rho[1:nsite] ~ dmnorm(zeros[1:nsite],#
+                        cov = D.cov[1:nsite, 1:nsite])#
+#
+  ## create covariance matrix based on distances#
+  D.cov[1:nsite, 1:nsite] <- (sigma^2)*exp(-delta*D[1:nsite, 1:nsite])#
+})#
+#
+input1 <- c(code=sp.mod,#
+            model.input)#
+#
+## *********************************************************************#
+## opt 1:vanilla nimble and auto block#
+## *********************************************************************#
+#
+sp.opt1 <- compareMCMCs(input1,#
+                        MCMCs=c("nimble", "autoBlock"),#
+                        niter=niter,#
+                        burnin = burnin,#
+                        summary=FALSE,#
+                        check=FALSE)

@@ -18,7 +18,7 @@ mexp <- nimbleFunction(
 
 sp.mod <- nimbleCode({
   ## priors
-  delta ~ dunif(0, 5)
+  delta ~ dunif(0.1, 5)
   sigma ~ dunif(0, 10)
   p ~ dunif(0, 1)
   alpha ~ dnorm(0, 0.001)
@@ -41,8 +41,10 @@ sp.mod <- nimbleCode({
   rho[1:nsite] ~ dmnorm(zeros[1:nsite],
                         D.tau[1:nsite, 1:nsite])
 
-  ## derived quantities
-  ## turning the distance matrix to covariance matrix
+  ## create covariance matrix based on distances (must be 1/cov for
+  ## JAGS)
+
+  ## mexp is jags's version fo matrix exponentiation, veyr sensitive 
   ## temp.cov[1:nsite, 1:nsite] <- -delta*D[1:nsite, 1:nsite]
   ## D.cov[1:nsite, 1:nsite]  <- (sigma^2)*mexp(-delta*D[1:nsite, 1:nsite])
 

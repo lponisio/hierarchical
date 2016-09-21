@@ -3,8 +3,6 @@ library(nimble)
 library(parallel)
 options(mc.cores=2)
 nthin <- 2
-source('~/Dropbox/occupancy-nimble/cppp/src/calcCPPP.R')
-
 
 pumpCode <- nimbleCode({
   for (i in 1:N){
@@ -46,17 +44,41 @@ D.model <- compileNimble(R.model)
 D.mcmc <- compileNimble(mcmc, project = R.model)
 D.mcmc$run(3000)
 message('NIMBLE model compiled')
+
+source('~/Dropbox/nimble/occupancy/analysis/cppp/src/calcCPPP.R')
 set.seed(4)
+
 output <- generateCPPP(R.model,
-             D.model,
-             D.mcmc,
-             mcmc,
-             dataNames = 'x',
-             paramNames = c('alpha','beta'), 
-             MCMCIter = 3000, 
-             NSamp = 100,
-             NPDist = 10,
-             burnInProportion = .1,
-             thin = nthin,
-             averageParams = 1,
-             discArgs = c('alpha','beta'))
+                       D.model,
+                       D.mcmc,
+                       mcmc,
+                       dataNames = 'x',
+                       paramNames = c('alpha','beta'), 
+                       MCMCIter = 3000, 
+                       NSamp = 100,
+                       NPDist = 10,
+                       burnInProportion = 0.1,
+                       thin = nthin,
+                       averageParams = TRUE,
+                       discFuncGenerator=likDiscFuncGenerator)
+
+
+
+output <- generateCPPP(R.model,
+                       D.model,
+                       D.mcmc,
+                       mcmc,
+                       dataNames = 'x',
+                       paramNames = c('alpha','beta'), 
+                       MCMCIter = 3000, 
+                       NSamp = 100,
+                       NPDist = 10,
+                       burnInProportion = 0.1,
+                       thin = nthin,
+                       averageParams = FALSE,
+                       discFuncGenerator=maxDiscFuncGenerator,
+                        discArgs = c('alpha','beta'))
+
+
+## for max discFunction
+## discArgs = c('alpha','beta')

@@ -70,9 +70,7 @@ ms.ss.occ <- nimbleCode({
     b1[i] ~ dnorm(mu.b1, sd=sigma.b1)
     b2[i] ~ dnorm(mu.b2, sd=sigma.b2)
 
-    ## Major change: We can vectorize the calculation of psi.  This
-    ## means we don't need the for loop.  It reduces the number of
-    ## nodes in the model by a factor of num.points
+    ## vectorize the calculation of psi.
     logit(psi[1:num.points,i]) <-
       u.cato[i]*(1-habitat.ind[1:num.points]) +
         u.fcw[i]*habitat.ind[1:num.points] +
@@ -80,10 +78,10 @@ ms.ss.occ <- nimbleCode({
             a2[i]*ufc.quadratic[1:num.points] +
               a3[i]*ba.linear[1:num.points] +
                 a4[i]*ba.quadratic[1:num.points]
-    ## We can also vectorize this
+    ## vectorized calculation
     mu.psi[1:num.points,i] <- psi[1:num.points, i]
 
-    ## and this: For our purpose a better way to write this way is to
+    ## For our purpose a better way to write this way is to
     ## not worry that some elements of date.linear and date.quadratic
     ## aren't used, since the benefit of vectorizing the computation
     ## should be much greater than the cost of a few extra elements
@@ -94,22 +92,17 @@ ms.ss.occ <- nimbleCode({
            b1[i]*date.linear[1:num.points,1:max.num.reps] +
              b2[i]*date.quadratic[1:num.points,1:max.num.reps]
 
-    ## This is the biggest change: We can write our own distribution
-    ## to combine the bernoulli occupancy and detection events.  We
-    ## can also make this is a single compuation for the entire matrix
-    ## of locations-x-visits, for each species (i) The code to define
-    ## dBernDetectionMatrix is below
-
+    ## user defined distribution to combine the bernoulli occupancy
+    ## and detection events.  We can also make this is a single
+    ## compuation for the entire matrix of locations-x-visits, for
+    ## each species (i)
+    
     X[1:num.points, 1:max.num.reps, i] ~ dBernDetectionMatrix(
       occProb = mu.psi[1:num.points,i],
       detectionProb = p[1:num.points, 1:max.num.reps,i],
       numReps = num.reps[1:num.points])
   }
   ## Derived quantities:
-  ## since we don't have Z's any more, I'm going to define these
-  ## derived quantities differently, as expected values.  One could
-  ## simply generate Z's at this predictive stage to capture that
-  ## additional variation or figure out derived quantities as wanted
   ## for(j in 1:num.points){
   ##   N.site[j]<- sum(mu.psi[j,1:(num.species)])
   ##   N.ground[j]<- sum(mu.psi[j,1:num.species] * ground[1:num.species])

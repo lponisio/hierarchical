@@ -9,7 +9,7 @@ model.input <- prepModData(dats$data, dats$y, dats$distance,
 
 sp.mod <- nimbleCode({
   ## priors
-  delta ~ dunif(0, 5)
+  delta ~ dunif(0.1, 5)
   sigma ~ dunif(0, 10)
   p ~ dunif(0, 1)
   alpha ~ dnorm(0, 0.001)
@@ -32,8 +32,7 @@ sp.mod <- nimbleCode({
   rho[1:nsite] ~ dmnorm(zeros[1:nsite],
                         cov = D.cov[1:nsite, 1:nsite])
 
-  ## derived quantities
-  ## turning the distance matrix to covariance matrix
+  ## create covariance matrix based on distances
   D.cov[1:nsite, 1:nsite] <- (sigma^2)*exp(-delta*D[1:nsite, 1:nsite])
   
 })

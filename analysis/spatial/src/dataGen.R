@@ -24,7 +24,7 @@ genSpatialOccData <- function(ngrid = 25,
   ## Set up distance matrix
   distance <- as.matrix(dist(simgrid))
 
-  ## Generate spatial random
+  ## Generate spatial random effect
   X <- rmvn(1, rep(0, n),  (sigma^2)*exp(-delta * distance))
   Xraster <- rasterFromXYZ(cbind(simgrid[, 1:2] - 0.5, X))
 
@@ -62,12 +62,13 @@ genSpatialOccData <- function(ngrid = 25,
 }
 
 
-## preps data from nimble
+## preps data for nimble
 prepModData <- function(fulldata, y, distance, nsite,
                         monitors=c("delta", "sigma", "psi",
                           "p", "alpha", "b1")){
-  ## subsample at "sites"
-  sites <- sample(1:nrow(fulldata), nsite)
+  ## subsample at "sites" (create a grid of sites to avoid any that
+  ## are too close to eachother)
+  sites <- round(seq(from=1, to=nrow(fulldata), length=nsite))
   y <- y[sites,]
   
   ## data zs with 0s set to NAs

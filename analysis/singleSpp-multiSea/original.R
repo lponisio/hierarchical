@@ -1,7 +1,10 @@
 rm(list=ls())
-gctorture()
 setwd("~/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea")
 source('src/initialize.R')
+
+data <- genDynamicOccData()
+model.input <- prepModDataOcc(data)
+
 
 ## *********************************************************************
 ##  original multi-season occupancy : JAGS & NIMBLE
@@ -52,17 +55,15 @@ ss.ms.occ <- nimbleCode({
 ## *********************************************************************
 ## orginal model in nimble
 
-input.nim <- list(code=ss.ms.occ,
-                       constants=constants,
-                       data=model.data,
-                       inits=inits)
+input1 <- c(code=ss.ms.occ,
+            model.input)
 
 
-ss.ms.orig <- compareMCMCs(input.nim,
-                                MCMCs=c('jags','nimble', 'autoBlock'),
-                                niter=niter,
-                                burnin = burnin,
-                                summary=FALSE,
+ss.ms.orig <- compareMCMCs(input1,
+                           MCMCs=c('jags','nimble'),
+                           niter=niter,
+                           burnin = burnin,
+                           summary=FALSE,
                            check=FALSE)
 
 save(ss.ms.orig, file=file.path(save.dir, "orig.Rdata"))

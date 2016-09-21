@@ -1,148 +1,17 @@
-library(devtools)#
-install_github("nimble-dev/nimble",#
-               ref = "devel",#
-               subdir = "packages/nimble")
-rm(list=ls()) #
-setwd('~/Dropbox/nimble/occupancy/analysis/multiSpp-singleSea')#
-#
-source('src/initialize.R')#
-## don't agument data#
-n.zeroes <- 0#
-model.input <- prepMutiSpData(survey.data,#
-                              survey.dates,#
-                              species.groups,#
-                              habitat,#
-                              n.zeros)#
-#
-## *********************************************************************#
-## multi-species site-occupancy models: vectorized with custom#
-## function to remove zs#
-## *********************************************************************#
-#
-ms.ss.occ <- nimbleCode({#
-  ## Define prior distributions for community-level model parameters#
-  cato.occ.mean ~ dunif(0,1)#
-  mu.ucato <- log(cato.occ.mean) - log(1-cato.occ.mean)#
-#
-  fcw.occ.mean ~ dunif(0,1)#
-  mu.ufcw <- log(fcw.occ.mean) - log(1-fcw.occ.mean)#
-#
-  cato.det.mean ~ dunif(0,1)#
-  mu.vcato <- log(cato.det.mean) - log(1-cato.det.mean)#
-#
-  fcw.det.mean ~ dunif(0,1)#
-  mu.vfcw <- log(fcw.det.mean) - log(1-fcw.det.mean)#
-#
-  ## random effects#
-  sigma.ucato ~ dunif(0, 100)#
-  sigma.ufcw ~ dunif(0, 100)#
-  mu.a1 ~ dnorm(0, 0.001)#
-  sigma.a1 ~ dunif(0, 100)#
-  mu.a2 ~ dnorm(0, 0.001)#
-  sigma.a2 ~ dunif(0, 100)#
-  mu.a3 ~ dnorm(0, 0.001)#
-  sigma.a3 ~ dunif(0, 100)#
-  mu.a4 ~ dnorm(0, 0.001)#
-  sigma.a4 ~ dunif(0, 100)#
-#
-  sigma.vcato ~ dunif(0, 100)#
-  sigma.vfcw ~ dunif(0, 100)#
-  mu.b1 ~ dnorm(0, 0.001)#
-  sigma.b1 ~ dunif(0, 100)#
-  mu.b2 ~ dnorm(0, 0.001)#
-  sigma.b2 ~ dunif(0, 100)#
-  for (i in 1:(num.species)) {#
-    ## Create priors for species i from the community level prior#
-    ## distributions#
-#
-    u.cato[i] ~ dnorm(mu.ucato, sd=sigma.ucato)#
-    u.fcw[i] ~ dnorm(mu.ufcw, sd=sigma.ufcw)#
-    a1[i] ~ dnorm(mu.a1, sd=sigma.a1)#
-    a2[i] ~ dnorm(mu.a2, sd=sigma.a2)#
-    a3[i] ~ dnorm(mu.a3, sd=sigma.a3)#
-    a4[i] ~ dnorm(mu.a4, sd=sigma.a4)#
-#
-    v.cato[i] ~ dnorm(mu.vcato, sd=sigma.vcato)#
-    v.fcw[i] ~ dnorm(mu.vfcw, sd=sigma.vfcw)#
-    b1[i] ~ dnorm(mu.b1, sd=sigma.b1)#
-    b2[i] ~ dnorm(mu.b2, sd=sigma.b2)#
-#
-    ## Major change: We can vectorize the calculation of psi.  This#
-    ## means we don't need the for loop.  It reduces the number of#
-    ## nodes in the model by a factor of num.points#
-    logit(psi[1:num.points,i]) <-#
-      u.cato[i]*(1-habitat.ind[1:num.points]) +#
-        u.fcw[i]*habitat.ind[1:num.points] +#
-          a1[i]*ufc.linear[1:num.points] +#
-            a2[i]*ufc.quadratic[1:num.points] +#
-              a3[i]*ba.linear[1:num.points] +#
-                a4[i]*ba.quadratic[1:num.points]#
-    ## We can also vectorize this#
-    mu.psi[1:num.points,i] <- psi[1:num.points, i]#
-#
-    ## and this: For our purpose a better way to write this way is to#
-    ## not worry that some elements of date.linear and date.quadratic#
-    ## aren't used, since the benefit of vectorizing the computation#
-    ## should be much greater than the cost of a few extra elements#
-    logit(p[1:num.points, 1:max.num.reps, i]) <-#
-      (v.cato[i]*(1-habitat.ind[1:num.points]) +#
-       v.fcw[i]*habitat.ind[1:num.points]) %*%#
-         asRow(onesRow[1, 1:max.num.reps])+#
-           b1[i]*date.linear[1:num.points,1:max.num.reps] +#
-             b2[i]*date.quadratic[1:num.points,1:max.num.reps]#
-#
-    ## This is the biggest change: We can write our own distribution#
-    ## to combine the bernoulli occupancy and detection events.  We#
-    ## can also make this is a single compuation for the entire matrix#
-    ## of locations-x-visits, for each species (i) The code to define#
-    ## dBernDetectionMatrix is below#
-#
-    X[1:num.points, 1:max.num.reps, i] ~ dBernDetectionMatrix(#
-      occProb = mu.psi[1:num.points,i],#
-      detectionProb = p[1:num.points, 1:max.num.reps,i],#
-      numReps = num.reps[1:num.points])#
-  }#
-  ## Derived quantities:#
-  ## since we don't have Z's any more, I'm going to define these#
-  ## derived quantities differently, as expected values.  One could#
-  ## simply generate Z's at this predictive stage to capture that#
-  ## additional variation or figure out derived quantities as wanted#
-  ## for(j in 1:num.points){#
-  ##   N.site[j]<- sum(mu.psi[j,1:(num.species)])#
-  ##   N.ground[j]<- sum(mu.psi[j,1:num.species] * ground[1:num.species])#
-  ##   N.mid[j]<- sum(mu.psi[j,1:num.species] * mid[1:num.species])#
-  ## }#
-})#
-input1 <- c(code=ms.ss.occ, model.input)#
-## *********************************************************************#
-## option 1 (vanilla NIMBLE) using compare MCMC#
-## *********************************************************************#
-#
-ms.ss.opt1 <- compareMCMCs(input1,#
-                           MCMCs=c('nimble', 'autoBlock'),#
-                           niter=niter,#
-                           burnin = burnin,#
-                           summary=FALSE,#
-                           check=FALSE)
-Q
 rm(list=ls())#
-#
 setwd("~/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea")#
 source('src/initialize.R')#
+#
 data <- genDynamicOccData()#
-model.input <- prepModDataOcc(data, include.zs=FALSE)#
-distributionsInputList <- nimble:::distributionsInputList#
+model.input <- prepModDataOcc(data)#
 #
 ## *********************************************************************#
-##  Multi-season occupancy model: option 4-5 remove latent states using#
-##  user-defined NIMBLE function#
-##  *********************************************************************#
+##  Multi-season occupancy model: custom z sampler#
+## *********************************************************************#
 #
-## Specify model in NIMBLE#
 ss.ms.occ <- nimbleCode({#
-  ##  priors#
+  ## Specify priors#
   psi1 ~ dunif(0, 1)#
-#
   psi[1] <- psi1#
   for(k in 1:(nyear-1)){#
     phi[k] ~ dunif(0, 1)#
@@ -152,27 +21,89 @@ ss.ms.occ <- nimbleCode({#
   p[nyear] ~ dunif(0, 1)#
 #
   ## Ecological submodel: Define state conditional on parameters#
-  for(i in 1:nsite) {#
-    ## removes the z's and muZ's from the model and compute#
-    ## the probability of all reps over all years for one site.#
-    y[i, 1:nrep, 1:nyear] ~ dDynamicOccupancy(nrep,#
-                                              psi1,#
-                                              phi[1:(nyear-1)],#
-                                              gamma[1:(nyear-1)],#
-                                              p[1:nyear])#
+  for (i in 1:nsite){#
+    z[i,1] ~ dbern(psi1)#
+    for (k in 2:nyear){#
+      muZ[i,k]<- z[i,k-1]*phi[k-1] + (1-z[i,k-1])*gamma[k-1]#
+      z[i,k] ~ dbern(muZ[i,k])#
+    }#
   }#
-})#
 #
-## *********************************************************************#
-## opt 4 run with compareMCMCs#
-## *********************************************************************#
+  ## Observation model#
+  for (i in 1:nsite){#
+    for (j in 1:nrep){#
+      for (k in 1:nyear){#
+        muy[i,j,k] <- z[i,k]*p[k]#
+        y[i,j,k] ~ dbern(muy[i,j,k])#
+      }#
+    }#
+  }#
+#
+})#
 #
 input1 <- c(code=ss.ms.occ,#
             model.input)#
 #
-ss.ms.opt4 <- compareMCMCs(input1,#
-                           MCMCs=c('nimble', 'autoBlock', 'nimble_slice'),#
-                           niter=niter,#
-                           burnin = burnin,#
-                           summary=FALSE,#
-                           check=FALSE)
+## *********************************************************************#
+## opt 2: add custom z sampler and slice on uniform(0,1) nodes#
+## *********************************************************************#
+#
+## MCMCdefs.opt2 <- list('nimbleOpt2' = quote({#
+##   customSpec <- configureMCMC(Rmodel)#
+##   customSpec$removeSamplers('phi', print=FALSE)#
+##   customSpec$removeSamplers('gamma', print=FALSE)#
+##   customSpec$removeSamplers('p', print=FALSE)#
+##   customSpec$removeSamplers('psi1', print=FALSE)#
+##   ## happens to be all top nodes#
+##   zeroOneNodes <- Rmodel$getNodeNames(topOnly = TRUE)#
+##   for(zon in zeroOneNodes) customSpec$addSampler(target = zon,#
+##                                                  type =#
+##                                                  "slice",#
+##                                                  print=FALSE)#
+##   customSpec#
+## }))#
+#
+## *********************************************************************#
+## run with compareMCMCs#
+#
+## ss.ms.opt2 <- compareMCMCs(input1,#
+##                            MCMCs=c('nimbleOpt2'),#
+##                            MCMCdefs = MCMCdefs.opt2,#
+##                            niter= niter,#
+##                            burnin = burnin,#
+##                            summary=FALSE,#
+##                            check=FALSE)#
+#
+## save(ss.ms.opt2, file=file.path(save.dir, "opt2.Rdata"))#
+## *********************************************************************#
+## model assessment#
+## *********************************************************************#
+## build model#
+#
+occ.R.model <- nimbleModel(code=ss.ms.occ,#
+                           constants=input1$constants,#
+                           data=input1$data,#
+                           inits=input1$inits,#
+                           check=FALSE)#
+## ad auto blocking#
+customSpec <- configureMCMC(occ.R.model, autoBlock=TRUE)#
+occ.mcmc <- buildMCMC(customSpec)#
+occ.C.model <- compileNimble(occ.R.model)#
+occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model)#
+#
+source('../cppp/src/calcCPPP.R', chdir = TRUE)#
+options(mc.cores=2)#
+#
+test.opt2 <- generateCPPP(occ.R.model,#
+                          occ.C.model,#
+                          occ.C.mcmc,#
+                          occ.mcmc,#
+                          dataName = 'y',#
+                          paramNames = input1$monitors, #
+                          MCMCIter = 100, #
+                          NSamp = 10,#
+                          NPDist = 5,#
+                          burnInProportion = 0.10,#
+                          thin = 1,#
+                          averageParams = TRUE,#
+                          discFuncGenerator=likDiscFuncGenerator)
