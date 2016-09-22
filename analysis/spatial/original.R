@@ -18,7 +18,7 @@ mexp <- nimbleFunction(
 
 sp.mod <- nimbleCode({
   ## priors
-  delta ~ dunif(0.1, 5)
+  delta ~ dunif(0.5, 1.5)
   sigma ~ dunif(0, 10)
   p ~ dunif(0, 1)
   alpha ~ dnorm(0, 0.001)

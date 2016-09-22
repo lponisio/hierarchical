@@ -113,4 +113,4 @@ test.opt2 <- generateCPPP(occ.R.model,
                           averageParams = TRUE,
                           discFuncGenerator=likeDiscFuncGenerator)
 
-
+save(test.opt2, file=file.path(save.dir, "ssms_CPPP.Rdata"))

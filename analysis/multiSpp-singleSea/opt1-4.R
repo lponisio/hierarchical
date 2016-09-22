@@ -240,3 +240,38 @@ ms.ss.opt4 <- compareMCMCs(input1,
                            check=FALSE)
 
 save(ms.ss.opt4, file=file.path(save.dir, "opt4.Rdata"))
+
+
+## *********************************************************************
+## ## CPPP
+## *********************************************************************
+
+occ.R.model <- nimbleModel(code=ms.ss.occ,
+                           constants=input1$constants,
+                           data=input1$data,
+                           inits=input1$inits,
+                           check=FALSE)
+
+occ.mcmc <- buildMCMC(occ.R.model)
+occ.C.model <- compileNimble(occ.R.model)
+occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model)
+occ.C.mcmc$run(10^3)
+
+source('../cppp/src/calcCPPP.R', chdir = TRUE)
+options(mc.cores=6)
+
+test.opt2 <- generateCPPP(occ.R.model,
+                          occ.C.model,
+                          occ.C.mcmc,
+                          occ.mcmc,
+                          dataName = 'X',
+                          paramNames = input1$monitors, 
+                          MCMCIter = 10^5, 
+                          NSamp = 10^4,
+                          NPDist = 10^2,
+                          burnInProportion = 0.10,
+                          thin = 1,
+                          averageParams = TRUE,
+                          discFuncGenerator=likeDiscFuncGenerator)
+
+save(test.opt2, file=file.path(save.dir, "ms_ss_noz_CPPP.Rdata"))

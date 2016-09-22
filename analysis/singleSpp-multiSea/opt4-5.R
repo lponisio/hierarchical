@@ -89,39 +89,33 @@ save(ss.ms.opt5, file=file.path(save.dir, "opt5.Rdata"))
 
 
 ## *********************************************************************
-
-simpSetMCMCDefs <- function(Rmodel, MCMCdefs, MCMCname) {
-  eval(MCMCdefs[[MCMCname]])
-}
-
 occ.R.model <- nimbleModel(code=ss.ms.occ,
-                       constants=input1$constants,
-                       data=input1$data,
-                       inits=input1$inits,
-                       check=FALSE)
-
-customSpec <- simpSetMCMCDefs(occ.R.model,
-                              MCMCdefs.opt5, 'nimbleOpt5')
-occ.mcmc <- buildMCMC(customSpec)
-
-## compile model in C++
+                           constants=input1$constants,
+                           data=input1$data,
+                           inits=input1$inits,
+                           check=FALSE)
+## ad auto blocking
+occ.mcmc <- buildMCMC(occ.R.model)
 occ.C.model <- compileNimble(occ.R.model)
 occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model)
+occ.C.mcmc$run(10000)
 
 source('../cppp/src/calcCPPP.R', chdir = TRUE)
-options(mc.cores=2)
+options(mc.cores=6)
 
-opt5cppp <- generateCPPP(occ.R.model,
-                         occ.C.model,
-                         occ.C.mcmc,
-                         occ.mcmc,
-                         dataName = 'y',
-                         paramNames = input1$monitors, 
-                         MCMCIter = 100, 
-                         NSamp = 10,
-                         NPDist = 5,
-                         burnInProportion = 0.10,
-                         thin = 1,
-                         averageParams = 1,
-                         discArgs = input1$monitors)
+test.opt2 <- generateCPPP(occ.R.model,
+                          occ.C.model,
+                          occ.C.mcmc,
+                          occ.mcmc,
+                          dataName = 'y',
+                          paramNames = input1$monitors, 
+                          MCMCIter = 10000, 
+                          NSamp = 1000,
+                          NPDist = 100,
+                          burnInProportion = 0.10,
+                          thin = 1,
+                          averageParams = TRUE,
+                          discFuncGenerator=likeDiscFuncGenerator)
+
+save(test.opt2, file=file.path(save.dir, "ssms_noz_CPPP.Rdata"))
 

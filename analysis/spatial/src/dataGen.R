@@ -15,7 +15,7 @@ genSpatialOccData <- function(ngrid = 25,
                               beta1 = 2,
                               p = 0.6,
                               sigma = 1,
-                              delta = 0.5){
+                              delta = 1){
 
   ## Set up a square lattice region
   simgrid <- expand.grid(1:ngrid, 1:ngrid)
