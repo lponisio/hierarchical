@@ -1,6 +1,6 @@
 rm(list=ls())
-#setwd("~/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea")
-setwd("C:/Users/iateb/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea")
+setwd("~/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea")
+## setwd("C:/Users/iateb/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea")
 
 source('src/initialize.R')
 
@@ -50,20 +50,20 @@ input1 <- c(code=ss.ms.occ,
 ## opt 2: add custom z sampler and slice on uniform(0,1) nodes
 ## *********************************************************************
 
-MCMCdefs.opt2 <- list('nimbleOpt2' = quote({
-  customSpec <- configureMCMC(Rmodel)
-  customSpec$removeSamplers('phi', print=FALSE)
-  customSpec$removeSamplers('gamma', print=FALSE)
-  customSpec$removeSamplers('p', print=FALSE)
-  customSpec$removeSamplers('psi1', print=FALSE)
-  ## happens to be all top nodes
-  zeroOneNodes <- Rmodel$getNodeNames(topOnly = TRUE)
-  for(zon in zeroOneNodes) customSpec$addSampler(target = zon,
-                                                 type =
-                                                 "slice",
-                                                 print=FALSE)
-  customSpec
-}))
+## MCMCdefs.opt2 <- list('nimbleOpt2' = quote({
+##   customSpec <- configureMCMC(Rmodel)
+##   customSpec$removeSamplers('phi', print=FALSE)
+##   customSpec$removeSamplers('gamma', print=FALSE)
+##   customSpec$removeSamplers('p', print=FALSE)
+##   customSpec$removeSamplers('psi1', print=FALSE)
+##   ## happens to be all top nodes
+##   zeroOneNodes <- Rmodel$getNodeNames(topOnly = TRUE)
+##   for(zon in zeroOneNodes) customSpec$addSampler(target = zon,
+##                                                  type =
+##                                                  "slice",
+##                                                  print=FALSE)
+##   customSpec
+## }))
 
 ## *********************************************************************
 ## run with compareMCMCs
@@ -90,7 +90,7 @@ occ.R.model <- nimbleModel(code=ss.ms.occ,
                            inits=input1$inits,
                            check=FALSE)
 ## ad auto blocking
-## customSpec <- configureMCMC(occ.R.model, autoBlock=TRUE)
+customSpec <- configureMCMC(occ.R.model, autoBlock=TRUE)
 occ.mcmc <- buildMCMC(occ.R.model)
 occ.C.model <- compileNimble(occ.R.model)
 occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model)
