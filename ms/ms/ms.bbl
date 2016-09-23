@@ -1,10 +1,24 @@
-\begin{thebibliography}{8}
+\begin{thebibliography}{17}
 \providecommand{\natexlab}[1]{#1}
+
+\bibitem[{ope()}]{openbugs}
+ (????) Open{BUGS}.
+\newblock \url{http://www.openbugs.net/w/FrontPage}.
+
+\bibitem[{win()}]{winbugs}
+ (????) Win{BUGS}.
+\newblock \url{http://www.mrc-bsu.cam.ac.uk/software/bugs/}.
 
 \bibitem[{Bayarri \& Berger(2000)}]{bayarri-berger-00}
 Bayarri, M. \& Berger, J. (2000) P values for composite null models.
 \newblock \emph{Journal of the American Statistical Association}, \textbf{95},
   1127--1142.
+
+\bibitem[{Celeux \emph{et~al.}(2006)Celeux, Forbes, Robert, Titterington
+  \emph{et~al.}}]{celeux2006deviance}
+Celeux, G., Forbes, F., Robert, C.P., Titterington, D.M. \emph{et~al.} (2006)
+  Deviance information criteria for missing data models.
+\newblock \emph{Bayesian Analysis}, \textbf{1}, 651--673.
 
 \bibitem[{Hines \emph{et~al.}(2010)Hines, Nichols, Royle, MacKenzie,
   Gopalaswamy, Kumar \& Karanth}]{hines2010tigers}
@@ -17,6 +31,11 @@ Hjort, N.L., Dahl, F.A. \& Hognadottir, G. (2006) Post-processing posterior
   predictive p values.
 \newblock \emph{Journal of the American Statistical Association}, \textbf{101},
   1157--1174.
+
+\bibitem[{Hooten \& Hobbs(2014)}]{hooten2014guide}
+Hooten, M.B. \& Hobbs, N.T. (2014) A guide to {B}ayesian model selection for
+  ecologists.
+\newblock \emph{Ecological Monographs}, pp. in press, online early.
 
 \bibitem[{Iknayan \emph{et~al.}(2014)Iknayan, Tingley, Furnas \&
   Beissinger}]{iknayan2014detecting}
@@ -38,6 +57,18 @@ M'Gonigle, L., Ponisio, L., Cutler, K. \& Kremen, C. (2015) Habitat restoration
   agriculture.
 \newblock \emph{Ecol Appl}, \textbf{25}, 1557--1565.
 
+\bibitem[{Pacifici \emph{et~al.}(2014)Pacifici, Zipkin, Collazo, Irizarry \&
+  DeWan}]{pacifici2014guidelines}
+Pacifici, K., Zipkin, E.F., Collazo, J.A., Irizarry, J.I. \& DeWan, A. (2014)
+  Guidelines for a priori grouping of species in hierarchical community models.
+\newblock \emph{Ecology and evolution}, \textbf{4}, 877--888.
+
+\bibitem[{Plummer \emph{et~al.}(2003)}]{plummer-2003-jags}
+Plummer, M. \emph{et~al.} (2003) Jags: A program for analysis of bayesian
+  graphical models using gibbs sampling.
+\newblock \emph{Proceedings of the 3rd International Workshop on Distributed
+  Statistical Computing (DSC 2003). March}, pp. 20--22.
+
 \bibitem[{Robins \emph{et~al.}(2000)Robins, van~der Vaart \&
   Ventura}]{robins-etal-00}
 Robins, J., van~der Vaart, A. \& Ventura, V. (2000) Asymptotic distribution of
@@ -45,9 +76,27 @@ Robins, J., van~der Vaart, A. \& Ventura, V. (2000) Asymptotic distribution of
 \newblock \emph{Journal of the American Statistical Association}, \textbf{95},
   1143--1156.
 
-\bibitem[{Royle \& K\'ery(2007)}]{royle-2007-1813}
-Royle, A. \& K\'ery, M. (2007) A bayesian state-space formulation of dynamic
-  occupancy models.
+\bibitem[{Royle \& K\'ery(2007{\natexlab{a}})}]{royle-2007-1813}
+Royle, A. \& K\'ery, M. (2007{\natexlab{a}}) A bayesian state-space formulation
+  of dynamic occupancy models.
 \newblock \emph{Ecology}, \textbf{88}, 1813--1823.
+
+\bibitem[{Royle \& K\'ery(2007{\natexlab{b}})}]{Royle2007}
+Royle, A. \& K\'ery, M. (2007{\natexlab{b}}) A bayesian state-space formulation
+  of dynamic occupancy models.
+\newblock \emph{Ecology}, \textbf{88}, 1813--1823.
+
+\bibitem[{Turek \emph{et~al.}(2016)Turek, de~Valpine \&
+  Paciorek}]{turek2016efficient}
+Turek, D., de~Valpine, P. \& Paciorek, C.J. (2016) Efficient markov chain monte
+  carlo sampling for hierarchical hidden markov models.
+\newblock \emph{arXiv preprint arXiv:160102698}.
+
+\bibitem[{Zipkin \emph{et~al.}(2010)Zipkin, Royle, Dawson \&
+  Bates}]{zipkin2010multi}
+Zipkin, E.F., Royle, J.A., Dawson, D.K. \& Bates, S. (2010) Multi-species
+  occurrence models to evaluate the effects of conservation and management
+  actions.
+\newblock \emph{Biological Conservation}, \textbf{143}, 479--484.
 
 \end{thebibliography}

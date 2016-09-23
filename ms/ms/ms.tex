@@ -100,7 +100,7 @@
     single species model with spatial auto-correlation, a single
     species dynamic (multi-season) model, and a multi-species
     model. We also develop and implement methods for calculating
-    calibrated predistive posterior $p$-values to assess model fit
+    calibrated predictive posterior $p$-values to assess model fit
     within the open source modeling software, NIMBLE.
   \item These computation approaches lead to an improvement in MCMC
     sampling efficiency over, particularly with models including
@@ -124,7 +124,7 @@
 Estimating the proportion of sites occupied by a species is common
 challenge for many sub-disciplines ecology and evolution including
 meta-population, endangered species and invasion biology. Greater
-acceptance of the baises introduced by imperfect detection has lead to
+acceptance of the biases introduced by imperfect detection has lead to
 the development and proliferation of occupancy models --- models where
 the occurrence of a species at a site as a latent state layered
 underneath a detection process \citep[e.g.,][]{mackenzie-2006,
@@ -144,49 +144,187 @@ of greatest interest to ecologists
 embedded within a hierarchical model. In such cases, practitioners
 generally rely on Markov chain Monte Carlo (MCMC) to perform a
 Bayesian analysis. Standard MCMC software will including the latent
-state varaibles in MCMC sampling \citep[e.g.,][]{plummer-2003-jags,
+state variables in MCMC sampling \citep[e.g.,][]{plummer-2003-jags,
   winbugs, openbugs}. Such models are computationally intensive, and
 large models requiring hundreds or thousands of dimensions which
-require MCMC can be intractable. Filtering over latent states to
-calculate model likelihoods inorder to limit MCMC sampling to
-top-level parameters \citep{turek2016efficient}
+require MCMC can be intractable.
 
 In addition, fitting these models is such a challenge that users often
-forgo adding any additional computation to asses model fit.  A common
+forgo adding any additional computation to asses model fit. A common
 idea behind evaluating whether a model provides an adequate fit to a
 particular dataset is that if data is simulated from the model, the
 simulated data should resemble the observed data. This is the basis of
-posterior predictive $P$-values, which compare the distribution of
+posterior predictive $p$-values, which compare the distribution of
 summary statistics calculated from simulated datasets to the observed
-statistic. Posterior predictive $P$-values alone, however, often fail
+statistic. Posterior predictive $p$-values alone, however, often fail
 to reject poor-fitting models \citep{bayarri-berger-00,
   robins-etal-00, hjort-etal-06}. Methods for correcting posterior
-predictive $P$-values for better performance have been proposed
-\citep[e.g., calibrated posterior predictive $P$-values,
-][]{hjort-etal-06}, but refitting the model via MCMC iterativly.
+predictive $p$-values for better performance have been proposed
+\citep[e.g., calibrated posterior predictive $p$-values,
+][]{hjort-etal-06}, but refitting the model via MCMC iterativly. Given
+that with occupancy models fitting the model just once can be a time
+consuming task, efficient methods for MCMC are necessary to ensure
+methods for assessment are feasible for these models.
 
-To ensure occupancy models are accessible to practitioners, more
-efficient methods for fitting and assessing these models are
-necessary.
+Beyond assessing the fit of a model, choosing between models is one of
+the most widely used applications of statistics by
+practitioners. Though many theoretically sound methods for Bayesian
+model selection such as cross-validation have been developed
+\citep{hooten2014guide}, they, like model assessment, are
+computationally intensive --- particularly for hierarchical models
+like occupancy models. A typical need for model selection arises when
+a practitioner is choosing whether to include a specific layer of
+hierarchy (i.e., random effect). This is often the case with so called
+``multi-species'' occupancy models, where the occupancy of many
+species is estimated simultaneously in a model with a random effect of
+species \citep[reviewed in, ][]{iknayan2014detecting}. Ecologists are
+often interested in whether there is some variability in the response
+of species to an explanatory variable such that a random effect of
+species accounts for that variability, or whether a fixed effect of
+that variable fits adequately
+\citep{pacifici2014guidelines}. Currently, the Deviance Information
+Criteria (DIC), originally derived to mimic AIC for Bayesian,
+non-hierarchical models, is now commonly used by scientists to
+evaluate hierarchical models. Though the limitations of DIC for
+hierarchical model selection are widely recognized by statisticians
+\citep{celeux2006deviance, hooten2014guide}, because it is built into
+open-source software such as WinBUGS \citep{winbugs}, it is
+uncritically used by practitioners. Readily available and
+theoretically sound alternative methods are thus critically needed.
+
+
+% Filtering over latent states to calculate model likelihoods inorder to
+% limit MCMC sampling to top-level parameters dyanmic blocking or
+% parameters \citep{turek2016efficient}
+
 
 
 
 \section*{Materials \& Methods}
-
-A common idea behind evaluating whether a model provides an adequate
-fit to a particular dataset is that if data is simulated from the
-model, the simulated data should resemble the observed data. This is
-the basis of posterior predictive $P$-values, which compare the
-distribution of summary statistics calculated from simulated datasets
-to the observed statistic. Posterior predictive $P$-values alone,
-however, often fail to reject poor-fitting models
-\citep{bayarri-berger-00, robins-etal-00, hjort-etal-06}. Methods for
-correcting posterior predictive $P$-values for better performance have
-been proposed, but previously were too computationally intensive to be
-feasible \citep[e.g., calibrated posterior predictive $P$-values,
-][]{hjort-etal-06}.
-
 \label{sec:methods}
+\subsection*{Computational approaches}
+
+\subsubsection*{Single species, single season occupancy model with
+  spatial auto-correlation}
+The first model is a single species, single season occupancy model
+accounting for spatial auto-correlation. We let $z_{i}$ denote the
+true occupancy of a species at site $i$.  We then let $x_{i,j}$
+indicate whether we detected ($x_{i,j}=1$) or did not detect
+($x_{i,j}=0$) that species in the $j^{\mathrm{th}}$ visit to site $i$.
+We assumed that occupancy at the $i^{\mathrm{th}}$ site is a Bernoulli
+random variable $z_{i} \sim \mathrm{Bern}(\psi_{i})$ with probability
+$\psi_{i}$.  We included the effect of an arbitrary covariate (e.g.,
+elevation) on site occupancy. To model the spatial auto-correlation in
+occupancy between sites, we assume the co-variance between sites $Y_i$
+and $Y_j$ is a function of distance between $p_i$ and $p_j$. We
+computed the probability of occupancy at site $i$
+%
+\begin{equation}
+  \begin{split}
+    \label{eq:spatial}
+    \mathrm{logit}(\psi_{i}) &=
+    \alpha + \beta*elevation_i + \rho_i\hspace{0.2em}\\
+    \rho_i &\sim MVN(0, {Cov}(Y_i,Y_j)) \hspace{0.2em}\\
+    {Cov} (Y_i,Y_j) &= \sigma^2exp^{(-\lambda\|p_i-p_j\|)} \hspace{0.2em}.\\
+  \end{split}
+\end{equation}
+%
+
+Where $\lambda$ is the exponential decay constant and $\sigma^2$ is
+SOMETHING....
+
+To improve efficiency of this model...
+
+\subsubsection*{Single species, multi season (dynamic) occupancy
+  model}
+\label{sec:ssms}
+
+The second model is a relatively simple single species occupancy model
+over multiple seasons \citep{Royle2007}. We let $z_{i,t}$ denote the
+true occupancy of a species in year $t$ at site $i$.  We then let
+$x_{i,t,j}$ indicate whether we detected ($x_{i,t,j}=1$) or did not
+detect ($x_{i,t,j}=0$) that species in the $j^{\mathrm{th}}$ visit to
+site $i$ in year $t$.  We assumed that occupancy at the
+$i^{\mathrm{th}}$ site in the $t^{\mathrm{th}}$ year is a Bernoulli
+random variable $z_{i,t} \sim \mathrm{Bern}(\psi_{i,t})$ with
+probability $\psi_{i,t}$.
+
+Letting $\phi_{i,t}$ denote the probability the species persists at
+site $i$ from years $t$ to $t+1$ (provided it was present at site $j$
+in year $t$, $z_{i,t}=1$) and $\gamma_{i,t}$ denote the
+probability that site $i$ is colonized in year $t+1$
+(provided it was not present at site $i$ in year $t$, $z_{i,t}=0$),
+we then computed the probability of occupancy  at site
+$i$ in subsequent years as
+%
+\begin{equation}
+  \label{eq:occupancy2}
+  \psi_{i,t+1} =
+  \phi_{i,t} * z_{i,t} + \gamma_{i,t} * (1-z_{i,t})\hspace{0.2em}.
+\end{equation}
+%
+
+First, to improve efficiency, filter over latent states
+to calculate model likelihoods in order to limit MCMC sampling to
+top-level parameters. We then use two computational approaches to
+improve the efficiency of this model 1) dynamic blocking of the
+parameters \citep{turek2016efficient}, and 2) a custom MCMC
+specification where a slice sampler is used for all parameters.
+
+\subsubsection*{Multi species, single season occupancy model}
+\label{sec:msss}
+
+The last model is from \citep{zipkin2010multi}. It is a multi-species,
+single season occupancy model examining the effect of wildlife
+management and habitat characteristics on bird communities
+\citep{zipkin2010multi}. The species-specific coefficients for the
+effect of basal tree area, understory foliage and deer management
+where bound together by a common distribution with an estimated
+variance. The model is similar to Eq.~\ref{eq:spatial}, except each for
+species $k$, we let $z_{i,k}$ denote its true occupancy state at site
+$i$.
+ 
+To improve the efficiency of this model, we first filtered over latent
+states to calculate model likelihoods in order to limit MCMC sampling
+to top-level parameters. We also vectorized all calculations that
+would have require for loops in BUGS or JAGS. We then tried two
+approaches to speed sampling of the top-level parameters 1) dynamic
+blocking of the parameters \citep{turek2016efficient}, and 2) a custom
+blocking scheme were the parameters of each species are blocked
+together.
+
+
+\subsection*{Model assessment}
+\label{sec:assess}
+
+We implemented a procedure to calculate calibrated posterior
+predictive $p$-values \citep{hjort-etal-06}. After the parameters have
+been fit to the model, a sample of the posterior is used to simulate
+data from the model. A discrepancy measure, which we chose to be the
+model likelihood, is then calculated, and the posterior $p$-value is
+the number of simulated $p$-values that fall below the observed. To
+``calibrate'' the distribution of posterior $p$-values, the MCMC is
+rerun on the simulated data to refit the model. 
+
+\subsection*{Model selection}
+\label{sec:select}
+
+Cross-validation is one of the most fudamental procedures in model
+selection, but, because it requires iternativly re-fitting the model,
+is computationally intensive \citep{hooten2014guide}. In cross
+validation, we exclude a subset of the data ($y_k$) from model
+fitting, then use the fitted model to predict $y_k$. The preidtion
+error is summarized by coparing the simulated $y_k$ to the true $y_k$.
+
+In the multi species occupancy models (Section \ref{sec:msss}),
+practitioners are often interested in determining whether a model
+including a species random effect for explanatory variables is a
+better fit than a model without the random effect. We implemented a
+cross-validation procudure for this model where the detection data for
+species is left out, the model refitted, and the fitted model used to
+predict the occurence of that species. The predictive error of the
+model included a random effect of species is then compared to a model
+where no species random effects were included.
 
 
 \section*{Results}

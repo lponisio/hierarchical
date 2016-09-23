@@ -42,14 +42,14 @@ ss.ms.occ <- nimbleCode({
 
   ## Derived parameters: Sample and population occupancy, growth rate
   ## and turnover
-  psi[1] <- psi1
-  n.occ[1]<-sum(z[1:nsite,1])
-  for (k in 2:nyear){
-    psi[k] <- psi[k-1]*phi[k-1] + (1-psi[k-1])*gamma[k-1]
-    n.occ[k] <- sum(z[1:nsite,k])
-    growthr[k-1] <- psi[k]/psi[k-1]
-    turnover[k-1] <- (1 - psi[k-1]) * gamma[k-1]/psi[k]
-  }
+  ## psi[1] <- psi1
+  ## n.occ[1]<-sum(z[1:nsite,1])
+  ## for (k in 2:nyear){
+  ##   psi[k] <- psi[k-1]*phi[k-1] + (1-psi[k-1])*gamma[k-1]
+  ##   n.occ[k] <- sum(z[1:nsite,k])
+  ##   growthr[k-1] <- psi[k]/psi[k-1]
+  ##   turnover[k-1] <- (1 - psi[k-1]) * gamma[k-1]/psi[k]
+  ## }
 })
 
 ## *********************************************************************

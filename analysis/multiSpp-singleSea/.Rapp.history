@@ -1,4 +1,723 @@
 rm(list=ls())#
+library(vegan)#
+library(lme4)#
+library(lmerTest)#
+setwd("~/Dropbox/hedgerow/forbs/analysis")#
+#
+load('../../data_sets/traditional/specimens-complete.RData')#
+spec <- dd#
+#
+to.keep <- c("PurcellForb", "PutahCreekForb", "RomingerForb",#
+             "GilmerForb", "BermForb", "Rominger", "Berm",#
+             "PutahCreek", "Gilmer", "Butler")#
+to.keep.yrs <- c(2013:2015)#
+#
+spec <- spec[spec$Site %in% to.keep,]#
+spec <- spec[spec$Year %in% to.keep.yrs,]#
+spec <- spec[spec$NetPan == "net",]#
+## calculate site-level statistics#
+calc.site.level <- function(dats, abund.type="length"){#
+  rich <- length(unique(dats))#
+  dats <- as.character(dats)#
+  div <-  diversity(table(dats), index="simpson")#
+  if(abund.type == "median"){#
+    abund <- median(table(dats))#
+  } else {#
+    abund <- length(dats)#
+  }#
+  return(c(rich=rich, abund=abund, div=div))#
+}#
+#
+by.site <- aggregate(spec$GenusSpecies,#
+                     list(Site=spec$Site,#
+                          Year=spec$Year,#
+                          SiteStatus=spec$SiteStatus,#
+                          JulianDate=spec$JulianDate),#
+                     function(x) calc.site.level(x))#
+by.site$Year <- as.factor(by.site$Year)#
+#
+by.site$beforeAfter <- ifelse(by.site$Year == 2013,#
+                              "before", "after")#
+by.site$SiteStatus <- ifelse(by.site$SiteStatus == "forb",#
+                             "forb", "hedgerow")#
+#
+## make a column to pair hedgerows with their forb additions#
+by.site$Site[by.site$Site == "Butler"] <- "Purcell"#
+#
+by.site$pairs <- gsub("(Forb)", "", by.site$Site)#
+## models with site as a catagorical effect#
+div.mod <- lmer(x[,"div"] ~ Year*SiteStatus +#
+                (1|Site) +  (1|pairs), data=by.site)#
+summary(div.mod)#
+#
+abund.mod <- glmer(x[,"abund"] ~ Year*SiteStatus +#
+                   (1|Site) + (1|pairs),#
+                   data=by.site, family="poisson")#
+summary(abund.mod)#
+#
+rich.mod <- glmer(x[,"rich"] ~ Year*SiteStatus +#
+                  (1|Site) + (1|pairs),#
+                   data=by.site, family="poisson")#
+summary(rich.mod)
+summary(abund.mod)
+rich.mod <- glmer(x[,"rich"] ~ Year*SiteStatus +#
+                  (1|Site) + (1|pairs),#
+                   data=by.site, family="poisson")#
+summary(rich.mod)
+rm(list=ls())#
+#
+setwd("~/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea")#
+source('src/initialize.R')#
+data <- genDynamicOccData()#
+model.input <- prepModDataOcc(data, include.zs=FALSE)#
+#
+## *********************************************************************#
+##  Multi-season occupancy model: option 4-5 remove latent states using#
+##  user-defined NIMBLE function#
+##  *********************************************************************#
+#
+## Specify model in NIMBLE#
+ss.ms.occ <- nimbleCode({#
+  ##  priors#
+  psi1 ~ dunif(0, 1)#
+#
+  psi[1] <- psi1#
+  for(k in 1:(nyear-1)){#
+    phi[k] ~ dunif(0, 1)#
+    gamma[k] ~ dunif(0, 1)#
+    p[k] ~ dunif(0, 1)#
+  }#
+  p[nyear] ~ dunif(0, 1)#
+#
+  ## Ecological submodel: Define state conditional on parameters#
+  for(i in 1:nsite) {#
+    ## removes the z's and muZ's from the model and compute#
+    ## the probability of all reps over all years for one site.#
+    y[i, 1:nrep, 1:nyear] ~ dDynamicOccupancy(nrep,#
+                                              psi1,#
+                                              phi[1:(nyear-1)],#
+                                              gamma[1:(nyear-1)],#
+                                              p[1:nyear])#
+  }#
+})#
+#
+input1 <- c(code=ss.ms.occ,#
+            model.input)
+rm(list=ls()) #
+setwd('~/Dropbox/nimble/occupancy/analysis/multiSpp-singleSea')#
+#
+source('src/initialize.R')#
+## don't agument data#
+n.zeroes <- 0#
+model.input <- prepMutiSpData(survey.data,#
+                              survey.dates,#
+                              species.groups,#
+                              habitat,#
+                              n.zeros)#
+#
+## *********************************************************************#
+## multi-species site-occupancy models: vectorized with custom#
+## function to remove zs#
+## *********************************************************************#
+#
+ms.ss.occ <- nimbleCode({#
+  ## Define prior distributions for community-level model parameters#
+  cato.occ.mean ~ dunif(0,1)#
+  mu.ucato <- log(cato.occ.mean) - log(1-cato.occ.mean)#
+#
+  fcw.occ.mean ~ dunif(0,1)#
+  mu.ufcw <- log(fcw.occ.mean) - log(1-fcw.occ.mean)#
+#
+  cato.det.mean ~ dunif(0,1)#
+  mu.vcato <- log(cato.det.mean) - log(1-cato.det.mean)#
+#
+  fcw.det.mean ~ dunif(0,1)#
+  mu.vfcw <- log(fcw.det.mean) - log(1-fcw.det.mean)#
+#
+  ## random effects#
+  sigma.ucato ~ dunif(0, 100)#
+  sigma.ufcw ~ dunif(0, 100)#
+  mu.a1 ~ dnorm(0, 0.001)#
+  sigma.a1 ~ dunif(0, 100)#
+  mu.a2 ~ dnorm(0, 0.001)#
+  sigma.a2 ~ dunif(0, 100)#
+  mu.a3 ~ dnorm(0, 0.001)#
+  sigma.a3 ~ dunif(0, 100)#
+  mu.a4 ~ dnorm(0, 0.001)#
+  sigma.a4 ~ dunif(0, 100)#
+#
+  sigma.vcato ~ dunif(0, 100)#
+  sigma.vfcw ~ dunif(0, 100)#
+  mu.b1 ~ dnorm(0, 0.001)#
+  sigma.b1 ~ dunif(0, 100)#
+  mu.b2 ~ dnorm(0, 0.001)#
+  sigma.b2 ~ dunif(0, 100)#
+  for (i in 1:(num.species)) {#
+    ## Create priors for species i from the community level prior#
+    ## distributions#
+#
+    u.cato[i] ~ dnorm(mu.ucato, sd=sigma.ucato)#
+    u.fcw[i] ~ dnorm(mu.ufcw, sd=sigma.ufcw)#
+    a1[i] ~ dnorm(mu.a1, sd=sigma.a1)#
+    a2[i] ~ dnorm(mu.a2, sd=sigma.a2)#
+    a3[i] ~ dnorm(mu.a3, sd=sigma.a3)#
+    a4[i] ~ dnorm(mu.a4, sd=sigma.a4)#
+#
+    v.cato[i] ~ dnorm(mu.vcato, sd=sigma.vcato)#
+    v.fcw[i] ~ dnorm(mu.vfcw, sd=sigma.vfcw)#
+    b1[i] ~ dnorm(mu.b1, sd=sigma.b1)#
+    b2[i] ~ dnorm(mu.b2, sd=sigma.b2)#
+#
+    ## vectorize the calculation of psi.#
+    logit(psi[1:num.points,i]) <-#
+      u.cato[i]*(1-habitat.ind[1:num.points]) +#
+        u.fcw[i]*habitat.ind[1:num.points] +#
+          a1[i]*ufc.linear[1:num.points] +#
+            a2[i]*ufc.quadratic[1:num.points] +#
+              a3[i]*ba.linear[1:num.points] +#
+                a4[i]*ba.quadratic[1:num.points]#
+    ## vectorized calculation#
+    mu.psi[1:num.points,i] <- psi[1:num.points, i]#
+#
+    ## For our purpose a better way to write this way is to#
+    ## not worry that some elements of date.linear and date.quadratic#
+    ## aren't used, since the benefit of vectorizing the computation#
+    ## should be much greater than the cost of a few extra elements#
+    logit(p[1:num.points, 1:max.num.reps, i]) <-#
+      (v.cato[i]*(1-habitat.ind[1:num.points]) +#
+       v.fcw[i]*habitat.ind[1:num.points]) %*%#
+         asRow(onesRow[1, 1:max.num.reps])+#
+           b1[i]*date.linear[1:num.points,1:max.num.reps] +#
+             b2[i]*date.quadratic[1:num.points,1:max.num.reps]#
+#
+    ## user defined distribution to combine the bernoulli occupancy#
+    ## and detection events.  We can also make this is a single#
+    ## compuation for the entire matrix of locations-x-visits, for#
+    ## each species (i)#
+    X[1:num.points, 1:max.num.reps, i] ~ dBernDetectionMatrix(#
+      occProb = mu.psi[1:num.points,i],#
+      detectionProb = p[1:num.points, 1:max.num.reps,i],#
+      numReps = num.reps[1:num.points])#
+  }#
+  ## Derived quantities:#
+  ## for(j in 1:num.points){#
+  ##   N.site[j]<- sum(mu.psi[j,1:(num.species)])#
+  ##   N.ground[j]<- sum(mu.psi[j,1:num.species] * ground[1:num.species])#
+  ##   N.mid[j]<- sum(mu.psi[j,1:num.species] * mid[1:num.species])#
+  ## }#
+})#
+input1 <- c(code=ms.ss.occ, model.input)
+## *********************************************************************#
+occ.R.model <- nimbleModel(code=ms.ss.occ,#
+                           constants=input1$constants,#
+                           data=input1$data,#
+                           inits=input1$inits,#
+                           check=FALSE)#
+## ad auto blocking#
+occ.mcmc <- buildMCMC(occ.R.model)#
+occ.C.model <- compileNimble(occ.R.model)#
+occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model)#
+occ.C.mcmc$run(10000)
+100000
+10^5
+## *********************************************************************#
+occ.R.model <- nimbleModel(code=ms.ss.occ,#
+                           constants=input1$constants,#
+                           data=input1$data,#
+                           inits=input1$inits,#
+                           check=FALSE)#
+#
+occ.mcmc <- buildMCMC(occ.R.model)#
+occ.C.model <- compileNimble(occ.R.model)#
+occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model)#
+occ.C.mcmc$run(10)
+10^2
+test.opt2 <- generateCPPP(occ.R.model,#
+                          occ.C.model,#
+                          occ.C.mcmc,#
+                          occ.mcmc,#
+                          dataName = 'X',#
+                          paramNames = input1$monitors, #
+                          MCMCIter = 10, #
+                          NSamp = 10,#
+                          NPDist = 10,#
+                          burnInProportion = 0.10,#
+                          thin = 1,#
+                          averageParams = TRUE,#
+                          discFuncGenerator=likeDiscFuncGenerator)
+source('../cppp/src/calcCPPP.R', chdir = TRUE)#
+options(mc.cores=1)#
+#
+test.opt2 <- generateCPPP(occ.R.model,#
+                          occ.C.model,#
+                          occ.C.mcmc,#
+                          occ.mcmc,#
+                          dataName = 'X',#
+                          paramNames = input1$monitors, #
+                          MCMCIter = 10, #
+                          NSamp = 10,#
+                          NPDist = 10,#
+                          burnInProportion = 0.10,#
+                          thin = 1,#
+                          averageParams = TRUE,#
+                          discFuncGenerator=likeDiscFuncGenerator)
+test.opt2
+occ.C.mcmc$run(10^3)
+test.opt2 <- generateCPPP(occ.R.model,#
+                          occ.C.model,#
+                          occ.C.mcmc,#
+                          occ.mcmc,#
+                          dataName = 'X',#
+                          paramNames = input1$monitors, #
+                          MCMCIter = 10^3, #
+                          NSamp = 10^2,#
+                          NPDist = 10^2,#
+                          burnInProportion = 0.10,#
+                          thin = 1,#
+                          averageParams = TRUE,#
+                          discFuncGenerator=likeDiscFuncGenerator)
+opt2
+test.opt2
+rm(list=ls())#
+setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
+source('src/initialize.R')#
+library(rjags)#
+load.module("msm")#
+#
+set.seed(444)#
+dats <- genSpatialOccData()#
+model.input <- prepModData(dats$data, dats$y, dats$distance,#
+                           nsite=50)#
+#
+mexp <- nimbleFunction(#
+  run = function(A = double(2)){#
+    returnType(double(2))#
+    outMat <- exp(A)#
+    return(outMat)#
+  })#
+#
+sp.mod <- nimbleCode({#
+  ## priors#
+  delta ~ dunif(0.5, 5)#
+  sigma ~ dunif(0, 10)#
+  p ~ dunif(0, 1)#
+  alpha ~ dnorm(0, 0.001)#
+  b1 ~ dnorm(0, 0.001)#
+#
+  ## Likelihood#
+  ## Ecological model for true occurrence#
+  for (i in 1:nsite) {#
+    z[i] ~ dbern(psi[i])#
+    logit(psi[i]) <- alpha + b1*elev[i] + rho[i]#
+    p.eff[i] <- z[i] * p#
+#
+    ## Observation model for replicated detection/nondetection#
+    ## observations#
+    for (j in 1:nreps) {#
+      y[i,j] ~ dbern(p.eff[i])#
+    }#
+  }#
+#
+  rho[1:nsite] ~ dmnorm(zeros[1:nsite],#
+                        D.tau[1:nsite, 1:nsite])#
+#
+  ## create covariance matrix based on distances (must be 1/cov for#
+  ## JAGS)#
+#
+  ## mexp is jags's version fo matrix exponentiation, veyr sensitive #
+  ## temp.cov[1:nsite, 1:nsite] <- -delta*D[1:nsite, 1:nsite]#
+  ## D.cov[1:nsite, 1:nsite]  <- (sigma^2)*mexp(-delta*D[1:nsite, 1:nsite])#
+#
+  for(i in 1:nsite){#
+    for(j in 1:nsite){#
+      temp.cov[i, j] <- -delta*D[i, j]#
+      D.cov[i, j]  <- (sigma^2)* exp(temp.cov[i, j])#
+    }#
+  }#
+  D.tau[1:nsite, 1:nsite] <- inverse(D.cov[1:nsite, 1:nsite])#
+})#
+input1 <- c(code=sp.mod,#
+            model.input)#
+#
+## *********************************************************************#
+## opt 1:vanilla nimble and auto block#
+## *********************************************************************#
+#
+sp.orig <- compareMCMCs(input1,#
+                        MCMCs=c("jags"),#
+                        niter=niter,#
+                        burnin = burnin,#
+                        summary=FALSE,#
+                        check=FALSE)#
+#
+save(sp.orig, file=file.path(save.dir, "orig.Rdata"))
+install.packages("rjags")
+library(rjags)
+rm(list=ls())#
+setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
+source('src/initialize.R')#
+library(rjags)#
+load.module("msm")#
+#
+set.seed(444)#
+dats <- genSpatialOccData()#
+model.input <- prepModData(dats$data, dats$y, dats$distance,#
+                           nsite=50)#
+#
+mexp <- nimbleFunction(#
+  run = function(A = double(2)){#
+    returnType(double(2))#
+    outMat <- exp(A)#
+    return(outMat)#
+  })#
+#
+sp.mod <- nimbleCode({#
+  ## priors#
+  delta ~ dunif(0.5, 5)#
+  sigma ~ dunif(0, 10)#
+  p ~ dunif(0, 1)#
+  alpha ~ dnorm(0, 0.001)#
+  b1 ~ dnorm(0, 0.001)#
+#
+  ## Likelihood#
+  ## Ecological model for true occurrence#
+  for (i in 1:nsite) {#
+    z[i] ~ dbern(psi[i])#
+    logit(psi[i]) <- alpha + b1*elev[i] + rho[i]#
+    p.eff[i] <- z[i] * p#
+#
+    ## Observation model for replicated detection/nondetection#
+    ## observations#
+    for (j in 1:nreps) {#
+      y[i,j] ~ dbern(p.eff[i])#
+    }#
+  }#
+#
+  rho[1:nsite] ~ dmnorm(zeros[1:nsite],#
+                        D.tau[1:nsite, 1:nsite])#
+#
+  ## create covariance matrix based on distances (must be 1/cov for#
+  ## JAGS)#
+#
+  ## mexp is jags's version fo matrix exponentiation, veyr sensitive #
+  ## temp.cov[1:nsite, 1:nsite] <- -delta*D[1:nsite, 1:nsite]#
+  ## D.cov[1:nsite, 1:nsite]  <- (sigma^2)*mexp(-delta*D[1:nsite, 1:nsite])#
+#
+  for(i in 1:nsite){#
+    for(j in 1:nsite){#
+      temp.cov[i, j] <- -delta*D[i, j]#
+      D.cov[i, j]  <- (sigma^2)* exp(temp.cov[i, j])#
+    }#
+  }#
+  D.tau[1:nsite, 1:nsite] <- inverse(D.cov[1:nsite, 1:nsite])#
+})#
+input1 <- c(code=sp.mod,#
+            model.input)#
+#
+## *********************************************************************#
+## opt 1:vanilla nimble and auto block#
+## *********************************************************************#
+#
+sp.orig <- compareMCMCs(input1,#
+                        MCMCs=c("jags"),#
+                        niter=niter,#
+                        burnin = burnin,#
+                        summary=FALSE,#
+                        check=FALSE)#
+#
+save(sp.orig, file=file.path(save.dir, "orig.Rdata"))
+rm(list=ls())#
+setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
+source('src/initialize.R')#
+library(rjags)#
+load.module("msm")#
+#
+set.seed(444)#
+dats <- genSpatialOccData()#
+model.input <- prepModData(dats$data, dats$y, dats$distance,#
+                           nsite=50)#
+#
+mexp <- nimbleFunction(#
+  run = function(A = double(2)){#
+    returnType(double(2))#
+    outMat <- exp(A)#
+    return(outMat)#
+  })#
+#
+sp.mod <- nimbleCode({#
+  ## priors#
+  delta ~ dunif(0.5, 1.5)#
+  sigma ~ dunif(0, 10)#
+  p ~ dunif(0, 1)#
+  alpha ~ dnorm(0, 0.001)#
+  b1 ~ dnorm(0, 0.001)#
+#
+  ## Likelihood#
+  ## Ecological model for true occurrence#
+  for (i in 1:nsite) {#
+    z[i] ~ dbern(psi[i])#
+    logit(psi[i]) <- alpha + b1*elev[i] + rho[i]#
+    p.eff[i] <- z[i] * p#
+#
+    ## Observation model for replicated detection/nondetection#
+    ## observations#
+    for (j in 1:nreps) {#
+      y[i,j] ~ dbern(p.eff[i])#
+    }#
+  }#
+#
+  rho[1:nsite] ~ dmnorm(zeros[1:nsite],#
+                        D.tau[1:nsite, 1:nsite])#
+#
+  ## create covariance matrix based on distances (must be 1/cov for#
+  ## JAGS)#
+#
+  ## mexp is jags's version fo matrix exponentiation, veyr sensitive #
+  ## temp.cov[1:nsite, 1:nsite] <- -delta*D[1:nsite, 1:nsite]#
+  ## D.cov[1:nsite, 1:nsite]  <- (sigma^2)*mexp(-delta*D[1:nsite, 1:nsite])#
+#
+  for(i in 1:nsite){#
+    for(j in 1:nsite){#
+      temp.cov[i, j] <- -delta*D[i, j]#
+      D.cov[i, j]  <- (sigma^2)* exp(temp.cov[i, j])#
+    }#
+  }#
+  D.tau[1:nsite, 1:nsite] <- inverse(D.cov[1:nsite, 1:nsite])#
+})#
+input1 <- c(code=sp.mod,#
+            model.input)#
+#
+## *********************************************************************#
+## opt 1:vanilla nimble and auto block#
+## *********************************************************************#
+#
+sp.orig <- compareMCMCs(input1,#
+                        MCMCs=c("jags"),#
+                        niter=niter,#
+                        burnin = burnin,#
+                        summary=FALSE,#
+                        check=FALSE)#
+#
+save(sp.orig, file=file.path(save.dir, "orig.Rdata"))
+rm(list=ls())#
+setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
+source('src/initialize.R')#
+library(rjags)#
+load.module("msm")#
+#
+set.seed(444)#
+dats <- genSpatialOccData()#
+model.input <- prepModData(dats$data, dats$y, dats$distance,#
+                           nsite=50)#
+#
+mexp <- nimbleFunction(#
+  run = function(A = double(2)){#
+    returnType(double(2))#
+    outMat <- exp(A)#
+    return(outMat)#
+  })#
+#
+sp.mod <- nimbleCode({#
+  ## priors#
+  delta ~ dunif(0.5, 1.5)#
+  sigma ~ dunif(0, 10)#
+  p ~ dunif(0, 1)#
+  alpha ~ dnorm(0, 0.001)#
+  b1 ~ dnorm(0, 0.001)#
+#
+  ## Likelihood#
+  ## Ecological model for true occurrence#
+  for (i in 1:nsite) {#
+    z[i] ~ dbern(psi[i])#
+    logit(psi[i]) <- alpha + b1*elev[i] + rho[i]#
+    p.eff[i] <- z[i] * p#
+#
+    ## Observation model for replicated detection/nondetection#
+    ## observations#
+    for (j in 1:nreps) {#
+      y[i,j] ~ dbern(p.eff[i])#
+    }#
+  }#
+#
+  rho[1:nsite] ~ dmnorm(zeros[1:nsite],#
+                        D.tau[1:nsite, 1:nsite])#
+#
+  ## create covariance matrix based on distances (must be 1/cov for#
+  ## JAGS)#
+#
+  ## mexp is jags's version fo matrix exponentiation, veyr sensitive #
+  ## temp.cov[1:nsite, 1:nsite] <- -delta*D[1:nsite, 1:nsite]#
+  ## D.cov[1:nsite, 1:nsite]  <- (sigma^2)*mexp(-delta*D[1:nsite, 1:nsite])#
+#
+  for(i in 1:nsite){#
+    for(j in 1:nsite){#
+      temp.cov[i, j] <- -delta*D[i, j]#
+      D.cov[i, j]  <- (sigma^2)* exp(temp.cov[i, j])#
+    }#
+  }#
+  D.tau[1:nsite, 1:nsite] <- inverse(D.cov[1:nsite, 1:nsite])#
+})#
+input1 <- c(code=sp.mod,#
+            model.input)#
+#
+## *********************************************************************#
+## opt 1:vanilla nimble and auto block#
+## *********************************************************************#
+#
+sp.orig <- compareMCMCs(input1,#
+                        MCMCs=c("jags"),#
+                        niter=niter,#
+                        burnin = burnin,#
+                        summary=FALSE,#
+                        check=FALSE)#
+#
+save(sp.orig, file=file.path(save.dir, "orig.Rdata"))
+rm(list=ls())#
+setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
+source('src/initialize.R')#
+library(rjags)#
+load.module("msm")#
+#
+set.seed(444)#
+dats <- genSpatialOccData()#
+model.input <- prepModData(dats$data, dats$y, dats$distance,#
+                           nsite=50)
+mexp <- nimbleFunction(#
+  run = function(A = double(2)){#
+    returnType(double(2))#
+    outMat <- exp(A)#
+    return(outMat)#
+  })#
+#
+sp.mod <- nimbleCode({#
+  ## priors#
+  delta ~ dunif(0.5, 1.5)#
+  sigma ~ dunif(0, 10)#
+  p ~ dunif(0, 1)#
+  alpha ~ dnorm(0, 0.001)#
+  b1 ~ dnorm(0, 0.001)#
+#
+  ## Likelihood#
+  ## Ecological model for true occurrence#
+  for (i in 1:nsite) {#
+    z[i] ~ dbern(psi[i])#
+    logit(psi[i]) <- alpha + b1*elev[i] + rho[i]#
+    p.eff[i] <- z[i] * p#
+#
+    ## Observation model for replicated detection/nondetection#
+    ## observations#
+    for (j in 1:nreps) {#
+      y[i,j] ~ dbern(p.eff[i])#
+    }#
+  }#
+#
+  rho[1:nsite] ~ dmnorm(zeros[1:nsite],#
+                        D.tau[1:nsite, 1:nsite])#
+#
+  ## create covariance matrix based on distances (must be 1/cov for#
+  ## JAGS)#
+#
+  ## mexp is jags's version fo matrix exponentiation, veyr sensitive #
+  ## temp.cov[1:nsite, 1:nsite] <- -delta*D[1:nsite, 1:nsite]#
+  ## D.cov[1:nsite, 1:nsite]  <- (sigma^2)*mexp(-delta*D[1:nsite, 1:nsite])#
+#
+  for(i in 1:nsite){#
+    for(j in 1:nsite){#
+      temp.cov[i, j] <- -delta*D[i, j]#
+      D.cov[i, j]  <- (sigma^2)* exp(temp.cov[i, j])#
+    }#
+  }#
+  D.tau[1:nsite, 1:nsite] <- inverse(D.cov[1:nsite, 1:nsite])#
+})#
+input1 <- c(code=sp.mod,#
+            model.input)#
+#
+## *********************************************************************#
+## opt 1:vanilla nimble and auto block#
+## *********************************************************************#
+#
+sp.orig <- compareMCMCs(input1,#
+                        MCMCs=c("jags"),#
+                        niter=niter,#
+                        burnin = burnin,#
+                        summary=FALSE,#
+                        check=FALSE)#
+#
+save(sp.orig, file=file.path(save.dir, "orig.Rdata"))
+rm(list=ls())#
+setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
+source('src/initialize.R')#
+library(rjags)#
+load.module("msm")#
+#
+set.seed(444)#
+dats <- genSpatialOccData()#
+model.input <- prepModData(dats$data, dats$y, dats$distance,#
+                           nsite=50)#
+#
+mexp <- nimbleFunction(#
+  run = function(A = double(2)){#
+    returnType(double(2))#
+    outMat <- exp(A)#
+    return(outMat)#
+  })#
+#
+sp.mod <- nimbleCode({#
+  ## priors#
+  delta ~ dunif(0.5, 1.5)#
+  sigma ~ dunif(0, 10)#
+  p ~ dunif(0, 1)#
+  alpha ~ dnorm(0, 0.001)#
+  b1 ~ dnorm(0, 0.001)#
+#
+  ## Likelihood#
+  ## Ecological model for true occurrence#
+  for (i in 1:nsite) {#
+    z[i] ~ dbern(psi[i])#
+    logit(psi[i]) <- alpha + b1*elev[i] + rho[i]#
+    p.eff[i] <- z[i] * p#
+#
+    ## Observation model for replicated detection/nondetection#
+    ## observations#
+    for (j in 1:nreps) {#
+      y[i,j] ~ dbern(p.eff[i])#
+    }#
+  }#
+#
+  rho[1:nsite] ~ dmnorm(zeros[1:nsite],#
+                        D.tau[1:nsite, 1:nsite])#
+#
+  ## create covariance matrix based on distances (must be 1/cov for#
+  ## JAGS)#
+#
+  ## mexp is jags's version fo matrix exponentiation, veyr sensitive #
+  temp.cov[1:nsite, 1:nsite] <- -delta*D[1:nsite, 1:nsite]#
+  D.cov[1:nsite, 1:nsite]  <- (sigma^2)*mexp(-delta*D[1:nsite, 1:nsite])#
+#
+  ## for(i in 1:nsite){#
+  ##   for(j in 1:nsite){#
+  ##     temp.cov[i, j] <- -delta*D[i, j]#
+  ##     D.cov[i, j]  <- (sigma^2)* exp(temp.cov[i, j])#
+  ##   }#
+  ## }#
+  D.tau[1:nsite, 1:nsite] <- inverse(D.cov[1:nsite, 1:nsite])#
+})#
+input1 <- c(code=sp.mod,#
+            model.input)#
+#
+## *********************************************************************#
+## opt 1:vanilla nimble and auto block#
+## *********************************************************************#
+#
+sp.orig <- compareMCMCs(input1,#
+                        MCMCs=c("jags"),#
+                        niter=niter,#
+                        burnin = burnin,#
+                        summary=FALSE,#
+                        check=FALSE)#
+#
+save(sp.orig, file=file.path(save.dir, "orig.Rdata"))
+rm(list=ls())#
 setwd('~/Dropbox/nimble/occupancy/analysis/multiSpp-singleSea')#
 #
 source('src/initialize.R')#
@@ -129,13 +848,1001 @@ ms.ss.occ <- nimbleCode({#
 })#
 model.input$data[["onesRow"]] <- NULL#
 model.input$constants[["max.num.reps"]] <- NULL#
-model.input$data[["ground"]] <- NULL#
-model.input$data[["mid"]] <- NULL#
 #
-input1 <- c(code=ms.ss.occ, model.input)
+input1 <- c(code=ms.ss.occ, model.input)#
+## *********************************************************************#
+## original model with nimble#
+#
 ms.ss.orig <- compareMCMCs(input1,#
-                           MCMCs=c('jags','nimble'),#
+                           MCMCs=c('jags'),#
                            niter=niter,#
                            burnin = burnin,#
                            summary=FALSE,#
                            check=FALSE)
+rm(list=ls()) #
+setwd('~/Dropbox/nimble/occupancy/analysis/multiSpp-singleSea')#
+#
+source('src/initialize.R')#
+## don't agument data#
+n.zeroes <- 0#
+model.input <- prepMutiSpData(survey.data,#
+                              survey.dates,#
+                              species.groups,#
+                              habitat,#
+                              n.zeros)#
+#
+## *********************************************************************#
+## multi-species site-occupancy models: vectorized with custom#
+## function to remove zs#
+## *********************************************************************#
+#
+ms.ss.occ <- nimbleCode({#
+  ## Define prior distributions for community-level model parameters#
+  cato.occ.mean ~ dunif(0,1)#
+  mu.ucato <- log(cato.occ.mean) - log(1-cato.occ.mean)#
+#
+  fcw.occ.mean ~ dunif(0,1)#
+  mu.ufcw <- log(fcw.occ.mean) - log(1-fcw.occ.mean)#
+#
+  cato.det.mean ~ dunif(0,1)#
+  mu.vcato <- log(cato.det.mean) - log(1-cato.det.mean)#
+#
+  fcw.det.mean ~ dunif(0,1)#
+  mu.vfcw <- log(fcw.det.mean) - log(1-fcw.det.mean)#
+#
+  ## random effects#
+  sigma.ucato ~ dunif(0, 100)#
+  sigma.ufcw ~ dunif(0, 100)#
+  mu.a1 ~ dnorm(0, 0.001)#
+  sigma.a1 ~ dunif(0, 100)#
+  mu.a2 ~ dnorm(0, 0.001)#
+  sigma.a2 ~ dunif(0, 100)#
+  mu.a3 ~ dnorm(0, 0.001)#
+  sigma.a3 ~ dunif(0, 100)#
+  mu.a4 ~ dnorm(0, 0.001)#
+  sigma.a4 ~ dunif(0, 100)#
+#
+  sigma.vcato ~ dunif(0, 100)#
+  sigma.vfcw ~ dunif(0, 100)#
+  mu.b1 ~ dnorm(0, 0.001)#
+  sigma.b1 ~ dunif(0, 100)#
+  mu.b2 ~ dnorm(0, 0.001)#
+  sigma.b2 ~ dunif(0, 100)#
+  for (i in 1:(num.species)) {#
+    ## Create priors for species i from the community level prior#
+    ## distributions#
+#
+    u.cato[i] ~ dnorm(mu.ucato, sd=sigma.ucato)#
+    u.fcw[i] ~ dnorm(mu.ufcw, sd=sigma.ufcw)#
+    a1[i] ~ dnorm(mu.a1, sd=sigma.a1)#
+    a2[i] ~ dnorm(mu.a2, sd=sigma.a2)#
+    a3[i] ~ dnorm(mu.a3, sd=sigma.a3)#
+    a4[i] ~ dnorm(mu.a4, sd=sigma.a4)#
+#
+    v.cato[i] ~ dnorm(mu.vcato, sd=sigma.vcato)#
+    v.fcw[i] ~ dnorm(mu.vfcw, sd=sigma.vfcw)#
+    b1[i] ~ dnorm(mu.b1, sd=sigma.b1)#
+    b2[i] ~ dnorm(mu.b2, sd=sigma.b2)#
+#
+    ## vectorize the calculation of psi.#
+    logit(psi[1:num.points,i]) <-#
+      u.cato[i]*(1-habitat.ind[1:num.points]) +#
+        u.fcw[i]*habitat.ind[1:num.points] +#
+          a1[i]*ufc.linear[1:num.points] +#
+            a2[i]*ufc.quadratic[1:num.points] +#
+              a3[i]*ba.linear[1:num.points] +#
+                a4[i]*ba.quadratic[1:num.points]#
+    ## vectorized calculation#
+    mu.psi[1:num.points,i] <- psi[1:num.points, i]#
+#
+    ## For our purpose a better way to write this way is to#
+    ## not worry that some elements of date.linear and date.quadratic#
+    ## aren't used, since the benefit of vectorizing the computation#
+    ## should be much greater than the cost of a few extra elements#
+    logit(p[1:num.points, 1:max.num.reps, i]) <-#
+      (v.cato[i]*(1-habitat.ind[1:num.points]) +#
+       v.fcw[i]*habitat.ind[1:num.points]) %*%#
+         asRow(onesRow[1, 1:max.num.reps])+#
+           b1[i]*date.linear[1:num.points,1:max.num.reps] +#
+             b2[i]*date.quadratic[1:num.points,1:max.num.reps]#
+#
+    ## user defined distribution to combine the bernoulli occupancy#
+    ## and detection events.  We can also make this is a single#
+    ## compuation for the entire matrix of locations-x-visits, for#
+    ## each species (i)#
+    X[1:num.points, 1:max.num.reps, i] ~ dBernDetectionMatrix(#
+      occProb = mu.psi[1:num.points,i],#
+      detectionProb = p[1:num.points, 1:max.num.reps,i],#
+      numReps = num.reps[1:num.points])#
+  }#
+  ## Derived quantities:#
+  ## for(j in 1:num.points){#
+  ##   N.site[j]<- sum(mu.psi[j,1:(num.species)])#
+  ##   N.ground[j]<- sum(mu.psi[j,1:num.species] * ground[1:num.species])#
+  ##   N.mid[j]<- sum(mu.psi[j,1:num.species] * mid[1:num.species])#
+  ## }#
+})#
+input1 <- c(code=ms.ss.occ, model.input)
+occ.R.model <- nimbleModel(code=ms.ss.occ,#
+                           constants=input1$constants,#
+                           data=input1$data,#
+                           inits=input1$inits,#
+                           check=FALSE)
+plot(occ.R.model)
+plot(occ.R.modelgraph)
+plot(occ.R.model$graph)
+length(occ.R.model$getNodeNames)
+length(occ.R.model$getNodeNames())
+rm(list=ls())#
+setwd('~/Dropbox/nimble/occupancy/analysis/multiSpp-singleSea')#
+#
+source('src/initialize.R')#
+## don't agument data#
+n.zeroes <- 0#
+model.input <- prepMutiSpData(survey.data,#
+                              survey.dates,#
+                              species.groups,#
+                              habitat,#
+                              n.zeros)#
+## *********************************************************************#
+## multi-species site-occupancy models: original#
+## *********************************************************************#
+#
+ms.ss.occ <- nimbleCode({#
+  ## Define prior distributions for community-level model parameters#
+  cato.occ.mean ~ dunif(0,1)#
+  mu.ucato <- log(cato.occ.mean) - log(1-cato.occ.mean)#
+#
+  fcw.occ.mean ~ dunif(0,1)#
+  mu.ufcw <- log(fcw.occ.mean) - log(1-fcw.occ.mean)#
+#
+  cato.det.mean ~ dunif(0,1)#
+  mu.vcato <- log(cato.det.mean) - log(1-cato.det.mean)#
+#
+  fcw.det.mean ~ dunif(0,1)#
+  mu.vfcw <- log(fcw.det.mean) - log(1-fcw.det.mean)#
+#
+  ## random effects#
+  sigma.ucato ~ dunif(0, 100)#
+  tau.ucato <-  1/(sigma.ucato*sigma.ucato)#
+#
+  sigma.ufcw ~ dunif(0, 100)#
+  tau.ufcw <-  1/(sigma.ufcw*sigma.ufcw)#
+#
+  mu.a1 ~ dnorm(0, 0.001)#
+  sigma.a1 ~ dunif(0, 100)#
+  tau.a1 <-  1/(sigma.a1*sigma.a1)#
+#
+  mu.a2 ~ dnorm(0, 0.001)#
+  sigma.a2 ~ dunif(0, 100)#
+  tau.a2 <-  1/(sigma.a2*sigma.a2)#
+#
+  mu.a3 ~ dnorm(0, 0.001)#
+  sigma.a3 ~ dunif(0, 100)#
+  tau.a3 <-  1/(sigma.a3*sigma.a3)#
+#
+  mu.a4 ~ dnorm(0, 0.001)#
+  sigma.a4 ~ dunif(0, 100)#
+  tau.a4 <-  1/(sigma.a4*sigma.a4)#
+#
+  sigma.vcato ~ dunif(0, 100)#
+  sigma.vfcw ~ dunif(0, 100)#
+  tau.vcato <-  1/(sigma.vcato*sigma.vcato)#
+  tau.vfcw <-  1/(sigma.vfcw*sigma.vfcw)#
+#
+  mu.b1 ~ dnorm(0, 0.001)#
+  sigma.b1 ~ dunif(0, 100)#
+  tau.b1 <-  1/(sigma.b1*sigma.b1)#
+#
+  mu.b2 ~ dnorm(0, 0.001)#
+  sigma.b2 ~ dunif(0, 100)#
+  tau.b2 <-  1/(sigma.b2*sigma.b2)#
+#
+  for (i in 1:(num.species)) {#
+    ## Create priors for species i from the community level prior#
+    ## distributions#
+#
+    u.cato[i] ~ dnorm(mu.ucato, tau.ucato)#
+    u.fcw[i] ~ dnorm(mu.ufcw, tau.ufcw)#
+    a1[i] ~ dnorm(mu.a1, tau.a1)#
+    a2[i] ~ dnorm(mu.a2, tau.a2)#
+    a3[i] ~ dnorm(mu.a3, tau.a3)#
+    a4[i] ~ dnorm(mu.a4, tau.a4)#
+#
+    v.cato[i] ~ dnorm(mu.vcato, tau.vcato)#
+    v.fcw[i] ~ dnorm(mu.vfcw, tau.vfcw)#
+    b1[i] ~ dnorm(mu.b1, tau.b1)#
+    b2[i] ~ dnorm(mu.b2, tau.b2)#
+#
+    ## Create a loop to estimate the Z matrix (true occurrence for#
+    ## species i at point j).#
+    for (j in 1:num.points) {#
+      ## Occurence model: u.cato and u.fcw are the occurrence#
+      ## probabilities (on the logit scale) for species i at points in#
+      ## the CATO and FCW study area, respectively, for average values#
+      ## of UFC and BA. The coefficients for the four 'a' terms are#
+      ## the linear and squared effects of understory foliage and tree#
+      ## basal area on species i.#
+      logit(psi[j,i]) <- u.cato[i]*(1-habitat.ind[j]) +#
+        u.fcw[i]*habitat.ind[j] +#
+        a1[i]*ufc.linear[j] +#
+        a2[i]*ufc.quadratic[j] +#
+        a3[i]*ba.linear[j] +#
+        a4[i]*ba.quadratic[j]#
+#
+      mu.psi[j,i] <- psi[j,i]#
+      Z[j,i] ~ dbern(mu.psi[j,i])#
+#
+      ## Create a loop to estimate detection for species i at point k#
+      ## during sampling period k.#
+      for (k in 1:num.reps[j]) {#
+        ## Detection model for the observed data X: v.cato and v.fcw#
+        ## are the detection probabilities (on the logit scale) for#
+        ## species i at points j during sampling periods k in the CATO#
+        ## and FCW study area, respectively, for for linear and#
+        ## squared terms of Julian dates.#
+        logit(p[j,k,i]) <-  v.cato[i]*(1-habitat.ind[j]) +#
+          v.fcw[i]*habitat.ind[j] +#
+          b1[i]*date.linear[j,k] +#
+          b2[i]*date.quadratic[j,k]#
+#
+        mu.p[j,k,i] <- p[j,k,i]*Z[j,i]#
+        X[j,k,i] ~ dbern(mu.p[j,k,i])#
+      }#
+    }#
+  }#
+#
+  ## Derived quantities:#
+  ## Create a loop to determine point level#
+  ## richness estimates for the whole community#
+  ## and for subsets or assemblages of interest.#
+  ## for(j in 1:num.points){#
+  ##   N.site[j]<- sum(mu.psi[j,1:(num.species)])#
+  ##   N.ground[j]<- inprod(Z[j,1:num.species],ground[1:num.species])#
+  ##   N.mid[j]<- inprod(Z[j,1:num.species],mid[1:num.species])#
+  ## }#
+})#
+model.input$data[["onesRow"]] <- NULL#
+model.input$constants[["max.num.reps"]] <- NULL#
+#
+input1 <- c(code=ms.ss.occ, model.input)#
+occ.R.model <- nimbleModel(code=ms.ss.occ,#
+                           constants=input1$constants,#
+                           data=input1$data,#
+                           inits=input1$inits,#
+                           check=FALSE)
+length(occ.R.model$getNodeNames())
+occ.R.model$getNodeNames()
+occ.R.model$getNodeNames(include.data=FALSE)
+occ.R.model$getNodeNames(includeData=FALSE)
+length(occ.R.model$getNodeNames(includeData=FALSE))
+rm(list=ls())#
+library(nimble)#
+library(parallel)#
+crossValCalculate <- function(row, MCMCOut, dataDimensions, saveData){#
+  simDataArray <- array(MCMCOut[row,], dim = c(dataDimensions))#
+  discrep <- sum((simDataArray - saveData)^2)#
+  return(discrep)#
+}#
+crossValidateOne <- function(model,#
+                             dataNames,#
+                             MCMCIter,#
+                             burnIn, thin,#
+                             leaveOutIndex#
+                             MCMCdefs=NULL){#
+  simpSetMCMCDefs <- function(Rmodel, MCMCdefs, MCMCname) {#
+    eval(MCMCdefs[[MCMCname]])#
+  }#
+  if(!is.null(MCMCdefs){#
+  ## eval(MCMCdefs.opt2[['nimbleOpt2']])#
+    ## customSpec <- simpSetMCMCDefs(occ.R.model, MCMCdefs.opt2, 'nimbleOpt2')#
+  }#
+#
+  ## fill in each element of data along leaveOutIndex with NAs.  then,#
+  ## data na values will be filled in as each mcmc runs.  These#
+  ## estimated data values can be compared to known data values, and#
+  ## the average loss (0/1) can be taken over all MCMC runs.  then#
+  ## take the average of these for all data points? woo!#
+  newModel <- model$newModel()#
+  compileNimble(newModel)#
+  numBlocks <- newModel$getVarInfo(dataNames)[['maxs']][leaveOutIndex]#
+  dataDimensions <- newModel$getVarInfo(dataNames)[['maxs']]#
+  saveData <- array(values(newModel, dataNames), dim = c(dataDimensions))#
+#
+  calcCrossVal <- function(i){#
+    tempData <- saveData#
+    print(tempData)#
+    newModel$resetData()#
+    evalCode1 <- paste0("tempData[",rep(",", leaveOutIndex - 1), i,#
+                        paste0(rep(",", length(dataDimensions) -#
+                                   leaveOutIndex)),"] <- NA")#
+    eval(parse(text = evalCode1))#
+    evalCode2 <- paste0("modelDataList <- list(", dataNames, "= tempData)")#
+    eval(parse(text=evalCode2))#
+    newModel$setData(modelDataList)#
+    print(modelDataList)#
+    modelMCMCConf <- configureMCMC(newModel,#
+                                   monitors = dataNames, thin = thin)#
+    modelMCMC <- buildMCMC(modelMCMCConf)#
+    C.modelMCMC <- compileNimble(modelMCMC,#
+                                 project = newModel,#
+                                 resetFunctions = (i != 1))    #
+    C.modelMCMC$run(MCMCIter)#
+    MCMCout <- as.matrix(C.modelMCMC$mvSamples)#
+    sampNum <- dim(MCMCout)[1] #
+    crossValValue <- unlist(mclapply(ceiling(burnIn/thin):sampNum,#
+                                     crossValCalculate, MCMCout,#
+                                     dataDimensions, saveData))#
+    crossValAverage <- mean(crossValValue)#
+    return(crossValAverage)#
+  }#
+  crossVal <- mean(sapply(1:numBlocks, calcCrossVal))#
+#
+  return(crossVal)#
+}#
+dyesCode <- nimbleCode({#
+  for (i in 1:BATCHES) {#
+    for (j in 1:SAMPLES) {#
+      y[i,j] ~ dnorm(mu[i], sd = sigma.within);#
+    }#
+    mu[i] ~ dnorm(theta, sd = sigma.between);#
+  }#
+  theta ~ dnorm(0.0, 1.0E-10);#
+  sigma.within ~ dunif(0, 100)#
+  sigma.between ~ dunif(0, 100)#
+})#
+#
+dyesModel <- nimbleModel(dyesCode,#
+                         constants = list(BATCHES = 6, SAMPLES = 5))#
+#
+data <- matrix(c(1545, 1540, 1595, 1445, 1595, 1520, 1440, 1555, 1550,#
+                 1440, 1630, 1455, 1440, 1490, 1605, 1595, 1515, 1450,#
+                 1520, 1560, 1510, 1465, 1635, 1480, 1580, 1495, 1560,#
+                 1545, 1625, 1445), nrow = 6)#
+#
+dyesModel$setData(list(y = data))#
+#
+output <- crossValidateOne(dyesModel, "y", 1000, 300, 2, 2)
+rm(list=ls())#
+library(nimble)#
+library(parallel)#
+crossValCalculate <- function(row, MCMCOut, dataDimensions, saveData){#
+  simDataArray <- array(MCMCOut[row,], dim = c(dataDimensions))#
+  discrep <- sum((simDataArray - saveData)^2)#
+  return(discrep)#
+}
+crossValidateOne <- function(model,#
+                             dataNames,#
+                             MCMCIter,#
+                             burnIn, thin,#
+                             leaveOutIndex#
+                             MCMCdefs=NULL){#
+  simpSetMCMCDefs <- function(Rmodel, MCMCdefs, MCMCname) {#
+    eval(MCMCdefs[[MCMCname]])#
+  }#
+  if(!is.null(MCMCdefs){#
+  ## eval(MCMCdefs.opt2[['nimbleOpt2']])#
+    ## customSpec <- simpSetMCMCDefs(occ.R.model, MCMCdefs.opt2, 'nimbleOpt2')#
+  }#
+#
+  ## fill in each element of data along leaveOutIndex with NAs.  then,#
+  ## data na values will be filled in as each mcmc runs.  These#
+  ## estimated data values can be compared to known data values, and#
+  ## the average loss (0/1) can be taken over all MCMC runs.  then#
+  ## take the average of these for all data points? woo!#
+  newModel <- model$newModel()#
+  compileNimble(newModel)#
+  numBlocks <- newModel$getVarInfo(dataNames)[['maxs']][leaveOutIndex]#
+  dataDimensions <- newModel$getVarInfo(dataNames)[['maxs']]#
+  saveData <- array(values(newModel, dataNames), dim = c(dataDimensions))#
+#
+  calcCrossVal <- function(i){#
+    tempData <- saveData#
+    print(tempData)#
+    newModel$resetData()#
+    evalCode1 <- paste0("tempData[",rep(",", leaveOutIndex - 1), i,#
+                        paste0(rep(",", length(dataDimensions) -#
+                                   leaveOutIndex)),"] <- NA")#
+    eval(parse(text = evalCode1))#
+    evalCode2 <- paste0("modelDataList <- list(", dataNames, "= tempData)")#
+    eval(parse(text=evalCode2))#
+    newModel$setData(modelDataList)#
+    print(modelDataList)#
+    modelMCMCConf <- configureMCMC(newModel,#
+                                   monitors = dataNames, thin = thin)#
+    modelMCMC <- buildMCMC(modelMCMCConf)#
+    C.modelMCMC <- compileNimble(modelMCMC,#
+                                 project = newModel,#
+                                 resetFunctions = (i != 1))    #
+    C.modelMCMC$run(MCMCIter)#
+    MCMCout <- as.matrix(C.modelMCMC$mvSamples)#
+    sampNum <- dim(MCMCout)[1] #
+    crossValValue <- unlist(mclapply(ceiling(burnIn/thin):sampNum,#
+                                     crossValCalculate, MCMCout,#
+                                     dataDimensions, saveData))#
+    crossValAverage <- mean(crossValValue)#
+    return(crossValAverage)#
+  }#
+  crossVal <- mean(sapply(1:numBlocks, calcCrossVal))#
+#
+  return(crossVal)#
+}
+crossValidateOne <- function(model,#
+                             dataNames,#
+                             MCMCIter,#
+                             burnIn, thin,#
+                             leaveOutIndex,#
+                             MCMCdefs=NULL){#
+  simpSetMCMCDefs <- function(Rmodel, MCMCdefs, MCMCname) {#
+    eval(MCMCdefs[[MCMCname]])#
+  }#
+  if(!is.null(MCMCdefs){#
+  ## eval(MCMCdefs.opt2[['nimbleOpt2']])#
+    ## customSpec <- simpSetMCMCDefs(occ.R.model, MCMCdefs.opt2, 'nimbleOpt2')#
+  }#
+#
+  ## fill in each element of data along leaveOutIndex with NAs.  then,#
+  ## data na values will be filled in as each mcmc runs.  These#
+  ## estimated data values can be compared to known data values, and#
+  ## the average loss (0/1) can be taken over all MCMC runs.  then#
+  ## take the average of these for all data points? woo!#
+  newModel <- model$newModel()#
+  compileNimble(newModel)#
+  numBlocks <- newModel$getVarInfo(dataNames)[['maxs']][leaveOutIndex]#
+  dataDimensions <- newModel$getVarInfo(dataNames)[['maxs']]#
+  saveData <- array(values(newModel, dataNames), dim = c(dataDimensions))#
+#
+  calcCrossVal <- function(i){#
+    tempData <- saveData#
+    print(tempData)#
+    newModel$resetData()#
+    evalCode1 <- paste0("tempData[",rep(",", leaveOutIndex - 1), i,#
+                        paste0(rep(",", length(dataDimensions) -#
+                                   leaveOutIndex)),"] <- NA")#
+    eval(parse(text = evalCode1))#
+    evalCode2 <- paste0("modelDataList <- list(", dataNames, "= tempData)")#
+    eval(parse(text=evalCode2))#
+    newModel$setData(modelDataList)#
+    print(modelDataList)#
+    modelMCMCConf <- configureMCMC(newModel,#
+                                   monitors = dataNames, thin = thin)#
+    modelMCMC <- buildMCMC(modelMCMCConf)#
+    C.modelMCMC <- compileNimble(modelMCMC,#
+                                 project = newModel,#
+                                 resetFunctions = (i != 1))    #
+    C.modelMCMC$run(MCMCIter)#
+    MCMCout <- as.matrix(C.modelMCMC$mvSamples)#
+    sampNum <- dim(MCMCout)[1] #
+    crossValValue <- unlist(mclapply(ceiling(burnIn/thin):sampNum,#
+                                     crossValCalculate, MCMCout,#
+                                     dataDimensions, saveData))#
+    crossValAverage <- mean(crossValValue)#
+    return(crossValAverage)#
+  }#
+  crossVal <- mean(sapply(1:numBlocks, calcCrossVal))#
+#
+  return(crossVal)#
+}
+crossValCalculate <- function(row, MCMCOut, dataDimensions, saveData){#
+  simDataArray <- array(MCMCOut[row,], dim = c(dataDimensions))#
+  discrep <- sum((simDataArray - saveData)^2)#
+  return(discrep)#
+}#
+#
+crossValidateOne <- function(model,#
+                             dataNames,#
+                             MCMCIter,#
+                             burnIn, thin,#
+                             leaveOutIndex,#
+                             MCMCdefs=NULL){#
+  simpSetMCMCDefs <- function(Rmodel, MCMCdefs, MCMCname) {#
+    eval(MCMCdefs[[MCMCname]])#
+  }#
+  if(!is.null(MCMCdefs){#
+  ## eval(MCMCdefs.opt2[['nimbleOpt2']])#
+    ## customSpec <- simpSetMCMCDefs(occ.R.model, MCMCdefs.opt2, 'nimbleOpt2')#
+  }#
+#
+  ## fill in each element of data along leaveOutIndex with NAs.  then,#
+  ## data na values will be filled in as each mcmc runs.  These#
+  ## estimated data values can be compared to known data values, and#
+  ## the average loss (0/1) can be taken over all MCMC runs.  then#
+  ## take the average of these for all data points? woo!#
+  newModel <- model$newModel()#
+  compileNimble(newModel)#
+  numBlocks <- newModel$getVarInfo(dataNames)[['maxs']][leaveOutIndex]#
+  dataDimensions <- newModel$getVarInfo(dataNames)[['maxs']]#
+  saveData <- array(values(newModel, dataNames), dim = c(dataDimensions))#
+#
+  calcCrossVal <- function(i){#
+    tempData <- saveData#
+    print(tempData)#
+    newModel$resetData()#
+    evalCode1 <- paste0("tempData[",rep(",", leaveOutIndex - 1), i,#
+                        paste0(rep(",", length(dataDimensions) -#
+                                   leaveOutIndex)),"] <- NA")#
+    eval(parse(text = evalCode1))#
+    evalCode2 <- paste0("modelDataList <- list(", dataNames, "= tempData)")#
+    eval(parse(text=evalCode2))#
+    newModel$setData(modelDataList)#
+    print(modelDataList)#
+    modelMCMCConf <- configureMCMC(newModel,#
+                                   monitors = dataNames, thin = thin)#
+    modelMCMC <- buildMCMC(modelMCMCConf)#
+    C.modelMCMC <- compileNimble(modelMCMC,#
+                                 project = newModel,#
+                                 resetFunctions = (i != 1))    #
+    C.modelMCMC$run(MCMCIter)#
+    MCMCout <- as.matrix(C.modelMCMC$mvSamples)#
+    sampNum <- dim(MCMCout)[1] #
+    crossValValue <- unlist(mclapply(ceiling(burnIn/thin):sampNum,#
+                                     crossValCalculate, MCMCout,#
+                                     dataDimensions, saveData))#
+    crossValAverage <- mean(crossValValue)#
+    return(crossValAverage)#
+  }#
+  crossVal <- mean(sapply(1:numBlocks, calcCrossVal))#
+#
+  return(crossVal)#
+}
+crossValidateOne <- function(model,#
+                             dataNames,#
+                             MCMCIter,#
+                             burnIn, thin,#
+                             leaveOutIndex,#
+                             MCMCdefs=NULL){#
+  simpSetMCMCDefs <- function(Rmodel, MCMCdefs, MCMCname) {#
+    eval(MCMCdefs[[MCMCname]])#
+  }#
+  if(!is.null(MCMCdefs)){#
+  ## eval(MCMCdefs.opt2[['nimbleOpt2']])#
+    ## customSpec <- simpSetMCMCDefs(occ.R.model, MCMCdefs.opt2, 'nimbleOpt2')#
+  }#
+#
+  ## fill in each element of data along leaveOutIndex with NAs.  then,#
+  ## data na values will be filled in as each mcmc runs.  These#
+  ## estimated data values can be compared to known data values, and#
+  ## the average loss (0/1) can be taken over all MCMC runs.  then#
+  ## take the average of these for all data points? woo!#
+  newModel <- model$newModel()#
+  compileNimble(newModel)#
+  numBlocks <- newModel$getVarInfo(dataNames)[['maxs']][leaveOutIndex]#
+  dataDimensions <- newModel$getVarInfo(dataNames)[['maxs']]#
+  saveData <- array(values(newModel, dataNames), dim = c(dataDimensions))#
+#
+  calcCrossVal <- function(i){#
+    tempData <- saveData#
+    print(tempData)#
+    newModel$resetData()#
+    evalCode1 <- paste0("tempData[",rep(",", leaveOutIndex - 1), i,#
+                        paste0(rep(",", length(dataDimensions) -#
+                                   leaveOutIndex)),"] <- NA")#
+    eval(parse(text = evalCode1))#
+    evalCode2 <- paste0("modelDataList <- list(", dataNames, "= tempData)")#
+    eval(parse(text=evalCode2))#
+    newModel$setData(modelDataList)#
+    print(modelDataList)#
+    modelMCMCConf <- configureMCMC(newModel,#
+                                   monitors = dataNames, thin = thin)#
+    modelMCMC <- buildMCMC(modelMCMCConf)#
+    C.modelMCMC <- compileNimble(modelMCMC,#
+                                 project = newModel,#
+                                 resetFunctions = (i != 1))    #
+    C.modelMCMC$run(MCMCIter)#
+    MCMCout <- as.matrix(C.modelMCMC$mvSamples)#
+    sampNum <- dim(MCMCout)[1] #
+    crossValValue <- unlist(mclapply(ceiling(burnIn/thin):sampNum,#
+                                     crossValCalculate, MCMCout,#
+                                     dataDimensions, saveData))#
+    crossValAverage <- mean(crossValValue)#
+    return(crossValAverage)#
+  }#
+  crossVal <- mean(sapply(1:numBlocks, calcCrossVal))#
+#
+  return(crossVal)#
+}
+dyesCode <- nimbleCode({#
+  for (i in 1:BATCHES) {#
+    for (j in 1:SAMPLES) {#
+      y[i,j] ~ dnorm(mu[i], sd = sigma.within);#
+    }#
+    mu[i] ~ dnorm(theta, sd = sigma.between);#
+  }#
+  theta ~ dnorm(0.0, 1.0E-10);#
+  sigma.within ~ dunif(0, 100)#
+  sigma.between ~ dunif(0, 100)#
+})#
+#
+dyesModel <- nimbleModel(dyesCode,#
+                         constants = list(BATCHES = 6, SAMPLES = 5))#
+#
+data <- matrix(c(1545, 1540, 1595, 1445, 1595, 1520, 1440, 1555, 1550,#
+                 1440, 1630, 1455, 1440, 1490, 1605, 1595, 1515, 1450,#
+                 1520, 1560, 1510, 1465, 1635, 1480, 1580, 1495, 1560,#
+                 1545, 1625, 1445), nrow = 6)#
+#
+dyesModel$setData(list(y = data))#
+#
+output <- crossValidateOne(dyesModel, "y", 1000, 300, 2, 2)
+library(devtools)#
+install_github("nimble-dev/nimble",#
+               ref = "devel",#
+               subdir = "packages/nimble")
+rm(list=ls())#
+library(nimble)#
+library(parallel)#
+crossValCalculate <- function(row, MCMCOut, dataDimensions, saveData){#
+  simDataArray <- array(MCMCOut[row,], dim = c(dataDimensions))#
+  discrep <- sum((simDataArray - saveData)^2)#
+  return(discrep)#
+}#
+#
+crossValidateOne <- function(model,#
+                             dataNames,#
+                             MCMCIter,#
+                             burnIn, thin,#
+                             leaveOutIndex,#
+                             MCMCdefs=NULL){#
+  simpSetMCMCDefs <- function(Rmodel, MCMCdefs, MCMCname) {#
+    eval(MCMCdefs[[MCMCname]])#
+  }#
+  if(!is.null(MCMCdefs)){#
+  ## eval(MCMCdefs.opt2[['nimbleOpt2']])#
+    ## customSpec <- simpSetMCMCDefs(occ.R.model, MCMCdefs.opt2, 'nimbleOpt2')#
+  }#
+#
+  ## fill in each element of data along leaveOutIndex with NAs.  then,#
+  ## data na values will be filled in as each mcmc runs.  These#
+  ## estimated data values can be compared to known data values, and#
+  ## the average loss (0/1) can be taken over all MCMC runs.  then#
+  ## take the average of these for all data points? woo!#
+  newModel <- model$newModel()#
+  compileNimble(newModel)#
+  numBlocks <- newModel$getVarInfo(dataNames)[['maxs']][leaveOutIndex]#
+  dataDimensions <- newModel$getVarInfo(dataNames)[['maxs']]#
+  saveData <- array(values(newModel, dataNames), dim = c(dataDimensions))#
+#
+  calcCrossVal <- function(i){#
+    tempData <- saveData#
+    print(tempData)#
+    newModel$resetData()#
+    evalCode1 <- paste0("tempData[",rep(",", leaveOutIndex - 1), i,#
+                        paste0(rep(",", length(dataDimensions) -#
+                                   leaveOutIndex)),"] <- NA")#
+    eval(parse(text = evalCode1))#
+    evalCode2 <- paste0("modelDataList <- list(", dataNames, "= tempData)")#
+    eval(parse(text=evalCode2))#
+    newModel$setData(modelDataList)#
+    print(modelDataList)#
+    modelMCMCConf <- configureMCMC(newModel,#
+                                   monitors = dataNames, thin = thin)#
+    modelMCMC <- buildMCMC(modelMCMCConf)#
+    C.modelMCMC <- compileNimble(modelMCMC,#
+                                 project = newModel,#
+                                 resetFunctions = (i != 1))    #
+    C.modelMCMC$run(MCMCIter)#
+    MCMCout <- as.matrix(C.modelMCMC$mvSamples)#
+    sampNum <- dim(MCMCout)[1] #
+    crossValValue <- unlist(mclapply(ceiling(burnIn/thin):sampNum,#
+                                     crossValCalculate, MCMCout,#
+                                     dataDimensions, saveData))#
+    crossValAverage <- mean(crossValValue)#
+    return(crossValAverage)#
+  }#
+  crossVal <- mean(sapply(1:numBlocks, calcCrossVal))#
+#
+  return(crossVal)#
+}
+dyesCode <- nimbleCode({#
+  for (i in 1:BATCHES) {#
+    for (j in 1:SAMPLES) {#
+      y[i,j] ~ dnorm(mu[i], sd = sigma.within);#
+    }#
+    mu[i] ~ dnorm(theta, sd = sigma.between);#
+  }#
+  theta ~ dnorm(0.0, 1.0E-10);#
+  sigma.within ~ dunif(0, 100)#
+  sigma.between ~ dunif(0, 100)#
+})
+dyesModel <- nimbleModel(dyesCode,#
+                         constants = list(BATCHES = 6, SAMPLES = 5))#
+#
+data <- matrix(c(1545, 1540, 1595, 1445, 1595, 1520, 1440, 1555, 1550,#
+                 1440, 1630, 1455, 1440, 1490, 1605, 1595, 1515, 1450,#
+                 1520, 1560, 1510, 1465, 1635, 1480, 1580, 1495, 1560,#
+                 1545, 1625, 1445), nrow = 6)#
+#
+dyesModel$setData(list(y = data))#
+#
+output <- crossValidateOne(dyesModel, "y", 1000, 300, 2, 2)
+crossValCalculate <- function(row, MCMCOut, dataDimensions, saveData){#
+  simDataArray <- array(MCMCOut[row,], dim = c(dataDimensions))#
+  discrep <- sum((simDataArray - saveData)^2)#
+  return(discrep)#
+}#
+#
+crossValidateOne <- function(model,#
+                             dataNames,#
+                             MCMCIter,#
+                             burnIn, thin,#
+                             leaveOutIndex,#
+                             MCMCdefs=NULL){#
+  simpSetMCMCDefs <- function(Rmodel, MCMCdefs, MCMCname) {#
+    eval(MCMCdefs[[MCMCname]])#
+  }#
+  if(!is.null(MCMCdefs)){#
+  ## eval(MCMCdefs.opt2[['nimbleOpt2']])#
+    ## customSpec <- simpSetMCMCDefs(occ.R.model, MCMCdefs.opt2, 'nimbleOpt2')#
+  }#
+#
+  ## fill in each element of data along leaveOutIndex with NAs.  then,#
+  ## data na values will be filled in as each mcmc runs.  These#
+  ## estimated data values can be compared to known data values, and#
+  ## the average loss (0/1) can be taken over all MCMC runs.  then#
+  ## take the average of these for all data points? woo!#
+  newModel <- model$newModel()#
+  compileNimble(newModel)#
+  numBlocks <- newModel$getVarInfo(dataNames)[['maxs']][leaveOutIndex]#
+  dataDimensions <- newModel$getVarInfo(dataNames)[['maxs']]#
+  saveData <- array(nimble:::values(newModel, dataNames), dim = c(dataDimensions))#
+#
+  calcCrossVal <- function(i){#
+    tempData <- saveData#
+    print(tempData)#
+    newModel$resetData()#
+    evalCode1 <- paste0("tempData[",rep(",", leaveOutIndex - 1), i,#
+                        paste0(rep(",", length(dataDimensions) -#
+                                   leaveOutIndex)),"] <- NA")#
+    eval(parse(text = evalCode1))#
+    evalCode2 <- paste0("modelDataList <- list(", dataNames, "= tempData)")#
+    eval(parse(text=evalCode2))#
+    newModel$setData(modelDataList)#
+    print(modelDataList)#
+    modelMCMCConf <- configureMCMC(newModel,#
+                                   monitors = dataNames, thin = thin)#
+    modelMCMC <- buildMCMC(modelMCMCConf)#
+    C.modelMCMC <- compileNimble(modelMCMC,#
+                                 project = newModel,#
+                                 resetFunctions = (i != 1))    #
+    C.modelMCMC$run(MCMCIter)#
+    MCMCout <- as.matrix(C.modelMCMC$mvSamples)#
+    sampNum <- dim(MCMCout)[1] #
+    crossValValue <- unlist(mclapply(ceiling(burnIn/thin):sampNum,#
+                                     crossValCalculate, MCMCout,#
+                                     dataDimensions, saveData))#
+    crossValAverage <- mean(crossValValue)#
+    return(crossValAverage)#
+  }#
+  crossVal <- mean(sapply(1:numBlocks, calcCrossVal))#
+#
+  return(crossVal)#
+}#
+dyesCode <- nimbleCode({#
+  for (i in 1:BATCHES) {#
+    for (j in 1:SAMPLES) {#
+      y[i,j] ~ dnorm(mu[i], sd = sigma.within);#
+    }#
+    mu[i] ~ dnorm(theta, sd = sigma.between);#
+  }#
+  theta ~ dnorm(0.0, 1.0E-10);#
+  sigma.within ~ dunif(0, 100)#
+  sigma.between ~ dunif(0, 100)#
+})#
+#
+dyesModel <- nimbleModel(dyesCode,#
+                         constants = list(BATCHES = 6, SAMPLES = 5))#
+#
+data <- matrix(c(1545, 1540, 1595, 1445, 1595, 1520, 1440, 1555, 1550,#
+                 1440, 1630, 1455, 1440, 1490, 1605, 1595, 1515, 1450,#
+                 1520, 1560, 1510, 1465, 1635, 1480, 1580, 1495, 1560,#
+                 1545, 1625, 1445), nrow = 6)#
+#
+dyesModel$setData(list(y = data))#
+#
+output <- crossValidateOne(dyesModel, "y", 1000, 300, 2, 2)
+dyesCodeSimp <- nimbleCode({#
+  for (i in 1:BATCHES) {#
+    for (j in 1:SAMPLES) {#
+          y[i,j] ~ dnorm(theta, sd = sigma)#
+    }#
+  }#
+  theta ~ dnorm(0.0, 1.0E-10);#
+  sigma ~ dunif(0, 100)#
+})#
+#
+dyesModelSimp <- nimbleModel(dyesCodeSimp = list(BATCHES = 6, SAMPLES = 5))#
+#
+output.simp <- crossValidateOne(dyesModel, "y", 1000, 300, 2, 2)
+dyesModelSimp <- nimbleModel(dyesCodeSimp = list(BATCHES = 6, SAMPLES = 5))
+dyesCodeSimp <- nimbleCode({#
+  for (i in 1:BATCHES) {#
+    for (j in 1:SAMPLES) {#
+          y[i,j] ~ dnorm(theta, sd = sigma)#
+    }#
+  }#
+  theta ~ dnorm(0.0, 1.0E-10);#
+  sigma ~ dunif(0, 100)#
+})
+dyesModelSimp <- nimbleModel(dyesCodeSimp = list(BATCHES = 6, SAMPLES = 5))
+dyesModelSimp <- nimbleModel(dyesCode = list(BATCHES = 6, SAMPLES = 5))
+dyesCodeSimp <- nimbleCode({#
+  for (i in 1:BATCHES) {#
+    for (j in 1:SAMPLES) {#
+          y[i,j] ~ dnorm(theta, sd = sigma)#
+    }#
+  }#
+  theta ~ dnorm(0.0, 1.0E-10);#
+  sigma ~ dunif(0, 100)#
+})#
+#
+dyesModelSimp <- nimbleModel(dyesCodeSimp, constants =list(BATCHES = 6, SAMPLES = 5))
+output.simp <- crossValidateOne(dyesModelSimp, "y", 1000, 300, 2, 2)
+data <- matrix(c(1545, 1540, 1595, 1445, 1595, 1520, 1440, 1555, 1550,#
+                 1440, 1630, 1455, 1440, 1490, 1605, 1595, 1515, 1450,#
+                 1520, 1560, 1510, 1465, 1635, 1480, 1580, 1495, 1560,#
+                 1545, 1625, 1445), nrow = 6)#
+#
+dyesModel$setData(list(y = data))
+dyesModelSimp <- nimbleModel(dyesCodeSimp, constants =list(BATCHES = 6, SAMPLES = 5))#
+dyesModelSimp$setData(list(y = data))#
+#
+output.simp <- crossValidateOne(dyesModelSimp, "y", 1000, 300, 2, 2)
+output.simp
+output
+rm(list=ls())#
+library(nimble)#
+library(parallel)#
+crossValCalculate <- function(row, MCMCOut, dataDimensions, saveData){#
+  simDataArray <- array(MCMCOut[row,], dim = c(dataDimensions))#
+  discrep <- sum((simDataArray - saveData)^2)#
+  return(discrep)#
+}#
+#
+crossValidateOne <- function(model,#
+                             dataNames,#
+                             MCMCIter,#
+                             burnIn, thin,#
+                             leaveOutIndex,#
+                             MCMCdefs=NULL){#
+  simpSetMCMCDefs <- function(Rmodel, MCMCdefs, MCMCname) {#
+    eval(MCMCdefs[[MCMCname]])#
+  }#
+  if(!is.null(MCMCdefs)){#
+  ## eval(MCMCdefs.opt2[['nimbleOpt2']])#
+    ## customSpec <- simpSetMCMCDefs(occ.R.model, MCMCdefs.opt2, 'nimbleOpt2')#
+  }#
+#
+  ## fill in each element of data along leaveOutIndex with NAs.  then,#
+  ## data na values will be filled in as each mcmc runs.  These#
+  ## estimated data values can be compared to known data values, and#
+  ## the average loss (0/1) can be taken over all MCMC runs.  then#
+  ## take the average of these for all data points? woo!#
+  newModel <- model$newModel()#
+  compileNimble(newModel)#
+  numBlocks <- newModel$getVarInfo(dataNames)[['maxs']][leaveOutIndex]#
+  dataDimensions <- newModel$getVarInfo(dataNames)[['maxs']]#
+  saveData <- array(nimble:::values(newModel, dataNames), dim = c(dataDimensions))#
+#
+  calcCrossVal <- function(i){#
+    tempData <- saveData#
+    print(tempData)#
+    newModel$resetData()#
+    evalCode1 <- paste0("tempData[",rep(",", leaveOutIndex - 1), i,#
+                        paste0(rep(",", length(dataDimensions) -#
+                                   leaveOutIndex)),"] <- NA")#
+    eval(parse(text = evalCode1))#
+    evalCode2 <- paste0("modelDataList <- list(", dataNames, "= tempData)")#
+    eval(parse(text=evalCode2))#
+    newModel$setData(modelDataList)#
+    print(modelDataList)#
+    modelMCMCConf <- configureMCMC(newModel,#
+                                   monitors = dataNames, thin = thin)#
+    modelMCMC <- buildMCMC(modelMCMCConf)#
+    C.modelMCMC <- compileNimble(modelMCMC,#
+                                 project = newModel,#
+                                 resetFunctions = (i != 1))    #
+    C.modelMCMC$run(MCMCIter)#
+    MCMCout <- as.matrix(C.modelMCMC$mvSamples)#
+    sampNum <- dim(MCMCout)[1] #
+    crossValValue <- unlist(mclapply(ceiling(burnIn/thin):sampNum,#
+                                     crossValCalculate, MCMCout,#
+                                     dataDimensions, saveData))#
+    crossValAverage <- log(mean(crossValValue))#
+    return(crossValAverage)#
+  }#
+  crossVal <- sum(sapply(1:numBlocks, calcCrossVal))#
+#
+  return(crossVal)#
+}#
+dyesCode <- nimbleCode({#
+  for (i in 1:BATCHES) {#
+    for (j in 1:SAMPLES) {#
+      y[i,j] ~ dnorm(mu[i], sd = sigma.within);#
+    }#
+    mu[i] ~ dnorm(theta, sd = sigma.between);#
+  }#
+  theta ~ dnorm(0.0, 1.0E-10);#
+  sigma.within ~ dunif(0, 100)#
+  sigma.between ~ dunif(0, 100)#
+})#
+#
+dyesModel <- nimbleModel(dyesCode,#
+                         constants = list(BATCHES = 6, SAMPLES = 5))#
+#
+data <- matrix(c(1545, 1540, 1595, 1445, 1595, 1520, 1440, 1555, 1550,#
+                 1440, 1630, 1455, 1440, 1490, 1605, 1595, 1515, 1450,#
+                 1520, 1560, 1510, 1465, 1635, 1480, 1580, 1495, 1560,#
+                 1545, 1625, 1445), nrow = 6)#
+#
+dyesModel$setData(list(y = data))#
+#
+output <- crossValidateOne(dyesModel, "y", 1000, 300, 2, 2)
+output
+## ****************************************************#
+dyesCodeSimp <- nimbleCode({#
+  for (i in 1:BATCHES) {#
+    for (j in 1:SAMPLES) {#
+          y[i,j] ~ dnorm(theta, sd = sigma)#
+    }#
+  }#
+  theta ~ dnorm(0.0, 1.0E-10);#
+  sigma ~ dunif(0, 100)#
+})#
+#
+dyesModelSimp <- nimbleModel(dyesCodeSimp, constants =list(BATCHES = 6, SAMPLES = 5))#
+dyesModelSimp$setData(list(y = data))#
+#
+output.simp <- crossValidateOne(dyesModelSimp, "y", 1000, 300, 2, 2)
+output.simp
+output
+dyesModel$sigma.within
+dyesModel
+dyesModel$sigma.between
+rnorm
+data <- cbind(rnorm(5, 0, 1), rnorm(5, 5, 1), rnorm(5, 4, 1),#
+              rnorm(5,10, 1),#
+              rnorm(5, 15, 1), rnorm(5, 25, 1))
+data
+dyesModel$setData(list(y = data))#
+#
+output <- crossValidateOne(dyesModel, "y", 1000, 300, 2, 2)
+data <- rbind(rnorm(5, 0, 1), rnorm(5, 5, 1), rnorm(5, 4, 1),#
+              rnorm(5,10, 1),#
+              rnorm(5, 15, 1), rnorm(5, 25, 1))
+data
+dyesModel$setData(list(y = data))#
+#
+output <- crossValidateOne(dyesModel, "y", 1000, 300, 2, 2)
+data <- cbind(rnorm(6, 0, 1), rnorm(6, 6, 1), rnorm(6, 4, 1),#
+              rnorm(6,10, 1),#
+              rnorm(6, 16, 1))
+data
+dyesModel$setData(list(y = data))#
+#
+output <- crossValidateOne(dyesModel, "y", 1000, 300, 2, 2)
+output
+## ****************************************************#
+dyesCodeSimp <- nimbleCode({#
+  for (i in 1:BATCHES) {#
+    for (j in 1:SAMPLES) {#
+          y[i,j] ~ dnorm(theta, sd = sigma)#
+    }#
+  }#
+  theta ~ dnorm(0.0, 1.0E-10);#
+  sigma ~ dunif(0, 100)#
+})#
+#
+dyesModelSimp <- nimbleModel(dyesCodeSimp,#
+                             constants =list(BATCHES = 6, SAMPLES = 5))#
+dyesModelSimp$setData(list(y = data))#
+#
+output.simp <- crossValidateOne(dyesModelSimp, "y", 1000, 300, 2, 2)
+output.simp
+output
+data <- cbind(rnorm(6, 0, 1), rnorm(6, 6, 1), rnorm(6, 4, 1),#
+              rnorm(6, 7, 1),#
+              rnorm(6, 5, 1))#
+#
+dyesModel$setData(list(y = data))#
+#
+output <- crossValidateOne(dyesModel, "y", 1000, 300, 2, 2)

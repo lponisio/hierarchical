@@ -3,44 +3,49 @@ Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
 The top-level auxiliary file: ms.aux
 The style file: mee.bst
 Database file #1: refs.bib
-You've used 8 entries,
+Warning--to sort, need author or key in winbugs
+Warning--to sort, need author or key in openbugs
+Warning--empty year in openbugs; set to ????
+Warning--empty year in winbugs; set to ????
+You've used 17 entries,
             2811 wiz_defined-function locations,
-            637 strings with 5881 characters,
-and the built_in function-call counts, 7255 in all, are:
-= -- 641
-> -- 264
-< -- 2
-+ -- 103
-- -- 93
-* -- 671
-:= -- 1066
-add.period$ -- 16
-call.type$ -- 8
-change.case$ -- 70
-chr.to.int$ -- 8
-cite$ -- 8
-duplicate$ -- 561
-empty$ -- 590
-format.name$ -- 121
-if$ -- 1444
-int.to.chr$ -- 1
+            680 strings with 7295 characters,
+and the built_in function-call counts, 13665 in all, are:
+= -- 1227
+> -- 462
+< -- 7
++ -- 186
+- -- 162
+* -- 1206
+:= -- 1994
+add.period$ -- 34
+call.type$ -- 17
+change.case$ -- 136
+chr.to.int$ -- 16
+cite$ -- 25
+duplicate$ -- 1056
+empty$ -- 1112
+format.name$ -- 216
+if$ -- 2753
+int.to.chr$ -- 2
 int.to.str$ -- 1
-missing$ -- 78
-newline$ -- 36
-num.names$ -- 32
-pop$ -- 147
+missing$ -- 146
+newline$ -- 72
+num.names$ -- 60
+pop$ -- 296
 preamble$ -- 1
-purify$ -- 63
+purify$ -- 120
 quote$ -- 0
-skip$ -- 99
+skip$ -- 239
 stack$ -- 0
-substring$ -- 722
-swap$ -- 197
-text.length$ -- 0
+substring$ -- 1282
+swap$ -- 395
+text.length$ -- 2
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 69
-warning$ -- 0
-while$ -- 45
+type$ -- 150
+warning$ -- 4
+while$ -- 85
 width$ -- 0
-write$ -- 98
+write$ -- 201
+(There were 4 warnings)

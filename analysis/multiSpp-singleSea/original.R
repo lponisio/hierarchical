@@ -137,6 +137,14 @@ model.input$constants[["max.num.reps"]] <- NULL
 input1 <- c(code=ms.ss.occ, model.input)
 
 
+occ.R.model <- nimbleModel(code=ms.ss.occ,
+                           constants=input1$constants,
+                           data=input1$data,
+                           inits=input1$inits,
+                           check=FALSE)
+
+
+
 ## *********************************************************************
 ## original model with nimble
 
