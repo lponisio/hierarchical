@@ -255,7 +255,7 @@ occ.R.model <- nimbleModel(code=ms.ss.occ,
 occ.mcmc <- buildMCMC(occ.R.model)
 occ.C.model <- compileNimble(occ.R.model)
 occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model)
-occ.C.mcmc$run(10^3)
+occ.C.mcmc$run(niter)
 
 source('../cppp/src/calcCPPP.R', chdir = TRUE)
 options(mc.cores=6)
@@ -266,12 +266,114 @@ test.opt2 <- generateCPPP(occ.R.model,
                           occ.mcmc,
                           dataName = 'X',
                           paramNames = input1$monitors, 
-                          MCMCIter = 10^5, 
-                          NSamp = 10^4,
-                          NPDist = 10^2,
+                          MCMCIter = niter, 
+                          NSamp = 10^3,
+                          NPDist = 10^3,
                           burnInProportion = 0.10,
                           thin = 1,
                           averageParams = TRUE,
-                          discFuncGenerator=likeDiscFuncGenerator)
+                          discFuncGenerator=likeDiscFuncGenerator,
+                          returnChains=TRUE)
 
 save(test.opt2, file=file.path(save.dir, "ms_ss_noz_CPPP.Rdata"))
+
+
+## *********************************************************************
+## ## cross validation
+## *********************************************************************
+## if not already run above
+occ.R.model <- nimbleModel(code=ms.ss.occ,
+                           constants=input1$constants,
+                           data=input1$data,
+                           inits=input1$inits,
+                           check=FALSE)
+
+options(mc.cores=6)
+
+source('../crossValidation/crossValidationFunction.R')
+
+output <- crossValidateOne(model=occ.R.model,
+                           dataNames= "X",
+                           MCMCIter= niter,
+                           burnIn=niter*0.1,
+                           thin=1,
+                           leaveOutIndex=3,
+                           MCMCdefs=NULL)
+
+## *********************************************************************
+
+ms.ss.occ.simp <- nimbleCode({
+
+  ## random effects  
+  a1 ~ dnorm(0, 0.001)  
+  a2 ~ dnorm(0, 0.001)
+  a3 ~ dnorm(0, 0.001)
+  a4 ~ dnorm(0, 0.001)
+  b1 ~ dnorm(0, 0.001)
+  b2 ~ dnorm(0, 0.001)
+
+
+  for (i in 1:(num.species)) {
+    ## Create priors for species i from the community level prior
+    ## distributions
+
+    ## vectorize the calculation of psi.
+    logit(psi[1:num.points]) <-
+      u.cato*(1-habitat.ind[1:num.points]) +
+        u.fcw*habitat.ind[1:num.points] +
+          a1*ufc.linear[1:num.points] +
+            a2*ufc.quadratic[1:num.points] +
+              a3*ba.linear[1:num.points] +
+                a4*ba.quadratic[1:num.points]
+    ## vectorized calculation
+    mu.psi[1:num.points] <- psi[1:num.points]
+
+    ## For our purpose a better way to write this way is to
+    ## not worry that some elements of date.linear and date.quadratic
+    ## aren't used, since the benefit of vectorizing the computation
+    ## should be much greater than the cost of a few extra elements
+    logit(p[1:num.points, 1:max.num.reps]) <-
+      (v.cato*(1-habitat.ind[1:num.points]) +
+       v.fcw*habitat.ind[1:num.points]) %*%
+         asRow(onesRow[1, 1:max.num.reps])+
+           b1*date.linear[1:num.points,1:max.num.reps] +
+             b2*date.quadratic[1:num.points,1:max.num.reps]
+
+    ## user defined distribution to combine the bernoulli occupancy
+    ## and detection events.  We can also make this is a single
+    ## compuation for the entire matrix of locations-x-visits, for
+    ## each species (i)
+    
+    X[1:num.points, 1:max.num.reps, i] ~ dBernDetectionMatrix(
+      occProb = mu.psi[1:num.points],
+      detectionProb = p[1:num.points, 1:max.num.reps],
+      numReps = num.reps[1:num.points])
+  }
+  ## Derived quantities:
+  ## for(j in 1:num.points){
+  ##   N.site[j]<- sum(mu.psi[j,1:(num.species)])
+  ##   N.ground[j]<- sum(mu.psi[j,1:num.species] * ground[1:num.species])
+  ##   N.mid[j]<- sum(mu.psi[j,1:num.species] * mid[1:num.species])
+  ## }
+})
+
+
+
+occ.R.model.simp <- nimbleModel(code=ms.ss.occ.simp,
+                           constants=input1$constants,
+                           data=input1$data,
+                           inits=input1$inits,
+                           check=FALSE)
+
+occ.mcmc <- buildMCMC(occ.R.model.simp)
+occ.C.model.simp <- compileNimble(occ.R.model.simp)
+occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model.simp)
+
+
+output.simp <- crossValidateOne(model=occ.R.model.simp,
+                           dataNames= "X",
+                           MCMCIter= 10^4,
+                           burnIn=10^2,
+                           thin=2,
+                           leaveOutIndex=3,
+                           MCMCdefs=NULL)

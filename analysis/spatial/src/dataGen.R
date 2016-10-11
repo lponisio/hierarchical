@@ -9,13 +9,13 @@ rmvn <- function(n, mu = 0, V = matrix(1)) {
 }
 
 
-genSpatialOccData <- function(ngrid = 25,
+genSpatialOccData <- function(ngrid = 50,
                               nreps = 10,
                               alpha = 1,
                               beta1 = 2,
                               p = 0.6,
-                              sigma = 1,
-                              delta = 1){
+                              sigma = 0.5,
+                              delta = 0.5){
 
   ## Set up a square lattice region
   simgrid <- expand.grid(1:ngrid, 1:ngrid)

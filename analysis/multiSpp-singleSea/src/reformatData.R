@@ -188,7 +188,7 @@ prepMutiSpData <- function(survey.data,
   ## initial values
   omega.draw <- runif(1, num.species/(num.species + n.zeroes), 1)
 
-  ## inital conditions with 1s as NAs and Nas as 1s
+  ## inital conditions with 1s as NAs and NAs as 1s
   zinits <- zs
   zinits[zinits == 1] <- 2
   zinits[is.na(zinits)] <- 1

@@ -1,864 +1,3 @@
-rm(list=ls())#
-library(vegan)#
-library(lme4)#
-library(lmerTest)#
-setwd("~/Dropbox/hedgerow/forbs/analysis")#
-#
-load('../../data_sets/traditional/specimens-complete.RData')#
-spec <- dd#
-#
-to.keep <- c("PurcellForb", "PutahCreekForb", "RomingerForb",#
-             "GilmerForb", "BermForb", "Rominger", "Berm",#
-             "PutahCreek", "Gilmer", "Butler")#
-to.keep.yrs <- c(2013:2015)#
-#
-spec <- spec[spec$Site %in% to.keep,]#
-spec <- spec[spec$Year %in% to.keep.yrs,]#
-spec <- spec[spec$NetPan == "net",]#
-## calculate site-level statistics#
-calc.site.level <- function(dats, abund.type="length"){#
-  rich <- length(unique(dats))#
-  dats <- as.character(dats)#
-  div <-  diversity(table(dats), index="simpson")#
-  if(abund.type == "median"){#
-    abund <- median(table(dats))#
-  } else {#
-    abund <- length(dats)#
-  }#
-  return(c(rich=rich, abund=abund, div=div))#
-}#
-#
-by.site <- aggregate(spec$GenusSpecies,#
-                     list(Site=spec$Site,#
-                          Year=spec$Year,#
-                          SiteStatus=spec$SiteStatus,#
-                          JulianDate=spec$JulianDate),#
-                     function(x) calc.site.level(x))#
-by.site$Year <- as.factor(by.site$Year)#
-#
-by.site$beforeAfter <- ifelse(by.site$Year == 2013,#
-                              "before", "after")#
-by.site$SiteStatus <- ifelse(by.site$SiteStatus == "forb",#
-                             "forb", "hedgerow")#
-#
-## make a column to pair hedgerows with their forb additions#
-by.site$Site[by.site$Site == "Butler"] <- "Purcell"#
-#
-by.site$pairs <- gsub("(Forb)", "", by.site$Site)#
-## models with site as a catagorical effect#
-div.mod <- lmer(x[,"div"] ~ Year*SiteStatus +#
-                (1|Site) +  (1|pairs), data=by.site)#
-summary(div.mod)#
-#
-abund.mod <- glmer(x[,"abund"] ~ Year*SiteStatus +#
-                   (1|Site) + (1|pairs),#
-                   data=by.site, family="poisson")#
-summary(abund.mod)#
-#
-rich.mod <- glmer(x[,"rich"] ~ Year*SiteStatus +#
-                  (1|Site) + (1|pairs),#
-                   data=by.site, family="poisson")#
-summary(rich.mod)
-summary(abund.mod)
-rich.mod <- glmer(x[,"rich"] ~ Year*SiteStatus +#
-                  (1|Site) + (1|pairs),#
-                   data=by.site, family="poisson")#
-summary(rich.mod)
-rm(list=ls())#
-#
-setwd("~/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea")#
-source('src/initialize.R')#
-data <- genDynamicOccData()#
-model.input <- prepModDataOcc(data, include.zs=FALSE)#
-#
-## *********************************************************************#
-##  Multi-season occupancy model: option 4-5 remove latent states using#
-##  user-defined NIMBLE function#
-##  *********************************************************************#
-#
-## Specify model in NIMBLE#
-ss.ms.occ <- nimbleCode({#
-  ##  priors#
-  psi1 ~ dunif(0, 1)#
-#
-  psi[1] <- psi1#
-  for(k in 1:(nyear-1)){#
-    phi[k] ~ dunif(0, 1)#
-    gamma[k] ~ dunif(0, 1)#
-    p[k] ~ dunif(0, 1)#
-  }#
-  p[nyear] ~ dunif(0, 1)#
-#
-  ## Ecological submodel: Define state conditional on parameters#
-  for(i in 1:nsite) {#
-    ## removes the z's and muZ's from the model and compute#
-    ## the probability of all reps over all years for one site.#
-    y[i, 1:nrep, 1:nyear] ~ dDynamicOccupancy(nrep,#
-                                              psi1,#
-                                              phi[1:(nyear-1)],#
-                                              gamma[1:(nyear-1)],#
-                                              p[1:nyear])#
-  }#
-})#
-#
-input1 <- c(code=ss.ms.occ,#
-            model.input)
-rm(list=ls()) #
-setwd('~/Dropbox/nimble/occupancy/analysis/multiSpp-singleSea')#
-#
-source('src/initialize.R')#
-## don't agument data#
-n.zeroes <- 0#
-model.input <- prepMutiSpData(survey.data,#
-                              survey.dates,#
-                              species.groups,#
-                              habitat,#
-                              n.zeros)#
-#
-## *********************************************************************#
-## multi-species site-occupancy models: vectorized with custom#
-## function to remove zs#
-## *********************************************************************#
-#
-ms.ss.occ <- nimbleCode({#
-  ## Define prior distributions for community-level model parameters#
-  cato.occ.mean ~ dunif(0,1)#
-  mu.ucato <- log(cato.occ.mean) - log(1-cato.occ.mean)#
-#
-  fcw.occ.mean ~ dunif(0,1)#
-  mu.ufcw <- log(fcw.occ.mean) - log(1-fcw.occ.mean)#
-#
-  cato.det.mean ~ dunif(0,1)#
-  mu.vcato <- log(cato.det.mean) - log(1-cato.det.mean)#
-#
-  fcw.det.mean ~ dunif(0,1)#
-  mu.vfcw <- log(fcw.det.mean) - log(1-fcw.det.mean)#
-#
-  ## random effects#
-  sigma.ucato ~ dunif(0, 100)#
-  sigma.ufcw ~ dunif(0, 100)#
-  mu.a1 ~ dnorm(0, 0.001)#
-  sigma.a1 ~ dunif(0, 100)#
-  mu.a2 ~ dnorm(0, 0.001)#
-  sigma.a2 ~ dunif(0, 100)#
-  mu.a3 ~ dnorm(0, 0.001)#
-  sigma.a3 ~ dunif(0, 100)#
-  mu.a4 ~ dnorm(0, 0.001)#
-  sigma.a4 ~ dunif(0, 100)#
-#
-  sigma.vcato ~ dunif(0, 100)#
-  sigma.vfcw ~ dunif(0, 100)#
-  mu.b1 ~ dnorm(0, 0.001)#
-  sigma.b1 ~ dunif(0, 100)#
-  mu.b2 ~ dnorm(0, 0.001)#
-  sigma.b2 ~ dunif(0, 100)#
-  for (i in 1:(num.species)) {#
-    ## Create priors for species i from the community level prior#
-    ## distributions#
-#
-    u.cato[i] ~ dnorm(mu.ucato, sd=sigma.ucato)#
-    u.fcw[i] ~ dnorm(mu.ufcw, sd=sigma.ufcw)#
-    a1[i] ~ dnorm(mu.a1, sd=sigma.a1)#
-    a2[i] ~ dnorm(mu.a2, sd=sigma.a2)#
-    a3[i] ~ dnorm(mu.a3, sd=sigma.a3)#
-    a4[i] ~ dnorm(mu.a4, sd=sigma.a4)#
-#
-    v.cato[i] ~ dnorm(mu.vcato, sd=sigma.vcato)#
-    v.fcw[i] ~ dnorm(mu.vfcw, sd=sigma.vfcw)#
-    b1[i] ~ dnorm(mu.b1, sd=sigma.b1)#
-    b2[i] ~ dnorm(mu.b2, sd=sigma.b2)#
-#
-    ## vectorize the calculation of psi.#
-    logit(psi[1:num.points,i]) <-#
-      u.cato[i]*(1-habitat.ind[1:num.points]) +#
-        u.fcw[i]*habitat.ind[1:num.points] +#
-          a1[i]*ufc.linear[1:num.points] +#
-            a2[i]*ufc.quadratic[1:num.points] +#
-              a3[i]*ba.linear[1:num.points] +#
-                a4[i]*ba.quadratic[1:num.points]#
-    ## vectorized calculation#
-    mu.psi[1:num.points,i] <- psi[1:num.points, i]#
-#
-    ## For our purpose a better way to write this way is to#
-    ## not worry that some elements of date.linear and date.quadratic#
-    ## aren't used, since the benefit of vectorizing the computation#
-    ## should be much greater than the cost of a few extra elements#
-    logit(p[1:num.points, 1:max.num.reps, i]) <-#
-      (v.cato[i]*(1-habitat.ind[1:num.points]) +#
-       v.fcw[i]*habitat.ind[1:num.points]) %*%#
-         asRow(onesRow[1, 1:max.num.reps])+#
-           b1[i]*date.linear[1:num.points,1:max.num.reps] +#
-             b2[i]*date.quadratic[1:num.points,1:max.num.reps]#
-#
-    ## user defined distribution to combine the bernoulli occupancy#
-    ## and detection events.  We can also make this is a single#
-    ## compuation for the entire matrix of locations-x-visits, for#
-    ## each species (i)#
-    X[1:num.points, 1:max.num.reps, i] ~ dBernDetectionMatrix(#
-      occProb = mu.psi[1:num.points,i],#
-      detectionProb = p[1:num.points, 1:max.num.reps,i],#
-      numReps = num.reps[1:num.points])#
-  }#
-  ## Derived quantities:#
-  ## for(j in 1:num.points){#
-  ##   N.site[j]<- sum(mu.psi[j,1:(num.species)])#
-  ##   N.ground[j]<- sum(mu.psi[j,1:num.species] * ground[1:num.species])#
-  ##   N.mid[j]<- sum(mu.psi[j,1:num.species] * mid[1:num.species])#
-  ## }#
-})#
-input1 <- c(code=ms.ss.occ, model.input)
-## *********************************************************************#
-occ.R.model <- nimbleModel(code=ms.ss.occ,#
-                           constants=input1$constants,#
-                           data=input1$data,#
-                           inits=input1$inits,#
-                           check=FALSE)#
-## ad auto blocking#
-occ.mcmc <- buildMCMC(occ.R.model)#
-occ.C.model <- compileNimble(occ.R.model)#
-occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model)#
-occ.C.mcmc$run(10000)
-100000
-10^5
-## *********************************************************************#
-occ.R.model <- nimbleModel(code=ms.ss.occ,#
-                           constants=input1$constants,#
-                           data=input1$data,#
-                           inits=input1$inits,#
-                           check=FALSE)#
-#
-occ.mcmc <- buildMCMC(occ.R.model)#
-occ.C.model <- compileNimble(occ.R.model)#
-occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model)#
-occ.C.mcmc$run(10)
-10^2
-test.opt2 <- generateCPPP(occ.R.model,#
-                          occ.C.model,#
-                          occ.C.mcmc,#
-                          occ.mcmc,#
-                          dataName = 'X',#
-                          paramNames = input1$monitors, #
-                          MCMCIter = 10, #
-                          NSamp = 10,#
-                          NPDist = 10,#
-                          burnInProportion = 0.10,#
-                          thin = 1,#
-                          averageParams = TRUE,#
-                          discFuncGenerator=likeDiscFuncGenerator)
-source('../cppp/src/calcCPPP.R', chdir = TRUE)#
-options(mc.cores=1)#
-#
-test.opt2 <- generateCPPP(occ.R.model,#
-                          occ.C.model,#
-                          occ.C.mcmc,#
-                          occ.mcmc,#
-                          dataName = 'X',#
-                          paramNames = input1$monitors, #
-                          MCMCIter = 10, #
-                          NSamp = 10,#
-                          NPDist = 10,#
-                          burnInProportion = 0.10,#
-                          thin = 1,#
-                          averageParams = TRUE,#
-                          discFuncGenerator=likeDiscFuncGenerator)
-test.opt2
-occ.C.mcmc$run(10^3)
-test.opt2 <- generateCPPP(occ.R.model,#
-                          occ.C.model,#
-                          occ.C.mcmc,#
-                          occ.mcmc,#
-                          dataName = 'X',#
-                          paramNames = input1$monitors, #
-                          MCMCIter = 10^3, #
-                          NSamp = 10^2,#
-                          NPDist = 10^2,#
-                          burnInProportion = 0.10,#
-                          thin = 1,#
-                          averageParams = TRUE,#
-                          discFuncGenerator=likeDiscFuncGenerator)
-opt2
-test.opt2
-rm(list=ls())#
-setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
-source('src/initialize.R')#
-library(rjags)#
-load.module("msm")#
-#
-set.seed(444)#
-dats <- genSpatialOccData()#
-model.input <- prepModData(dats$data, dats$y, dats$distance,#
-                           nsite=50)#
-#
-mexp <- nimbleFunction(#
-  run = function(A = double(2)){#
-    returnType(double(2))#
-    outMat <- exp(A)#
-    return(outMat)#
-  })#
-#
-sp.mod <- nimbleCode({#
-  ## priors#
-  delta ~ dunif(0.5, 5)#
-  sigma ~ dunif(0, 10)#
-  p ~ dunif(0, 1)#
-  alpha ~ dnorm(0, 0.001)#
-  b1 ~ dnorm(0, 0.001)#
-#
-  ## Likelihood#
-  ## Ecological model for true occurrence#
-  for (i in 1:nsite) {#
-    z[i] ~ dbern(psi[i])#
-    logit(psi[i]) <- alpha + b1*elev[i] + rho[i]#
-    p.eff[i] <- z[i] * p#
-#
-    ## Observation model for replicated detection/nondetection#
-    ## observations#
-    for (j in 1:nreps) {#
-      y[i,j] ~ dbern(p.eff[i])#
-    }#
-  }#
-#
-  rho[1:nsite] ~ dmnorm(zeros[1:nsite],#
-                        D.tau[1:nsite, 1:nsite])#
-#
-  ## create covariance matrix based on distances (must be 1/cov for#
-  ## JAGS)#
-#
-  ## mexp is jags's version fo matrix exponentiation, veyr sensitive #
-  ## temp.cov[1:nsite, 1:nsite] <- -delta*D[1:nsite, 1:nsite]#
-  ## D.cov[1:nsite, 1:nsite]  <- (sigma^2)*mexp(-delta*D[1:nsite, 1:nsite])#
-#
-  for(i in 1:nsite){#
-    for(j in 1:nsite){#
-      temp.cov[i, j] <- -delta*D[i, j]#
-      D.cov[i, j]  <- (sigma^2)* exp(temp.cov[i, j])#
-    }#
-  }#
-  D.tau[1:nsite, 1:nsite] <- inverse(D.cov[1:nsite, 1:nsite])#
-})#
-input1 <- c(code=sp.mod,#
-            model.input)#
-#
-## *********************************************************************#
-## opt 1:vanilla nimble and auto block#
-## *********************************************************************#
-#
-sp.orig <- compareMCMCs(input1,#
-                        MCMCs=c("jags"),#
-                        niter=niter,#
-                        burnin = burnin,#
-                        summary=FALSE,#
-                        check=FALSE)#
-#
-save(sp.orig, file=file.path(save.dir, "orig.Rdata"))
-install.packages("rjags")
-library(rjags)
-rm(list=ls())#
-setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
-source('src/initialize.R')#
-library(rjags)#
-load.module("msm")#
-#
-set.seed(444)#
-dats <- genSpatialOccData()#
-model.input <- prepModData(dats$data, dats$y, dats$distance,#
-                           nsite=50)#
-#
-mexp <- nimbleFunction(#
-  run = function(A = double(2)){#
-    returnType(double(2))#
-    outMat <- exp(A)#
-    return(outMat)#
-  })#
-#
-sp.mod <- nimbleCode({#
-  ## priors#
-  delta ~ dunif(0.5, 5)#
-  sigma ~ dunif(0, 10)#
-  p ~ dunif(0, 1)#
-  alpha ~ dnorm(0, 0.001)#
-  b1 ~ dnorm(0, 0.001)#
-#
-  ## Likelihood#
-  ## Ecological model for true occurrence#
-  for (i in 1:nsite) {#
-    z[i] ~ dbern(psi[i])#
-    logit(psi[i]) <- alpha + b1*elev[i] + rho[i]#
-    p.eff[i] <- z[i] * p#
-#
-    ## Observation model for replicated detection/nondetection#
-    ## observations#
-    for (j in 1:nreps) {#
-      y[i,j] ~ dbern(p.eff[i])#
-    }#
-  }#
-#
-  rho[1:nsite] ~ dmnorm(zeros[1:nsite],#
-                        D.tau[1:nsite, 1:nsite])#
-#
-  ## create covariance matrix based on distances (must be 1/cov for#
-  ## JAGS)#
-#
-  ## mexp is jags's version fo matrix exponentiation, veyr sensitive #
-  ## temp.cov[1:nsite, 1:nsite] <- -delta*D[1:nsite, 1:nsite]#
-  ## D.cov[1:nsite, 1:nsite]  <- (sigma^2)*mexp(-delta*D[1:nsite, 1:nsite])#
-#
-  for(i in 1:nsite){#
-    for(j in 1:nsite){#
-      temp.cov[i, j] <- -delta*D[i, j]#
-      D.cov[i, j]  <- (sigma^2)* exp(temp.cov[i, j])#
-    }#
-  }#
-  D.tau[1:nsite, 1:nsite] <- inverse(D.cov[1:nsite, 1:nsite])#
-})#
-input1 <- c(code=sp.mod,#
-            model.input)#
-#
-## *********************************************************************#
-## opt 1:vanilla nimble and auto block#
-## *********************************************************************#
-#
-sp.orig <- compareMCMCs(input1,#
-                        MCMCs=c("jags"),#
-                        niter=niter,#
-                        burnin = burnin,#
-                        summary=FALSE,#
-                        check=FALSE)#
-#
-save(sp.orig, file=file.path(save.dir, "orig.Rdata"))
-rm(list=ls())#
-setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
-source('src/initialize.R')#
-library(rjags)#
-load.module("msm")#
-#
-set.seed(444)#
-dats <- genSpatialOccData()#
-model.input <- prepModData(dats$data, dats$y, dats$distance,#
-                           nsite=50)#
-#
-mexp <- nimbleFunction(#
-  run = function(A = double(2)){#
-    returnType(double(2))#
-    outMat <- exp(A)#
-    return(outMat)#
-  })#
-#
-sp.mod <- nimbleCode({#
-  ## priors#
-  delta ~ dunif(0.5, 1.5)#
-  sigma ~ dunif(0, 10)#
-  p ~ dunif(0, 1)#
-  alpha ~ dnorm(0, 0.001)#
-  b1 ~ dnorm(0, 0.001)#
-#
-  ## Likelihood#
-  ## Ecological model for true occurrence#
-  for (i in 1:nsite) {#
-    z[i] ~ dbern(psi[i])#
-    logit(psi[i]) <- alpha + b1*elev[i] + rho[i]#
-    p.eff[i] <- z[i] * p#
-#
-    ## Observation model for replicated detection/nondetection#
-    ## observations#
-    for (j in 1:nreps) {#
-      y[i,j] ~ dbern(p.eff[i])#
-    }#
-  }#
-#
-  rho[1:nsite] ~ dmnorm(zeros[1:nsite],#
-                        D.tau[1:nsite, 1:nsite])#
-#
-  ## create covariance matrix based on distances (must be 1/cov for#
-  ## JAGS)#
-#
-  ## mexp is jags's version fo matrix exponentiation, veyr sensitive #
-  ## temp.cov[1:nsite, 1:nsite] <- -delta*D[1:nsite, 1:nsite]#
-  ## D.cov[1:nsite, 1:nsite]  <- (sigma^2)*mexp(-delta*D[1:nsite, 1:nsite])#
-#
-  for(i in 1:nsite){#
-    for(j in 1:nsite){#
-      temp.cov[i, j] <- -delta*D[i, j]#
-      D.cov[i, j]  <- (sigma^2)* exp(temp.cov[i, j])#
-    }#
-  }#
-  D.tau[1:nsite, 1:nsite] <- inverse(D.cov[1:nsite, 1:nsite])#
-})#
-input1 <- c(code=sp.mod,#
-            model.input)#
-#
-## *********************************************************************#
-## opt 1:vanilla nimble and auto block#
-## *********************************************************************#
-#
-sp.orig <- compareMCMCs(input1,#
-                        MCMCs=c("jags"),#
-                        niter=niter,#
-                        burnin = burnin,#
-                        summary=FALSE,#
-                        check=FALSE)#
-#
-save(sp.orig, file=file.path(save.dir, "orig.Rdata"))
-rm(list=ls())#
-setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
-source('src/initialize.R')#
-library(rjags)#
-load.module("msm")#
-#
-set.seed(444)#
-dats <- genSpatialOccData()#
-model.input <- prepModData(dats$data, dats$y, dats$distance,#
-                           nsite=50)#
-#
-mexp <- nimbleFunction(#
-  run = function(A = double(2)){#
-    returnType(double(2))#
-    outMat <- exp(A)#
-    return(outMat)#
-  })#
-#
-sp.mod <- nimbleCode({#
-  ## priors#
-  delta ~ dunif(0.5, 1.5)#
-  sigma ~ dunif(0, 10)#
-  p ~ dunif(0, 1)#
-  alpha ~ dnorm(0, 0.001)#
-  b1 ~ dnorm(0, 0.001)#
-#
-  ## Likelihood#
-  ## Ecological model for true occurrence#
-  for (i in 1:nsite) {#
-    z[i] ~ dbern(psi[i])#
-    logit(psi[i]) <- alpha + b1*elev[i] + rho[i]#
-    p.eff[i] <- z[i] * p#
-#
-    ## Observation model for replicated detection/nondetection#
-    ## observations#
-    for (j in 1:nreps) {#
-      y[i,j] ~ dbern(p.eff[i])#
-    }#
-  }#
-#
-  rho[1:nsite] ~ dmnorm(zeros[1:nsite],#
-                        D.tau[1:nsite, 1:nsite])#
-#
-  ## create covariance matrix based on distances (must be 1/cov for#
-  ## JAGS)#
-#
-  ## mexp is jags's version fo matrix exponentiation, veyr sensitive #
-  ## temp.cov[1:nsite, 1:nsite] <- -delta*D[1:nsite, 1:nsite]#
-  ## D.cov[1:nsite, 1:nsite]  <- (sigma^2)*mexp(-delta*D[1:nsite, 1:nsite])#
-#
-  for(i in 1:nsite){#
-    for(j in 1:nsite){#
-      temp.cov[i, j] <- -delta*D[i, j]#
-      D.cov[i, j]  <- (sigma^2)* exp(temp.cov[i, j])#
-    }#
-  }#
-  D.tau[1:nsite, 1:nsite] <- inverse(D.cov[1:nsite, 1:nsite])#
-})#
-input1 <- c(code=sp.mod,#
-            model.input)#
-#
-## *********************************************************************#
-## opt 1:vanilla nimble and auto block#
-## *********************************************************************#
-#
-sp.orig <- compareMCMCs(input1,#
-                        MCMCs=c("jags"),#
-                        niter=niter,#
-                        burnin = burnin,#
-                        summary=FALSE,#
-                        check=FALSE)#
-#
-save(sp.orig, file=file.path(save.dir, "orig.Rdata"))
-rm(list=ls())#
-setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
-source('src/initialize.R')#
-library(rjags)#
-load.module("msm")#
-#
-set.seed(444)#
-dats <- genSpatialOccData()#
-model.input <- prepModData(dats$data, dats$y, dats$distance,#
-                           nsite=50)
-mexp <- nimbleFunction(#
-  run = function(A = double(2)){#
-    returnType(double(2))#
-    outMat <- exp(A)#
-    return(outMat)#
-  })#
-#
-sp.mod <- nimbleCode({#
-  ## priors#
-  delta ~ dunif(0.5, 1.5)#
-  sigma ~ dunif(0, 10)#
-  p ~ dunif(0, 1)#
-  alpha ~ dnorm(0, 0.001)#
-  b1 ~ dnorm(0, 0.001)#
-#
-  ## Likelihood#
-  ## Ecological model for true occurrence#
-  for (i in 1:nsite) {#
-    z[i] ~ dbern(psi[i])#
-    logit(psi[i]) <- alpha + b1*elev[i] + rho[i]#
-    p.eff[i] <- z[i] * p#
-#
-    ## Observation model for replicated detection/nondetection#
-    ## observations#
-    for (j in 1:nreps) {#
-      y[i,j] ~ dbern(p.eff[i])#
-    }#
-  }#
-#
-  rho[1:nsite] ~ dmnorm(zeros[1:nsite],#
-                        D.tau[1:nsite, 1:nsite])#
-#
-  ## create covariance matrix based on distances (must be 1/cov for#
-  ## JAGS)#
-#
-  ## mexp is jags's version fo matrix exponentiation, veyr sensitive #
-  ## temp.cov[1:nsite, 1:nsite] <- -delta*D[1:nsite, 1:nsite]#
-  ## D.cov[1:nsite, 1:nsite]  <- (sigma^2)*mexp(-delta*D[1:nsite, 1:nsite])#
-#
-  for(i in 1:nsite){#
-    for(j in 1:nsite){#
-      temp.cov[i, j] <- -delta*D[i, j]#
-      D.cov[i, j]  <- (sigma^2)* exp(temp.cov[i, j])#
-    }#
-  }#
-  D.tau[1:nsite, 1:nsite] <- inverse(D.cov[1:nsite, 1:nsite])#
-})#
-input1 <- c(code=sp.mod,#
-            model.input)#
-#
-## *********************************************************************#
-## opt 1:vanilla nimble and auto block#
-## *********************************************************************#
-#
-sp.orig <- compareMCMCs(input1,#
-                        MCMCs=c("jags"),#
-                        niter=niter,#
-                        burnin = burnin,#
-                        summary=FALSE,#
-                        check=FALSE)#
-#
-save(sp.orig, file=file.path(save.dir, "orig.Rdata"))
-rm(list=ls())#
-setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
-source('src/initialize.R')#
-library(rjags)#
-load.module("msm")#
-#
-set.seed(444)#
-dats <- genSpatialOccData()#
-model.input <- prepModData(dats$data, dats$y, dats$distance,#
-                           nsite=50)#
-#
-mexp <- nimbleFunction(#
-  run = function(A = double(2)){#
-    returnType(double(2))#
-    outMat <- exp(A)#
-    return(outMat)#
-  })#
-#
-sp.mod <- nimbleCode({#
-  ## priors#
-  delta ~ dunif(0.5, 1.5)#
-  sigma ~ dunif(0, 10)#
-  p ~ dunif(0, 1)#
-  alpha ~ dnorm(0, 0.001)#
-  b1 ~ dnorm(0, 0.001)#
-#
-  ## Likelihood#
-  ## Ecological model for true occurrence#
-  for (i in 1:nsite) {#
-    z[i] ~ dbern(psi[i])#
-    logit(psi[i]) <- alpha + b1*elev[i] + rho[i]#
-    p.eff[i] <- z[i] * p#
-#
-    ## Observation model for replicated detection/nondetection#
-    ## observations#
-    for (j in 1:nreps) {#
-      y[i,j] ~ dbern(p.eff[i])#
-    }#
-  }#
-#
-  rho[1:nsite] ~ dmnorm(zeros[1:nsite],#
-                        D.tau[1:nsite, 1:nsite])#
-#
-  ## create covariance matrix based on distances (must be 1/cov for#
-  ## JAGS)#
-#
-  ## mexp is jags's version fo matrix exponentiation, veyr sensitive #
-  temp.cov[1:nsite, 1:nsite] <- -delta*D[1:nsite, 1:nsite]#
-  D.cov[1:nsite, 1:nsite]  <- (sigma^2)*mexp(-delta*D[1:nsite, 1:nsite])#
-#
-  ## for(i in 1:nsite){#
-  ##   for(j in 1:nsite){#
-  ##     temp.cov[i, j] <- -delta*D[i, j]#
-  ##     D.cov[i, j]  <- (sigma^2)* exp(temp.cov[i, j])#
-  ##   }#
-  ## }#
-  D.tau[1:nsite, 1:nsite] <- inverse(D.cov[1:nsite, 1:nsite])#
-})#
-input1 <- c(code=sp.mod,#
-            model.input)#
-#
-## *********************************************************************#
-## opt 1:vanilla nimble and auto block#
-## *********************************************************************#
-#
-sp.orig <- compareMCMCs(input1,#
-                        MCMCs=c("jags"),#
-                        niter=niter,#
-                        burnin = burnin,#
-                        summary=FALSE,#
-                        check=FALSE)#
-#
-save(sp.orig, file=file.path(save.dir, "orig.Rdata"))
-rm(list=ls())#
-setwd('~/Dropbox/nimble/occupancy/analysis/multiSpp-singleSea')#
-#
-source('src/initialize.R')#
-## don't agument data#
-n.zeroes <- 0#
-model.input <- prepMutiSpData(survey.data,#
-                              survey.dates,#
-                              species.groups,#
-                              habitat,#
-                              n.zeros)#
-## *********************************************************************#
-## multi-species site-occupancy models: original#
-## *********************************************************************#
-#
-ms.ss.occ <- nimbleCode({#
-  ## Define prior distributions for community-level model parameters#
-  cato.occ.mean ~ dunif(0,1)#
-  mu.ucato <- log(cato.occ.mean) - log(1-cato.occ.mean)#
-#
-  fcw.occ.mean ~ dunif(0,1)#
-  mu.ufcw <- log(fcw.occ.mean) - log(1-fcw.occ.mean)#
-#
-  cato.det.mean ~ dunif(0,1)#
-  mu.vcato <- log(cato.det.mean) - log(1-cato.det.mean)#
-#
-  fcw.det.mean ~ dunif(0,1)#
-  mu.vfcw <- log(fcw.det.mean) - log(1-fcw.det.mean)#
-#
-  ## random effects#
-  sigma.ucato ~ dunif(0, 100)#
-  tau.ucato <-  1/(sigma.ucato*sigma.ucato)#
-#
-  sigma.ufcw ~ dunif(0, 100)#
-  tau.ufcw <-  1/(sigma.ufcw*sigma.ufcw)#
-#
-  mu.a1 ~ dnorm(0, 0.001)#
-  sigma.a1 ~ dunif(0, 100)#
-  tau.a1 <-  1/(sigma.a1*sigma.a1)#
-#
-  mu.a2 ~ dnorm(0, 0.001)#
-  sigma.a2 ~ dunif(0, 100)#
-  tau.a2 <-  1/(sigma.a2*sigma.a2)#
-#
-  mu.a3 ~ dnorm(0, 0.001)#
-  sigma.a3 ~ dunif(0, 100)#
-  tau.a3 <-  1/(sigma.a3*sigma.a3)#
-#
-  mu.a4 ~ dnorm(0, 0.001)#
-  sigma.a4 ~ dunif(0, 100)#
-  tau.a4 <-  1/(sigma.a4*sigma.a4)#
-#
-  sigma.vcato ~ dunif(0, 100)#
-  sigma.vfcw ~ dunif(0, 100)#
-  tau.vcato <-  1/(sigma.vcato*sigma.vcato)#
-  tau.vfcw <-  1/(sigma.vfcw*sigma.vfcw)#
-#
-  mu.b1 ~ dnorm(0, 0.001)#
-  sigma.b1 ~ dunif(0, 100)#
-  tau.b1 <-  1/(sigma.b1*sigma.b1)#
-#
-  mu.b2 ~ dnorm(0, 0.001)#
-  sigma.b2 ~ dunif(0, 100)#
-  tau.b2 <-  1/(sigma.b2*sigma.b2)#
-#
-  for (i in 1:(num.species)) {#
-    ## Create priors for species i from the community level prior#
-    ## distributions#
-#
-    u.cato[i] ~ dnorm(mu.ucato, tau.ucato)#
-    u.fcw[i] ~ dnorm(mu.ufcw, tau.ufcw)#
-    a1[i] ~ dnorm(mu.a1, tau.a1)#
-    a2[i] ~ dnorm(mu.a2, tau.a2)#
-    a3[i] ~ dnorm(mu.a3, tau.a3)#
-    a4[i] ~ dnorm(mu.a4, tau.a4)#
-#
-    v.cato[i] ~ dnorm(mu.vcato, tau.vcato)#
-    v.fcw[i] ~ dnorm(mu.vfcw, tau.vfcw)#
-    b1[i] ~ dnorm(mu.b1, tau.b1)#
-    b2[i] ~ dnorm(mu.b2, tau.b2)#
-#
-    ## Create a loop to estimate the Z matrix (true occurrence for#
-    ## species i at point j).#
-    for (j in 1:num.points) {#
-      ## Occurence model: u.cato and u.fcw are the occurrence#
-      ## probabilities (on the logit scale) for species i at points in#
-      ## the CATO and FCW study area, respectively, for average values#
-      ## of UFC and BA. The coefficients for the four 'a' terms are#
-      ## the linear and squared effects of understory foliage and tree#
-      ## basal area on species i.#
-      logit(psi[j,i]) <- u.cato[i]*(1-habitat.ind[j]) +#
-        u.fcw[i]*habitat.ind[j] +#
-        a1[i]*ufc.linear[j] +#
-        a2[i]*ufc.quadratic[j] +#
-        a3[i]*ba.linear[j] +#
-        a4[i]*ba.quadratic[j]#
-#
-      mu.psi[j,i] <- psi[j,i]#
-      Z[j,i] ~ dbern(mu.psi[j,i])#
-#
-      ## Create a loop to estimate detection for species i at point k#
-      ## during sampling period k.#
-      for (k in 1:num.reps[j]) {#
-        ## Detection model for the observed data X: v.cato and v.fcw#
-        ## are the detection probabilities (on the logit scale) for#
-        ## species i at points j during sampling periods k in the CATO#
-        ## and FCW study area, respectively, for for linear and#
-        ## squared terms of Julian dates.#
-        logit(p[j,k,i]) <-  v.cato[i]*(1-habitat.ind[j]) +#
-          v.fcw[i]*habitat.ind[j] +#
-          b1[i]*date.linear[j,k] +#
-          b2[i]*date.quadratic[j,k]#
-#
-        mu.p[j,k,i] <- p[j,k,i]*Z[j,i]#
-        X[j,k,i] ~ dbern(mu.p[j,k,i])#
-      }#
-    }#
-  }#
-#
-  ## Derived quantities:#
-  ## Create a loop to determine point level#
-  ## richness estimates for the whole community#
-  ## and for subsets or assemblages of interest.#
-  ## for(j in 1:num.points){#
-  ##   N.site[j]<- sum(mu.psi[j,1:(num.species)])#
-  ##   N.ground[j]<- inprod(Z[j,1:num.species],ground[1:num.species])#
-  ##   N.mid[j]<- inprod(Z[j,1:num.species],mid[1:num.species])#
-  ## }#
-})#
-model.input$data[["onesRow"]] <- NULL#
-model.input$constants[["max.num.reps"]] <- NULL#
-#
-input1 <- c(code=ms.ss.occ, model.input)#
-## *********************************************************************#
-## original model with nimble#
-#
-ms.ss.orig <- compareMCMCs(input1,#
-                           MCMCs=c('jags'),#
-                           niter=niter,#
-                           burnin = burnin,#
-                           summary=FALSE,#
-                           check=FALSE)
 rm(list=ls()) #
 setwd('~/Dropbox/nimble/occupancy/analysis/multiSpp-singleSea')#
 #
@@ -967,882 +106,1078 @@ occ.R.model <- nimbleModel(code=ms.ss.occ,#
                            constants=input1$constants,#
                            data=input1$data,#
                            inits=input1$inits,#
-                           check=FALSE)
-plot(occ.R.model)
-plot(occ.R.modelgraph)
-plot(occ.R.model$graph)
-length(occ.R.model$getNodeNames)
-length(occ.R.model$getNodeNames())
-rm(list=ls())#
-setwd('~/Dropbox/nimble/occupancy/analysis/multiSpp-singleSea')#
+                           check=FALSE)#
 #
-source('src/initialize.R')#
-## don't agument data#
-n.zeroes <- 0#
-model.input <- prepMutiSpData(survey.data,#
-                              survey.dates,#
-                              species.groups,#
-                              habitat,#
-                              n.zeros)#
-## *********************************************************************#
-## multi-species site-occupancy models: original#
-## *********************************************************************#
+occ.mcmc <- buildMCMC(occ.R.model)#
+occ.C.model <- compileNimble(occ.R.model)#
+occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model)#
 #
-ms.ss.occ <- nimbleCode({#
-  ## Define prior distributions for community-level model parameters#
-  cato.occ.mean ~ dunif(0,1)#
-  mu.ucato <- log(cato.occ.mean) - log(1-cato.occ.mean)#
-#
-  fcw.occ.mean ~ dunif(0,1)#
-  mu.ufcw <- log(fcw.occ.mean) - log(1-fcw.occ.mean)#
-#
-  cato.det.mean ~ dunif(0,1)#
-  mu.vcato <- log(cato.det.mean) - log(1-cato.det.mean)#
-#
-  fcw.det.mean ~ dunif(0,1)#
-  mu.vfcw <- log(fcw.det.mean) - log(1-fcw.det.mean)#
-#
-  ## random effects#
-  sigma.ucato ~ dunif(0, 100)#
-  tau.ucato <-  1/(sigma.ucato*sigma.ucato)#
-#
-  sigma.ufcw ~ dunif(0, 100)#
-  tau.ufcw <-  1/(sigma.ufcw*sigma.ufcw)#
-#
-  mu.a1 ~ dnorm(0, 0.001)#
-  sigma.a1 ~ dunif(0, 100)#
-  tau.a1 <-  1/(sigma.a1*sigma.a1)#
-#
-  mu.a2 ~ dnorm(0, 0.001)#
-  sigma.a2 ~ dunif(0, 100)#
-  tau.a2 <-  1/(sigma.a2*sigma.a2)#
-#
-  mu.a3 ~ dnorm(0, 0.001)#
-  sigma.a3 ~ dunif(0, 100)#
-  tau.a3 <-  1/(sigma.a3*sigma.a3)#
-#
-  mu.a4 ~ dnorm(0, 0.001)#
-  sigma.a4 ~ dunif(0, 100)#
-  tau.a4 <-  1/(sigma.a4*sigma.a4)#
-#
-  sigma.vcato ~ dunif(0, 100)#
-  sigma.vfcw ~ dunif(0, 100)#
-  tau.vcato <-  1/(sigma.vcato*sigma.vcato)#
-  tau.vfcw <-  1/(sigma.vfcw*sigma.vfcw)#
-#
-  mu.b1 ~ dnorm(0, 0.001)#
-  sigma.b1 ~ dunif(0, 100)#
-  tau.b1 <-  1/(sigma.b1*sigma.b1)#
-#
-  mu.b2 ~ dnorm(0, 0.001)#
-  sigma.b2 ~ dunif(0, 100)#
-  tau.b2 <-  1/(sigma.b2*sigma.b2)#
-#
-  for (i in 1:(num.species)) {#
-    ## Create priors for species i from the community level prior#
-    ## distributions#
-#
-    u.cato[i] ~ dnorm(mu.ucato, tau.ucato)#
-    u.fcw[i] ~ dnorm(mu.ufcw, tau.ufcw)#
-    a1[i] ~ dnorm(mu.a1, tau.a1)#
-    a2[i] ~ dnorm(mu.a2, tau.a2)#
-    a3[i] ~ dnorm(mu.a3, tau.a3)#
-    a4[i] ~ dnorm(mu.a4, tau.a4)#
-#
-    v.cato[i] ~ dnorm(mu.vcato, tau.vcato)#
-    v.fcw[i] ~ dnorm(mu.vfcw, tau.vfcw)#
-    b1[i] ~ dnorm(mu.b1, tau.b1)#
-    b2[i] ~ dnorm(mu.b2, tau.b2)#
-#
-    ## Create a loop to estimate the Z matrix (true occurrence for#
-    ## species i at point j).#
-    for (j in 1:num.points) {#
-      ## Occurence model: u.cato and u.fcw are the occurrence#
-      ## probabilities (on the logit scale) for species i at points in#
-      ## the CATO and FCW study area, respectively, for average values#
-      ## of UFC and BA. The coefficients for the four 'a' terms are#
-      ## the linear and squared effects of understory foliage and tree#
-      ## basal area on species i.#
-      logit(psi[j,i]) <- u.cato[i]*(1-habitat.ind[j]) +#
-        u.fcw[i]*habitat.ind[j] +#
-        a1[i]*ufc.linear[j] +#
-        a2[i]*ufc.quadratic[j] +#
-        a3[i]*ba.linear[j] +#
-        a4[i]*ba.quadratic[j]#
-#
-      mu.psi[j,i] <- psi[j,i]#
-      Z[j,i] ~ dbern(mu.psi[j,i])#
-#
-      ## Create a loop to estimate detection for species i at point k#
-      ## during sampling period k.#
-      for (k in 1:num.reps[j]) {#
-        ## Detection model for the observed data X: v.cato and v.fcw#
-        ## are the detection probabilities (on the logit scale) for#
-        ## species i at points j during sampling periods k in the CATO#
-        ## and FCW study area, respectively, for for linear and#
-        ## squared terms of Julian dates.#
-        logit(p[j,k,i]) <-  v.cato[i]*(1-habitat.ind[j]) +#
-          v.fcw[i]*habitat.ind[j] +#
-          b1[i]*date.linear[j,k] +#
-          b2[i]*date.quadratic[j,k]#
-#
-        mu.p[j,k,i] <- p[j,k,i]*Z[j,i]#
-        X[j,k,i] ~ dbern(mu.p[j,k,i])#
-      }#
-    }#
-  }#
-#
-  ## Derived quantities:#
-  ## Create a loop to determine point level#
-  ## richness estimates for the whole community#
-  ## and for subsets or assemblages of interest.#
-  ## for(j in 1:num.points){#
-  ##   N.site[j]<- sum(mu.psi[j,1:(num.species)])#
-  ##   N.ground[j]<- inprod(Z[j,1:num.species],ground[1:num.species])#
-  ##   N.mid[j]<- inprod(Z[j,1:num.species],mid[1:num.species])#
-  ## }#
-})#
-model.input$data[["onesRow"]] <- NULL#
-model.input$constants[["max.num.reps"]] <- NULL#
-#
-input1 <- c(code=ms.ss.occ, model.input)#
-occ.R.model <- nimbleModel(code=ms.ss.occ,#
-                           constants=input1$constants,#
-                           data=input1$data,#
-                           inits=input1$inits,#
-                           check=FALSE)
-length(occ.R.model$getNodeNames())
-occ.R.model$getNodeNames()
-occ.R.model$getNodeNames(include.data=FALSE)
-occ.R.model$getNodeNames(includeData=FALSE)
-length(occ.R.model$getNodeNames(includeData=FALSE))
-rm(list=ls())#
-library(nimble)#
-library(parallel)#
-crossValCalculate <- function(row, MCMCOut, dataDimensions, saveData){#
-  simDataArray <- array(MCMCOut[row,], dim = c(dataDimensions))#
-  discrep <- sum((simDataArray - saveData)^2)#
-  return(discrep)#
-}#
-crossValidateOne <- function(model,#
-                             dataNames,#
-                             MCMCIter,#
-                             burnIn, thin,#
-                             leaveOutIndex#
-                             MCMCdefs=NULL){#
-  simpSetMCMCDefs <- function(Rmodel, MCMCdefs, MCMCname) {#
-    eval(MCMCdefs[[MCMCname]])#
-  }#
-  if(!is.null(MCMCdefs){#
-  ## eval(MCMCdefs.opt2[['nimbleOpt2']])#
-    ## customSpec <- simpSetMCMCDefs(occ.R.model, MCMCdefs.opt2, 'nimbleOpt2')#
-  }#
-#
-  ## fill in each element of data along leaveOutIndex with NAs.  then,#
-  ## data na values will be filled in as each mcmc runs.  These#
-  ## estimated data values can be compared to known data values, and#
-  ## the average loss (0/1) can be taken over all MCMC runs.  then#
-  ## take the average of these for all data points? woo!#
-  newModel <- model$newModel()#
-  compileNimble(newModel)#
-  numBlocks <- newModel$getVarInfo(dataNames)[['maxs']][leaveOutIndex]#
-  dataDimensions <- newModel$getVarInfo(dataNames)[['maxs']]#
-  saveData <- array(values(newModel, dataNames), dim = c(dataDimensions))#
-#
-  calcCrossVal <- function(i){#
-    tempData <- saveData#
-    print(tempData)#
-    newModel$resetData()#
-    evalCode1 <- paste0("tempData[",rep(",", leaveOutIndex - 1), i,#
-                        paste0(rep(",", length(dataDimensions) -#
-                                   leaveOutIndex)),"] <- NA")#
-    eval(parse(text = evalCode1))#
-    evalCode2 <- paste0("modelDataList <- list(", dataNames, "= tempData)")#
-    eval(parse(text=evalCode2))#
-    newModel$setData(modelDataList)#
-    print(modelDataList)#
-    modelMCMCConf <- configureMCMC(newModel,#
-                                   monitors = dataNames, thin = thin)#
-    modelMCMC <- buildMCMC(modelMCMCConf)#
-    C.modelMCMC <- compileNimble(modelMCMC,#
-                                 project = newModel,#
-                                 resetFunctions = (i != 1))    #
-    C.modelMCMC$run(MCMCIter)#
-    MCMCout <- as.matrix(C.modelMCMC$mvSamples)#
-    sampNum <- dim(MCMCout)[1] #
-    crossValValue <- unlist(mclapply(ceiling(burnIn/thin):sampNum,#
-                                     crossValCalculate, MCMCout,#
-                                     dataDimensions, saveData))#
-    crossValAverage <- mean(crossValValue)#
-    return(crossValAverage)#
-  }#
-  crossVal <- mean(sapply(1:numBlocks, calcCrossVal))#
-#
-  return(crossVal)#
-}#
-dyesCode <- nimbleCode({#
-  for (i in 1:BATCHES) {#
-    for (j in 1:SAMPLES) {#
-      y[i,j] ~ dnorm(mu[i], sd = sigma.within);#
-    }#
-    mu[i] ~ dnorm(theta, sd = sigma.between);#
-  }#
-  theta ~ dnorm(0.0, 1.0E-10);#
-  sigma.within ~ dunif(0, 100)#
-  sigma.between ~ dunif(0, 100)#
-})#
-#
-dyesModel <- nimbleModel(dyesCode,#
-                         constants = list(BATCHES = 6, SAMPLES = 5))#
-#
-data <- matrix(c(1545, 1540, 1595, 1445, 1595, 1520, 1440, 1555, 1550,#
-                 1440, 1630, 1455, 1440, 1490, 1605, 1595, 1515, 1450,#
-                 1520, 1560, 1510, 1465, 1635, 1480, 1580, 1495, 1560,#
-                 1545, 1625, 1445), nrow = 6)#
-#
-dyesModel$setData(list(y = data))#
-#
-output <- crossValidateOne(dyesModel, "y", 1000, 300, 2, 2)
-rm(list=ls())#
-library(nimble)#
-library(parallel)#
-crossValCalculate <- function(row, MCMCOut, dataDimensions, saveData){#
-  simDataArray <- array(MCMCOut[row,], dim = c(dataDimensions))#
-  discrep <- sum((simDataArray - saveData)^2)#
-  return(discrep)#
-}
-crossValidateOne <- function(model,#
-                             dataNames,#
-                             MCMCIter,#
-                             burnIn, thin,#
-                             leaveOutIndex#
-                             MCMCdefs=NULL){#
-  simpSetMCMCDefs <- function(Rmodel, MCMCdefs, MCMCname) {#
-    eval(MCMCdefs[[MCMCname]])#
-  }#
-  if(!is.null(MCMCdefs){#
-  ## eval(MCMCdefs.opt2[['nimbleOpt2']])#
-    ## customSpec <- simpSetMCMCDefs(occ.R.model, MCMCdefs.opt2, 'nimbleOpt2')#
-  }#
-#
-  ## fill in each element of data along leaveOutIndex with NAs.  then,#
-  ## data na values will be filled in as each mcmc runs.  These#
-  ## estimated data values can be compared to known data values, and#
-  ## the average loss (0/1) can be taken over all MCMC runs.  then#
-  ## take the average of these for all data points? woo!#
-  newModel <- model$newModel()#
-  compileNimble(newModel)#
-  numBlocks <- newModel$getVarInfo(dataNames)[['maxs']][leaveOutIndex]#
-  dataDimensions <- newModel$getVarInfo(dataNames)[['maxs']]#
-  saveData <- array(values(newModel, dataNames), dim = c(dataDimensions))#
-#
-  calcCrossVal <- function(i){#
-    tempData <- saveData#
-    print(tempData)#
-    newModel$resetData()#
-    evalCode1 <- paste0("tempData[",rep(",", leaveOutIndex - 1), i,#
-                        paste0(rep(",", length(dataDimensions) -#
-                                   leaveOutIndex)),"] <- NA")#
-    eval(parse(text = evalCode1))#
-    evalCode2 <- paste0("modelDataList <- list(", dataNames, "= tempData)")#
-    eval(parse(text=evalCode2))#
-    newModel$setData(modelDataList)#
-    print(modelDataList)#
-    modelMCMCConf <- configureMCMC(newModel,#
-                                   monitors = dataNames, thin = thin)#
-    modelMCMC <- buildMCMC(modelMCMCConf)#
-    C.modelMCMC <- compileNimble(modelMCMC,#
-                                 project = newModel,#
-                                 resetFunctions = (i != 1))    #
-    C.modelMCMC$run(MCMCIter)#
-    MCMCout <- as.matrix(C.modelMCMC$mvSamples)#
-    sampNum <- dim(MCMCout)[1] #
-    crossValValue <- unlist(mclapply(ceiling(burnIn/thin):sampNum,#
-                                     crossValCalculate, MCMCout,#
-                                     dataDimensions, saveData))#
-    crossValAverage <- mean(crossValValue)#
-    return(crossValAverage)#
-  }#
-  crossVal <- mean(sapply(1:numBlocks, calcCrossVal))#
-#
-  return(crossVal)#
-}
-crossValidateOne <- function(model,#
-                             dataNames,#
-                             MCMCIter,#
-                             burnIn, thin,#
-                             leaveOutIndex,#
-                             MCMCdefs=NULL){#
-  simpSetMCMCDefs <- function(Rmodel, MCMCdefs, MCMCname) {#
-    eval(MCMCdefs[[MCMCname]])#
-  }#
-  if(!is.null(MCMCdefs){#
-  ## eval(MCMCdefs.opt2[['nimbleOpt2']])#
-    ## customSpec <- simpSetMCMCDefs(occ.R.model, MCMCdefs.opt2, 'nimbleOpt2')#
-  }#
-#
-  ## fill in each element of data along leaveOutIndex with NAs.  then,#
-  ## data na values will be filled in as each mcmc runs.  These#
-  ## estimated data values can be compared to known data values, and#
-  ## the average loss (0/1) can be taken over all MCMC runs.  then#
-  ## take the average of these for all data points? woo!#
-  newModel <- model$newModel()#
-  compileNimble(newModel)#
-  numBlocks <- newModel$getVarInfo(dataNames)[['maxs']][leaveOutIndex]#
-  dataDimensions <- newModel$getVarInfo(dataNames)[['maxs']]#
-  saveData <- array(values(newModel, dataNames), dim = c(dataDimensions))#
-#
-  calcCrossVal <- function(i){#
-    tempData <- saveData#
-    print(tempData)#
-    newModel$resetData()#
-    evalCode1 <- paste0("tempData[",rep(",", leaveOutIndex - 1), i,#
-                        paste0(rep(",", length(dataDimensions) -#
-                                   leaveOutIndex)),"] <- NA")#
-    eval(parse(text = evalCode1))#
-    evalCode2 <- paste0("modelDataList <- list(", dataNames, "= tempData)")#
-    eval(parse(text=evalCode2))#
-    newModel$setData(modelDataList)#
-    print(modelDataList)#
-    modelMCMCConf <- configureMCMC(newModel,#
-                                   monitors = dataNames, thin = thin)#
-    modelMCMC <- buildMCMC(modelMCMCConf)#
-    C.modelMCMC <- compileNimble(modelMCMC,#
-                                 project = newModel,#
-                                 resetFunctions = (i != 1))    #
-    C.modelMCMC$run(MCMCIter)#
-    MCMCout <- as.matrix(C.modelMCMC$mvSamples)#
-    sampNum <- dim(MCMCout)[1] #
-    crossValValue <- unlist(mclapply(ceiling(burnIn/thin):sampNum,#
-                                     crossValCalculate, MCMCout,#
-                                     dataDimensions, saveData))#
-    crossValAverage <- mean(crossValValue)#
-    return(crossValAverage)#
-  }#
-  crossVal <- mean(sapply(1:numBlocks, calcCrossVal))#
-#
-  return(crossVal)#
-}
-crossValCalculate <- function(row, MCMCOut, dataDimensions, saveData){#
-  simDataArray <- array(MCMCOut[row,], dim = c(dataDimensions))#
-  discrep <- sum((simDataArray - saveData)^2)#
-  return(discrep)#
-}#
-#
-crossValidateOne <- function(model,#
-                             dataNames,#
-                             MCMCIter,#
-                             burnIn, thin,#
-                             leaveOutIndex,#
-                             MCMCdefs=NULL){#
-  simpSetMCMCDefs <- function(Rmodel, MCMCdefs, MCMCname) {#
-    eval(MCMCdefs[[MCMCname]])#
-  }#
-  if(!is.null(MCMCdefs){#
-  ## eval(MCMCdefs.opt2[['nimbleOpt2']])#
-    ## customSpec <- simpSetMCMCDefs(occ.R.model, MCMCdefs.opt2, 'nimbleOpt2')#
-  }#
-#
-  ## fill in each element of data along leaveOutIndex with NAs.  then,#
-  ## data na values will be filled in as each mcmc runs.  These#
-  ## estimated data values can be compared to known data values, and#
-  ## the average loss (0/1) can be taken over all MCMC runs.  then#
-  ## take the average of these for all data points? woo!#
-  newModel <- model$newModel()#
-  compileNimble(newModel)#
-  numBlocks <- newModel$getVarInfo(dataNames)[['maxs']][leaveOutIndex]#
-  dataDimensions <- newModel$getVarInfo(dataNames)[['maxs']]#
-  saveData <- array(values(newModel, dataNames), dim = c(dataDimensions))#
-#
-  calcCrossVal <- function(i){#
-    tempData <- saveData#
-    print(tempData)#
-    newModel$resetData()#
-    evalCode1 <- paste0("tempData[",rep(",", leaveOutIndex - 1), i,#
-                        paste0(rep(",", length(dataDimensions) -#
-                                   leaveOutIndex)),"] <- NA")#
-    eval(parse(text = evalCode1))#
-    evalCode2 <- paste0("modelDataList <- list(", dataNames, "= tempData)")#
-    eval(parse(text=evalCode2))#
-    newModel$setData(modelDataList)#
-    print(modelDataList)#
-    modelMCMCConf <- configureMCMC(newModel,#
-                                   monitors = dataNames, thin = thin)#
-    modelMCMC <- buildMCMC(modelMCMCConf)#
-    C.modelMCMC <- compileNimble(modelMCMC,#
-                                 project = newModel,#
-                                 resetFunctions = (i != 1))    #
-    C.modelMCMC$run(MCMCIter)#
-    MCMCout <- as.matrix(C.modelMCMC$mvSamples)#
-    sampNum <- dim(MCMCout)[1] #
-    crossValValue <- unlist(mclapply(ceiling(burnIn/thin):sampNum,#
-                                     crossValCalculate, MCMCout,#
-                                     dataDimensions, saveData))#
-    crossValAverage <- mean(crossValValue)#
-    return(crossValAverage)#
-  }#
-  crossVal <- mean(sapply(1:numBlocks, calcCrossVal))#
-#
-  return(crossVal)#
-}
-crossValidateOne <- function(model,#
-                             dataNames,#
-                             MCMCIter,#
-                             burnIn, thin,#
-                             leaveOutIndex,#
-                             MCMCdefs=NULL){#
-  simpSetMCMCDefs <- function(Rmodel, MCMCdefs, MCMCname) {#
-    eval(MCMCdefs[[MCMCname]])#
-  }#
-  if(!is.null(MCMCdefs)){#
-  ## eval(MCMCdefs.opt2[['nimbleOpt2']])#
-    ## customSpec <- simpSetMCMCDefs(occ.R.model, MCMCdefs.opt2, 'nimbleOpt2')#
-  }#
-#
-  ## fill in each element of data along leaveOutIndex with NAs.  then,#
-  ## data na values will be filled in as each mcmc runs.  These#
-  ## estimated data values can be compared to known data values, and#
-  ## the average loss (0/1) can be taken over all MCMC runs.  then#
-  ## take the average of these for all data points? woo!#
-  newModel <- model$newModel()#
-  compileNimble(newModel)#
-  numBlocks <- newModel$getVarInfo(dataNames)[['maxs']][leaveOutIndex]#
-  dataDimensions <- newModel$getVarInfo(dataNames)[['maxs']]#
-  saveData <- array(values(newModel, dataNames), dim = c(dataDimensions))#
-#
-  calcCrossVal <- function(i){#
-    tempData <- saveData#
-    print(tempData)#
-    newModel$resetData()#
-    evalCode1 <- paste0("tempData[",rep(",", leaveOutIndex - 1), i,#
-                        paste0(rep(",", length(dataDimensions) -#
-                                   leaveOutIndex)),"] <- NA")#
-    eval(parse(text = evalCode1))#
-    evalCode2 <- paste0("modelDataList <- list(", dataNames, "= tempData)")#
-    eval(parse(text=evalCode2))#
-    newModel$setData(modelDataList)#
-    print(modelDataList)#
-    modelMCMCConf <- configureMCMC(newModel,#
-                                   monitors = dataNames, thin = thin)#
-    modelMCMC <- buildMCMC(modelMCMCConf)#
-    C.modelMCMC <- compileNimble(modelMCMC,#
-                                 project = newModel,#
-                                 resetFunctions = (i != 1))    #
-    C.modelMCMC$run(MCMCIter)#
-    MCMCout <- as.matrix(C.modelMCMC$mvSamples)#
-    sampNum <- dim(MCMCout)[1] #
-    crossValValue <- unlist(mclapply(ceiling(burnIn/thin):sampNum,#
-                                     crossValCalculate, MCMCout,#
-                                     dataDimensions, saveData))#
-    crossValAverage <- mean(crossValValue)#
-    return(crossValAverage)#
-  }#
-  crossVal <- mean(sapply(1:numBlocks, calcCrossVal))#
-#
-  return(crossVal)#
-}
-dyesCode <- nimbleCode({#
-  for (i in 1:BATCHES) {#
-    for (j in 1:SAMPLES) {#
-      y[i,j] ~ dnorm(mu[i], sd = sigma.within);#
-    }#
-    mu[i] ~ dnorm(theta, sd = sigma.between);#
-  }#
-  theta ~ dnorm(0.0, 1.0E-10);#
-  sigma.within ~ dunif(0, 100)#
-  sigma.between ~ dunif(0, 100)#
-})#
-#
-dyesModel <- nimbleModel(dyesCode,#
-                         constants = list(BATCHES = 6, SAMPLES = 5))#
-#
-data <- matrix(c(1545, 1540, 1595, 1445, 1595, 1520, 1440, 1555, 1550,#
-                 1440, 1630, 1455, 1440, 1490, 1605, 1595, 1515, 1450,#
-                 1520, 1560, 1510, 1465, 1635, 1480, 1580, 1495, 1560,#
-                 1545, 1625, 1445), nrow = 6)#
-#
-dyesModel$setData(list(y = data))#
-#
-output <- crossValidateOne(dyesModel, "y", 1000, 300, 2, 2)
+niter <- 1000#
+occ.C.mcmc$run(niter)
+source('../crossValidation/crossValidationFunction.R')
+output <- crossValidateOne(model=occ.R.model,#
+                           dataNames= "X",#
+                           MCMCIter= niter,#
+                           burnIn=niter*0.1,#
+                           thin=1,#
+                           leaveOutIndex=3,#
+                           MCMCdefs=NULL)
 library(devtools)#
 install_github("nimble-dev/nimble",#
                ref = "devel",#
                subdir = "packages/nimble")
-rm(list=ls())#
+clearCompiled()
 library(nimble)#
-library(parallel)#
-crossValCalculate <- function(row, MCMCOut, dataDimensions, saveData){#
-  simDataArray <- array(MCMCOut[row,], dim = c(dataDimensions))#
-  discrep <- sum((simDataArray - saveData)^2)#
-  return(discrep)#
+library(igraph)#
+library(reshape)#
+source("../all/plotting.R")#
+source("../all/runNimble.R")#
+source('../all/samplers/sampler_RW_shift.R')#
+source("src/reformatData.R")#
+source("src/multispeciesOcc.R")
+clearCompiled()
+projectNameCreator <- labelFunctionCreator('P')#
+#
+nfCompilationInfoClass <- setRefClass('nfCompilationInfoClass',#
+                                      fields = list(#
+                                          nfProc = 		'ANY',      ## an nfProcessing object #
+                                          nfGenerator = 'ANY', ## a nfGenerator, which is a function with special stuff in its environment#
+                                          cppDef = 'ANY',       ## a cppNimbleFunctionClass object#
+                                          labelMaker = 'ANY',    ## a label maker function#
+                                          virtual =  'ANY',		#'logical',#
+                                          RinitTypesProcessed = 'ANY',		# 'logical', ## setupTypesForUsingFunction() #
+                                          Rcompiled =  'ANY',		#'logical',#
+                                          written =  'ANY',		#'logical',#
+                                          cppCompiled =  'ANY',		#'logical',#
+                                          loaded =  'ANY',		#'logical',#
+                                          fromModel =  'ANY',		#'logical',#
+                                          Rinstances =  'ANY'		#'list'#
+                                          ),#
+                                      methods = list(#
+                                      		initialize = function(...){Rinstances <<- list(); callSuper(...)},#
+                                          addRinstance = function(nfi) {Rinstances[[ length(Rinstances)+1 ]] <<- nfi},#
+                                          addRinstanceList = function(nfList) {Rinstances[length(Rinstances) + seq_along(nfList)] <<- nfList}#
+                                          ))#
+#
+mvInfoClass <- setRefClass('mvInfoClass',#
+                           fields = list(#
+                               mvConf = 'ANY', ## a custom modelValues class#
+                               cppClassName =  'ANY',		#'character',#
+                               cppClass = 'ANY', ## a cppModelValuesClass object,#
+                               fromModel =  'ANY',		#'logical',#
+                               RmvObjs =  'ANY'		#'list'#
+                               ),#
+                           methods = list(#
+                           		initialize = function(...){RmvObjs <<- list(); callSuper(...)},#
+                               addRmv = function(Rmv) RmvObjs[[length(RmvObjs)+1]] <<- Rmv))#
+#
+RCfunInfoClass <- setRefClass('RCfunInfoClass',#
+                              fields = list(#
+                                  nfMethodRCobj = 'ANY', ## an mfMethodRC#
+                                  RCfunProc     = 'ANY', ## an RCfunProcessing or NULL#
+                                  cppClass      = 'ANY',  ## an RCfunctionDef or NULL#
+                                  fromModel     =  'ANY'		#'logical'#
+                                  ))#
+#
+modelDefInfoClass <- setRefClass('modelDefInfoClass',#
+                                 fields = list(#
+                                     labelMaker = 'ANY'#
+                                     ))#
+## removeVariableFromEnv <- function(name, env)#
+## 	eval(substitute(remove(VAR, envir = env), list(VAR = name)))#
+#
+nimbleProjectClass <- setRefClass('nimbleProjectClass',#
+                             fields = list(#
+                                 RCfunInfos         =  'ANY',		#'list', ## a list of RCfunInfoClass objects#
+                                 RCfunCppInterfaces =  'ANY',		#'list', #
+                                 mvInfos            =  'ANY',		#'list', ## a list of mvInfoClass objects#
+                                 modelDefInfos      =  'ANY',		#'list',#
+                                 ##modelCppInterfaces =  'ANY',		#'list',#
+                                 models             =  'ANY',		#'list',#
+                                 nimbleFunctions    =  'ANY',		#'list',#
+                                 nfCompInfos        =  'ANY',		#'list', ## list of nfCompilationInfoClass objects#
+                                 cppProjects        =  'ANY',		#'list', ## list of cppProjectClass objects, 1 for each dll to be produced#
+                                 dirName            =  'ANY',		#'character',#
+                                 nimbleLabel        =  'ANY',		#'character',#
+                                 refClassDefsEnv    =  'ANY',		#'environment',#
+                                 projectName        =  'ANY'		#'character'#
+                                 ),#
+                             methods = list(#
+                                 show = function() {#
+                                     writeLines(paste0('nimbleProject object'))#
+                                 },#
+                                 initialize = function(dir = NULL, name = '') {#
+                                 	RCfunInfos <<- new.env()						# list()#
+                                 	RCfunCppInterfaces <<- new.env()				# list()#
+                                 	mvInfos <<- new.env()							# list()#
+                                 	modelDefInfos <<- new.env()						# list()#
+                                 ##	modelCppInterfaces <<- new.env()				# list()#
+                                 	models <<- new.env()							# list()#
+                                 	nimbleFunctions <<- new.env()					# list()	#
+                                 	nfCompInfos <<- list()							# list()#
+                                 	cppProjects <<- list()							#new.env()						#list()#
+                                 	refClassDefsEnv <<- new.env()#
+                                     dirName <<- if(is.null(dir)) makeDefaultDirName() else dir#
+                                     if(name == '') projectName <<- projectNameCreator() else projectName <<- name#
+                                    },#
+                                 clearCompiled = function(functions = TRUE, models = TRUE, DLLs = TRUE) {#
+                                     if(functions) resetFunctions(finalize = TRUE)#
+                                     if(models) resetModels(finalize = TRUE)#
+                                     if(DLLs) unloadDLLs()#
+                                 },#
+                                 unloadDLLs = function() {#
+                                     for(i in seq_along(cppProjects)) {#
+                                         cppProjects[[i]]$unloadSO(check = TRUE, force = FALSE)#
+                                     }#
+                                 },#
+                                 resetModels = function(finalize = TRUE) {#
+                                     for(i in ls(models)) {#
+                                         models[[i]]$CobjectInterface$finalizeInternal()#
+                                         models[[i]]$CobjectInterface <<- NULL#
+                                         models[[i]]$nimbleProject <<- NULL#
+                                         models[[i]]$Cname <<- character(0)#
+                                         models[[i]] <<- NULL#
+                                     }#
+                                     for(i in ls(RCfunInfos)) {#
+                                         if(length(RCfunInfos[[i]]$fromModel) > 0) {#
+                                             if(RCfunInfos[[i]]$fromModel) {#
+                                                 if(!is.null(RCfunCppInterfaces[[i]])) { ## could be null if it was a neededType and an interface was never built #
+                                                     environment(RCfunCppInterfaces[[i]])$CnativeSymbolInfo_ <<- NULL#
+                                                     ##RCfunCppInterfaces[[i]] <<- NULL#
+                                                     rm(list = i, envir = RCfunCppInterfaces)#
+                                                 }#
+                                                 assign('nimbleProject', NULL, envir = RCfunInfos[[i]]$nfMethodRCobj)#
+                                                 thisName <- RCfunInfos[[i]]$nfMethodRCobj$uniqueName#
+                                                 ##if(!is.null(cppProjects[[thisName]])) cppProjects[[thisName]] <<- NULL#
+                                                 ##RCfunInfos[[i]] <<- NULL#
+                                                 rm(list = i, envir = RCfunInfos)#
+                                             }#
+                                         }#
+                                     }#
+                                     for(i in ls(nfCompInfos)) {#
+                                         if(length(nfCompInfos[[i]]$fromModel) > 0) {#
+                                             if(nfCompInfos[[i]]$fromModel) {#
+                                                 for(j in seq_along(nfCompInfos[[i]]$Rinstances)) {#
+                                                     thisEnv <- environment(nfCompInfos[[i]]$Rinstances[[j]])#
+                                                     thisRCO <- nf_getRefClassObject(nfCompInfos[[i]]$Rinstances[[j]])#
+                                                     if(exists('name', envir = thisRCO, inherits = FALSE)) {#
+                                                         thisname <- thisRCO$name#
+                                                         rm(list = thisname, envir = nimbleFunctions)#
+                                                         rm('name', envir = thisRCO)#
+                                                     }#
+                                                     thisRCO[['nimbleProject']] <- NULL#
+                                                     ## finalization done internally to the model interface#
+                                                 }#
+                                                 nfCompInfos[[i]] <<- NULL#
+                                                 ## cppProjects[[i]] <<- NULL#
+                                             }#
+                                         }#
+                                     }#
+#
+                                 },#
+                                 resetFunctions = function(finalize = FALSE) {#
+                                     ## clear everything except models and nimbleFunctions from models#
+                                     for(i in ls(mvInfos)) {#
+                                         clearThisMV <- TRUE ## It looked like in some situations we'd not want to clear here, but apparently we always should#
+                                         ## OK, what happens is we used to check if a cppClass was from a model and then not clear, but that isn't right.#
+                                         ## It could be defined from a model but then have objects from nimbleFunctions that need to be cleared.#
+                                         if(clearThisMV) {#
+                                             mvInfos[[i]]$cppClass <<- NULL#
+                                             for(j in seq_along(mvInfos[[i]]$RmvObjs)) {#
+                                                 if(!is.null(mvInfos[[i]]$RmvObjs[[j]]$CobjectInterface)) {#
+                                                     if(finalize) {#
+                                                         mvInfos[[i]]$RmvObjs[[j]]$CobjectInterface$finalizeInternal() #
+                                                     }#
+                                                     mvInfos[[i]]$RmvObjs[[j]]$CobjectInterface <<- NULL#
+                                                 }#
+                                             }#
+                                             rm(list = i, envir = mvInfos)#
+                                         }#
+                                     }#
+                                     for(i in ls(RCfunInfos)) {#
+                                         if(length(RCfunInfos[[i]]$fromModel) > 0) {#
+                                             if(!RCfunInfos[[i]]$fromModel) {#
+                                                 if(!is.null(RCfunCppInterfaces[[i]])) { ## could be null if it was a neededType and an interface was never built #
+                                                     environment(RCfunCppInterfaces[[i]])$CnativeSymbolInfo_ <<- NULL#
+                                                     ##RCfunCppInterfaces[[i]] <<- NULL#
+                                                     rm(list = i, envir = RCfunCppInterfaces)#
+                                                 }#
+                                                 assign('nimbleProject', NULL, envir = RCfunInfos[[i]]$nfMethodRCobj)#
+                                                 thisName <- RCfunInfos[[i]]$nfMethodRCobj$uniqueName#
+                                                 ##if(!is.null(cppProjects[[thisName]])) cppProjects[[thisName]] <<- NULL#
+                                                 ##RCfunInfos[[i]] <<- NULL#
+                                                 rm(list = i, envir = RCfunInfos)#
+                                             }#
+                                         }#
+                                     }#
+                                     for(i in ls(nfCompInfos)) {#
+                                         if(length(nfCompInfos[[i]]$fromModel) > 0) {#
+                                             if(!nfCompInfos[[i]]$fromModel) {#
+                                                 for(j in seq_along(nfCompInfos[[i]]$Rinstances)) {#
+                                                     thisEnv <- environment(nfCompInfos[[i]]$Rinstances[[j]])#
+                                                     thisRCO <- nf_getRefClassObject(nfCompInfos[[i]]$Rinstances[[j]])#
+                                                     if(exists('name', envir = thisRCO, inherits = FALSE)) {#
+                                                         thisname <- thisRCO$name#
+                                                         rm(list = thisname, envir = nimbleFunctions)#
+                                                         ##nimbleFunctions[[ thisname ]] <<- NULL#
+                                                         rm('name', envir = thisRCO)#
+                                                     }#
+                                                     thisRCO[['nimbleProject']] <- NULL#
+                                                     if(finalize) {#
+                                                         if(!is.null(thisRCO$.CobjectInterface)) {#
+                                                             if(is.list( thisRCO$.CobjectInterface)) { ## CmultiNimbleFunctionInterface#
+                                                                 thisRCO$.CobjectInterface[[1]]$finalizeInstance(thisRCO$.CobjectInterface[[2]])#
+                                                             } else {#
+                                                                 thisRCO$.CobjectInterface$finalizeInternal()#
+                                                             }#
+                                                             thisRCO$.CobjectInterface <- NULL#
+                                                         }#
+                                                     }#
+                                                 }#
+                                                 nfCompInfos[[i]] <<- NULL#
+                                                 ## cppProjects[[i]] <<- NULL#
+                                             }#
+                                         }#
+                                     }#
+                                 },#
+                                 addModelValuesClass = function(mvConf, fromModel = FALSE) {#
+                                     mvClassName <- environment(mvConf)$className#
+                                     if(!is.null(mvInfos[[mvClassName]])) stop('Trying to add a modelValues class with the same name as one already in this project', call. = FALSE)#
+                                     mvInfos[[mvClassName]] <<-  mvInfoClass(cppClassName = mvClassName, cppClass = NULL, mvConf = mvConf, fromModel = fromModel)#
+                                 },#
+                                 getModelValuesCppDef = function(mvConf, NULLok = FALSE) {#
+                                     mvClassName <- environment(mvConf)$className#
+                                     if(is.null(mvInfos[[mvClassName]])) {#
+                                         if(!NULLok) stop('Project does not know about this modelValues class but the cppDef is being requested', call. = FALSE)#
+                                         else return(NULL)#
+                                     }#
+                                     ans <- mvInfos[[mvClassName]]$cppClass#
+                                     if(is.null(ans)) {#
+                                         if(!NULLok) stop('cppDef for a requested modelValues class has not been generated but was requested.', call. = FALSE)#
+                                         else return(NULL)#
+                                     }#
+                                     ans#
+                                 },#
+                                 addModel = function(model) {#
+                                     if(!inherits(model, 'RmodelBaseClass')) stop('model provided to project is not an RmodelBaseClass', call. = FALSE)#
+                                     modelDefName <- model$modelDef$name#
+                                     if(is.null(modelDefInfos[[modelDefName]])) {#
+                                         modelDefInfos[[modelDefName]] <<- modelDefInfoClass(#
+                                             labelMaker = labelFunctionCreator(paste0(modelDefName, '_'))#
+                                             )#
+                                         if(identical(model$name, character(0))) {#
+                                             model$name <- modelDefInfos[[modelDefName]]$labelMaker()#
+                                         } else {#
+                                             if(!is.null(models[[ model$name ]])) stop('Model provided to project has same name as another one in the same project')#
+                                         }#
+                                         if(identical(model$Cname, character(0))) {#
+                                             model$Cname <- Rname2CppName(model$name)#
+                                         } #
+                                         model$nimbleProject <- .self#
+                                         models[[ model$name ]] <<- model#
+                                         ##modelCppInterfaces[[ model$name ]] <<- new.env()	#list(NULL)#
+                                     }#
+                                 },#
+                                 addNimbleFunctionMulti = function(funList, fromModel = FALSE, generatorFunNames = NULL) {#
+                                     if(length(funList) == 0) return(invisible(NULL))#
+                                     if(!is.nf(funList[[1]])) stop('first nimbleFunction provided to project is not a nimbleFunction.', call. = FALSE)#
+                                     inProjectAlready <- unlist(lapply(funList, function(x) identical(x[['nimbleProject']], .self)))#
+                                     if(any(inProjectAlready)) {#
+                                         stop('Trying to add list of nimbleFunctions but some are already part of another project. If you are recompiling, try redefining models and specialized nimbleFunctions. (The reset option works now for nimbleFunctions but not models.)', call. = FALSE)#
+                                     }#
+                                     allGeneratorNames <- if(is.null(generatorFunNames))#
+                                                              unlist(lapply(funList, function(x) environment(x$.generatorFunction)$name), use.names = FALSE)#
+                                                          else#
+                                                              generatorFunNames#
+                                     generatorName2Indices <- split(seq_along(funList), allGeneratorNames) ##uniqueGeneratorNamesIndices <- which(!duplicated(allGeneratorNames))#
+                                     for(i in seq_along(generatorName2Indices)) { ##genID in uniqueGeneratorNameIndices) {#
+                                         genID <- generatorName2Indices[[i]][1]#
+                                         generatorName <- names(generatorName2Indices)[i] ##allGeneratorNames[genID]#
+                                         if(is.null(nfCompInfos[[generatorName]])) {#
+                                             ## nfProc could have been created already during makeTypeObject for another nimbleFunction so it knows the types of this one.#
+                                             nfCompInfos[[generatorName]] <<- nfCompilationInfoClass(nfGenerator = nf_getGeneratorFunction(funList[[genID]]),#
+                                                                                                     Rcompiled = FALSE, written = FALSE, cppCompiled = FALSE, loaded = FALSE,#
+                                                                                                     RinitTypesProcessed = FALSE, virtual = FALSE,#
+                                                                                                     fromModel = fromModel)#
+                                             nfCompInfos[[generatorName]]$labelMaker <<- labelFunctionCreator(paste0(generatorName,'_'))#
+                                         }#
+                                         genIDs <- generatorName2Indices[[i]]#
+                                         newLabels <- nfCompInfos[[generatorName]]$labelMaker(count = length(genIDs))#
+                                         namedFunList <- funList[genIDs]#
+                                         names(namedFunList) <- newLabels#
+                                         list2env(namedFunList, envir = nimbleFunctions)#
+                                         nfCompInfos[[generatorName]]$addRinstanceList(namedFunList)#
+                                         newEnvs <- lapply(seq_along(newLabels), new.env)#
+                                         names(newEnvs) <- newLabels#
+                                         CppNewLabels <- Rname2CppName(newLabels)#
+                                         for(j in seq_along(newLabels)) {#
+                                             funList[[genIDs[j]]][['Cname']] <- CppNewLabels[j]#
+                                             funList[[genIDs[j]]][['name']] <- newLabels[j] ## skip the checking done in addNimbleFunction#
+                                             funList[[genIDs[j]]][['nimbleProject']] <- .self#
+                                         }#
+                                     }#
+                                 },#
+                                 addNimbleFunction = function(fun, fromModel = FALSE) {#
+                                     if(!is.nf(fun)) stop('nimbleFunction provided to project is not a nimbleFunction.', call. = FALSE)#
+                                     inProjectAlready <- nf_getRefClassObject(fun)[['nimbleProject']]#
+                                     if(!is.null(inProjectAlready)) {#
+                                         if(!identical(inProjectAlready, .self)) stop('Trying to add a specialized nimbleFunction to a project, but it is already part of another project. \nIf you did not specify a project, this error can occur in trying to create a new project -- you likely need to specify the relevant model as the project.\nIf you are recompiling, try redefining models and specialized nimbleFunctions. (The reset option works now for nimbleFunctions but not models.)', call. = FALSE)#
+                                         else warning('Adding a specialized nimbleFunction to a project to which it already belongs', call. = FALSE)#
+                                     }#
+                                     generatorName <- nfGetDefVar(fun, 'name')#
+                                     if(is.null(nfCompInfos[[generatorName]])) {#
+                                         ## nfProc could have been created already during makeTypeObject for another nimbleFunction so it knows the types of this one.#
+                                         nfCompInfos[[generatorName]] <<- nfCompilationInfoClass(nfGenerator = nf_getGeneratorFunction(fun),#
+                                                                                                 Rcompiled = FALSE, written = FALSE, cppCompiled = FALSE, loaded = FALSE,#
+                                                                                                 RinitTypesProcessed = FALSE, virtual = FALSE,#
+                                                                                                 fromModel = fromModel)#
+                                         nfCompInfos[[generatorName]]$labelMaker <<- labelFunctionCreator(paste0(generatorName,'_'))#
+                                     }#
+                                     if(!exists('name', envir = nf_getRefClassObject(fun), inherits = FALSE)) {#
+                                         assign('name', nfCompInfos[[generatorName]]$labelMaker(), envir = nf_getRefClassObject(fun))#
+                                     } else {#
+                                         if(!is.null(nimbleFunctions[[ nf_getRefClassObject(fun)$name ]])) {#
+                                             stop('nimbleFunction provided to project has same name as another one in the same project', call. = FALSE)#
+                                         }#
+                                     }#
+                                     nimbleFunctions[[ nf_getRefClassObject(fun)$name ]] <<- fun#
+                                     nfCompInfos[[generatorName]]$addRinstance(fun)#
+                                     if(!exists('Cname', envir = nf_getRefClassObject(fun), inherits = FALSE)) {#
+                                         assign('Cname', Rname2CppName(nf_getRefClassObject(fun)$name), envir = nf_getRefClassObject(fun))#
+                                     }#
+#
+                                     assign('nimbleProject', .self, envir = nf_getRefClassObject(fun))#
+                                     ## could check for duplicate Cnames here, but if the names are unique the Cnames should be too.#
+                                 },#
+                                 addRCfun = function(nfmObj, fromModel = FALSE) {#
+                                     if(!inherits(nfmObj, 'nfMethodRC')) stop("Can't add this function. nfmObj is not an nfMethodRC", call. = FALSE)#
+                                     className <- nfmObj$uniqueName#
+                                     if(is.null(RCfunInfos[[className]])) {#
+                                         RCfunInfos[[className]] <<- RCfunInfoClass(nfMethodRCobj = nfmObj, RCfunProc = NULL, cppClass = NULL, fromModel = fromModel)#
+                                     }#
+                                     assign('nimbleProject', .self, envir = nfmObj) ## needed for clearCompiled(), i.e. safe dyn.unload()#
+                                 },#
+                                 getRCfunCppDef = function(nfmObj, NULLok = FALSE) {#
+                                     className <- nfmObj$uniqueName#
+                                     ans <- RCfunInfos[[className]]#
+                                     if(is.null(ans)) {#
+                                         if(!NULLok) stop("Requested to get an RCfunCppDef but it is not in the project and NULLok = FALSE", call. = FALSE)#
+                                         return(NULL)#
+                                     }#
+                                     ans <- ans$cppClass#
+                                     if(inherits(ans, 'uninitializedField') )  return(NULL)                                     	 #
+                                     ans#
+                                 },#
+                                 needRCfunCppClass = function(nfmObj, genNeededTypes = TRUE, control = list(debug = FALSE, debugCpp = FALSE), fromModel = FALSE) {#
+                                     if(!inherits(nfmObj, 'nfMethodRC')) stop("Can't compile this function. nfmObj is not an nfMethodRC", call. = FALSE)#
+                                     className <- nfmObj$uniqueName#
+                                     Cname <- Rname2CppName(className)#
+                                     RCfunInfo <- RCfunInfos[[className]]#
+                                     if(is.null(RCfunInfo)) addRCfun(nfmObj, fromModel = fromModel)#
+                                     if(is.null(RCfunInfos[[className]]$RCfunProc)) {#
+                                         RCfunInfos[[className]]$RCfunProc <<- RCfunProcessing$new(nfmObj, Cname)#
+                                         RCfunInfos[[className]]$RCfunProc$process(debug = control$debug, debugCpp = control$debugCpp)#
+                                     }#
+                                     cppClass <- RCfunInfos[[className]]$cppClass#
+                                     if(is.null(cppClass)) {#
+                                         cppClass <- RCfunctionDef(project = .self)#
+                                         cppClass$buildFunction(RCfunInfos[[className]]$RCfunProc)#
+                                         cppClass$buildSEXPinterfaceFun()#
+                                         if(genNeededTypes) cppClass$genNeededTypes()#
+                                         RCfunInfos[[className]]$cppClass <<- cppClass#
+                                     }#
+                                     cppClass#
+                                 },#
+                                 compileRCfun = function( fun, filename = NULL, control = list(debug = FALSE, debugCpp = FALSE, writeFiles = TRUE, returnAsList = FALSE ) ) {#
+                                     if(is.rcf(fun)) fun <- environment(fun)$nfMethodRCobject#
+                                     addRCfun(fun) ## checks if it already exists and if it is an nfMethodRC#
+                                     cppClass <- needRCfunCppClass(fun, genNeededTypes = TRUE, control = control)#
+                                     className <- fun$uniqueName#
+                                     if(control$writeFiles) {#
+                                         cppProj <- cppProjectClass(dirName = dirName)#
+                                         cppProjects[[ className ]] <<- cppProj#
+                                         if(is.null(filename)) filename <- paste0(projectName, '_', className)#
+                                         cppProj$addClass( cppClass, className, filename )#
+                                         cppProj$writeFiles(filename)#
+                                     }#
+                                     if(control$compileCpp) {#
+                                         cppProj$compileFile(filename)#
+                                     }#
+                                     if(control$loadSO) {#
+                                         cppProj$loadSO(filename)#
+                                     }#
+                                     RCfunCppInterfaces[[className]] <<- cppClass$buildRwrapperFunCode(includeLHS = FALSE, eval = TRUE, returnArgsAsList = control$returnAsList, dll = cppProj$dll)#
+                                     RCfunCppInterfaces[[className]]#
+                                 },#
+                                 needModelValuesCppClass = function(mvConf, fromModel = FALSE) {#
+                                     if(!isModelValuesConf(mvConf)) stop("Can't compileModelValues: mvConf is not a modelValuesConf", call. = FALSE)#
+                                     mvClassName <- environment(mvConf)$className#
+                                     mvInfo <- mvInfos[[mvClassName]]#
+                                     if(is.null(mvInfo)) addModelValuesClass(mvConf, fromModel)#
+                                     cppClass <- mvInfos[[mvClassName]]$cppClass#
+                                     if(is.null(cppClass)) {#
+                                         cppClass <- cppModelValuesClass(name = mvClassName,#
+                                                                            vars = environment(mvConf)$symTab,#
+                                                                            project = .self)#
+                                         cppClass$buildAll()#
+                                          mvInfos[[mvClassName]]$cppClass <<- cppClass#
+                                     }#
+                                     cppClass#
+                                 },#
+                                 instantiateCmodelValues = function(mv, dll) {#
+                                     mvClassName <- class(mv)#
+                                     cppDef <- mvInfos[[mvClassName]]$cppClass#
+                                     if(is.null(cppDef)) stop('Trying to instantiate a modelValues type that the project has no record of. Try setting option resetFunctions = TRUE in compileNimble')#
+                                     generatorName <- cppDef$SEXPgeneratorFun$name#
+                                     sym = if(!is.null(dll))#
+                                         getNativeSymbolInfo(generatorName, dll)#
+                                     else {#
+                                         warning('a nimbleFunctionInterface is about to build a CmodelValues without dll info, based on generatorFun name only.', call. = FALSE)#
+                                         generatorName#
+                                     }#
+                                     ans <- CmodelValues(sym, dll = dll)#
+                                     mvInfos[[mvClassName]]$addRmv(mv) ## simply a list for later clearing#
+                                     mv$CobjectInterface <- ans#
+                                     ans#
+                                 },#
+                                 compileModel = function(model, filename = NULL,#
+                                     control = list(debug = FALSE, debugCpp = FALSE, writeFiles = TRUE, compileCpp = TRUE, loadSO = TRUE), where = globalenv()) {#
+                                     if(is.character(model)) {#
+                                         tmp <- models[[model]]#
+                                         if(is.null(tmp)) stop(paste0("Model provided as name: ", model, " but it is not in this project."), call. = FALSE)#
+                                         model <- tmp#
+                                     } else addModel(model)#
+                                     modelDef <- model$getModelDef()#
+                                     modelDefName <- modelDef$name#
+                                     Cname <- Rname2CppName(modelDefName)#
+                                     if(is.null(filename)) filename <- paste0(projectName, '_', Rname2CppName(modelDefName)) #
+                                     modelCpp <- cppBUGSmodelClass(modelDef = modelDef, model = model,#
+                                                                   name = Cname, project = .self)#
+                                     ## buildAll will call back to the project to add its nimbleFunctions #
+                                     modelCpp$buildAll(buildNodeDefs = TRUE, where = where, control = control)#
+                                     cppProj <- cppProjectClass(dirName = dirName)#
+                                     cppProjects[[ modelDefName ]] <<- cppProj#
+                                     ## genModelValuesCppClass will back to the project to add its mv class#
+                                     mvc <- modelCpp$genModelValuesCppClass()#
+                                     if(is.null(filename)) filename <- paste0(projectName, '_', modelDefName)#
+                                     cppProj$addClass(mvc, filename = filename)#
+                                     cppProj$addClass(modelCpp, modelDefName, filename)#
+                                     ##if compileNodes#
+                                     nfFileName <- paste0(projectName, '_', Rname2CppName(modelDefName),'_nfCode')#
+                                     for(i in names(modelCpp$nodeFuns)) {#
+                                         cppProj$addClass(modelCpp$nodeFuns[[i]], filename = nfFileName)#
+                                     }#
+                                     if(control$writeFiles) {#
+                                         cppProj$writeFiles(filename)#
+                                         cppProj$writeFiles(nfFileName) ## if compileNodes#
+                                     } else return(cppProj)#
+                                     if(control$compileCpp) {#
+                                         compileList <- filename#
+                                         compileList <- c(compileList, nfFileName) ## if compileNodes#
+                                         cppProj$compileFile(compileList)#
+                                     } else return(cppProj)#
+                                     if(control$loadSO) {#
+                                         ## if loadSO#
+                                         cppProj$loadSO(filename)#
+                                     } else return(cppProj)#
+                                     ## if buildInterface#
+                                     interfaceName <- paste0('C', modelDefName)#
+                                     compiledModel <- modelCpp ## cppProj$cppDefs[[2]]#
+                                     newCall <- paste0('new_',Rname2CppName(modelDefName))#
+                                     ans <- buildModelInterface(interfaceName, compiledModel, newCall, where = where, project = .self, dll = cppProj$dll)#
+                                     createModel <- TRUE#
+                                     if(!createModel) return(ans) else return(ans(model, where, dll = cppProj$dll))#
+                                     ## creating the model populates model$CobjectInterface#
+                                 },#
+                                 getNimbleFunctionCppDef = function(generatorName, nfProc) {#
+                                     if(missing(generatorName)) {#
+                                         if(missing(nfProc)) stop('No good information provided to getNimbleFunctionCppDef', call. = FALSE)#
+                                         generatorName <- environment(nfProc$nfGenerator)[['name']]#
+                                         if(is.null(generatorName)) stop('Invalid generatorName', call. = FALSE)#
+                                     }#
+                                     if(is.null(nfCompInfos[[generatorName]])){#
+                                     	 return(NULL)#
+                                    }#
+                                     ans <- nfCompInfos[[generatorName]]$cppDef#
+                                     if(inherits(ans, 'uninitializedField') )  return(NULL)                                     	 #
+                                     ans#
+                                 },#
+                                 getNimbleFunctionNFproc = function(fun) {#
+                                     generatorName <- nfGetDefVar(fun, 'name')#
+                                     if(is.null(nfCompInfos[[generatorName]])) return(NULL)#
+                                     ans <- nfCompInfos[[generatorName]]$nfProc#
+                                     if(inherits(ans, 'uninitializedField')) return(NULL)#
+                                     ans#
+                                 },#
+                                 buildVirtualNimbleFunctionCompilationInfo = function(vfun, initialTypeInferenceOnly = FALSE, control = list(debug = FALSE, debugCpp = FALSE)) {#
+                                     if(!is.character(vfun)) {#
+                                         if(!is.nfGenerator(vfun)) stop("Something provided as a nimbleFunctionVirtual does not appear to be correct.", call. = FALSE)#
+                                         if(!(environment(vfun)$virtual)) stop("Something provided as a nimbleFunctionVirtual is an nfGenerator but not a virtual one.", call. = FALSE)#
+                                         if(initialTypeInferenceOnly) stop("Can't do initialTypeInferenceOnly on a virtualNimbleFunction", call. = FALSE)#
+                                         generatorName <- environment(vfun)$name#
+                                     } else {#
+                                         generatorName <- vfun#
+                                     }#
+                                     if(is.null(nfCompInfos[[generatorName]])) stop("It doesn't look like nfCompInfos was set up for this generator.  Call setupVirtualNimbleFunction first.", call. = FALSE) #
+                                     if(inherits(nfCompInfos[[generatorName]]$nfProc, 'uninitializedField')) {## might always be FALSE by this point in processing#
+                                         if(is.character(vfun)) stop("vfun given as character but nfProc doesn't exist yet", call. = FALSE)#
+                                         nfCompInfos[[generatorName]]$nfProc <<- virtualNFprocessing$new(vfun, generatorName)#
+                                     }#
+                                     if(!nfCompInfos[[generatorName]]$Rcompiled) {#
+                                         nfCompInfos[[generatorName]]$nfProc$process(control = control)#
+                                         nfCompInfos[[generatorName]]$Rcompiled <<- TRUE#
+                                     }#
+                                     if(inherits(nfCompInfos[[generatorName]]$cppDef, 'uninitializedField')) {#
+                                         newCppClass <- cppVirtualNimbleFunctionClass(name = generatorName,#
+                                                                                      nfProc = nfCompInfos[[generatorName]]$nfProc,#
+                                                                                      project = .self)#
+                                         nfCompInfos[[generatorName]]$cppDef <<- newCppClass#
+                                         newCppClass ## possible return value#
+                                     } else {#
+                                         nfCompInfos[[generatorName]]$cppDef ## return value if already exists#
+                                     }#
+                                 },#
+                                 buildNimbleFunctionCompilationInfo = function(funList = NULL, generatorName, initialTypeInferenceOnly = FALSE,#
+                                     isNode = FALSE, control = list(debug = FALSE, debugCpp = FALSE), where = globalenv(), fromModel = FALSE) {#
+                                     ## like old makeCppNIMBLEfunction#
+                                     ## check of make new nfCompInfos item#
+                                     ## ensure it is build up to the cppNimbleFunctionClass#
+                                     if(!is.null(funList)) {#
+                                         generatorName <- nfGetDefVar(funList[[1]], 'name')#
+                                         name <- nf_getRefClassObject(funList[[1]])$name#
+                                         Cname <- nf_getRefClassObject(funList[[1]])$Cname#
+                                         if(is.null(nfCompInfos[[generatorName]])) stop("Requested buildNimbleFunctionCompilationInfo for a generator for which no specialized NF has been added to the project", call. = FALSE)#
+                                         if(inherits(nfCompInfos[[generatorName]]$nfProc, 'uninitializedField')) #
+                                             nfCompInfos[[generatorName]]$nfProc <<- nfProcessing(funList, generatorName, fromModel = fromModel, project = .self, isNode = isNode)#
+                                     } else {#
+                                         if(missing(generatorName)) stop("If funList is omitted, a generator name must be provided to buildNimbleFunctionCompilationInfo", call. = FALSE)#
+                                         if(inherits(nfCompInfos[[generatorName]]$nfProc, 'uninitializedField')) stop("buildNimbleFunctionCompilationInfo was called with only a generatorName (probably from genNeededTypes), but the nfProc is missing.", call. = FALSE)#
+                                     }#
+                                     if(initialTypeInferenceOnly) {#
+                                         if(!nfCompInfos[[generatorName]]$RinitTypesProcessed) {#
+                                             nfCompInfos[[generatorName]]$nfProc$setupTypesForUsingFunction() #
+                                             nfCompInfos[[generatorName]]$RinitTypesProcessed <<- TRUE#
+                                         }#
+                                         return(nfCompInfos[[generatorName]]$nfProc)#
+                                     }#
+                                     if(!nfCompInfos[[generatorName]]$Rcompiled) {#
+                                         nfCompInfos[[generatorName]]$nfProc$process(control = control)#
+                                         nfCompInfos[[generatorName]]$Rcompiled <<- TRUE#
+                                     }#
+                                     if(inherits(nfCompInfos[[generatorName]]$cppDef, 'uninitializedField')) {#
+                                         newCppClass <- cppNimbleFunctionClass(name = generatorName,#
+                                                                               nfProc = nfCompInfos[[generatorName]]$nfProc,#
+                                                                               isNode = isNode,#
+                                                                               debugCpp = control$debugCpp,#
+                                                                               project = .self,#
+                                                                               fromModel = fromModel#
+                                                                               )#
+                                         newCppClass$buildAll(where = where)#
+                                         nfCompInfos[[generatorName]]$cppDef <<- newCppClass#
+                                         newCppClass ## possible return value#
+                                     } else {#
+                                         nfCompInfos[[generatorName]]$cppDef ## return value if already exists#
+                                     }#
+                                 },#
+                                 instantiateNimbleFunction = function(nf, dll, asTopLevel = TRUE) { ## called by cppInterfaces_models and cppInterfaces_nimbleFunctions#
+                                     ## to instantiate neededObjects#
+                                     if(!is.nf(nf)) stop("Can't instantiateNimbleFunction, nf is not a nimbleFunction")#
+                                     generatorName <- nfGetDefVar(nf, 'name')#
+#
+                                     nfCppDef <- getNimbleFunctionCppDef(generatorName = generatorName)#
+#
+                                     ok <- TRUE#
+                                     if(asTopLevel) {#
+                                         if(is.null(nfCppDef$Rgenerator)) ok <- FALSE#
+                                         else ans <- nfCppDef$Rgenerator(nf, dll = dll, project = .self)#
+                                     } else {#
+                                         if(is.null(nfCppDef$CmultiInterface)) ok <- FALSE#
+                                         else ans <- nfCppDef$CmultiInterface$addInstance(nf, dll = dll)#
+                                     }#
+                                     if(!ok) stop("Oops, there is something in this compilation job that doesn\'t fit together.  This can happen in some cases if you are trying to compile new pieces into an exising project.  If that is the situation, please try including \"resetFunctions = TRUE\" as an argument to compileNimble.  Alternatively please try rebuilding the project from the beginning with more pieces in the same call to compileNimble.  For example, if you are compiling multiple algorithms for the same model in multiple calls to compileNimble, try compiling them all with one call.", call. = FALSE) #
+#
+                                     ans#
+                                 },#
+                                 setupVirtualNimbleFunction = function(vfun, fromModel = FALSE) {#
+                                     if(!is.nfGenerator(vfun)) stop('nimbleFunctionVirtual provided to project is not a nimbleFunction generator.', call. = FALSE)#
+                                     if(!(environment(vfun)$virtual)) stop("Something provided as a nimbleFunctionVirtual is an nfGenerator but not a virtual one.", call. = FALSE)#
+                                     generatorName <- environment(vfun)$name#
+                                     if(is.null(nfCompInfos[[generatorName]])) {#
+                                         nfCompInfos[[generatorName]] <<- nfCompilationInfoClass(nfGenerator = vfun,#
+                                                                                                 Rcompiled = FALSE, written = FALSE, cppCompiled = FALSE, loaded = FALSE,#
+                                                                                                 RinitTypesProcessed = FALSE, virtual = TRUE, fromModel = fromModel)#
+                                         nfCompInfos[[generatorName]]$labelMaker <<- NULL ## not needed?#
+                                     }#
+                                     if(inherits(nfCompInfos[[generatorName]]$nfProc, 'uninitializedField'))#
+                                         nfCompInfos[[generatorName]]$nfProc <<- virtualNFprocessing$new(vfun, generatorName)#
+                                     nfCompInfos[[generatorName]]$nfProc#
+                                 },#
+                                 compileNimbleFunctionMulti = function(funList, isNode = FALSE, filename = NULL, initialTypeInferenceOnly = FALSE,#
+                                     control = list(debug = FALSE, debugCpp = FALSE, compileR = TRUE, writeFiles = TRUE, compileCpp = TRUE, loadSO = TRUE),#
+                                     reset = FALSE, returnCppClass = FALSE, where = globalenv(), fromModel = FALSE, generatorFunNames = NULL, alreadyAdded = FALSE) {#
+                                     if(!is.list(funList)) stop('funList in compileNimbleFunctionMulti should be a list', call. = FALSE)#
+                                     allGeneratorNames <- if(is.null(generatorFunNames)) lapply(funList, nfGetDefVar, 'name') else generatorFunNames#
+                                     uniqueGeneratorNames <- unique(allGeneratorNames)#
+                                     if(initialTypeInferenceOnly || returnCppClass) {#
+                                         ans <- list()#
+                                         if(initialTypeInferenceOnly) oldKnownGeneratorNames <- ls(nfCompInfos)	#names(nfCompInfos)#
+                                     } else ans <- vector('list', length(funList))#
+                                     for(uGN in uniqueGeneratorNames) {#
+                                         thisBool <- allGeneratorNames == uGN#
+                                         thisAns <- compileNimbleFunction( funList[ thisBool ], isNode = isNode, filename = filename,#
+                                                                          initialTypeInferenceOnly = initialTypeInferenceOnly,#
+                                                                          control = control, reset = reset, returnCppClass = returnCppClass, where = where,#
+                                                                          fromModel = fromModel, generatorName = uGN, alreadyAdded = alreadyAdded)#
+                                         if(initialTypeInferenceOnly || returnCppClass) {#
+                                             if(initialTypeInferenceOnly) { ## return only new NFprocs in this case.#
+                                                 thisGeneratorName <- environment(thisAns$nfGenerator)$name ## should be same as uGN#
+                                                 if(!(thisGeneratorName %in% oldKnownGeneratorNames)) ans[[ thisGeneratorName ]] <- thisAns#
+                                             }#
+                                             else ## they should all be new in this case anyway#
+                                                 ans[[ uGN ]] <- thisAns#
+                                         } else {#
+                                             ans[thisBool] <- if(is.list(thisAns)) thisAns else list(thisAns)#
+                                         }#
+                                     }#
+                                     ans#
+                                 },#
+                                 compileNimbleFunction = function(fun, isNode = FALSE, filename = NULL, initialTypeInferenceOnly = FALSE,#
+                                     control = list(debug = FALSE, debugCpp = FALSE, compileR = TRUE, writeFiles = TRUE, compileCpp = TRUE, loadSO = TRUE),#
+                                     reset = FALSE, returnCppClass = FALSE, where = globalenv(), fromModel = FALSE, generatorName = NULL, alreadyAdded = FALSE) {#
+                                     if(is.character(fun)) {#
+                                         tmp <- nimbleFunctions[[fun]]#
+                                         if(is.null(tmp)) stop(paste0("nimbleFunction name ", fun, " not recognized in this project."), call. = FALSE)#
+                                         if(reset) {#
+                                             nf_getRefClassObject(tmp)$.CobjectInterface <- NULL#
+                                         }#
+                                         fun <- tmp#
+                                         funList <- list(fun)#
+                                         generatorName <- nfGetDefVar(fun, 'name')#
+                                         if(reset) nfCompInfos[[generatorName]] <<- NULL#
+                                     } else {#
+                                         if(is.list(fun)) {#
+                                             if(length(fun) == 0) stop('Empty list provided to compileNimbleFunction', call. = FALSE)#
+                                             if(is.null(generatorName)) generatorName <- unique(unlist(lapply(fun, nfGetDefVar, 'name')))#
+                                             if(length(generatorName) != 1) stop(paste0('Not all elements in the fun list for compileNimbleFunction are specialized from the same nimbleFunction.  The generator names include:', paste(generatorName, collapse = ' ')), call. = FALSE)#
+                                             if(reset) nfCompInfos[[generatorName]] <<- NULL#
+                                             funList <- fun#
+                                         } else {#
+                                             if(!is.nf(fun)) stop(paste0("fun argument provided is not a nimbleFunction."), call. = FALSE)#
+                                             funList <- list(fun)#
+                                             generatorName <- nfGetDefVar(fun, 'name')#
+                                             if(reset) nfCompInfos[[generatorName]] <<- NULL#
+                                         }#
+                                         if(!alreadyAdded) {#
+                                             for(i in seq_along(funList)) {#
+                                                 addNF <- TRUE#
+                                                 thisName <- nf_getRefClassObject(funList[[i]])[['name']] #
+                                                 if(!is.null(thisName)) {#
+                                                     tmp <- nimbleFunctions[[thisName]]#
+                                                     if(!is.null(tmp)) {#
+                                                         if(reset) {#
+                                                             nimbleFunctions[[thisName]] <<- NULL#
+                                                         } else {#
+                                                             if(!identical(funList[[i]], tmp)) stop('Trying to compile something with same name as previously added nimbleFunction that is not the same thing')#
+                                                             addNF <- FALSE#
+                                                         }#
+                                                     }#
+                                                 }#
+                                                 if(addNF) {#
+                                                     addNimbleFunction(funList[[i]], fromModel = fromModel)#
+                                                 }#
+                                             }#
+                                         }#
+                                     }#
+##                                     Cname <- nf_getRefClassObject(funList[[1]])$Cname#
+                                     if(!exists('name', envir = nf_getRefClassObject(funList[[1]]), inherits = FALSE)) stop('Something is wrong if by this point in compileNimbleFunction there is no name.', call. = FALSE)#
+                                     cppClass <- buildNimbleFunctionCompilationInfo(funList, isNode = isNode, initialTypeInferenceOnly = initialTypeInferenceOnly, control = control, where = where, fromModel = fromModel)#
+                                     if(initialTypeInferenceOnly || returnCppClass) return(cppClass) ## cppClass is an nfProc in this case#
+#
+                                     if(!nfCompInfos[[generatorName]]$written && control$writeFiles) {#
+                                         cppProj <- cppProjectClass(dirName = dirName)#
+                                         cppProjects[[ generatorName ]] <<- cppProj#
+                                         if(is.null(filename)) filename <- paste0(projectName, '_', Rname2CppName(generatorName))#
+                                         cppProj$addClass(cppClass, generatorName, filename)#
+                                         cppProj$writeFiles(filename)#
+                                         nfCompInfos[[generatorName]]$written <<- TRUE#
+                                     } else {#
+                                         if(!control$writeFiles) return(cppProj)#
+                                         cppProj <- cppProjects[[ generatorName ]]#
+                                     }#
+                                     if(!nfCompInfos[[generatorName]]$cppCompiled && control$compileCpp) {#
+                                         if(control$compileCpp) {#
+                                             cppProj$compileFile(filename)#
+                                             nfCompInfos[[generatorName]]$cppCompiled <<- TRUE#
+                                         } else writeLines('Skipping compilation because control$compileCpp is FALSE')#
+                                     } else {if(!control$compileCpp) return(cppProj)}#writeLines('Using previously compiled C++ code.')#
+                                     if(!nfCompInfos[[generatorName]]$loaded && control$loadSO) {#
+                                         cppProj$loadSO(filename)#
+                                         nfCompInfos[[generatorName]]$loaded <<- TRUE#
+                                     } else{if(!control$loadSO) return(cppProj)}# writeLines('Using previously loaded compilation unit.')#
+                                     ans <- vector('list', length(funList))#
+#
+                                     for(i in seq_along(funList)) {#
+                                         ans[[i]] <- nfCompInfos[[generatorName]]$cppDef$buildCallable(funList[[i]], cppProj$dll, asTopLevel = TRUE)#
+                                     }#
+                                     if(length(ans) == 1) ans[[1]] else ans#
+                                 }#
+                                 )#
+                             )#
+#
+clearCompiled <- function(obj) { # for now just take one obj as input#
+    np <- getNimbleProject(obj)#
+    np$clearCompiled()#
 }#
 #
-crossValidateOne <- function(model,#
-                             dataNames,#
-                             MCMCIter,#
-                             burnIn, thin,#
-                             leaveOutIndex,#
-                             MCMCdefs=NULL){#
-  simpSetMCMCDefs <- function(Rmodel, MCMCdefs, MCMCname) {#
-    eval(MCMCdefs[[MCMCname]])#
-  }#
-  if(!is.null(MCMCdefs)){#
-  ## eval(MCMCdefs.opt2[['nimbleOpt2']])#
-    ## customSpec <- simpSetMCMCDefs(occ.R.model, MCMCdefs.opt2, 'nimbleOpt2')#
-  }#
+#' compile NIMBLE models and nimbleFunctions#
+#'#
+#' compile a collection of models and nimbleFunctions: generate C++, compile the C++, load the result, and return an interface object#
+#'#
+#' @param ...  An arbitrary set of NIMBLE models and nimbleFunctions, or lists of them.  If given as named parameters, those names may be used in the return list.#
+#' @param project  Optional NIMBLE model or nimbleFunction already associated with a project, which the current units for compilation should join. If not provided, a new project will be created and the current compilation units will be associated with it.#
+#' @param dirName  Optional directory name in which to generate the C++ code.  If not provided, a temporary directory will be generated using R's \code{tempdir} function.#
+#' @param projectName Optional character name for labeling the project if it is new#
+#' @param control  A list mostly for internal use. See details.#
+#' @param resetFunctions Logical value stating whether nimbleFunctions associated with an existing project should all be reset for compilation purposes.  See details.#
+#' @author Perry de Valpine#
+#' @export#
+#' @details#
+#' This is the main function for calling the NIMBLE compiler.  A set of compiler calls and output will be seen.  Compiling in NIMBLE does 4 things:#
+#' 1. It generates C++ code files for all the model and nimbleFunction components.  2. It calls the system's C++ compiler.  3. It loads the compiled object(s) into R using \code{dyn.load}. And 4. it generates R objects for using the compiled model and nimbleFunctions.#
+#'#
+#' When the units for compilation provided in \code{...} include multiple models and/or nimbleFunctions, models are compiled first, in the order in which they are provided.  Groups of nimbleFunctions that were specialized from the same nimbleFunction generator (the result of a call to \code{nimbleFunction}, which then takes setup arguments and returns a specialized nimbleFunction) are then compiled as a group, in the order of first appearance.#
+#'#
+#' The behavior of adding new compilation units to an existing project is limited.  For example, one can compile a model in one call to \code{compileNimble} and then compile a nimbleFunction that uses the model (i.e. was given the model as a setup argument) in a second call to \code{compileNimble}, with the model provided as the \code{project} argument.  Either the uncompiled or compiled model can be provided.  However, compiling a second nimbleFunction and adding it to the same project will only work in limited circumstances.  Basically, the limitations occur because it attempts to re-use already compiled pieces, but if these do not have all the necessary information for the new compilation, it gives up.  An attempt has been made to give up in a controlled manner and provide somewhat informative messages.#
+#'#
+#' When compilation is not allowed or doesn't work, try using \code{resetFunctions = TRUE}, which will force recompilation of all nimbleFunctions in the new call.  Previously compiled nimbleFunctions will be unaffected, and their R interface objects should continue to work.  The only cost is additional compilation time for the current compilation call.  If that doesn't work, try re-creating the model and/or the nimbleFunctions from their generators.  An alternative possible fix is to compile multiple units in one call, rather than sequentially in multiple calls.#
+#'#
+#' The control list can contain the following named elements, each with \code{TRUE} or \code{FALSE}: debug, which sets a debug mode for the compiler for development purposes; debugCpp, which inserts an output message before every line of C++ code for debugging purposes; compileR, which determines whether the R-only steps of compilation should be executed; writeCpp, which determines whether the C++ files should be generated; compileCpp, which determines whether the C++ should be compiled;  loadSO, which determines whether the DLL or shared object should be loaded and interfaced; and returnAsList, which determines whether calls to the compiled nimbleFunction should return only the returned value of the call (\code{returnAsList = FALSE}) or whether a list including the input arguments, possibly modified, should be returned in a list with the returned value of the call at the end (\code{returnAsList = TRUE}).  The control list is mostly for developer use, although \code{returnAsArgs} may be useful to a user.  An example of developer use is that one can have the compiler write the C++ files but not compile them, then modify them by hand, then have the C++ compiler do the subsequent steps without over-writing the files.#
+#'#
+#' See NIMBLE User Manual for examples#
+#' #
+#' @return If there is only one compilation unit (one model or nimbleFunction), an R interface object is returned.  This object can be used like the uncompiled model or nimbleFunction, but execution will call the corresponding compiled objects or functions.  If there are multiple compilation units, they will be returned as a list of interface objects, in the order provided.  If names were included in the arguments, or in a list if any elements of \code{...} are lists, those names will be used for the corresponding element of the returned list.  Otherwise an attempt will be made to generate names from the argument code.  For example \code{compileNimble(A = fun1, B = fun2, project = myModel)} will return a list with named elements A and B, while \code{compileNimble(fun1, fun2, project = myModel)} will return a list with named elements fun1 and fun2.#
+#'#
+#' #
+#' #
+compileNimble <- function(..., project, dirName = NULL, projectName = '',#
+                          control = list(),#
+                          resetFunctions = FALSE) {#
+## 1. Extract compilation items#
+    reset <- FALSE#
+    ## This pulls out ... arguments, makes names from their expressions if names weren't provided, and combines them with any ... arguments that are lists.#
 #
-  ## fill in each element of data along leaveOutIndex with NAs.  then,#
-  ## data na values will be filled in as each mcmc runs.  These#
-  ## estimated data values can be compared to known data values, and#
-  ## the average loss (0/1) can be taken over all MCMC runs.  then#
-  ## take the average of these for all data points? woo!#
-  newModel <- model$newModel()#
-  compileNimble(newModel)#
-  numBlocks <- newModel$getVarInfo(dataNames)[['maxs']][leaveOutIndex]#
-  dataDimensions <- newModel$getVarInfo(dataNames)[['maxs']]#
-  saveData <- array(values(newModel, dataNames), dim = c(dataDimensions))#
-#
-  calcCrossVal <- function(i){#
-    tempData <- saveData#
-    print(tempData)#
-    newModel$resetData()#
-    evalCode1 <- paste0("tempData[",rep(",", leaveOutIndex - 1), i,#
-                        paste0(rep(",", length(dataDimensions) -#
-                                   leaveOutIndex)),"] <- NA")#
-    eval(parse(text = evalCode1))#
-    evalCode2 <- paste0("modelDataList <- list(", dataNames, "= tempData)")#
-    eval(parse(text=evalCode2))#
-    newModel$setData(modelDataList)#
-    print(modelDataList)#
-    modelMCMCConf <- configureMCMC(newModel,#
-                                   monitors = dataNames, thin = thin)#
-    modelMCMC <- buildMCMC(modelMCMCConf)#
-    C.modelMCMC <- compileNimble(modelMCMC,#
-                                 project = newModel,#
-                                 resetFunctions = (i != 1))    #
-    C.modelMCMC$run(MCMCIter)#
-    MCMCout <- as.matrix(C.modelMCMC$mvSamples)#
-    sampNum <- dim(MCMCout)[1] #
-    crossValValue <- unlist(mclapply(ceiling(burnIn/thin):sampNum,#
-                                     crossValCalculate, MCMCout,#
-                                     dataDimensions, saveData))#
-    crossValAverage <- mean(crossValValue)#
-    return(crossValAverage)#
-  }#
-  crossVal <- mean(sapply(1:numBlocks, calcCrossVal))#
-#
-  return(crossVal)#
-}
-dyesCode <- nimbleCode({#
-  for (i in 1:BATCHES) {#
-    for (j in 1:SAMPLES) {#
-      y[i,j] ~ dnorm(mu[i], sd = sigma.within);#
+    controlDefaults = list(debug = FALSE, debugCpp = FALSE, compileR = TRUE, writeFiles = TRUE, compileCpp = TRUE, loadSO = TRUE, returnAsList = FALSE)#
+    dotsDeparses <- unlist(lapply( substitute(list(...))[-1], deparse ))#
+    origList <- list(...)#
+    if(is.null(names(origList))) names(origList) <- rep('', length(origList))#
+    boolNoName <- names(origList)==''#
+    origIsList <- unlist(lapply(origList, is.list))#
+    dotsDeparses[origIsList] <- ''#
+    names(origList)[boolNoName] <- dotsDeparses[boolNoName]#
+    units <- do.call('c', origList)#
+    unitTypes <- getNimbleTypes(units)#
+    if(length(grep('unknown', unitTypes)) > 0) stop(paste0('Some items provided for compilation do not have types that can be compiled.  The types provided were: ', paste0(unitTypes, collapse = ' '), '. Be sure only specialized nimbleFunctions are provided, not nimbleFunction generators.'), call. = FALSE)#
+    if(is.null(names(units))) names(units) <- rep('', length(units))#
+    if(length(units) == 0) stop('No objects for compilation provided')#
+    ## 2. Get project or make new project#
+    if(missing(project)) {#
+        if(reset) warning("reset = TRUE but no project was provided.  If you are trying to re-compiled something into the same project, give it as the project argument as well as a compilation item. For example, 'compileNimble(myFunction, project = myFunction, reset = TRUE)'")#
+        project <- nimbleProjectClass(dirName, name = projectName)#
+    } else {#
+        project <- getNimbleProject(project, TRUE)#
+        if(!inherits(project, 'nimbleProjectClass'))#
+            stop("Invalid project argument; note that models and nimbleFunctions need to be compiled before they can be used to specify a project. Once compiled you can use an R model or nimbleFunction to specify the project.", call. = FALSE)#
     }#
-    mu[i] ~ dnorm(theta, sd = sigma.between);#
-  }#
-  theta ~ dnorm(0.0, 1.0E-10);#
-  sigma.within ~ dunif(0, 100)#
-  sigma.between ~ dunif(0, 100)#
-})
-dyesModel <- nimbleModel(dyesCode,#
-                         constants = list(BATCHES = 6, SAMPLES = 5))#
+    if(resetFunctions) project$resetFunctions()#
 #
-data <- matrix(c(1545, 1540, 1595, 1445, 1595, 1520, 1440, 1555, 1550,#
-                 1440, 1630, 1455, 1440, 1490, 1605, 1595, 1515, 1450,#
-                 1520, 1560, 1510, 1465, 1635, 1480, 1580, 1495, 1560,#
-                 1545, 1625, 1445), nrow = 6)#
+    for(i in names(controlDefaults)) {#
+        if(!i %in% names(control)) control[[i]] <- controlDefaults[[i]]#
+    }#
+    ## Units should be either Rmodel, nimbleFunction, or RCfunction (now coming from nimbleFunction with no setup)#
+    showOutput <- getNimbleOption('showCompilerOutput')#
+    if(nimbleOptions('verbose') && !showOutput) message("compiling... this may take a minute. Use nimbleOptions(showCompilerOutput = TRUE) to see C++ compiler details.")#
+    if(nimbleOptions('verbose') && showOutput) message("compiling... this may take a minute. On some systems there may be some compiler warnings that can be safely ignored.")#
+    ## Compile models first#
+    ans <- list()#
+    rcfUnits <- unitTypes == 'rcf'#
+    if(sum(rcfUnits) > 0) {#
+        whichUnits <- which(rcfUnits)#
+        for(i in whichUnits) {#
+            ans[[i]] <- project$compileRCfun(units[[i]], control = control)#
+            if(names(units)[i] != '') names(ans)[i] <- names(units)[i]#
+        }#
+    }#
+    modelUnits <- unitTypes == 'model'#
+    if(sum(modelUnits) > 0) {#
+        whichUnits <- which(modelUnits)#
+        for(i in whichUnits) {#
+            ans[[ i ]] <- project$compileModel(units[[i]], control = control)#
+            if(names(units)[i] != '') names(ans)[i] <- names(units)[i]#
+        }#
+    }#
+    nfUnits <- unitTypes == 'nf'#
+    if(sum(nfUnits) > 0) {#
+        whichUnits <- which(nfUnits)#
+        nfAns <- project$compileNimbleFunctionMulti(units[whichUnits], control = control, reset = reset)#
+        ans[whichUnits] <- nfAns#
+        for(i in whichUnits) if(names(units)[i] != '') names(ans)[i] <- names(units)[i]#
+    }#
+    if(nimbleOptions('verbose')) message("compilation finished.")#
 #
-dyesModel$setData(list(y = data))#
-#
-output <- crossValidateOne(dyesModel, "y", 1000, 300, 2, 2)
-crossValCalculate <- function(row, MCMCOut, dataDimensions, saveData){#
-  simDataArray <- array(MCMCOut[row,], dim = c(dataDimensions))#
-  discrep <- sum((simDataArray - saveData)^2)#
-  return(discrep)#
+    if(length(ans) == 1) ans[[1]] else ans#
 }#
 #
-crossValidateOne <- function(model,#
-                             dataNames,#
-                             MCMCIter,#
-                             burnIn, thin,#
-                             leaveOutIndex,#
-                             MCMCdefs=NULL){#
-  simpSetMCMCDefs <- function(Rmodel, MCMCdefs, MCMCname) {#
-    eval(MCMCdefs[[MCMCname]])#
-  }#
-  if(!is.null(MCMCdefs)){#
-  ## eval(MCMCdefs.opt2[['nimbleOpt2']])#
-    ## customSpec <- simpSetMCMCDefs(occ.R.model, MCMCdefs.opt2, 'nimbleOpt2')#
-  }#
-#
-  ## fill in each element of data along leaveOutIndex with NAs.  then,#
-  ## data na values will be filled in as each mcmc runs.  These#
-  ## estimated data values can be compared to known data values, and#
-  ## the average loss (0/1) can be taken over all MCMC runs.  then#
-  ## take the average of these for all data points? woo!#
-  newModel <- model$newModel()#
-  compileNimble(newModel)#
-  numBlocks <- newModel$getVarInfo(dataNames)[['maxs']][leaveOutIndex]#
-  dataDimensions <- newModel$getVarInfo(dataNames)[['maxs']]#
-  saveData <- array(nimble:::values(newModel, dataNames), dim = c(dataDimensions))#
-#
-  calcCrossVal <- function(i){#
-    tempData <- saveData#
-    print(tempData)#
-    newModel$resetData()#
-    evalCode1 <- paste0("tempData[",rep(",", leaveOutIndex - 1), i,#
-                        paste0(rep(",", length(dataDimensions) -#
-                                   leaveOutIndex)),"] <- NA")#
-    eval(parse(text = evalCode1))#
-    evalCode2 <- paste0("modelDataList <- list(", dataNames, "= tempData)")#
-    eval(parse(text=evalCode2))#
-    newModel$setData(modelDataList)#
-    print(modelDataList)#
-    modelMCMCConf <- configureMCMC(newModel,#
-                                   monitors = dataNames, thin = thin)#
-    modelMCMC <- buildMCMC(modelMCMCConf)#
-    C.modelMCMC <- compileNimble(modelMCMC,#
-                                 project = newModel,#
-                                 resetFunctions = (i != 1))    #
-    C.modelMCMC$run(MCMCIter)#
-    MCMCout <- as.matrix(C.modelMCMC$mvSamples)#
-    sampNum <- dim(MCMCout)[1] #
-    crossValValue <- unlist(mclapply(ceiling(burnIn/thin):sampNum,#
-                                     crossValCalculate, MCMCout,#
-                                     dataDimensions, saveData))#
-    crossValAverage <- mean(crossValValue)#
-    return(crossValAverage)#
-  }#
-  crossVal <- mean(sapply(1:numBlocks, calcCrossVal))#
-#
-  return(crossVal)#
-}#
-dyesCode <- nimbleCode({#
-  for (i in 1:BATCHES) {#
-    for (j in 1:SAMPLES) {#
-      y[i,j] ~ dnorm(mu[i], sd = sigma.within);#
+getNimbleTypes <- function(units) {#
+    ans <- character(length(units))#
+    for(i in seq_along(units)) {#
+        if(inherits(units[[i]], 'RmodelBaseClass')) ans[i] <- 'model'#
+        else if(is.nf(units[[i]])) ans[i] <- 'nf'   ## a nimbleFunction#
+        else if(is.rcf(units[[i]])) ans[i] <- 'rcf' ## an RCfunction = a nimbleFunction with no setup#
+        else if(is.nfGenerator(units[[i]])) ans[i] <- 'unknown(nf generator)'#
+        else ans[i] <- 'unknown'#
     }#
-    mu[i] ~ dnorm(theta, sd = sigma.between);#
-  }#
-  theta ~ dnorm(0.0, 1.0E-10);#
-  sigma.within ~ dunif(0, 100)#
-  sigma.between ~ dunif(0, 100)#
-})#
-#
-dyesModel <- nimbleModel(dyesCode,#
-                         constants = list(BATCHES = 6, SAMPLES = 5))#
-#
-data <- matrix(c(1545, 1540, 1595, 1445, 1595, 1520, 1440, 1555, 1550,#
-                 1440, 1630, 1455, 1440, 1490, 1605, 1595, 1515, 1450,#
-                 1520, 1560, 1510, 1465, 1635, 1480, 1580, 1495, 1560,#
-                 1545, 1625, 1445), nrow = 6)#
-#
-dyesModel$setData(list(y = data))#
-#
-output <- crossValidateOne(dyesModel, "y", 1000, 300, 2, 2)
-dyesCodeSimp <- nimbleCode({#
-  for (i in 1:BATCHES) {#
-    for (j in 1:SAMPLES) {#
-          y[i,j] ~ dnorm(theta, sd = sigma)#
-    }#
-  }#
-  theta ~ dnorm(0.0, 1.0E-10);#
-  sigma ~ dunif(0, 100)#
-})#
-#
-dyesModelSimp <- nimbleModel(dyesCodeSimp = list(BATCHES = 6, SAMPLES = 5))#
-#
-output.simp <- crossValidateOne(dyesModel, "y", 1000, 300, 2, 2)
-dyesModelSimp <- nimbleModel(dyesCodeSimp = list(BATCHES = 6, SAMPLES = 5))
-dyesCodeSimp <- nimbleCode({#
-  for (i in 1:BATCHES) {#
-    for (j in 1:SAMPLES) {#
-          y[i,j] ~ dnorm(theta, sd = sigma)#
-    }#
-  }#
-  theta ~ dnorm(0.0, 1.0E-10);#
-  sigma ~ dunif(0, 100)#
-})
-dyesModelSimp <- nimbleModel(dyesCodeSimp = list(BATCHES = 6, SAMPLES = 5))
-dyesModelSimp <- nimbleModel(dyesCode = list(BATCHES = 6, SAMPLES = 5))
-dyesCodeSimp <- nimbleCode({#
-  for (i in 1:BATCHES) {#
-    for (j in 1:SAMPLES) {#
-          y[i,j] ~ dnorm(theta, sd = sigma)#
-    }#
-  }#
-  theta ~ dnorm(0.0, 1.0E-10);#
-  sigma ~ dunif(0, 100)#
-})#
-#
-dyesModelSimp <- nimbleModel(dyesCodeSimp, constants =list(BATCHES = 6, SAMPLES = 5))
-output.simp <- crossValidateOne(dyesModelSimp, "y", 1000, 300, 2, 2)
-data <- matrix(c(1545, 1540, 1595, 1445, 1595, 1520, 1440, 1555, 1550,#
-                 1440, 1630, 1455, 1440, 1490, 1605, 1595, 1515, 1450,#
-                 1520, 1560, 1510, 1465, 1635, 1480, 1580, 1495, 1560,#
-                 1545, 1625, 1445), nrow = 6)#
-#
-dyesModel$setData(list(y = data))
-dyesModelSimp <- nimbleModel(dyesCodeSimp, constants =list(BATCHES = 6, SAMPLES = 5))#
-dyesModelSimp$setData(list(y = data))#
-#
-output.simp <- crossValidateOne(dyesModelSimp, "y", 1000, 300, 2, 2)
-output.simp
-output
-rm(list=ls())#
-library(nimble)#
-library(parallel)#
-crossValCalculate <- function(row, MCMCOut, dataDimensions, saveData){#
-  simDataArray <- array(MCMCOut[row,], dim = c(dataDimensions))#
-  discrep <- sum((simDataArray - saveData)^2)#
-  return(discrep)#
+    ans#
 }#
 #
-crossValidateOne <- function(model,#
-                             dataNames,#
-                             MCMCIter,#
-                             burnIn, thin,#
-                             leaveOutIndex,#
-                             MCMCdefs=NULL){#
-  simpSetMCMCDefs <- function(Rmodel, MCMCdefs, MCMCname) {#
-    eval(MCMCdefs[[MCMCname]])#
-  }#
-  if(!is.null(MCMCdefs)){#
-  ## eval(MCMCdefs.opt2[['nimbleOpt2']])#
-    ## customSpec <- simpSetMCMCDefs(occ.R.model, MCMCdefs.opt2, 'nimbleOpt2')#
-  }#
-#
-  ## fill in each element of data along leaveOutIndex with NAs.  then,#
-  ## data na values will be filled in as each mcmc runs.  These#
-  ## estimated data values can be compared to known data values, and#
-  ## the average loss (0/1) can be taken over all MCMC runs.  then#
-  ## take the average of these for all data points? woo!#
-  newModel <- model$newModel()#
-  compileNimble(newModel)#
-  numBlocks <- newModel$getVarInfo(dataNames)[['maxs']][leaveOutIndex]#
-  dataDimensions <- newModel$getVarInfo(dataNames)[['maxs']]#
-  saveData <- array(nimble:::values(newModel, dataNames), dim = c(dataDimensions))#
-#
-  calcCrossVal <- function(i){#
-    tempData <- saveData#
-    print(tempData)#
-    newModel$resetData()#
-    evalCode1 <- paste0("tempData[",rep(",", leaveOutIndex - 1), i,#
-                        paste0(rep(",", length(dataDimensions) -#
-                                   leaveOutIndex)),"] <- NA")#
-    eval(parse(text = evalCode1))#
-    evalCode2 <- paste0("modelDataList <- list(", dataNames, "= tempData)")#
-    eval(parse(text=evalCode2))#
-    newModel$setData(modelDataList)#
-    print(modelDataList)#
-    modelMCMCConf <- configureMCMC(newModel,#
-                                   monitors = dataNames, thin = thin)#
-    modelMCMC <- buildMCMC(modelMCMCConf)#
-    C.modelMCMC <- compileNimble(modelMCMC,#
-                                 project = newModel,#
-                                 resetFunctions = (i != 1))    #
-    C.modelMCMC$run(MCMCIter)#
-    MCMCout <- as.matrix(C.modelMCMC$mvSamples)#
-    sampNum <- dim(MCMCout)[1] #
-    crossValValue <- unlist(mclapply(ceiling(burnIn/thin):sampNum,#
-                                     crossValCalculate, MCMCout,#
-                                     dataDimensions, saveData))#
-    crossValAverage <- log(mean(crossValValue))#
-    return(crossValAverage)#
-  }#
-  crossVal <- sum(sapply(1:numBlocks, calcCrossVal))#
-#
-  return(crossVal)#
+# return the nimble project, if any, associated with a model or nimbleFunction object.#
+getNimbleProject <- function(project, stopOnNull = FALSE) {#
+    if(inherits(project, 'nimbleProjectClass')) return(project)#
+    if(is.nf(project)) return(nfVar(project, 'nimbleProject'))#
+    if(is.rcf(project)) return(environment(project)$nfMethodRCobject$nimbleProject)#
+    ans <- try(project$nimbleProject)#
+    if(inherits(ans, 'try-error') | is.null(ans)) {#
+        if(stopOnNull) stop(paste0('cannot determine nimbleProject from provided project argument'))#
+        return(NULL)#
+    }#
+    ans#
 }#
-dyesCode <- nimbleCode({#
-  for (i in 1:BATCHES) {#
-    for (j in 1:SAMPLES) {#
-      y[i,j] ~ dnorm(mu[i], sd = sigma.within);#
-    }#
-    mu[i] ~ dnorm(theta, sd = sigma.between);#
+#
+countDllObjects <- function() {#
+    eval(call('.Call',nimbleUserNamespace$sessionSpecificDll$CountDllObjects))#
+}\
+clearCompiled()
+source('src/initialize.R')#
+## don't agument data#
+n.zeroes <- 0#
+model.input <- prepMutiSpData(survey.data,#
+                              survey.dates,#
+                              species.groups,#
+                              habitat,#
+                              n.zeros)#
+#
+## *********************************************************************#
+## multi-species site-occupancy models: vectorized with custom#
+## function to remove zs#
+## *********************************************************************#
+#
+ms.ss.occ <- nimbleCode({#
+  ## Define prior distributions for community-level model parameters#
+  cato.occ.mean ~ dunif(0,1)#
+  mu.ucato <- log(cato.occ.mean) - log(1-cato.occ.mean)#
+#
+  fcw.occ.mean ~ dunif(0,1)#
+  mu.ufcw <- log(fcw.occ.mean) - log(1-fcw.occ.mean)#
+#
+  cato.det.mean ~ dunif(0,1)#
+  mu.vcato <- log(cato.det.mean) - log(1-cato.det.mean)#
+#
+  fcw.det.mean ~ dunif(0,1)#
+  mu.vfcw <- log(fcw.det.mean) - log(1-fcw.det.mean)#
+#
+  ## random effects#
+  sigma.ucato ~ dunif(0, 100)#
+  sigma.ufcw ~ dunif(0, 100)#
+  mu.a1 ~ dnorm(0, 0.001)#
+  sigma.a1 ~ dunif(0, 100)#
+  mu.a2 ~ dnorm(0, 0.001)#
+  sigma.a2 ~ dunif(0, 100)#
+  mu.a3 ~ dnorm(0, 0.001)#
+  sigma.a3 ~ dunif(0, 100)#
+  mu.a4 ~ dnorm(0, 0.001)#
+  sigma.a4 ~ dunif(0, 100)#
+#
+  sigma.vcato ~ dunif(0, 100)#
+  sigma.vfcw ~ dunif(0, 100)#
+  mu.b1 ~ dnorm(0, 0.001)#
+  sigma.b1 ~ dunif(0, 100)#
+  mu.b2 ~ dnorm(0, 0.001)#
+  sigma.b2 ~ dunif(0, 100)#
+  for (i in 1:(num.species)) {#
+    ## Create priors for species i from the community level prior#
+    ## distributions#
+#
+    u.cato[i] ~ dnorm(mu.ucato, sd=sigma.ucato)#
+    u.fcw[i] ~ dnorm(mu.ufcw, sd=sigma.ufcw)#
+    a1[i] ~ dnorm(mu.a1, sd=sigma.a1)#
+    a2[i] ~ dnorm(mu.a2, sd=sigma.a2)#
+    a3[i] ~ dnorm(mu.a3, sd=sigma.a3)#
+    a4[i] ~ dnorm(mu.a4, sd=sigma.a4)#
+#
+    v.cato[i] ~ dnorm(mu.vcato, sd=sigma.vcato)#
+    v.fcw[i] ~ dnorm(mu.vfcw, sd=sigma.vfcw)#
+    b1[i] ~ dnorm(mu.b1, sd=sigma.b1)#
+    b2[i] ~ dnorm(mu.b2, sd=sigma.b2)#
+#
+    ## vectorize the calculation of psi.#
+    logit(psi[1:num.points,i]) <-#
+      u.cato[i]*(1-habitat.ind[1:num.points]) +#
+        u.fcw[i]*habitat.ind[1:num.points] +#
+          a1[i]*ufc.linear[1:num.points] +#
+            a2[i]*ufc.quadratic[1:num.points] +#
+              a3[i]*ba.linear[1:num.points] +#
+                a4[i]*ba.quadratic[1:num.points]#
+    ## vectorized calculation#
+    mu.psi[1:num.points,i] <- psi[1:num.points, i]#
+#
+    ## For our purpose a better way to write this way is to#
+    ## not worry that some elements of date.linear and date.quadratic#
+    ## aren't used, since the benefit of vectorizing the computation#
+    ## should be much greater than the cost of a few extra elements#
+    logit(p[1:num.points, 1:max.num.reps, i]) <-#
+      (v.cato[i]*(1-habitat.ind[1:num.points]) +#
+       v.fcw[i]*habitat.ind[1:num.points]) %*%#
+         asRow(onesRow[1, 1:max.num.reps])+#
+           b1[i]*date.linear[1:num.points,1:max.num.reps] +#
+             b2[i]*date.quadratic[1:num.points,1:max.num.reps]#
+#
+    ## user defined distribution to combine the bernoulli occupancy#
+    ## and detection events.  We can also make this is a single#
+    ## compuation for the entire matrix of locations-x-visits, for#
+    ## each species (i)#
+    X[1:num.points, 1:max.num.reps, i] ~ dBernDetectionMatrix(#
+      occProb = mu.psi[1:num.points,i],#
+      detectionProb = p[1:num.points, 1:max.num.reps,i],#
+      numReps = num.reps[1:num.points])#
   }#
-  theta ~ dnorm(0.0, 1.0E-10);#
-  sigma.within ~ dunif(0, 100)#
-  sigma.between ~ dunif(0, 100)#
+  ## Derived quantities:#
+  ## for(j in 1:num.points){#
+  ##   N.site[j]<- sum(mu.psi[j,1:(num.species)])#
+  ##   N.ground[j]<- sum(mu.psi[j,1:num.species] * ground[1:num.species])#
+  ##   N.mid[j]<- sum(mu.psi[j,1:num.species] * mid[1:num.species])#
+  ## }#
 })#
+input1 <- c(code=ms.ss.occ, model.input)
+source('../crossValidation/crossValidationFunction.R')#
 #
-dyesModel <- nimbleModel(dyesCode,#
-                         constants = list(BATCHES = 6, SAMPLES = 5))#
+output <- crossValidateOne(model=occ.R.model,#
+                           dataNames= "X",#
+                           MCMCIter= niter,#
+                           burnIn=niter*0.1,#
+                           thin=1,#
+                           leaveOutIndex=3,#
+                           MCMCdefs=NULL)
+setwd('~/Dropbox/nimble/occupancy/analysis/multiSpp-singleSea')#
 #
-data <- matrix(c(1545, 1540, 1595, 1445, 1595, 1520, 1440, 1555, 1550,#
-                 1440, 1630, 1455, 1440, 1490, 1605, 1595, 1515, 1450,#
-                 1520, 1560, 1510, 1465, 1635, 1480, 1580, 1495, 1560,#
-                 1545, 1625, 1445), nrow = 6)#
+source('src/initialize.R')#
+## don't agument data#
+n.zeroes <- 0#
+model.input <- prepMutiSpData(survey.data,#
+                              survey.dates,#
+                              species.groups,#
+                              habitat,#
+                              n.zeros)#
 #
-dyesModel$setData(list(y = data))#
+## *********************************************************************#
+## multi-species site-occupancy models: vectorized with custom#
+## function to remove zs#
+## *********************************************************************#
 #
-output <- crossValidateOne(dyesModel, "y", 1000, 300, 2, 2)
-output
-## ****************************************************#
-dyesCodeSimp <- nimbleCode({#
-  for (i in 1:BATCHES) {#
-    for (j in 1:SAMPLES) {#
-          y[i,j] ~ dnorm(theta, sd = sigma)#
-    }#
+ms.ss.occ <- nimbleCode({#
+  ## Define prior distributions for community-level model parameters#
+  cato.occ.mean ~ dunif(0,1)#
+  mu.ucato <- log(cato.occ.mean) - log(1-cato.occ.mean)#
+#
+  fcw.occ.mean ~ dunif(0,1)#
+  mu.ufcw <- log(fcw.occ.mean) - log(1-fcw.occ.mean)#
+#
+  cato.det.mean ~ dunif(0,1)#
+  mu.vcato <- log(cato.det.mean) - log(1-cato.det.mean)#
+#
+  fcw.det.mean ~ dunif(0,1)#
+  mu.vfcw <- log(fcw.det.mean) - log(1-fcw.det.mean)#
+#
+  ## random effects#
+  sigma.ucato ~ dunif(0, 100)#
+  sigma.ufcw ~ dunif(0, 100)#
+  mu.a1 ~ dnorm(0, 0.001)#
+  sigma.a1 ~ dunif(0, 100)#
+  mu.a2 ~ dnorm(0, 0.001)#
+  sigma.a2 ~ dunif(0, 100)#
+  mu.a3 ~ dnorm(0, 0.001)#
+  sigma.a3 ~ dunif(0, 100)#
+  mu.a4 ~ dnorm(0, 0.001)#
+  sigma.a4 ~ dunif(0, 100)#
+#
+  sigma.vcato ~ dunif(0, 100)#
+  sigma.vfcw ~ dunif(0, 100)#
+  mu.b1 ~ dnorm(0, 0.001)#
+  sigma.b1 ~ dunif(0, 100)#
+  mu.b2 ~ dnorm(0, 0.001)#
+  sigma.b2 ~ dunif(0, 100)#
+  for (i in 1:(num.species)) {#
+    ## Create priors for species i from the community level prior#
+    ## distributions#
+#
+    u.cato[i] ~ dnorm(mu.ucato, sd=sigma.ucato)#
+    u.fcw[i] ~ dnorm(mu.ufcw, sd=sigma.ufcw)#
+    a1[i] ~ dnorm(mu.a1, sd=sigma.a1)#
+    a2[i] ~ dnorm(mu.a2, sd=sigma.a2)#
+    a3[i] ~ dnorm(mu.a3, sd=sigma.a3)#
+    a4[i] ~ dnorm(mu.a4, sd=sigma.a4)#
+#
+    v.cato[i] ~ dnorm(mu.vcato, sd=sigma.vcato)#
+    v.fcw[i] ~ dnorm(mu.vfcw, sd=sigma.vfcw)#
+    b1[i] ~ dnorm(mu.b1, sd=sigma.b1)#
+    b2[i] ~ dnorm(mu.b2, sd=sigma.b2)#
+#
+    ## vectorize the calculation of psi.#
+    logit(psi[1:num.points,i]) <-#
+      u.cato[i]*(1-habitat.ind[1:num.points]) +#
+        u.fcw[i]*habitat.ind[1:num.points] +#
+          a1[i]*ufc.linear[1:num.points] +#
+            a2[i]*ufc.quadratic[1:num.points] +#
+              a3[i]*ba.linear[1:num.points] +#
+                a4[i]*ba.quadratic[1:num.points]#
+    ## vectorized calculation#
+    mu.psi[1:num.points,i] <- psi[1:num.points, i]#
+#
+    ## For our purpose a better way to write this way is to#
+    ## not worry that some elements of date.linear and date.quadratic#
+    ## aren't used, since the benefit of vectorizing the computation#
+    ## should be much greater than the cost of a few extra elements#
+    logit(p[1:num.points, 1:max.num.reps, i]) <-#
+      (v.cato[i]*(1-habitat.ind[1:num.points]) +#
+       v.fcw[i]*habitat.ind[1:num.points]) %*%#
+         asRow(onesRow[1, 1:max.num.reps])+#
+           b1[i]*date.linear[1:num.points,1:max.num.reps] +#
+             b2[i]*date.quadratic[1:num.points,1:max.num.reps]#
+#
+    ## user defined distribution to combine the bernoulli occupancy#
+    ## and detection events.  We can also make this is a single#
+    ## compuation for the entire matrix of locations-x-visits, for#
+    ## each species (i)#
+    X[1:num.points, 1:max.num.reps, i] ~ dBernDetectionMatrix(#
+      occProb = mu.psi[1:num.points,i],#
+      detectionProb = p[1:num.points, 1:max.num.reps,i],#
+      numReps = num.reps[1:num.points])#
   }#
-  theta ~ dnorm(0.0, 1.0E-10);#
-  sigma ~ dunif(0, 100)#
+  ## Derived quantities:#
+  ## for(j in 1:num.points){#
+  ##   N.site[j]<- sum(mu.psi[j,1:(num.species)])#
+  ##   N.ground[j]<- sum(mu.psi[j,1:num.species] * ground[1:num.species])#
+  ##   N.mid[j]<- sum(mu.psi[j,1:num.species] * mid[1:num.species])#
+  ## }#
 })#
+input1 <- c(code=ms.ss.occ, model.input)
+occ.R.model <- nimbleModel(code=ms.ss.occ,#
+                           constants=input1$constants,#
+                           data=input1$data,#
+                           inits=input1$inits,#
+                           check=FALSE)#
 #
-dyesModelSimp <- nimbleModel(dyesCodeSimp, constants =list(BATCHES = 6, SAMPLES = 5))#
-dyesModelSimp$setData(list(y = data))#
+occ.mcmc <- buildMCMC(occ.R.model)#
+occ.C.model <- compileNimble(occ.R.model)#
+occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model)#
 #
-output.simp <- crossValidateOne(dyesModelSimp, "y", 1000, 300, 2, 2)
-output.simp
-output
-dyesModel$sigma.within
-dyesModel
-dyesModel$sigma.between
-rnorm
-data <- cbind(rnorm(5, 0, 1), rnorm(5, 5, 1), rnorm(5, 4, 1),#
-              rnorm(5,10, 1),#
-              rnorm(5, 15, 1), rnorm(5, 25, 1))
-data
-dyesModel$setData(list(y = data))#
-#
-output <- crossValidateOne(dyesModel, "y", 1000, 300, 2, 2)
-data <- rbind(rnorm(5, 0, 1), rnorm(5, 5, 1), rnorm(5, 4, 1),#
-              rnorm(5,10, 1),#
-              rnorm(5, 15, 1), rnorm(5, 25, 1))
-data
-dyesModel$setData(list(y = data))#
-#
-output <- crossValidateOne(dyesModel, "y", 1000, 300, 2, 2)
-data <- cbind(rnorm(6, 0, 1), rnorm(6, 6, 1), rnorm(6, 4, 1),#
-              rnorm(6,10, 1),#
-              rnorm(6, 16, 1))
-data
-dyesModel$setData(list(y = data))#
-#
-output <- crossValidateOne(dyesModel, "y", 1000, 300, 2, 2)
-output
-## ****************************************************#
-dyesCodeSimp <- nimbleCode({#
-  for (i in 1:BATCHES) {#
-    for (j in 1:SAMPLES) {#
-          y[i,j] ~ dnorm(theta, sd = sigma)#
-    }#
-  }#
-  theta ~ dnorm(0.0, 1.0E-10);#
-  sigma ~ dunif(0, 100)#
-})#
-#
-dyesModelSimp <- nimbleModel(dyesCodeSimp,#
-                             constants =list(BATCHES = 6, SAMPLES = 5))#
-dyesModelSimp$setData(list(y = data))#
-#
-output.simp <- crossValidateOne(dyesModelSimp, "y", 1000, 300, 2, 2)
-output.simp
-output
-data <- cbind(rnorm(6, 0, 1), rnorm(6, 6, 1), rnorm(6, 4, 1),#
-              rnorm(6, 7, 1),#
-              rnorm(6, 5, 1))#
-#
-dyesModel$setData(list(y = data))#
-#
-output <- crossValidateOne(dyesModel, "y", 1000, 300, 2, 2)
+niter <- 1000#
+occ.C.mcmc$run(niter)

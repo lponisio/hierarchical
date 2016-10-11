@@ -1,10 +1,11 @@
 library(parallel)
+library(coda)
 ## draws a random number from the posterior, reassigned it as the
 ## paramter value, simulates data from the model
 
 virtualDiscFunction <- nimbleFunctionVirtual(run = function()
-  returnType(double(0))
-)
+                                             returnType(double(0))
+                                             )
 
 likeDiscFuncGenerator <- nimbleFunction(
   setup = function(model, ...){},
@@ -14,7 +15,7 @@ likeDiscFuncGenerator <- nimbleFunction(
     return(output)
   },
   contains = virtualDiscFunction
-)
+  )
 
 maxDiscFuncGenerator <- nimbleFunction(
   setup = function(model, ...){
@@ -27,7 +28,7 @@ maxDiscFuncGenerator <- nimbleFunction(
     return(output)
   },
   contains = virtualDiscFunction
-)
+  )
 
 
 pppFunc <- nimbleFunction(
@@ -83,12 +84,17 @@ calcCPPP <- function(MCMCIter,
                      C.pppFunc,
                      cppp.C.mcmc,
                      firstRun){
-  if(firstRun  == 0)
+  if(firstRun  == 0){
     cppp.C.mcmc$run(MCMCIter)
+    samples <- mcmc(as.matrix(cppp.C.mcmc$mvSamples))
+  } else{
+    samples <- NA
+  }
   
   pre.pp <- C.pppFunc$run(NSamp)
   if(!is.finite(pre.pp))    pre.pp <- NA
-  return(pre.pp)    
+  return(list(pre.pp = pre.pp,
+              samples = samples))    
 }
 
 
@@ -104,7 +110,8 @@ generateCPPP <-  function(R.model,
                           burnInProportion, ## proportion of mcmc to drop
                           thin,## thinning used in original mcmc run
                           discFuncGenerator, 
-                          averageParams, 
+                          averageParams,
+                          returnChains = TRUE,
                           ...){
   burnIn <- ceiling(burnInProportion*(MCMCIter/thin))
   origData <- nimble:::values(orig.C.model, dataNames)
@@ -132,7 +139,6 @@ generateCPPP <-  function(R.model,
                        C.pppFunc,
                        orig.C.mcmc,
                        firstRun = 1)
-  print(obs.cppp)
 
   ## refits model with sampled data, reruns, enter inner loop,
   ## calculates distbution of PPPs
@@ -146,15 +152,27 @@ generateCPPP <-  function(R.model,
                     firstRun = 0)
     return(out)
   }
-  sim.cppp <- unlist(lapply(1:NPDist, simPppDist))
+
+  sim.cppp <- mclapply(1:NPDist, simPppDist)
+  sim.ppp <- sapply(sim.cppp, function(x) x$pre.pp)
+  sim.samples <- lapply(sim.cppp, function(x) x$samples)
 
   ## calculates the number of simulated ppp that fall below the obs
-  out.cppp <- mean(obs.cppp <= sim.cppp, na.rm = TRUE)  
+  out.cppp <- mean(obs.cppp <= sim.ppp,
+                   na.rm = TRUE)
+  chain.diag <- do.call(rbind, lapply(
+    lapply(sim.samples, geweke.diag), function(x) x$z))
   
   nimble:::values(orig.C.model, dataNames) <- origData 
-  
-  return(list(cppp=out.cppp,
-              obs=obs.cppp,
-              sim=sim.cppp))
+
+  out <- list(cppp=out.cppp,
+              obs.ppp=obs.cppp,
+              sim.cpp.dist=sim.ppp,
+              chain.diagnostics= chain.diag,
+              samples=sim.samples)
+  if(!returnChains){
+    out$samples <- NULL
+  }
+  return(out)
 }
 

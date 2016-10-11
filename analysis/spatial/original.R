@@ -18,12 +18,16 @@ mexp <- nimbleFunction(
 
 sp.mod <- nimbleCode({
   ## priors
-  delta ~ dunif(0.5, 1.5)
+  delta ~ dunif(0.01, 10)
   sigma ~ dunif(0, 10)
   p ~ dunif(0, 1)
   alpha ~ dnorm(0, 0.001)
   b1 ~ dnorm(0, 0.001)
 
+  rho[1:nsite] ~ dmnorm(zeros[1:nsite],
+                        D.tau[1:nsite, 1:nsite])
+
+  
   ## Likelihood
   ## Ecological model for true occurrence
   for (i in 1:nsite) {
@@ -38,22 +42,19 @@ sp.mod <- nimbleCode({
     }
   }
 
-  rho[1:nsite] ~ dmnorm(zeros[1:nsite],
-                        D.tau[1:nsite, 1:nsite])
-
   ## create covariance matrix based on distances (must be 1/cov for
   ## JAGS)
 
-  ## mexp is jags's version fo matrix exponentiation, veyr sensitive 
+  ## mexp is jags's version fo matrix exponentiation, very sensitive 
   ## temp.cov[1:nsite, 1:nsite] <- -delta*D[1:nsite, 1:nsite]
-  ## D.cov[1:nsite, 1:nsite]  <- (sigma^2)*mexp(-delta*D[1:nsite, 1:nsite])
+  D.cov[1:nsite, 1:nsite]  <- (sigma^2)*mexp(-delta*D[1:nsite, 1:nsite])
 
-  for(i in 1:nsite){
-    for(j in 1:nsite){
-      temp.cov[i, j] <- -delta*D[i, j]
-      D.cov[i, j]  <- (sigma^2)* exp(temp.cov[i, j])
-    }
-  }
+  ## for(i in 1:nsite){
+  ##   for(j in 1:nsite){
+  ##     temp.cov[i, j] <- -delta*D[i, j]
+  ##     D.cov[i, j]  <- (sigma^2)* exp(temp.cov[i, j])
+  ##   }
+  ## }
   
   D.tau[1:nsite, 1:nsite] <- inverse(D.cov[1:nsite, 1:nsite])
   
