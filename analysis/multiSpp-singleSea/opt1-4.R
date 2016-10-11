@@ -288,7 +288,7 @@ occ.R.model <- nimbleModel(code=ms.ss.occ,
                            inits=input1$inits,
                            check=FALSE)
 
-options(mc.cores=6)
+options(mc.cores=1)
 
 source('../crossValidation/crossValidationFunction.R')
 

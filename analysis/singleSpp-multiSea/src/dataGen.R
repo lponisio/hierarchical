@@ -22,7 +22,7 @@ expit <- function(x) {
 ## range.psi and range.gamma - same for survival and colonization probability
 
 genDynamicOccData <- function(R = 250,
-                              J = 3, K = 10,
+                              J = 10, K = 10,
                               psi1 = 0.4,
                               range.p = c(0.2, 0.4),
                               range.phi = c(0.6, 0.8),

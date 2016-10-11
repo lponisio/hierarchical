@@ -2,6 +2,7 @@ rm(list=ls())
 
 setwd("~/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea")
 source('src/initialize.R')
+set.seed(444)
 data <- genDynamicOccData()
 model.input <- prepModDataOcc(data, include.zs=FALSE)
 
@@ -94,28 +95,28 @@ occ.R.model <- nimbleModel(code=ss.ms.occ,
                            data=input1$data,
                            inits=input1$inits,
                            check=FALSE)
-## ad auto blocking
+
 occ.mcmc <- buildMCMC(occ.R.model)
 occ.C.model <- compileNimble(occ.R.model)
 occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model)
-occ.C.mcmc$run(10000)
+occ.C.mcmc$run(niter)
 
 source('../cppp/src/calcCPPP.R', chdir = TRUE)
-options(mc.cores=6)
+options(mc.cores=1)
 
-test.opt2 <- generateCPPP(occ.R.model,
+test.opt4 <- generateCPPP(occ.R.model,
                           occ.C.model,
                           occ.C.mcmc,
                           occ.mcmc,
                           dataName = 'y',
                           paramNames = input1$monitors, 
-                          MCMCIter = 10000, 
-                          NSamp = 1000,
-                          NPDist = 100,
+                          MCMCIter = niter, 
+                          NSamp = 10^3,
+                          NPDist = 10^3,
                           burnInProportion = 0.10,
                           thin = 1,
                           averageParams = TRUE,
                           discFuncGenerator=likeDiscFuncGenerator)
 
-save(test.opt2, file=file.path(save.dir, "ssms_noz_CPPP.Rdata"))
+save(test.opt4, file=file.path(save.dir, "ssms_noz_CPPP.Rdata"))
 

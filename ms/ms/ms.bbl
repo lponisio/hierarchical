@@ -1,4 +1,4 @@
-\begin{thebibliography}{17}
+\begin{thebibliography}{21}
 \providecommand{\natexlab}[1]{#1}
 
 \bibitem[{ope()}]{openbugs}
@@ -19,6 +19,12 @@ Bayarri, M. \& Berger, J. (2000) P values for composite null models.
 Celeux, G., Forbes, F., Robert, C.P., Titterington, D.M. \emph{et~al.} (2006)
   Deviance information criteria for missing data models.
 \newblock \emph{Bayesian Analysis}, \textbf{1}, 651--673.
+
+\bibitem[{Haario \emph{et~al.}(1998)Haario, Saksman \&
+  Tamminen}]{haario98anadaptive}
+Haario, H., Saksman, E. \& Tamminen, J. (1998) An adaptive metropolis
+  algorithm.
+\newblock \emph{Bernoulli}, \textbf{7}, 223--242.
 
 \bibitem[{Hines \emph{et~al.}(2010)Hines, Nichols, Royle, MacKenzie,
   Gopalaswamy, Kumar \& Karanth}]{hines2010tigers}
@@ -43,6 +49,11 @@ Iknayan, K.J., Tingley, M.W., Furnas, B.J. \& Beissinger, S.R. (2014) Detecting
   diversity: emerging methods to estimate species diversity.
 \newblock \emph{Trends in ecology \& evolution}, \textbf{29}, 97--106.
 
+\bibitem[{Kery \& Schaub(2011)}]{kery-schaub-11}
+Kery, M. \& Schaub, M. (2011) \emph{{B}ayesian Population Analysis using
+  {WinBUGS}: A hierarchical perspective}.
+\newblock Academic Press, Boston, 1 edition edition.
+
 \bibitem[{MacKenzie \emph{et~al.}(2006)MacKenzie, Nichols, Royle, Pollock,
   Bailey \& Hines}]{mackenzie-2006}
 MacKenzie, D., Nichols, J., Royle, J., Pollock, K., Bailey, L. \& Hines, J.
@@ -50,12 +61,22 @@ MacKenzie, D., Nichols, J., Royle, J., Pollock, K., Bailey, L. \& Hines, J.
   dynamics of species occurrence}.
 \newblock Elsevier, Burlington, Massachusetts, USA.
 
+\bibitem[{Metropolis \emph{et~al.}(1953)Metropolis, Rosenbluth, Rosenbluth,
+  Teller \& Teller}]{metropolis1953equation}
+Metropolis, N., Rosenbluth, A.W., Rosenbluth, M.N., Teller, A.H. \& Teller, E.
+  (1953) Equation of state calculations by fast computing machines.
+\newblock \emph{The journal of chemical physics}, \textbf{21}, 1087--1092.
+
 \bibitem[{M'Gonigle \emph{et~al.}(2015)M'Gonigle, Ponisio, Cutler \&
   Kremen}]{mgonigle-2015-x}
 M'Gonigle, L., Ponisio, L., Cutler, K. \& Kremen, C. (2015) Habitat restoration
   promotes pollinator persistence and colonization in intensively-managed
   agriculture.
 \newblock \emph{Ecol Appl}, \textbf{25}, 1557--1565.
+
+\bibitem[{Neal(2003)}]{neal-03}
+Neal, R.M. (2003) Slice sampling.
+\newblock \emph{Annals of Statistics}, pp. 705--741.
 
 \bibitem[{Pacifici \emph{et~al.}(2014)Pacifici, Zipkin, Collazo, Irizarry \&
   DeWan}]{pacifici2014guidelines}

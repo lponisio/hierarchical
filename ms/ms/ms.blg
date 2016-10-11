@@ -7,45 +7,45 @@ Warning--to sort, need author or key in winbugs
 Warning--to sort, need author or key in openbugs
 Warning--empty year in openbugs; set to ????
 Warning--empty year in winbugs; set to ????
-You've used 17 entries,
+You've used 21 entries,
             2811 wiz_defined-function locations,
-            680 strings with 7295 characters,
-and the built_in function-call counts, 13665 in all, are:
-= -- 1227
-> -- 462
-< -- 7
-+ -- 186
-- -- 162
-* -- 1206
-:= -- 1994
-add.period$ -- 34
-call.type$ -- 17
-change.case$ -- 136
-chr.to.int$ -- 16
-cite$ -- 25
-duplicate$ -- 1056
-empty$ -- 1112
-format.name$ -- 216
-if$ -- 2753
+            708 strings with 7892 characters,
+and the built_in function-call counts, 16635 in all, are:
+= -- 1492
+> -- 558
+< -- 10
++ -- 225
+- -- 195
+* -- 1453
+:= -- 2434
+add.period$ -- 42
+call.type$ -- 21
+change.case$ -- 167
+chr.to.int$ -- 20
+cite$ -- 29
+duplicate$ -- 1288
+empty$ -- 1355
+format.name$ -- 261
+if$ -- 3355
 int.to.chr$ -- 2
 int.to.str$ -- 1
-missing$ -- 146
-newline$ -- 72
-num.names$ -- 60
-pop$ -- 296
+missing$ -- 181
+newline$ -- 88
+num.names$ -- 76
+pop$ -- 363
 preamble$ -- 1
-purify$ -- 120
+purify$ -- 147
 quote$ -- 0
-skip$ -- 239
+skip$ -- 301
 stack$ -- 0
-substring$ -- 1282
-swap$ -- 395
-text.length$ -- 2
+substring$ -- 1536
+swap$ -- 488
+text.length$ -- 3
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 150
+type$ -- 183
 warning$ -- 4
-while$ -- 85
+while$ -- 107
 width$ -- 0
-write$ -- 201
+write$ -- 249
 (There were 4 warnings)

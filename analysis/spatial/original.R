@@ -7,7 +7,7 @@ load.module("msm")
 set.seed(444)
 dats <- genSpatialOccData()
 model.input <- prepModData(dats$data, dats$y, dats$distance,
-                           nsite=50)
+                           nsite=100)
 
 mexp <- nimbleFunction(
   run = function(A = double(2)){
@@ -46,15 +46,14 @@ sp.mod <- nimbleCode({
   ## JAGS)
 
   ## mexp is jags's version fo matrix exponentiation, very sensitive 
-  ## temp.cov[1:nsite, 1:nsite] <- -delta*D[1:nsite, 1:nsite]
-  D.cov[1:nsite, 1:nsite]  <- (sigma^2)*mexp(-delta*D[1:nsite, 1:nsite])
+  ## D.cov[1:nsite, 1:nsite]  <- (sigma^2)*mexp(-delta*D[1:nsite, 1:nsite])
 
-  ## for(i in 1:nsite){
-  ##   for(j in 1:nsite){
-  ##     temp.cov[i, j] <- -delta*D[i, j]
-  ##     D.cov[i, j]  <- (sigma^2)* exp(temp.cov[i, j])
-  ##   }
-  ## }
+  for(i in 1:nsite){
+    for(j in 1:nsite){
+      temp.cov[i, j] <- -delta*D[i, j]
+      D.cov[i, j]  <- (sigma^2)*exp(temp.cov[i, j])
+    }
+  }
   
   D.tau[1:nsite, 1:nsite] <- inverse(D.cov[1:nsite, 1:nsite])
   

@@ -27,7 +27,6 @@ crossValidateOne <- function(model,
   ## the average loss (0/1) can be taken over all MCMC runs.  then
   ## take the average of these for all data points? woo!
   newModel <- model$newModel()
-  compileNimble(newModel)
   numBlocks <- newModel$getVarInfo(dataNames)[['maxs']][leaveOutIndex]
   dataDimensions <- newModel$getVarInfo(dataNames)[['maxs']]
   saveData <- array(nimble:::values(newModel, dataNames),

@@ -10,10 +10,10 @@ rmvn <- function(n, mu = 0, V = matrix(1)) {
 
 
 genSpatialOccData <- function(ngrid = 50,
-                              nreps = 10,
+                              nreps = 50,
                               alpha = 1,
-                              beta1 = 2,
-                              p = 0.6,
+                              beta1 = 6,
+                              p = 0.8,
                               sigma = 0.5,
                               delta = 0.5){
 
@@ -36,7 +36,7 @@ genSpatialOccData <- function(ngrid = 50,
 
   ## calculate probabilities of occurrence
   psi <- expit(alpha + beta1 * raster::values(elev) +
-               raster::values(Xraster))
+               raster::values(Xraster))  
 
   ## Latent occurrence state
   z <- rbinom(n = n, size = 1, prob = psi) 

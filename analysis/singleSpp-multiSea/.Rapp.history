@@ -1,17 +1,13 @@
 rm(list=ls())#
 setwd("~/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea")#
+#
 source('src/initialize.R')#
-#
+set.seed(444)#
 data <- genDynamicOccData()#
-model.input <- prepModDataOcc(data)#
-## *********************************************************************#
-##  original multi-season occupancy : JAGS & NIMBLE#
-## *********************************************************************#
-#
+model.input <- prepModDataOcc(data)
 ss.ms.occ <- nimbleCode({#
   ## Specify priors#
   psi1 ~ dunif(0, 1)#
-#
   for(k in 1:(nyear-1)){#
     phi[k] ~ dunif(0, 1)#
     gamma[k] ~ dunif(0, 1)#
@@ -38,28 +34,77 @@ ss.ms.occ <- nimbleCode({#
     }#
   }#
 #
-  ## Derived parameters: Sample and population occupancy, growth rate#
-  ## and turnover#
-  ## psi[1] <- psi1#
-  ## n.occ[1]<-sum(z[1:nsite,1])#
-  ## for (k in 2:nyear){#
-  ##   psi[k] <- psi[k-1]*phi[k-1] + (1-psi[k-1])*gamma[k-1]#
-  ##   n.occ[k] <- sum(z[1:nsite,k])#
-  ##   growthr[k-1] <- psi[k]/psi[k-1]#
-  ##   turnover[k-1] <- (1 - psi[k-1]) * gamma[k-1]/psi[k]#
-  ## }#
 })#
 #
+input1 <- c(code=ss.ms.occ,#
+            model.input)
+rm(list=ls())#
+#
+setwd("~/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea")#
+source('src/initialize.R')#
+set.seed(444)#
+data <- genDynamicOccData()#
+model.input <- prepModDataOcc(data, include.zs=FALSE)#
+#
 ## *********************************************************************#
-## orginal model in nimble#
+##  Multi-season occupancy model: option 4-5 remove latent states using#
+##  user-defined NIMBLE function#
+##  *********************************************************************#
+#
+## Specify model in NIMBLE#
+ss.ms.occ <- nimbleCode({#
+  ##  priors#
+  psi1 ~ dunif(0, 1)#
+#
+  psi[1] <- psi1#
+  for(k in 1:(nyear-1)){#
+    phi[k] ~ dunif(0, 1)#
+    gamma[k] ~ dunif(0, 1)#
+    p[k] ~ dunif(0, 1)#
+  }#
+  p[nyear] ~ dunif(0, 1)#
+#
+  ## Ecological submodel: Define state conditional on parameters#
+  for(i in 1:nsite) {#
+    ## removes the z's and muZ's from the model and compute#
+    ## the probability of all reps over all years for one site.#
+    y[i, 1:nrep, 1:nyear] ~ dDynamicOccupancy(nrep,#
+                                              psi1,#
+                                              phi[1:(nyear-1)],#
+                                              gamma[1:(nyear-1)],#
+                                              p[1:nyear])#
+  }#
+})#
 #
 input1 <- c(code=ss.ms.occ,#
-            model.input)#
-ss.ms.orig <- compareMCMCs(input1,#
-                           MCMCs=c('jags','nimble'),#
-                           niter=niter,#
-                           burnin = burnin,#
-                           summary=FALSE,#
+            model.input)
+## *********************************************************************#
+occ.R.model <- nimbleModel(code=ss.ms.occ,#
+                           constants=input1$constants,#
+                           data=input1$data,#
+                           inits=input1$inits,#
                            check=FALSE)#
 #
-save(ss.ms.orig, file=file.path(save.dir, "orig.Rdata"))
+occ.mcmc <- buildMCMC(occ.R.model)#
+occ.C.model <- compileNimble(occ.R.model)#
+occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model)#
+occ.C.mcmc$run(niter)#
+#
+source('../cppp/src/calcCPPP.R', chdir = TRUE)#
+options(mc.cores=1)#
+#
+test.opt4 <- generateCPPP(occ.R.model,#
+                          occ.C.model,#
+                          occ.C.mcmc,#
+                          occ.mcmc,#
+                          dataName = 'y',#
+                          paramNames = input1$monitors, #
+                          MCMCIter = niter, #
+                          NSamp = 10^3,#
+                          NPDist = 10^3,#
+                          burnInProportion = 0.10,#
+                          thin = 1,#
+                          averageParams = TRUE,#
+                          discFuncGenerator=likeDiscFuncGenerator)#
+#
+save(test.opt4, file=file.path(save.dir, "ssms_noz_CPPP.Rdata"))
