@@ -53,7 +53,7 @@ ms.ss.occ.all <- combine_MCMC_comparison_results(ms.ss.orig[[1]],
                                                  ms.ss.opt2[[1]],
                                                  ## ms.ss.opt3[[1]],
                                                  ## ms.ss.opt4[[1]],
-                                                 name = "ms.ss" )
+                                                 name = "ms.ss"))
 
 make_MCMC_comparison_pages(ms.ss.occ.all,
                            dir=file.path(save.dir, "../figures/comparisons"))
@@ -74,6 +74,8 @@ checkChains(ms.ss.occ.all[[1]]$samples,
 by.param <- apply(ms.ss.occ.all[[1]]$samples, c(1,2), effectiveSize)
 by.config <- ms.ss.occ.all[[1]]$efficiency
 
+
+source('../all/plotting.R')
 plotEffSize(by.config, by.param, f.path= file.path(save.dir,
-              "../figures/comparisons/%s.pdf"), "MultiSpp-SingleSea",
-            at=0.4, adj=0.03)
+              "../figures/comparisons/%s%s.pdf"), "MultiSpp-SingleSea",
+            at=0.4, adj1=0.03, adj2=0.1)

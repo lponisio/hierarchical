@@ -37,18 +37,18 @@ checkChains <- function(all.mods.samps, f.path){
 
 
 plotEffSize <- function(eff.size, eff.param,
-                        f.path, name, at, adj=0.5){
+                        f.path, name, at, adj1, adj2){
+  cols <- brewer.pal(length(eff.size$mean)+1, "Greys")[-1]
   f <- function(){
-    layout(matrix(1:4, ncol=2))
+    layout(matrix(1:2, ncol=1))
     par(oma=c(5, 7.5, 0.5, 1),
         mar=c(0.5, 0, 3, 1), cex.axis=1.5)
-    cols <- brewer.pal(length(eff.size$mean), "Greys")
     ## barplots
     mp1 <- barplot(eff.size$mean, names="", las=1, col=cols)
     mtext("Mean", 3, line=0.5, cex=1.5)
 
     mp2 <- barplot(eff.size$min, names="", las=1, col=cols)
-    text(mp2, par('usr')[3] - adj,
+    text(mp2, par('usr')[3] - adj1,
          srt = 45, adj = 1,
          labels = names(eff.size$mean),
          xpd = NA,
@@ -57,16 +57,40 @@ plotEffSize <- function(eff.size, eff.param,
     mtext("Minimum", 3, line=0.5, cex=1.5)
     mtext("Effective sample size \n per second",
           2, line=4.5, cex=1.5, at=at)
-    ## for each parm
-    plot(NA, ylim=range(eff.param), xlim=c(1, ncol(eff.param)))
-    for(i in 1:nrow(eff.param)){
-      points(x=1:ncol(eff.param), y=eff.param[i,], col=cols[i],
-             pch=16,
-             xaxt="n")
-    }
+  }
+
+  f2 <- function(){
+    layout(matrix(1:2, ncol=1), heights=c(1,3))
+
+    par(oma=c(5, 6, 0.5, 1),
+        mar=c(0.5, 0, 0.5, 1), cex.axis=1.5)
+
+    plot(NA, ylim=c(0,1), xlim=c(0,1), yaxt= "n", xaxt="n", bty="n")
+    legend("top", legend=rownames(eff.param),
+           pch=16, col=cols, bty="n", ncol=3)
     
+    plot(NA, ylim=log(range(eff.param)), xlim=c(1, ncol(eff.param)),
+         xlab="", ylab="", xaxt="n")
+    for(i in 1:nrow(eff.param)){
+      points(x=1:ncol(eff.param), y=log(eff.param[i,]),
+             col=cols[i],
+             pch=16,
+             xaxt="n",
+             type="o")
+    }
+    text(x=1:ncol(eff.param), par('usr')[3],
+         srt = 45, adj = 1 + adj2,
+         labels = colnames(eff.param),
+         xpd = NA,
+         cex=1)
+    mtext("Effective sample size \n per second (log)",
+          2, line=3.2, cex=1.5)
   }
   pdf.f(f,
-        file= file.path(sprintf(f.path, name)),
+        file= file.path(sprintf(f.path, name, "Bar")),
         height=6, width=4.5)
+  pdf.f(f2,
+        file= file.path(sprintf(f.path, name, "Points")),
+        height=4, width=6)
 }
+
