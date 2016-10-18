@@ -53,7 +53,7 @@ ms.ss.occ.all <- combine_MCMC_comparison_results(ms.ss.orig[[1]],
                                                  ms.ss.opt2[[1]],
                                                  ## ms.ss.opt3[[1]],
                                                  ## ms.ss.opt4[[1]],
-                                                 name = "ms.ss"))
+                                                 name = "ms.ss")
 
 make_MCMC_comparison_pages(ms.ss.occ.all,
                            dir=file.path(save.dir, "../figures/comparisons"))
@@ -61,17 +61,18 @@ make_MCMC_comparison_pages(ms.ss.occ.all,
 
 ## look at samples
 
-checkChains(ms.ss.occ.all[[1]]$samples,
-            f.path = file.path(save.dir,
-            "../figures/chains/%s.pdf")
-)
+## checkChains(ms.ss.occ.all[[1]]$samples,
+##             f.path = file.path(save.dir,
+##             "../figures/chains/%s.pdf")
+## )
 
 
 ## ****************************************
 ## custom figs
 ## ****************************************
 
-by.param <- apply(ms.ss.occ.all[[1]]$samples, c(1,2), effectiveSize)
+by.param <- apply(ms.ss.occ.all[[1]]$samples, c(1,2), effectiveSize)/
+  ms.ss.occ.all[[1]]$timing 
 by.config <- ms.ss.occ.all[[1]]$efficiency
 
 

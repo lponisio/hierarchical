@@ -51,18 +51,22 @@ make_MCMC_comparison_pages(ss.ms.occ.all,
                            dir=file.path(save.dir, "../figures/comparisons"))
 
 
-checkChains(ss.ms.occ.all[[1]]$samples,
-            f.path = file.path(save.dir,
-              "../figures/chains/%s.pdf")
-            )
+## checkChains(ss.ms.occ.all[[1]]$samples,
+##             f.path = file.path(save.dir,
+##               "../figures/chains/%s.pdf")
+##             )
+
 
 ## ****************************************
 ## custom figs
 ## ****************************************
 
-by.param <- apply(ss.ms.occ.all[[1]]$samples, c(1,2), effectiveSize)
+by.param <- apply(ss.ms.occ.all[[1]]$samples, c(1,2), effectiveSize)/
+  ss.ms.occ.all[[1]]$timing
 by.config <- ss.ms.occ.all[[1]]$efficiency
 
-plotEffSize(by.param, by.config, f.path= file.path(save.dir,
-              "../figures/comparisons/%s.pdf"), name="singleSpp-MultiSea",
-            at=9)
+
+source('../all/plotting.R')
+plotEffSize(by.config, by.param, f.path= file.path(save.dir,
+              "../figures/comparisons/%s%s.pdf"), "SingleSpp-MultiSea",
+            at=9, adj1=0.3, adj2=0.3, widths=c(4.5, 8.5))

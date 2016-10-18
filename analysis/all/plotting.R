@@ -37,8 +37,10 @@ checkChains <- function(all.mods.samps, f.path){
 
 
 plotEffSize <- function(eff.size, eff.param,
-                        f.path, name, at, adj1, adj2){
+                        f.path, name, at, adj1, adj2,
+                        widths=c(4.5, 6)){
   cols <- brewer.pal(length(eff.size$mean)+1, "Greys")[-1]
+  names(cols) <- names(eff.size$mean)
   f <- function(){
     layout(matrix(1:2, ncol=1))
     par(oma=c(5, 7.5, 0.5, 1),
@@ -82,15 +84,15 @@ plotEffSize <- function(eff.size, eff.param,
          srt = 45, adj = 1 + adj2,
          labels = colnames(eff.param),
          xpd = NA,
-         cex=1)
+         cex=0.8)
     mtext("Effective sample size \n per second (log)",
           2, line=3.2, cex=1.5)
   }
   pdf.f(f,
         file= file.path(sprintf(f.path, name, "Bar")),
-        height=6, width=4.5)
+        height=6, width=widths[1])
   pdf.f(f2,
         file= file.path(sprintf(f.path, name, "Points")),
-        height=4, width=6)
+        height=4, width=widths[2])
 }
 
