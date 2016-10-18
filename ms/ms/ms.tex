@@ -296,28 +296,27 @@ $\mathrm{Unif}(0,1)$ priors for all parameters.
 
 Next, to improve efficiency, using NIMBLE we filter over latent states
 to calculate model likelihoods in order to limit MCMC sampling to
-top-level parameters (``filter''). We then use two additional
-computational approaches to improve the efficiency of this model 1)
-dynamic blocking of the parameters \citep[``filter + blocking'',
+top-level parameters (``filter''). \flagged{Do we want to write out
+  the likelihood?)} We then use two additional computational
+approaches to improve the efficiency of this model 1) dynamic blocking
+of the parameters \citep[``filter + autoblocking'',
 ][]{turek2016efficient}, and 2) a custom MCMC specification where
 slice samplers \citep{neal-03} are used for all parameters (``filter +
-slice''). \flagged{other options we want to present?}
-
-Slice samplers are a class of methods that sample from a target
-distribution by using that fact that samples from any distribution can
-be obtained by sampling uniformly from the area under that
-distribution's probability density function curve.  The horizontal
-coordinates of these uniform samples will provide samples from the
-distribution of interest. Slice samplers have been shown to perform
-well in situations where choosing a tuning parameter for a Metropolis
-algorithm is difficult. When used to sample from the posterior
-distribution of a univariate parameter, a slice sampler proceeds at
-each iteration by first choosing a vertical coordinate sampled
-uniformly between 0 and the height of the density curve at the
+slice''). Slice samplers are a class of methods that sample from a
+target distribution by using that fact that samples from any
+distribution can be obtained by sampling uniformly from the area under
+that distribution's probability density function curve.  The
+horizontal coordinates of these uniform samples will provide samples
+from the distribution of interest. Slice samplers have been shown to
+perform well in situations where choosing a tuning parameter for a
+Metropolis algorithm is difficult. When used to sample from the
+posterior distribution of a univariate parameter, a slice sampler
+proceeds at each iteration by first choosing a vertical coordinate
+sampled uniformly between 0 and the height of the density curve at the
 parameter value from the previous iteration.  Then, a horizontal
 coordinate is chosen uniformly from the set of all possible parameter
 values whose density is at least as great as the chosen vertical
-coordinate.
+coordinate.  \flagged{other options we want to present?}
 
 \subsubsection*{Multi species, single season occupancy model}
 \label{sec:msss}
@@ -367,31 +366,36 @@ since sunrise.
   \end{split}
 \end{equation}
 
-
+We first fit the using the default settings for JAGS and NIMBLE where
+all model parameters and latent states undergo MCMC sampling
+(``NIMBLE-latent'' and ``JAGS-latent'', respectively). We use
+uninformative priors $\mathrm{Norm}(0,1000)$ for the means of the
+distributions of the hyperparameters and $\mathrm{Unif}(0,100)$ the
+variances.
 
 To improve the efficiency of this model, we first filtered over latent
 states to calculate model likelihoods in order to limit MCMC sampling
-to top-level parameters. We also vectorized all calculations that
-would have require for loops in BUGS or JAGS. We then tried two
-approaches to speed sampling of the top-level parameters 1) dynamic
-blocking of the parameters \citep{turek2016efficient}, and 2) a custom
-blocking scheme where the parameters of each species are blocked
-together with adaptive random walk MCMC.
-
-Random walk Metropolis algorithms \citep{metropolis1953equation}
-sample from the posterior distribution of a parameter of interest by
-first proposing a new parameter value from a normal proposal
-distribution centered at the current value, and then deciding whether
-to accept or reject the proposed value via the Metropolis ratio.
-Although common, standard univariate or multivariate normal proposal
-distributions can prove to be inefficient at sampling for models in
-which parameters are highly correlated.  Adaptive random walk
-Metropolis sampling \citep{haario98anadaptive} allows the correlation
-structure of the posterior distribution of blocks of parameters to be
-used to produce better proposals.  For an occupancy model where
-parameters are highly correlated within species, this can provide much
-more efficient sampling than a non-adaptive Metropolis algorithm.
-
+to top-level parameters (``Filter''). We also vectorized all
+calculations that would have require for loops in JAGS. \flagged{Do we
+  want to write out the likelihood?)} We then applied two approaches
+to speed sampling of the top-level parameters 1) dynamic blocking of
+the parameters \citep[``Filter + autoblocking'',
+][]{turek2016efficient}, and 2) a custom blocking scheme where the
+parameters of each species are blocked together with adaptive random
+walk MCMC (``Filter + species blocking''). Random walk Metropolis
+algorithms \citep{metropolis1953equation} sample from the posterior
+distribution of a parameter of interest by first proposing a new
+parameter value from a normal proposal distribution centered at the
+current value, and then deciding whether to accept or reject the
+proposed value via the Metropolis ratio.  Although common, standard
+univariate or multivariate normal proposal distributions can prove to
+be inefficient at sampling for models in which parameters are highly
+correlated.  Adaptive random walk Metropolis sampling
+\citep{haario98anadaptive} allows the correlation structure of the
+posterior distribution of blocks of parameters to be used to produce
+better proposals.  For an occupancy model where parameters are highly
+correlated within species, this can provide much more efficient
+sampling than a non-adaptive Metropolis algorithm.
 
 \subsection*{Model assessment}
 \label{sec:assess}
@@ -413,17 +417,19 @@ selection, but, because it requires iternativly re-fitting the model,
 is computationally intensive \citep{hooten2014guide}. In cross
 validation, we exclude a subset of the data ($y_k$) from model
 fitting, then use the fitted model to predict $y_k$. The prediction
-error is summarized by comparing the simulated $y_k$ to the true $y_k$.
+error is summarized by comparing the simulated $y_k$ to the true
+$y_k$.
 
-In the multi species occupancy models (Section \ref{sec:msss}),
-practitioners are often interested in determining whether a model
-including a species random effect for explanatory variables is a
-better fit than a model without the random effect. We implemented a
-cross-validation procudure for this model where the detection data for
-species is left out, the model refitted, and the fitted model used to
-predict the occurence of that species. The predictive error of the
-model included a random effect of species is then compared to a model
-where no species random effects were included.
+In multi-species occupancy models like the model we explored in
+Section \ref{sec:msss}), practitioners are often interested in
+determining whether a model including a species random effect for
+explanatory variables is a better fit than a model without the random
+effect. We implemented a cross-validation procedure for this model
+where the detection data for species is left out, the model refitted,
+and the fitted model used to predict the occurence of that
+species. The predictive error of the model included a random effect of
+species is then compared to a model where no species random effects
+were included.
 
 \section*{Results}
 \label{sec:results}

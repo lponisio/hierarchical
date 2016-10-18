@@ -1,154 +1,159 @@
 rm(list=ls())#
-setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
-source('src/initialize.R')#
 #
-set.seed(444)#
-dats <- genSpatialOccData()
-psi <- expit(alpha + beta1 * raster::values(elev) +#
-               raster::values(Xraster))
-plot(psi)
-hist(psi)
-psi.rast <- raster(matrix(psi, ngrid, ngrid),#
-                 xmn = 0, xmx = ngrid,#
-                 ymn = 0, ymx = ngrid)
-plot(psi.rast)
-plot(evel)
-plot(elev)
-Q
-rm(list=ls())#
-setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
-source('src/initialize.R')#
+library(nimble)#
+library(coda)#
 #
-set.seed(444)#
-dats <- genSpatialOccData()
-psi <- expit(alpha + beta1 * raster::values(elev) +#
-               raster::values(Xraster))#
-psi.rast <- raster(matrix(psi, ngrid, ngrid),#
-                 xmn = 0, xmx = ngrid,#
-                 ymn = 0, ymx = ngrid)
-hist(psi)
-Q
-rm(list=ls()) #
 setwd('~/Dropbox/nimble/occupancy/analysis/multiSpp-singleSea')#
+source('../all/plotting.R')#
+save.dir <-  "../../../saved/multiSpp-singleSea/saved"#
 #
-source('src/initialize.R')#
-## don't agument data#
-n.zeroes <- 0#
-model.input <- prepMutiSpData(survey.data,#
-                              survey.dates,#
-                              species.groups,#
-                              habitat,#
-                              n.zeros)#
+## original model jags and nimble#
+load(file=file.path(save.dir, "orig.Rdata"))#
 #
-## *********************************************************************#
-## multi-species site-occupancy models: vectorized with custom#
-## function to remove zs#
-## *********************************************************************#
+## vectorized, likelihood for latent state, derived quantity#
+## calculation#
+load(file=file.path(save.dir, "opt1.Rdata"))#
 #
-ms.ss.occ <- nimbleCode({#
-  ## Define prior distributions for community-level model parameters#
-  cato.occ.mean ~ dunif(0,1)#
-  mu.ucato <- log(cato.occ.mean) - log(1-cato.occ.mean)#
+## option 1 + custom block sampler on species random effect for each#
+## species#
+load(file=file.path(save.dir, "opt2.Rdata"))#
 #
-  fcw.occ.mean ~ dunif(0,1)#
-  mu.ufcw <- log(fcw.occ.mean) - log(1-fcw.occ.mean)#
+## ## option 1 + custom block sampler on species random effect for each#
+## ## random effect type#
+## load(file=file.path(save.dir, "opt3.Rdata")#
 #
-  cato.det.mean ~ dunif(0,1)#
-  mu.vcato <- log(cato.det.mean) - log(1-cato.det.mean)#
+## option 1 + sigma sampler on random effects#
+load(file=file.path(save.dir, "opt4.Rdata"))#
+ms.ss.orig[[1]] <- rename_MCMC_comparison_method(c('nimble', 'jags'),#
+                                                 c('NIMBLE-latent',#
+                                                   'JAGS-latent'),#
+                                                 comparison=ms.ss.orig[[1]])#
 #
-  fcw.det.mean ~ dunif(0,1)#
-  mu.vfcw <- log(fcw.det.mean) - log(1-fcw.det.mean)#
+ms.ss.opt1[[1]] <- rename_MCMC_comparison_method(c('nimble',#
+                                                   "autoBlock"),#
+                                                 c('filter',#
+                                                   'filter + autoblock'),#
+                                                 comparison=ms.ss.opt1[[1]])#
+ms.ss.opt2[[1]] <- rename_MCMC_comparison_method('nimbleOpt2',#
+                                                 'filter + sp. block',#
+                                                 comparison=ms.ss.opt2[[1]])#
+## ms.ss.opt3[[1]] <- rename_MCMC_comparison_method('nimbleOpt3',#
+##                                                  'block_2',#
+##                                                  comparison=ms.ss.opt3[[1]])#
+ms.ss.opt4[[1]] <- rename_MCMC_comparison_method('nimbleOpt4',#
+                                                 'sigma sampler',#
+                                                 comparison=ms.ss.opt4[[1]])#
 #
-  ## random effects#
-  sigma.ucato ~ dunif(0, 100)#
-  sigma.ufcw ~ dunif(0, 100)#
-  mu.a1 ~ dnorm(0, 0.001)#
-  sigma.a1 ~ dunif(0, 100)#
-  mu.a2 ~ dnorm(0, 0.001)#
-  sigma.a2 ~ dunif(0, 100)#
-  mu.a3 ~ dnorm(0, 0.001)#
-  sigma.a3 ~ dunif(0, 100)#
-  mu.a4 ~ dnorm(0, 0.001)#
-  sigma.a4 ~ dunif(0, 100)#
+## compare mcmcs#
+ms.ss.occ.all <- combine_MCMC_comparison_results(ms.ss.orig[[1]],#
+                                                 ms.ss.opt1[[1]],#
+                                                 ms.ss.opt2[[1]],#
+                                                 ## ms.ss.opt3[[1]],#
+                                                 ## ms.ss.opt4[[1]],#
+                                                 name = "ms.ss" )#
 #
-  sigma.vcato ~ dunif(0, 100)#
-  sigma.vfcw ~ dunif(0, 100)#
-  mu.b1 ~ dnorm(0, 0.001)#
-  sigma.b1 ~ dunif(0, 100)#
-  mu.b2 ~ dnorm(0, 0.001)#
-  sigma.b2 ~ dunif(0, 100)#
-  for (i in 1:(num.species)) {#
-    ## Create priors for species i from the community level prior#
-    ## distributions#
+make_MCMC_comparison_pages(ms.ss.occ.all,#
+                           dir=file.path(save.dir, "../figures/comparisons"))
+## ****************************************#
+## custom figs#
+## ****************************************#
 #
-    u.cato[i] ~ dnorm(mu.ucato, sd=sigma.ucato)#
-    u.fcw[i] ~ dnorm(mu.ufcw, sd=sigma.ufcw)#
-    a1[i] ~ dnorm(mu.a1, sd=sigma.a1)#
-    a2[i] ~ dnorm(mu.a2, sd=sigma.a2)#
-    a3[i] ~ dnorm(mu.a3, sd=sigma.a3)#
-    a4[i] ~ dnorm(mu.a4, sd=sigma.a4)#
+by.param <- apply(ms.ss.occ.all[[1]]$samples, c(1,2), effectiveSize)#
+by.config <- ms.ss.occ.all[[1]]$efficiency#
 #
-    v.cato[i] ~ dnorm(mu.vcato, sd=sigma.vcato)#
-    v.fcw[i] ~ dnorm(mu.vfcw, sd=sigma.vfcw)#
-    b1[i] ~ dnorm(mu.b1, sd=sigma.b1)#
-    b2[i] ~ dnorm(mu.b2, sd=sigma.b2)#
+plotEffSize(by.config, by.param, f.path= file.path(save.dir,#
+              "../figures/comparisons/%s.pdf"), "MultiSpp-SingleSea",#
+            at=0.4, adj=0.03)
+quartz()
+layout(matrix(1:4, ncol=2))#
+    par(oma=c(5, 7.5, 0.5, 1),#
+        mar=c(0.5, 0, 3, 1), cex.axis=1.5)#
+    ## barplots#
+    mp1 <- barplot(eff.size$mean, names="", las=1)#
+    mtext("Mean", 3, line=0.5, cex=1.5)#
 #
-    ## vectorize the calculation of psi.#
-    logit(psi[1:num.points,i]) <-#
-      u.cato[i]*(1-habitat.ind[1:num.points]) +#
-        u.fcw[i]*habitat.ind[1:num.points] +#
-          a1[i]*ufc.linear[1:num.points] +#
-            a2[i]*ufc.quadratic[1:num.points] +#
-              a3[i]*ba.linear[1:num.points] +#
-                a4[i]*ba.quadratic[1:num.points]#
-    ## vectorized calculation#
-    mu.psi[1:num.points,i] <- psi[1:num.points, i]#
+    mp2 <- barplot(eff.size$min, names="", las=1)#
+    text(mp2, par('usr')[3] - adj,#
+         srt = 45, adj = 1,#
+         labels = names(eff.size$mean),#
+         xpd = NA,#
+         cex=1)#
 #
-    ## For our purpose a better way to write this way is to#
-    ## not worry that some elements of date.linear and date.quadratic#
-    ## aren't used, since the benefit of vectorizing the computation#
-    ## should be much greater than the cost of a few extra elements#
-    logit(p[1:num.points, 1:max.num.reps, i]) <-#
-      (v.cato[i]*(1-habitat.ind[1:num.points]) +#
-       v.fcw[i]*habitat.ind[1:num.points]) %*%#
-         asRow(onesRow[1, 1:max.num.reps])+#
-           b1[i]*date.linear[1:num.points,1:max.num.reps] +#
-             b2[i]*date.quadratic[1:num.points,1:max.num.reps]#
-#
-    ## user defined distribution to combine the bernoulli occupancy#
-    ## and detection events.  We can also make this is a single#
-    ## compuation for the entire matrix of locations-x-visits, for#
-    ## each species (i)#
-    X[1:num.points, 1:max.num.reps, i] ~ dBernDetectionMatrix(#
-      occProb = mu.psi[1:num.points,i],#
-      detectionProb = p[1:num.points, 1:max.num.reps,i],#
-      numReps = num.reps[1:num.points])#
-  }#
-  ## Derived quantities:#
-  ## for(j in 1:num.points){#
-  ##   N.site[j]<- sum(mu.psi[j,1:(num.species)])#
-  ##   N.ground[j]<- sum(mu.psi[j,1:num.species] * ground[1:num.species])#
-  ##   N.mid[j]<- sum(mu.psi[j,1:num.species] * mid[1:num.species])#
-  ## }#
-})#
-input1 <- c(code=ms.ss.occ, model.input)
-## *********************************************************************#
-## ## cross validation#
-## *********************************************************************#
-## if not already run above#
-occ.R.model <- nimbleModel(code=ms.ss.occ,#
-                           constants=input1$constants,#
-                           data=input1$data,#
-                           inits=input1$inits,#
-                           check=FALSE)
-niter<- 1000
-options(mc.cores=1)
-source('../crossValidation/crossValidationFunction.R')#
-#
-output <- crossValidateOne(model=occ.R.model,#
-                           dataNames= "X",#
-                           MCMCIter= niter,#
-                           burnIn=niter*0.1,#
-                           thin=1,#
-                           leaveOutIndex=3,#
-                           MCMCdefs=NULL)
+    mtext("Minimum", 3, line=0.5, cex=1.5)#
+    mtext("Effective sample size \n per second",#
+          2, line=4.5, cex=1.5, at=at)
+plotEffSize(by.config, by.param, f.path= file.path(save.dir,#
+              "../figures/comparisons/%s.pdf"), "MultiSpp-SingleSea",#
+            at=0.4, adj=0.03)
+quartz()
+layout(matrix(1:4, ncol=2))#
+    par(oma=c(5, 7.5, 0.5, 1),#
+        mar=c(0.5, 0, 3, 1), cex.axis=1.5)#
+    ## barplots#
+    mp1 <- barplot(eff.size$mean, names="", las=1)#
+    mtext("Mean", 3, line=0.5, cex=1.5)
+mp2 <- barplot(eff.size$min, names="", las=1)#
+    text(mp2, par('usr')[3] - adj,#
+         srt = 45, adj = 1,#
+         labels = names(eff.size$mean),#
+         xpd = NA,#
+         cex=1)
+mtext("Minimum", 3, line=0.5, cex=1.5)#
+    mtext("Effective sample size \n per second",#
+          2, line=4.5, cex=1.5, at=at)
+plot(NA, ylim=range(eff.param), xlim=c(1, ncol(eff.param)))
+for(i in 1:nrow(eff.parm)){#
+      points(x=1, ncol(eff.param), y=eff.param[i,])#
+    }
+for(i in 1:nrow(eff.param)){#
+      points(x=1, ncol(eff.param), y=eff.param[i,])#
+    }
+for(i in 1:nrow(eff.param)){#
+      points(x=1, ncol(eff.param), y=eff.param[i,])#
+    }
+Q
+source('../all/plotting.R')
+source('../all/plotting.R')
+plotEffSize(by.config, by.param, f.path= file.path(save.dir,#
+              "../figures/comparisons/%s.pdf"), "MultiSpp-SingleSea",#
+            at=0.4, adj=0.03)
+source('../all/plotting.R')
+plotEffSize(by.config, by.param, f.path= file.path(save.dir,#
+              "../figures/comparisons/%s.pdf"), "MultiSpp-SingleSea",#
+            at=0.4, adj=0.03)
+source('../all/plotting.R')
+plotEffSize(by.config, by.param, f.path= file.path(save.dir,#
+              "../figures/comparisons/%s.pdf"), "MultiSpp-SingleSea",#
+            at=0.4, adj=0.03)
+source('../all/plotting.R')
+plotEffSize(by.config, by.param, f.path= file.path(save.dir,#
+              "../figures/comparisons/%s.pdf"), "MultiSpp-SingleSea",#
+            at=0.4, adj=0.03)
+source('../all/plotting.R')
+plotEffSize(by.config, by.param, f.path= file.path(save.dir,#
+              "../figures/comparisons/%s.pdf"), "MultiSpp-SingleSea",#
+            at=0.4, adj=0.03)
+source('../all/plotting.R')
+plotEffSize(by.config, by.param, f.path= file.path(save.dir,#
+              "../figures/comparisons/%s.pdf"), "MultiSpp-SingleSea",#
+            at=0.4, adj=0.03)
+source('../all/plotting.R')
+plotEffSize(by.config, by.param, f.path= file.path(save.dir,#
+              "../figures/comparisons/%s.pdf"), "MultiSpp-SingleSea",#
+            at=0.4, adj=0.03)
+?effectiveSize
+plotEffSize(by.config, by.param, f.path= file.path(save.dir,#
+              "../figures/comparisons/%s.pdf"), "MultiSpp-SingleSea",#
+            at=0.4, adj=0.03)
+source('../all/plotting.R')
+plotEffSize(by.config, by.param, f.path= file.path(save.dir,#
+              "../figures/comparisons/%s.pdf"), "MultiSpp-SingleSea",#
+            at=0.4, adj=0.03)
+source('../all/plotting.R')
+plotEffSize(by.config, by.param, f.path= file.path(save.dir,#
+              "../figures/comparisons/%s.pdf"), "MultiSpp-SingleSea",#
+            at=0.4, adj=0.03)
+source('../all/plotting.R')
+plotEffSize(by.config, by.param, f.path= file.path(save.dir,#
+              "../figures/comparisons/%s.pdf"), "MultiSpp-SingleSea",#
+            at=0.4, adj=0.03)

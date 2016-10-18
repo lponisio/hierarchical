@@ -138,7 +138,7 @@ generateCPPP <-  function(R.model,
                        NSamp,
                        C.pppFunc,
                        orig.C.mcmc,
-                       firstRun = 1)
+                       firstRun = 1)$pre.pp
 
   ## refits model with sampled data, reruns, enter inner loop,
   ## calculates distbution of PPPs

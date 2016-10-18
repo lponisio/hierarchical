@@ -258,7 +258,7 @@ occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model)
 occ.C.mcmc$run(niter)
 
 source('../cppp/src/calcCPPP.R', chdir = TRUE)
-options(mc.cores=6)
+options(mc.cores=8)
 
 test.opt2 <- generateCPPP(occ.R.model,
                           occ.C.model,

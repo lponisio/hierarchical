@@ -80,7 +80,9 @@ prepModData <- function(fulldata, y, distance, nsite,
   zinits[zinits == 1] <- 2
   zinits[is.na(zinits)] <- 1
   zinits[zinits == 2] <- NA
-  inits <- list(z = zinits)
+  inits <- list(z = zinits,
+                sigma=0.1,
+                delta=0.1)
 
   model.data <- list(D = distance[sites, sites],
                      y = y,

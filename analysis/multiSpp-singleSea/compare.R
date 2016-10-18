@@ -1,7 +1,8 @@
 rm(list=ls())
-## gctorture()
 
 library(nimble)
+library(coda)
+
 setwd('~/Dropbox/nimble/occupancy/analysis/multiSpp-singleSea')
 source('../all/plotting.R')
 save.dir <-  "../../../saved/multiSpp-singleSea/saved"
@@ -24,9 +25,20 @@ load(file=file.path(save.dir, "opt2.Rdata"))
 ## option 1 + sigma sampler on random effects
 load(file=file.path(save.dir, "opt4.Rdata"))
 
-ms.ss.opt1[[1]] <- rename_MCMC_comparison_method('nimble', 'remove_z',
+
+
+ms.ss.orig[[1]] <- rename_MCMC_comparison_method(c('nimble', 'jags'),
+                                                 c('NIMBLE-latent',
+                                                   'JAGS-latent'),
+                                                 comparison=ms.ss.orig[[1]])
+
+ms.ss.opt1[[1]] <- rename_MCMC_comparison_method(c('nimble',
+                                                   "autoBlock"),
+                                                 c('filter',
+                                                   'filter + autoblock'),
                                                  comparison=ms.ss.opt1[[1]])
-ms.ss.opt2[[1]] <- rename_MCMC_comparison_method('nimbleOpt2', 'block_1',
+ms.ss.opt2[[1]] <- rename_MCMC_comparison_method('nimbleOpt2',
+                                                 'filter + sp. block',
                                                  comparison=ms.ss.opt2[[1]])
 ## ms.ss.opt3[[1]] <- rename_MCMC_comparison_method('nimbleOpt3',
 ##                                                  'block_2',
@@ -40,7 +52,7 @@ ms.ss.occ.all <- combine_MCMC_comparison_results(ms.ss.orig[[1]],
                                                  ms.ss.opt1[[1]],
                                                  ms.ss.opt2[[1]],
                                                  ## ms.ss.opt3[[1]],
-                                                 ms.ss.opt4[[1]],
+                                                 ## ms.ss.opt4[[1]],
                                                  name = "ms.ss" )
 
 make_MCMC_comparison_pages(ms.ss.occ.all,
@@ -53,3 +65,15 @@ checkChains(ms.ss.occ.all[[1]]$samples,
             f.path = file.path(save.dir,
             "../figures/chains/%s.pdf")
 )
+
+
+## ****************************************
+## custom figs
+## ****************************************
+
+by.param <- apply(ms.ss.occ.all[[1]]$samples, c(1,2), effectiveSize)
+by.config <- ms.ss.occ.all[[1]]$efficiency
+
+plotEffSize(by.config, by.param, f.path= file.path(save.dir,
+              "../figures/comparisons/%s.pdf"), "MultiSpp-SingleSea",
+            at=0.4, adj=0.03)

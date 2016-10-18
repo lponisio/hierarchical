@@ -1,10 +1,11 @@
+library(RColorBrewer)
 
-  pdf.f <- function(f, file, ...) {
-    cat(sprintf('Writing %s\n', file))
-    pdf(file, ...)
-    on.exit(dev.off())
-    f()
-  }
+pdf.f <- function(f, file, ...) {
+  cat(sprintf('Writing %s\n', file))
+  pdf(file, ...)
+  on.exit(dev.off())
+  f()
+}
 
 ## function to plot values of parameters as a function of
 ## iterations. Input is a MCMCcompare object
@@ -32,4 +33,40 @@ checkChains <- function(all.mods.samps, f.path){
           file= file.path(sprintf(f.path, z)),
           height=11, width=8.5)
   })
+}
+
+
+plotEffSize <- function(eff.size, eff.param,
+                        f.path, name, at, adj=0.5){
+  f <- function(){
+    layout(matrix(1:4, ncol=2))
+    par(oma=c(5, 7.5, 0.5, 1),
+        mar=c(0.5, 0, 3, 1), cex.axis=1.5)
+    cols <- brewer.pal(length(eff.size$mean), "Greys")
+    ## barplots
+    mp1 <- barplot(eff.size$mean, names="", las=1, col=cols)
+    mtext("Mean", 3, line=0.5, cex=1.5)
+
+    mp2 <- barplot(eff.size$min, names="", las=1, col=cols)
+    text(mp2, par('usr')[3] - adj,
+         srt = 45, adj = 1,
+         labels = names(eff.size$mean),
+         xpd = NA,
+         cex=1)
+
+    mtext("Minimum", 3, line=0.5, cex=1.5)
+    mtext("Effective sample size \n per second",
+          2, line=4.5, cex=1.5, at=at)
+    ## for each parm
+    plot(NA, ylim=range(eff.param), xlim=c(1, ncol(eff.param)))
+    for(i in 1:nrow(eff.param)){
+      points(x=1:ncol(eff.param), y=eff.param[i,], col=cols[i],
+             pch=16,
+             xaxt="n")
+    }
+    
+  }
+  pdf.f(f,
+        file= file.path(sprintf(f.path, name)),
+        height=6, width=4.5)
 }
