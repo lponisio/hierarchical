@@ -109,7 +109,7 @@ ms.ss.occ <- nimbleCode({
   ##   N.mid[j]<- sum(mu.psi[j,1:num.species] * mid[1:num.species])
   ## }
 })
-
+ 
 input1 <- c(code=ms.ss.occ, model.input)
 
 
@@ -265,11 +265,9 @@ test.opt2 <- generateCPPP(occ.R.model,
                           occ.mcmc,
                           dataName = 'X',
                           paramNames = input1$monitors, 
-                          MCMCIter = niter, 
                           NSamp = 10^3,
                           NPDist = 10^3,
-                          burnInProportion = 0.10,
-                          thin = 1,
+                          burnInProp = 0.10,
                           averageParams = TRUE,
                           discFuncGenerator=likeDiscFuncGenerator,
                           returnChains=TRUE)

@@ -104,7 +104,6 @@ generateCPPP <-  function(R.model,
                           orig.mcmc,
                           dataNames, ## names of the data column
                           paramNames, ## vector of parameters to monitor
-                          MCMCIter, ## number of mcmc iterations
                           NSamp,## number of samples from posterior
                           NPDist, ## number of simulated PPP values
                           burnInProp, ## proportion of mcmc to drop
