@@ -88,11 +88,46 @@ plotEffSize <- function(eff.size, eff.param,
     mtext("Effective sample size \n per second (log)",
           2, line=3.2, cex=1.5)
   }
+
+    f3 <- function(){
+    layout(matrix(1:2, ncol=1), heights=c(1,3))
+
+    par(oma=c(5, 6, 0.5, 1),
+        mar=c(0.5, 0, 0.5, 1), cex.axis=1.5)
+    
+    diffs <- t(apply(eff.param, 1,
+                   function(x) x - eff.param["JAGS-latent",]))[-1,]
+    
+    plot(NA, ylim=c(0,1), xlim=c(0,1), yaxt= "n", xaxt="n", bty="n")
+    legend("top", legend=rownames(diffs),
+           pch=16, col=cols[-1], bty="n", ncol=3)
+    
+    plot(NA, ylim=range(diffs), xlim=c(1, ncol(diffs)),
+         xlab="", ylab="", xaxt="n")
+    for(i in 1:nrow(diffs)){
+      points(x=1:ncol(diffs), y=diffs[i,],
+             col=cols[i+1],
+             pch=16,
+             xaxt="n",
+             type="o")
+    }
+    text(x=1:ncol(diffs), par('usr')[3],
+         srt = 45, adj = 1 + adj2,
+         labels = colnames(diffs),
+         xpd = NA,
+         cex=0.8)
+    mtext("Difference in effective sample size \n per second",
+          2, line=3.2, cex=1.5)
+    abline(h=0, lty=2)
+  }
   pdf.f(f,
         file= file.path(sprintf(f.path, name, "Bar")),
         height=6, width=widths[1])
   pdf.f(f2,
         file= file.path(sprintf(f.path, name, "Points")),
+        height=4, width=widths[2])
+  pdf.f(f3,
+        file= file.path(sprintf(f.path, name, "Diffs")),
         height=4, width=widths[2])
 }
 

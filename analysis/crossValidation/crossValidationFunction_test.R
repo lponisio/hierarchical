@@ -31,8 +31,8 @@ data <- cbind(rnorm(6, 0, 1), rnorm(6, 6, 1), rnorm(6, 4, 1),
 
 dyesModel$setData(list(y = data))
 
-options(cores=1)
-niter <- 10
+options(mc.cores=1)
+niter <- 100
 output <- crossValidateOne(model=dyesModel,
                            dataNames= "y",
                            MCMCIter= niter,

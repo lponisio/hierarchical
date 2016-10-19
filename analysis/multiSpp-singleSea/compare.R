@@ -1,5 +1,4 @@
 rm(list=ls())
-
 library(nimble)
 library(coda)
 
@@ -74,7 +73,6 @@ make_MCMC_comparison_pages(ms.ss.occ.all,
 by.param <- apply(ms.ss.occ.all[[1]]$samples, c(1,2), effectiveSize)/
   ms.ss.occ.all[[1]]$timing 
 by.config <- ms.ss.occ.all[[1]]$efficiency
-
 
 source('../all/plotting.R')
 plotEffSize(by.config, by.param, f.path= file.path(save.dir,

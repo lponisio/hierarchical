@@ -19,19 +19,21 @@ ms.ss.occ <- nimbleCode({
   ## Define prior distributions for community-level model parameters
   cato.occ.mean ~ dunif(0,1)
   mu.ucato <- log(cato.occ.mean) - log(1-cato.occ.mean)
-
+  sigma.ucato ~ dunif(0, 100)
+  
   fcw.occ.mean ~ dunif(0,1)
   mu.ufcw <- log(fcw.occ.mean) - log(1-fcw.occ.mean)
+  sigma.ufcw ~ dunif(0, 100)
 
   cato.det.mean ~ dunif(0,1)
   mu.vcato <- log(cato.det.mean) - log(1-cato.det.mean)
+  sigma.vcato ~ dunif(0, 100)
 
   fcw.det.mean ~ dunif(0,1)
   mu.vfcw <- log(fcw.det.mean) - log(1-fcw.det.mean)
+  sigma.vfcw ~ dunif(0, 100)
 
   ## random effects
-  sigma.ucato ~ dunif(0, 100)
-  sigma.ufcw ~ dunif(0, 100)
   
   mu.a1 ~ dnorm(0, 0.001)
   sigma.a1 ~ dunif(0, 100)
@@ -45,11 +47,9 @@ ms.ss.occ <- nimbleCode({
   mu.a4 ~ dnorm(0, 0.001)
   sigma.a4 ~ dunif(0, 100)
 
-  sigma.vcato ~ dunif(0, 100)
-  sigma.vfcw ~ dunif(0, 100)
-  
   mu.b1 ~ dnorm(0, 0.001)
   sigma.b1 ~ dunif(0, 100)
+  
   mu.b2 ~ dnorm(0, 0.001)
   sigma.b2 ~ dunif(0, 100)
 
@@ -360,10 +360,10 @@ ms.ss.occ.simp <- nimbleCode({
 
 
 occ.R.model.simp <- nimbleModel(code=ms.ss.occ.simp,
-                           constants=input1$constants,
-                           data=input1$data,
-                           inits=input1$inits,
-                           check=FALSE)
+                                constants=input1$constants,
+                                data=input1$data,
+                                inits=input1$inits,
+                                check=FALSE)
 
 occ.mcmc <- buildMCMC(occ.R.model.simp)
 occ.C.model.simp <- compileNimble(occ.R.model.simp)
@@ -371,9 +371,9 @@ occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model.simp)
 
 
 output.simp <- crossValidateOne(model=occ.R.model.simp,
-                           dataNames= "X",
-                           MCMCIter= 10^4,
-                           burnIn=10^2,
-                           thin=2,
-                           leaveOutIndex=3,
-                           MCMCdefs=NULL)
+                                dataNames= "X",
+                                MCMCIter= 10^4,
+                                burnIn=10^2,
+                                thin=2,
+                                leaveOutIndex=3,
+                                MCMCdefs=NULL)

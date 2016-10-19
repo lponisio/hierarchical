@@ -74,7 +74,8 @@ crossValidateOne <- function(model,
                            dataDimensions,
                            dataNames)
   browser()
-  crossVal <- sum(sapply(crossValOut, function(x) x$crossValAverage))
+  crossVal <- sum(sapply(crossValOut, function(x) x$crossValAverage),
+                  na.rm=TRUE)
   samples <- lapply(crossValOut, function(x) x$samples)
   chain.diag <-  do.call(rbind,
                          lapply(lapply(samples, geweke.diag),

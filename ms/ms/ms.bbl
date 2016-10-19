@@ -1,14 +1,6 @@
 \begin{thebibliography}{21}
 \providecommand{\natexlab}[1]{#1}
 
-\bibitem[{ope()}]{openbugs}
- (????) Open{BUGS}.
-\newblock \url{http://www.openbugs.net/w/FrontPage}.
-
-\bibitem[{win()}]{winbugs}
- (????) Win{BUGS}.
-\newblock \url{http://www.mrc-bsu.cam.ac.uk/software/bugs/}.
-
 \bibitem[{Bayarri \& Berger(2000)}]{bayarri-berger-00}
 Bayarri, M. \& Berger, J. (2000) P values for composite null models.
 \newblock \emph{Journal of the American Statistical Association}, \textbf{95},
@@ -78,6 +70,10 @@ M'Gonigle, L., Ponisio, L., Cutler, K. \& Kremen, C. (2015) Habitat restoration
 Neal, R.M. (2003) Slice sampling.
 \newblock \emph{Annals of Statistics}, pp. 705--741.
 
+\bibitem[{Open{BUGS}()}]{openbugs}
+Open{BUGS} (????) Open{BUGS}.
+\newblock \url{http://www.openbugs.net/w/FrontPage}.
+
 \bibitem[{Pacifici \emph{et~al.}(2014)Pacifici, Zipkin, Collazo, Irizarry \&
   DeWan}]{pacifici2014guidelines}
 Pacifici, K., Zipkin, E.F., Collazo, J.A., Irizarry, J.I. \& DeWan, A. (2014)
@@ -112,6 +108,10 @@ Royle, A. \& K\'ery, M. (2007{\natexlab{b}}) A bayesian state-space formulation
 Turek, D., de~Valpine, P. \& Paciorek, C.J. (2016) Efficient markov chain monte
   carlo sampling for hierarchical hidden markov models.
 \newblock \emph{arXiv preprint arXiv:160102698}.
+
+\bibitem[{Win{BUGS}()}]{winbugs}
+Win{BUGS} (????) Win{BUGS}.
+\newblock \url{http://www.mrc-bsu.cam.ac.uk/software/bugs/}.
 
 \bibitem[{Zipkin \emph{et~al.}(2010)Zipkin, Royle, Dawson \&
   Bates}]{zipkin2010multi}

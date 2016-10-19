@@ -9,13 +9,13 @@ rmvn <- function(n, mu = 0, V = matrix(1)) {
 }
 
 
-genSpatialOccData <- function(ngrid = 50,
+genSpatialOccData <- function(ngrid = 80,
                               nreps = 50,
                               alpha = 1,
                               beta1 = 6,
                               p = 0.8,
-                              sigma = 0.5,
-                              delta = 1.5){
+                              sigma = 2,
+                              delta = 0.5){
 
   ## Set up a square lattice region
   simgrid <- expand.grid(1:ngrid, 1:ngrid)
@@ -27,7 +27,7 @@ genSpatialOccData <- function(ngrid = 50,
   ## Generate spatial random effect
   X <- rmvn(1, rep(0, n),  (sigma^2)*exp(-delta * distance))
   Xraster <- rasterFromXYZ(cbind(simgrid[, 1:2] - 0.5, X))
-
+  plot(Xraster)
   ## simulate elevation data
   elev <- raster(matrix(rnorm(n), ngrid, ngrid),
                  xmn = 0, xmx = ngrid,
