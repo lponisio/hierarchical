@@ -1,4 +1,5 @@
 library(nimble)
+library(coda)
 library(parallel)
 
 crossValCalculate <- function(row, MCMCOut, dataDimensions, saveData){
@@ -57,19 +58,29 @@ crossValidateOne <- function(model,
     C.modelMCMC$run(MCMCIter)
     MCMCout <- as.matrix(C.modelMCMC$mvSamples)
     sampNum <- dim(MCMCout)[1] 
-    crossValValue <- unlist(mclapply(ceiling(burnIn/thin):sampNum,
+    crossValValue <- sapply(ceiling(burnIn/thin):sampNum,
                                      crossValCalculate, MCMCout,
-                                     dataDimensions, saveData))
+                                     dataDimensions, saveData)
+    print(i)
     crossValAverage <- log(mean(crossValValue))
     nimble:::clearCompiled(C.modelMCMC)
-    return(crossValAverage)
+    return(list(crossValAverage =crossValAverage,
+                samples= MCMCout))
   }
-  crossVal <- sum(sapply(1:numBlocks, calcCrossVal,
+  crossValOut <- mclapply(1:numBlocks, calcCrossVal,
                            saveData,
                            newModel,
                            leaveOutIndex,
                            dataDimensions,
-                           dataNames))
+                           dataNames)
+  browser()
+  crossVal <- sum(sapply(crossValOut, function(x) x$crossValAverage))
+  samples <- lapply(crossValOut, function(x) x$samples)
+  chain.diag <-  do.call(rbind,
+                         lapply(lapply(samples, geweke.diag),
+                                function(x) x$z))
 
-  return(crossVal)
+  return(list(crossVal=crossVal,
+              chain.diag=chain.diag,
+              samples=samples))
 }

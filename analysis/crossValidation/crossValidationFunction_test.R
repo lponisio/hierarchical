@@ -31,7 +31,16 @@ data <- cbind(rnorm(6, 0, 1), rnorm(6, 6, 1), rnorm(6, 4, 1),
 
 dyesModel$setData(list(y = data))
 
-output <- crossValidateOne(dyesModel, "y", 1000, 300, 2, 2)
+options(cores=1)
+niter <- 10
+output <- crossValidateOne(model=dyesModel,
+                           dataNames= "y",
+                           MCMCIter= niter,
+                           burnIn=niter*0.1,
+                           thin=1,
+                           leaveOutIndex=2,
+                           MCMCdefs=NULL)
+
 
 ## ****************************************************
 dyesCodeSimp <- nimbleCode({
