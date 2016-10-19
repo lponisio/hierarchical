@@ -53,31 +53,14 @@ output <- generateCPPP(R.model,
                        D.mcmc,
                        mcmc,
                        dataNames = 'x',
-                       paramNames = c('alpha','beta'), 
+                       paramNames = c('alpha','beta', "x"), 
                        MCMCIter = 3000, 
                        NSamp = 100,
                        NPDist = 10,
-                       burnInProportion = 0.1,
+                       burnInProp = 0.1,
                        thin = nthin,
                        averageParams = TRUE,
                        discFuncGenerator=likeDiscFuncGenerator)
-
-
-
-output <- generateCPPP(R.model,
-                       D.model,
-                       D.mcmc,
-                       mcmc,
-                       dataNames = 'x',
-                       paramNames = c('alpha','beta'), 
-                       MCMCIter = 3000, 
-                       NSamp = 100,
-                       NPDist = 10,
-                       burnInProportion = 0.1,
-                       thin = nthin,
-                       averageParams = FALSE,
-                       discFuncGenerator=maxDiscFuncGenerator,
-                        discArgs = c('alpha','beta'))
 
 
 ## for max discFunction

@@ -32,11 +32,11 @@ data <- cbind(rnorm(6, 0, 1), rnorm(6, 6, 1), rnorm(6, 4, 1),
 dyesModel$setData(list(y = data))
 
 options(mc.cores=1)
-niter <- 100
+niter <- 10000
 output <- crossValidateOne(model=dyesModel,
                            dataNames= "y",
                            MCMCIter= niter,
-                           burnIn=niter*0.1,
+                           burnInProp=0.1,
                            thin=1,
                            leaveOutIndex=2,
                            MCMCdefs=NULL)
@@ -57,4 +57,5 @@ dyesModelSimp <- nimbleModel(dyesCodeSimp,
                              constants =list(BATCHES = 6, SAMPLES = 5))
 dyesModelSimp$setData(list(y = data))
 
-output.simp <- crossValidateOne(dyesModelSimp, "y", 1000, 300, 2, 2)
+output.simp <- crossValidateOne(dyesModelSimp,
+                                "y", niter, niter*0.1, 2, 2)

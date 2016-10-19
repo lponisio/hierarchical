@@ -107,13 +107,63 @@ generateCPPP <-  function(R.model,
                           MCMCIter, ## number of mcmc iterations
                           NSamp,## number of samples from posterior
                           NPDist, ## number of simulated PPP values
-                          burnInProportion, ## proportion of mcmc to drop
-                          thin,## thinning used in original mcmc run
+                          burnInProp, ## proportion of mcmc to drop
                           discFuncGenerator, 
                           averageParams,
                           returnChains = TRUE,
                           ...){
-  burnIn <- ceiling(burnInProportion*(MCMCIter/thin))
+  if(!inherits(R.model, "RmodelBaseClass")){
+    stop("R.model is not an Rmodel")
+  }
+  if(!inherits(orig.C.model, "CmodelBaseClass")){
+    stop("orig.C.model is not an Cmodel")
+  }
+  if(burnInProp >= 1 | burnInProp < 0){
+    stop("burnInProp needs to be between 0 and 1")
+  }
+  
+  thin <- orig.C.mcmc$thin
+  MCMCIter <- nrow(as.matrix(orig.C.mcmc$mvSamples))*thin
+  
+  if(MCMCIter <= 1){
+    stop("MCMC must be run on C model before assessment")
+  }
+  
+  burnIn <- ceiling(burnInProp*(MCMCIter/thin))
+
+  if(NSamp > MCMCIter){
+    stop("number of samples from posterior must be < number of MCMC iterations")
+  }
+  
+  testDataNames <- try(R.model[[dataNames]], silent=TRUE)
+  if(inherits(testDataNames, "try-error")){
+    stop(paste("dataNames", dataNames,
+               "is not the name of the data in model"))
+  } else{
+    test2DataNames <- all(R.model$expandNodeNames(dataNames) %in%
+                          R.model$getNodeNames(dataOnly=TRUE))
+    if(test2DataNames == FALSE){
+      stop(paste("dataNames", dataNames,
+                 "is not the name of the data in model"))
+    }
+  }
+  testParamNames <- lapply(paramNames, function(x){
+    test.this.param <- try(R.model[[x]], silent=TRUE)
+    if(inherits(test.this.param, "try-error")){
+      stop(paste("paramNames", x,
+                 "are not parameters in model"))
+    }
+  })
+  test2ParamNames <- all(R.model$expandNodeNames(paramNames) %in%
+                         R.model$getNodeNames(includeData=FALSE,
+                                              stochOnly=TRUE))
+  if(test2ParamNames == FALSE){
+    stop(paste("paramNames", paramNames,
+               "are not parameters in model"))
+  }
+
+
+  
   origData <- nimble:::values(orig.C.model, dataNames)
   
   ## sample posterior, simulate data from sample 
@@ -143,7 +193,7 @@ generateCPPP <-  function(R.model,
   ## refits model with sampled data, reruns, enter inner loop,
   ## calculates distbution of PPPs
   simPppDist <- function(iteration){
-    print(iteration)
+    message(paste("refitting data iteration", iteration))
     simulate(orig.C.model,  includeData =  TRUE)
     out <- calcCPPP(MCMCIter,
                     NSamp,
