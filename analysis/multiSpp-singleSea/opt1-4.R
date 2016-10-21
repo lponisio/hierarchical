@@ -270,7 +270,7 @@ test.opt2 <- generateCPPP(occ.R.model,
                           burnInProp = 0.10,
                           averageParams = TRUE,
                           discFuncGenerator=likeDiscFuncGenerator,
-                          returnChains=TRUE)
+                          returnChains=FALSE)
 
 save(test.opt2, file=file.path(save.dir, "ms_ss_noz_CPPP.Rdata"))
 
