@@ -96,7 +96,7 @@ plotEffSize <- function(eff.size, eff.param,
         mar=c(0.5, 0, 0.5, 1), cex.axis=1.5)
     
     diffs <- t(apply(eff.param, 1,
-                   function(x) x - eff.param["JAGS-latent",]))[-1,]
+                   function(x) log(x) - log(eff.param["JAGS-latent",])))[-1,]
     
     plot(NA, ylim=c(0,1), xlim=c(0,1), yaxt= "n", xaxt="n", bty="n")
     legend("top", legend=rownames(diffs),
@@ -116,7 +116,7 @@ plotEffSize <- function(eff.size, eff.param,
          labels = colnames(diffs),
          xpd = NA,
          cex=0.8)
-    mtext("Difference in effective sample size \n per second",
+    mtext("Ratio of effective sample size \n per second (log)",
           2, line=3.2, cex=1.5)
     abline(h=0, lty=2)
   }

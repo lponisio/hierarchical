@@ -21,7 +21,7 @@ expit <- function(x) {
 ## range.p - bounds of uniform distribution from which annual p drawn
 ## range.psi and range.gamma - same for survival and colonization probability
 
-genDynamicOccData <- function(R = 250,
+genDynamicOccData <- function(R = 50,
                               J = 10, K = 10,
                               psi1 = 0.4,
                               range.p = c(0.2, 0.4),

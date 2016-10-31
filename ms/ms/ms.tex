@@ -15,9 +15,8 @@
 \usepackage{hyperref}
 \usepackage[parfill]{parskip}
 \usepackage{graphicx}
+\usepackage{rotating}
 \usepackage{textcomp}
-\usepackage{xr}
-
 \hypersetup{colorlinks=true, linkcolor=black, citecolor=black}
 \RequirePackage{lineno}
 
@@ -25,8 +24,9 @@
   \textcolor{blue}{#1}
 }
 
-\def\title{Something occupancy models}
-\def\author{Lauren C.\ Ponisio$^{1,2}$, Nicholas Michaud$^1$, Perry de
+\def\title{Improving the efficiency of occupancy models (something
+  more interesting sounding?)}
+\def\author{Lauren C.\ Ponisio$^{1,2,3}$, Nicholas Michaud$^1$, Perry de
   Valpine$^1$ (Daniel and Chris?)}
 
 \def\runninghead{Occupancy model efficiency}
@@ -51,6 +51,9 @@
     130 Mulford Hall\\
     Berkeley, California, USA\\
     94720\\
+  \item Berkeley Institute for Data Science (BIDS)\\
+    University of California, Berkeley\\
+    190 Doe Library \\
   \item Department of Entomology\\
     University of California, Riverside\\
     417 Entomology Bldg.\\
@@ -107,7 +110,7 @@
     cross validation for model selection within NIMBLE.
   \item These computation approaches lead to an improvement in MCMC
     sampling efficiency over, particularly with models including
-    random effects. (more results once they are available)
+    random effects (maybe?). (more results once they are available)
   \item \textit{Implications:} Ours results highlight the need for
     more customizable approaches to MCMC to fit and assess
     hierarchical models in order to ensure occupancy and other
@@ -175,8 +178,8 @@ the most widely used applications of statistics by
 practitioners. Though many methods for Bayesian model selection have
 been developed \citep{hooten2014guide}, but they, like model
 assessment, are computationally intensive. For example,
-cross-validation, one of the most fudamental procedures in model
-selection, requires iternativly re-fitting the model. A typical need
+cross-validation, one of the most fundamental procedures in model
+selection, requires iterativly re-fitting the model. A typical need
 for model selection arises when a practitioner is choosing whether to
 include a specific layer of hierarchy (i.e., random effect). This is
 often the case with so called ``multi-species'' occupancy models,
@@ -256,7 +259,7 @@ settings for NIMBLE and JAGS. \flagged{To improve efficiency of this
   model...}
 
 We implemented a procedure to calculate calibrated posterior
-predictive $p$-values \citep[CPPP, ][]{hjort-etal-06} to assesss the
+predictive $p$-values \citep[CPPP, ][]{hjort-etal-06} to assess the
 fit of the model to the data. After the parameters have been fit to
 the model, a sample of the posterior is used to simulate data from the
 model. A discrepancy measure, which we chose to be the model
@@ -264,7 +267,7 @@ likelihood, is then calculated, and the posterior $p$-value is the
 number of simulated $p$-values that fall below the observed. To
 ``calibrate'' the distribution of posterior $p$-values, the MCMC is
 rerun on the simulated data to refit the model. If the CPPP $< 0.05$,
-the model is rejected as having an adequate fit ot the data
+the model is rejected as having an adequate fit to the data
 \citep{hjort-etal-06}.
 
 \subsubsection*{Single species, multi season (dynamic) occupancy
@@ -331,8 +334,8 @@ coordinate is chosen uniformly from the set of all possible parameter
 values whose density is at least as great as the chosen vertical
 coordinate.  \flagged{other options we want to present?}
 
-As with the spatail model, we use calibrated posterior predictive
-$p$-values \citep{hjort-etal-06} to assesss the fit of the model to
+As with the spatial model, we use calibrated posterior predictive
+$p$-values \citep{hjort-etal-06} to assess the fit of the model to
 the data.
 
 \subsubsection*{Multi species, single season occupancy model}
@@ -353,9 +356,9 @@ the $k^{\mathrm{th}}$ visit to site $j$. We also assumed that
 detection was distributed according to be a Bernoulli random variable
 such that $x_{i,j,k} \sim \mathrm{Bern}(p_{i}*z_{i,j})$, where $p_{i}$
 is the probability that the $i^{\mathrm{th}}$ species was
-detected. Both site occupancy and detection were influence by habiat
+detected. Both site occupancy and detection were influence by habitat
 and survey characteristics \citep{zipkin2010multi}. Specifically,
-occurence depended on the study area (CATO, Ind=1, or FCW, Ind=0), the
+occurrence depended on the study area (CATO, Ind=1, or FCW, Ind=0), the
 basal tree area (BA) and the understory foliage cover (UFC). The
 species-specific occupancy probabilities are modeled as
 
@@ -418,13 +421,13 @@ correlated within species, this can provide much more efficient
 sampling than a non-adaptive Metropolis algorithm.
 
 We also use calibrated posterior predictive $p$-values
-\citep{hjort-etal-06} to assesss the fit of the model to the data.  In
+\citep{hjort-etal-06} to assess the fit of the model to the data.  In
 multi-species occupancy models, practitioners are often interested in
 determining whether a model including a species random effect for
 explanatory variables is a better fit than a model without the random
 effect. We implemented a cross-validation procedure for this model
 where the detection data for species is left out, the model refitted,
-and the fitted model used to predict the occurence of that
+and the fitted model used to predict the occurrence of that
 species. The predictive error of the model included a random effect of
 species is then compared to a model where no species random effects
 were included.
@@ -435,15 +438,17 @@ were included.
 
 \section*{Results}
 \label{sec:results}
-\subsubsection*{Single species, single season occupancy model with
-  spatial auto-correlation}
-
 
 \subsubsection*{Multi species, single season occupancy model}
-\label{sec:msss}
+\label{sec:msss-res}
+
+\subsubsection*{Single species, single season occupancy model with
+  spatial auto-correlation}
+\label{sec:sp-res}
 
 \subsubsection*{Single species, multi season (dynamic) occupancy
   model}
+\label{sec:ssms-res}
 
 \section*{Discussion}
 \label{sec:discussion}
@@ -455,22 +460,49 @@ were included.
 
 \bibliography{refs}
 
-% \begin{figure}
-%   \centering
-%   \includegraphics[width=.8\textwidth]{../analysis/changePoint/plotting/networks.pdf}
-%   \caption{Assembling hedgerow networks had more changing points
-%     (vertical red lines) than non-assembling hedgerows and weedy field
-%     margins (a representative sample of non-assembling sites are
-%     depicted here). In each network, plants and pollinators are
-%     represented by green and yellow circles, respectively, weighted by
-%     their degree. Each species has a consistent position in the
-%     network across years. In the assembling hedgerows, colored squares
-%     in the corner of each network represent the year of
-%     assembly. Before hedgerows are installed (when they are still
-%     field margins) the year of assembly is zero.}
-%   \label{fig:changePoints}
-% \end{figure}
-% \clearpage
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.8\textwidth]{../../../saved/SingleSpp-MultiSea/figures/comparisons/SingleSpp-MultiSeaBar.pdf}
+  \caption{The mean and minimum efficiency of different MCMC samplers
+    for the single species, multi season occupancy model.}
+  \label{fig:ss-ms-eff}
+\end{figure}
+\clearpage
+
+
+\begin{sidewaysfigure}
+  \centering
+  \includegraphics[width=.8\textwidth]{../../../saved/SingleSpp-MultiSea/figures/comparisons/SingleSpp-MultiSeaDiffs.pdf}
+  \caption{The log ratio of the NIMBLE samplers in comparison to the
+    JAGS sampler for the single species, multi season occupancy
+    model.}
+  \label{fig:ss-ms-eff}
+\end{sidewaysfigure}
+\clearpage
+
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.8\textwidth]{../../../saved/multiSpp-singleSea/figures/comparisons/MultiSpp-SingleSeaBar.pdf}
+  \caption{The mean and minimum efficiency of different MCMC samplers
+    for the multi species, single season occupancy model.}
+  \label{fig:ms-ss-eff}
+\end{figure}
+\clearpage
+
+
+\begin{sidewaysfigure}
+  \centering
+  \includegraphics[width=.8\textwidth]{../../../saved/multiSpp-singleSea/figures/comparisons/MultiSpp-SingleSeaDiffs.pdf}
+  \caption{The log ratio of the NIMBLE samplers in comparison to the
+    JAGS sampler for the multi species, single season occupancy
+    model.}
+  \label{fig:ms-ss-eff}
+\end{sidewaysfigure}
+\clearpage
+
+
 
 \end{document}
 
