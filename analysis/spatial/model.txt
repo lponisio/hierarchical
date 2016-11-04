@@ -1,7 +1,7 @@
 model
 {
     delta ~ dunif(0.1, 10)
-    sigma ~ dunif(0, 10)
+    sigma ~ dunif(0.1, 10)
     p ~ dunif(0, 1)
     alpha ~ dnorm(0, 0.001)
     b1 ~ dnorm(0, 0.001)
@@ -16,8 +16,8 @@ model
     }
     for (i in 1:nsite) {
         for (j in 1:nsite) {
-            temp.cov[i, j] <- -delta * D[i, j]
-            D.cov[i, j] <- (sigma^2) * exp(temp.cov[i, j])
+            prep.cov[i, j] <- exp(-delta * D[i, j])
+            D.cov[i, j] <- (sigma^2) * (0.95 * prep.cov[i, j] + 0.05 * DI[i, j])
         }
     }
     D.tau[1:nsite, 1:nsite] <- inverse(D.cov[1:nsite, 1:nsite])

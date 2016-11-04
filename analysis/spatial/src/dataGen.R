@@ -1,3 +1,4 @@
+
 expit <- function(x) 1/(1 + exp(-x))
 
 rmvn <- function(n, mu = 0, V = matrix(1)) {
@@ -9,23 +10,26 @@ rmvn <- function(n, mu = 0, V = matrix(1)) {
 }
 
 
-genSpatialOccData <- function(ngrid = 80,
+genSpatialOccData <- function(ngrid = 50,
                               nreps = 50,
                               alpha = 1,
                               beta1 = 6,
                               p = 0.8,
-                              sigma = 2,
+                              sigma = 0.5,
                               delta = 0.5){
-
   ## Set up a square lattice region
   simgrid <- expand.grid(1:ngrid, 1:ngrid)
   n <- nrow(simgrid)
 
   ## Set up distance matrix
-  distance <- as.matrix(dist(simgrid))
-
+  dist.mat <- as.matrix(dist(simgrid))
+  
+  prep.cor.mat <- exp(-delta * dist.mat)
+  cor.mat <- sigma^2*(0.95*prep.cor.mat +
+                      0.05*diag(nrow(prep.cor.mat)))
   ## Generate spatial random effect
-  X <- rmvn(1, rep(0, n),  (sigma^2)*exp(-delta * distance))
+  X <- rmvn(1, rep(0, n), cor.mat)
+  
   Xraster <- rasterFromXYZ(cbind(simgrid[, 1:2] - 0.5, X))
   plot(Xraster)
   ## simulate elevation data
@@ -58,16 +62,17 @@ genSpatialOccData <- function(ngrid = 80,
 
   return(list(data=fulldata,
               y=y,
-              distance=distance))
+              distance=dist.mat))
 }
 
 
 ## preps data for nimble
-prepModData <- function(fulldata, y, distance, nsite,
+prepModData <- function(fulldata, y, dist.mat, nsite,
                         monitors=c("delta", "sigma", "psi",
                           "p", "alpha", "b1")){
   ## subsample at "sites" (create a grid of sites to avoid any that
   ## are too close to eachother)
+
   sites <- round(seq(from=1, to=nrow(fulldata), length=nsite))
   y <- y[sites,]
   
@@ -84,11 +89,12 @@ prepModData <- function(fulldata, y, distance, nsite,
                 sigma=0.1,
                 delta=0.1)
 
-  model.data <- list(D = distance[sites, sites],
+  model.data <- list(D = dist.mat[sites, sites],
                      y = y,
                      z = zs,
                      zeros=rep(0, nsite),
-                     elev = fulldata$elevation[sites])
+                     elev = fulldata$elevation[sites],
+                     DI = diag(nsite))
   
   model.input <- list(constants=list(nsite = nsite,
                         nreps=ncol(y)),
