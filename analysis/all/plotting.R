@@ -1,4 +1,5 @@
 library(RColorBrewer)
+library(coda)
 
 pdf.f <- function(f, file, ...) {
   cat(sprintf('Writing %s\n', file))
@@ -21,11 +22,14 @@ checkChains <- function(all.mods.samps, f.path){
       layout(matrix(1:4, ncol=2))
 
       apply(all.mods.samps[z,,], 1, function(x){
-        plot(x, type="l",
-             xlab = 'iteration',
-             main= params[which(apply(all.mods.samps[z,,], 1, function(y)
-               all(match(x,y))))]
-             )
+        plot(mcmc(x), type = "l",
+                  main= params[which(apply(all.mods.samps[z,,], 1, function(y)
+                    all(match(x,y))))])
+        ## plot(x, type="l",
+        ##      xlab = 'iteration',
+        ##      main= params[which(apply(all.mods.samps[z,,], 1, function(y)
+        ##        all(match(x,y))))]
+        ##      )
       })
     }
 
@@ -89,14 +93,14 @@ plotEffSize <- function(eff.size, eff.param,
           2, line=3.2, cex=1.5)
   }
 
-    f3 <- function(){
+  f3 <- function(){
     layout(matrix(1:2, ncol=1), heights=c(1,3))
 
     par(oma=c(5, 6, 0.5, 1),
         mar=c(0.5, 0, 0.5, 1), cex.axis=1.5)
     
     diffs <- t(apply(eff.param, 1,
-                   function(x) log(x) - log(eff.param["JAGS-latent",])))[-1,]
+                     function(x) log(x) - log(eff.param["JAGS-latent",])))[-1,]
     
     plot(NA, ylim=c(0,1), xlim=c(0,1), yaxt= "n", xaxt="n", bty="n")
     legend("top", legend=rownames(diffs),

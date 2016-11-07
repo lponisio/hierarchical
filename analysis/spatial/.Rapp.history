@@ -1,20 +1,581 @@
-install.packages("corpcor")
 rm(list=ls())#
+library(nimble)#
 setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
-source('src/initialize.R')#
-library(rjags)#
-load.module("msm")#
+source('../all/plotting.R')#
+save.dir <-  "../../../saved/spatial/saved"#
 #
-set.seed(444)#
-dats <- genSpatialOccData()
-dist.mat <- as.matrix(dist(simgrid))
-dist.mat.shrink <- cov.shrink(dist.mat)
-is.positive.definite(dist.mat.shrink)
-X <- rmvn(1, rep(0, n),  (sigma^2)*exp(-delta * dist.mat.shrink))
-head(dist.mat.shrink)
-dist.mat.shrink
-head(dist.mat)
-class(dist.mat.shrink)
-X <- rmvn(1, rep(0, n),  (sigma^2)*exp(-delta * dist.mat))#
-  X.shrink <- cov.shrink(X)
+## original model jags and nimble#
+load(file=file.path(save.dir, "orig.Rdata"))#
+#
+## vanilla nimble and auto block#
+load(file=file.path(save.dir, "opt1.Rdata"))#
+#
+## ## custom sampler for zs, slice for other parms#
+## load(file=file.path(save.dir, "opt2.Rdata"))#
+#
+## ## rename results#
+## sp.opt2[[1]] <- rename_MCMC_comparison_method('nimbleOpt2',#
+##                                                  'slice',#
+##                                                  comparison=sp.opt2[[1]])#
+## compare mcmcs#
+sp.occ.all <- combine_MCMC_comparison_results(sp.orig[[1]],#
+                                                 sp.opt1[[1]],#
+                                                 ## sp.opt2[[1]],#
+                                                 name = "sp" )#
+make_MCMC_comparison_pages(sp.occ.all,#
+                           dir=file.path(save.dir,#
+                             "../figures/comparisons"))#
+#
+checkChains(sp.occ.all[[1]]$samples,#
+            f.path = file.path(save.dir,#
+            "../figures/chains/%s.pdf"))
+rm(list=ls())#
+library(nimble)#
+setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
+source('../all/plotting.R')#
+save.dir <-  "../../../saved/spatial/saved"#
+#
+## original model jags and nimble#
+load(file=file.path(save.dir, "orig.Rdata"))#
+#
+## vanilla nimble and auto block#
+load(file=file.path(save.dir, "opt1.Rdata"))#
+#
+## ## custom sampler for zs, slice for other parms#
+## load(file=file.path(save.dir, "opt2.Rdata"))#
+#
+## ## rename results#
+## sp.opt2[[1]] <- rename_MCMC_comparison_method('nimbleOpt2',#
+##                                                  'slice',#
+##                                                  comparison=sp.opt2[[1]])#
+## compare mcmcs#
+sp.occ.all <- combine_MCMC_comparison_results(sp.orig[[1]],#
+                                                 sp.opt1[[1]],#
+                                                 ## sp.opt2[[1]],#
+                                                 name = "sp" )#
+make_MCMC_comparison_pages(sp.occ.all,#
+                           dir=file.path(save.dir,#
+                             "../figures/comparisons"))#
+#
+checkChains(sp.occ.all[[1]]$samples,#
+            f.path = file.path(save.dir,#
+            "../figures/chains/%s.pdf"))
+rm(list=ls())#
+library(nimble)#
+setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
+source('../all/plotting.R')#
+save.dir <-  "../../../saved/spatial/saved"#
+#
+## original model jags and nimble#
+load(file=file.path(save.dir, "orig.Rdata"))#
+#
+## vanilla nimble and auto block#
+load(file=file.path(save.dir, "opt1.Rdata"))#
+#
+## ## custom sampler for zs, slice for other parms#
+## load(file=file.path(save.dir, "opt2.Rdata"))#
+#
+## ## rename results#
+## sp.opt2[[1]] <- rename_MCMC_comparison_method('nimbleOpt2',#
+##                                                  'slice',#
+##                                                  comparison=sp.opt2[[1]])#
+## compare mcmcs#
+sp.occ.all <- combine_MCMC_comparison_results(sp.orig[[1]],#
+                                                 sp.opt1[[1]],#
+                                                 ## sp.opt2[[1]],#
+                                                 name = "sp" )#
+make_MCMC_comparison_pages(sp.occ.all,#
+                           dir=file.path(save.dir,#
+                             "../figures/comparisons"))#
+#
+checkChains(sp.occ.all[[1]]$samples,#
+            f.path = file.path(save.dir,#
+            "../figures/chains/%s.pdf"))
+rm(list=ls())#
+library(nimble)#
+setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
+source('../all/plotting.R')#
+save.dir <-  "../../../saved/spatial/saved"#
+#
+## original model jags and nimble#
+load(file=file.path(save.dir, "orig.Rdata"))#
+#
+## vanilla nimble and auto block#
+load(file=file.path(save.dir, "opt1.Rdata"))#
+#
+## ## custom sampler for zs, slice for other parms#
+## load(file=file.path(save.dir, "opt2.Rdata"))#
+#
+## ## rename results#
+## sp.opt2[[1]] <- rename_MCMC_comparison_method('nimbleOpt2',#
+##                                                  'slice',#
+##                                                  comparison=sp.opt2[[1]])#
+## compare mcmcs#
+sp.occ.all <- combine_MCMC_comparison_results(sp.orig[[1]],#
+                                                 sp.opt1[[1]],#
+                                                 ## sp.opt2[[1]],#
+                                                 name = "sp" )#
+make_MCMC_comparison_pages(sp.occ.all,#
+                           dir=file.path(save.dir,#
+                             "../figures/comparisons"))#
+#
+checkChains(sp.occ.all[[1]]$samples,#
+            f.path = file.path(save.dir,#
+            "../figures/chains/%s.pdf"))
+rm(list=ls())#
+library(nimble)#
+setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
+source('../all/plotting.R')#
+save.dir <-  "../../../saved/spatial/saved"#
+#
+## original model jags and nimble#
+load(file=file.path(save.dir, "orig.Rdata"))#
+#
+## vanilla nimble and auto block#
+load(file=file.path(save.dir, "opt1.Rdata"))#
+#
+## ## custom sampler for zs, slice for other parms#
+## load(file=file.path(save.dir, "opt2.Rdata"))#
+#
+## ## rename results#
+## sp.opt2[[1]] <- rename_MCMC_comparison_method('nimbleOpt2',#
+##                                                  'slice',#
+##                                                  comparison=sp.opt2[[1]])#
+## compare mcmcs#
+sp.occ.all <- combine_MCMC_comparison_results(sp.orig[[1]],#
+                                                 sp.opt1[[1]],#
+                                                 ## sp.opt2[[1]],#
+                                                 name = "sp" )#
+make_MCMC_comparison_pages(sp.occ.all,#
+                           dir=file.path(save.dir,#
+                             "../figures/comparisons"))#
+#
+checkChains(sp.occ.all[[1]]$samples,#
+            f.path = file.path(save.dir,#
+            "../figures/chains/%s.pdf"))
+rm(list=ls())#
+library(nimble)#
+setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
+source('../all/plotting.R')#
+save.dir <-  "../../../saved/spatial/saved"#
+#
+## original model jags and nimble#
+load(file=file.path(save.dir, "orig.Rdata"))#
+#
+## vanilla nimble and auto block#
+load(file=file.path(save.dir, "opt1.Rdata"))#
+#
+## ## custom sampler for zs, slice for other parms#
+## load(file=file.path(save.dir, "opt2.Rdata"))#
+#
+## ## rename results#
+## sp.opt2[[1]] <- rename_MCMC_comparison_method('nimbleOpt2',#
+##                                                  'slice',#
+##                                                  comparison=sp.opt2[[1]])#
+## compare mcmcs#
+sp.occ.all <- combine_MCMC_comparison_results(sp.orig[[1]],#
+                                                 sp.opt1[[1]],#
+                                                 ## sp.opt2[[1]],#
+                                                 name = "sp" )#
+make_MCMC_comparison_pages(sp.occ.all,#
+                           dir=file.path(save.dir,#
+                             "../figures/comparisons"))#
+#
+checkChains(sp.occ.all[[1]]$samples,#
+            f.path = file.path(save.dir,#
+            "../figures/chains/%s.pdf"))
+rm(list=ls())#
+library(nimble)#
+setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
+source('../all/plotting.R')#
+save.dir <-  "../../../saved/spatial/saved"#
+#
+## original model jags and nimble#
+load(file=file.path(save.dir, "orig.Rdata"))#
+#
+## vanilla nimble and auto block#
+load(file=file.path(save.dir, "opt1.Rdata"))#
+#
+## ## custom sampler for zs, slice for other parms#
+## load(file=file.path(save.dir, "opt2.Rdata"))#
+#
+## ## rename results#
+## sp.opt2[[1]] <- rename_MCMC_comparison_method('nimbleOpt2',#
+##                                                  'slice',#
+##                                                  comparison=sp.opt2[[1]])#
+## compare mcmcs#
+sp.occ.all <- combine_MCMC_comparison_results(sp.orig[[1]],#
+                                                 sp.opt1[[1]],#
+                                                 ## sp.opt2[[1]],#
+                                                 name = "sp" )#
+make_MCMC_comparison_pages(sp.occ.all,#
+                           dir=file.path(save.dir,#
+                             "../figures/comparisons"))#
+#
+checkChains(sp.occ.all[[1]]$samples,#
+            f.path = file.path(save.dir,#
+            "../figures/chains/%s.pdf"))
+rm(list=ls())#
+library(nimble)#
+setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
+source('../all/plotting.R')#
+save.dir <-  "../../../saved/spatial/saved"#
+#
+## original model jags and nimble#
+load(file=file.path(save.dir, "orig.Rdata"))#
+#
+## vanilla nimble and auto block#
+load(file=file.path(save.dir, "opt1.Rdata"))#
+#
+## ## custom sampler for zs, slice for other parms#
+## load(file=file.path(save.dir, "opt2.Rdata"))#
+#
+## ## rename results#
+## sp.opt2[[1]] <- rename_MCMC_comparison_method('nimbleOpt2',#
+##                                                  'slice',#
+##                                                  comparison=sp.opt2[[1]])#
+## compare mcmcs#
+sp.occ.all <- combine_MCMC_comparison_results(sp.orig[[1]],#
+                                                 sp.opt1[[1]],#
+                                                 ## sp.opt2[[1]],#
+                                                 name = "sp" )#
+make_MCMC_comparison_pages(sp.occ.all,#
+                           dir=file.path(save.dir,#
+                             "../figures/comparisons"))#
+#
+checkChains(sp.occ.all[[1]]$samples,#
+            f.path = file.path(save.dir,#
+            "../figures/chains/%s.pdf"))
+niter
+niter
+rm(list=ls())#
+library(nimble)#
+setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
+source('../all/plotting.R')#
+save.dir <-  "../../../saved/spatial/saved"#
+#
+## original model jags and nimble#
+load(file=file.path(save.dir, "orig.Rdata"))#
+#
+## vanilla nimble and auto block#
+load(file=file.path(save.dir, "opt1.Rdata"))#
+#
+## ## custom sampler for zs, slice for other parms#
+## load(file=file.path(save.dir, "opt2.Rdata"))#
+#
+## ## rename results#
+## sp.opt2[[1]] <- rename_MCMC_comparison_method('nimbleOpt2',#
+##                                                  'slice',#
+##                                                  comparison=sp.opt2[[1]])#
+## compare mcmcs#
+sp.occ.all <- combine_MCMC_comparison_results(sp.orig[[1]],#
+                                                 sp.opt1[[1]],#
+                                                 ## sp.opt2[[1]],#
+                                                 name = "sp" )#
+make_MCMC_comparison_pages(sp.occ.all,#
+                           dir=file.path(save.dir,#
+                             "../figures/comparisons"))#
+#
+checkChains(sp.occ.all[[1]]$samples,#
+            f.path = file.path(save.dir,#
+            "../figures/chains/%s.pdf"))
+?traceplot
+library(devtools)#
+install_github("nimble-dev/nimble",#
+               ref = "devel",#
+               subdir = "packages/nimble")#
+#
+library(nimble)#
+library(igraph)#
+library(raster)#
+#
+source("../all/plotting.R")#
+source("../all/runNimble.R")#
+source("src/dataGen.R")#
+#
+save.dir <-  "../../../saved/spatial/saved"#
+#
+## MCMC settings#
+scale <- 1e2#
+burnin <- 1e1*scale#
+niter <- (1e3)*scale
+niter
+rm(list=ls())#
+library(nimble)#
+library(parallel)#
+options(mc.cores=1)#
+nthin <- 2#
+#
+pumpCode <- nimbleCode({#
+  for (i in 1:N){#
+    theta[i] ~ dgamma(alpha,beta)#
+    lambda[i] <- theta[i]*t[i]#
+    x[i] ~ dpois(lambda[i])#
+  }#
+  alpha ~ dexp(1.0)#
+  beta ~ dgamma(0.1,1.0)#
+})#
+#
+pumpConsts <- list(N = 10,#
+                   t = c(94.3, 15.7, 62.9, 126, 5.24,#
+                     31.4, 1.05, 1.05, 2.1, 10.5))#
+pumpData <- list(x = c(5, 1, 5, 14, 3, 19, 1, 1, 4, 22))#
+pumpInits <- list(alpha = 1, beta = 1,#
+                  theta = rep(0.1, pumpConsts$N))#
+## build model#
+R.model <- nimbleModel(code=pumpCode,#
+                       constants=pumpConsts,#
+                       data=pumpData,#
+                       inits=pumpInits,#
+                       check=FALSE)#
+message('R model created')#
+#
+## configure and build mcmc#
+mcmc.spec <- configureMCMC(R.model,#
+                           print=FALSE,#
+                           monitors = c("alpha", "beta"),#
+                           thin=nthin)#
+mcmc <- buildMCMC(mcmc.spec)#
+message('MCMC built')#
+#
+## compile model in C++#
+D.model <- compileNimble(R.model)#
+D.mcmc <- compileNimble(mcmc, project = R.model)#
+D.mcmc$run(3000)#
+message('NIMBLE model compiled')#
+#
+source('~/Dropbox/nimble/occupancy/analysis/cppp/src/calcCPPP.R')#
+set.seed(4)
+output <- generateCPPP(R.model,#
+                       D.model,#
+                       D.mcmc,#
+                       mcmc,#
+                       dataNames = 'x',#
+                       paramNames = c('alpha','beta'), #
+                       NSamp = 100,#
+                       NPDist = 10,#
+                       burnInProp = 0.1,#
+                       thin = nthin,#
+                       averageParams = TRUE,#
+                       discFuncGenerator=likeDiscFuncGenerator)
+output <- generateCPPP(R.model,#
+                       D.model,#
+                       D.mcmc,#
+                       mcmc,#
+                       dataNames = 'x',#
+                       paramNames = c('alpha','beta'), #
+                       NSamp = 100,#
+                       NPDist = 10,#
+                       burnInProp = 0.1,#
+                       thin = nthin,#
+                       averageParams = TRUE,#
+                       discFuncGenerator=likeDiscFuncGenerator)
+source('~/Dropbox/nimble/occupancy/analysis/cppp/src/calcCPPP.R')#
+set.seed(4)#
+#
+output <- generateCPPP(R.model,#
+                       D.model,#
+                       D.mcmc,#
+                       mcmc,#
+                       dataNames = 'x',#
+                       paramNames = c('alpha','beta'), #
+                       NSamp = 100,#
+                       NPDist = 10,#
+                       burnInProp = 0.1,#
+                       thin = nthin,#
+                       averageParams = TRUE,#
+                       discFuncGenerator=likeDiscFuncGenerator)
+head(samples)
+convergeTest <- geweke.diag(samples)$z
+convergeTest
+is.finite(NA)
+is.finite(NAN)
+is.finite(NaN)
+convergeTest <- geweke.diag(samples)$z
+convergeTest[!is.finite(convergeTest)] <- 10
+zVal <- 1.96
+?compileNimble
+cppp.C.mcmc$run(MCMCIter*0.1, reset = FALSE)
+this.niter <- MCMCIter + 0.1*MCMCIter
+samples <- mcmc(as.matrix(cppp.C.mcmc$mvSamples))
+samples <- mcmc(as.matrix(cppp.C.mcmc$mvSamples))      convergeTest <- geweke.diag(samples)$z
+convergeTest <- geweke.diag(samples)$z
+convergeTest[!is.finite(convergeTest)] <- 10
 Q
+rm(list=ls())#
+library(nimble)#
+library(parallel)#
+options(mc.cores=1)#
+nthin <- 2#
+#
+pumpCode <- nimbleCode({#
+  for (i in 1:N){#
+    theta[i] ~ dgamma(alpha,beta)#
+    lambda[i] <- theta[i]*t[i]#
+    x[i] ~ dpois(lambda[i])#
+  }#
+  alpha ~ dexp(1.0)#
+  beta ~ dgamma(0.1,1.0)#
+})#
+#
+pumpConsts <- list(N = 10,#
+                   t = c(94.3, 15.7, 62.9, 126, 5.24,#
+                     31.4, 1.05, 1.05, 2.1, 10.5))#
+pumpData <- list(x = c(5, 1, 5, 14, 3, 19, 1, 1, 4, 22))#
+pumpInits <- list(alpha = 1, beta = 1,#
+                  theta = rep(0.1, pumpConsts$N))#
+## build model#
+R.model <- nimbleModel(code=pumpCode,#
+                       constants=pumpConsts,#
+                       data=pumpData,#
+                       inits=pumpInits,#
+                       check=FALSE)#
+message('R model created')#
+#
+## configure and build mcmc#
+mcmc.spec <- configureMCMC(R.model,#
+                           print=FALSE,#
+                           monitors = c("alpha", "beta"),#
+                           thin=nthin)#
+mcmc <- buildMCMC(mcmc.spec)#
+message('MCMC built')#
+#
+## compile model in C++#
+D.model <- compileNimble(R.model)#
+D.mcmc <- compileNimble(mcmc, project = R.model)#
+D.mcmc$run(3000)#
+message('NIMBLE model compiled')#
+#
+source('~/Dropbox/nimble/occupancy/analysis/cppp/src/calcCPPP.R')#
+set.seed(4)#
+#
+output <- generateCPPP(R.model,#
+                       D.model,#
+                       D.mcmc,#
+                       mcmc,#
+                       dataNames = 'x',#
+                       paramNames = c('alpha','beta'), #
+                       NSamp = 100,#
+                       NPDist = 10,#
+                       burnInProp = 0.1,#
+                       thin = nthin,#
+                       averageParams = TRUE,#
+                       discFuncGenerator=likeDiscFuncGenerator)
+rm(list=ls())#
+library(nimble)#
+library(parallel)#
+options(mc.cores=1)#
+nthin <- 2#
+#
+pumpCode <- nimbleCode({#
+  for (i in 1:N){#
+    theta[i] ~ dgamma(alpha,beta)#
+    lambda[i] <- theta[i]*t[i]#
+    x[i] ~ dpois(lambda[i])#
+  }#
+  alpha ~ dexp(1.0)#
+  beta ~ dgamma(0.1,1.0)#
+})#
+#
+pumpConsts <- list(N = 10,#
+                   t = c(94.3, 15.7, 62.9, 126, 5.24,#
+                     31.4, 1.05, 1.05, 2.1, 10.5))#
+pumpData <- list(x = c(5, 1, 5, 14, 3, 19, 1, 1, 4, 22))#
+pumpInits <- list(alpha = 1, beta = 1,#
+                  theta = rep(0.1, pumpConsts$N))#
+## build model#
+R.model <- nimbleModel(code=pumpCode,#
+                       constants=pumpConsts,#
+                       data=pumpData,#
+                       inits=pumpInits,#
+                       check=FALSE)#
+message('R model created')#
+#
+## configure and build mcmc#
+mcmc.spec <- configureMCMC(R.model,#
+                           print=FALSE,#
+                           monitors = c("alpha", "beta"),#
+                           thin=nthin)#
+mcmc <- buildMCMC(mcmc.spec)#
+message('MCMC built')#
+#
+## compile model in C++#
+D.model <- compileNimble(R.model)#
+D.mcmc <- compileNimble(mcmc, project = R.model)#
+D.mcmc$run(3000)#
+message('NIMBLE model compiled')#
+#
+source('~/Dropbox/nimble/occupancy/analysis/cppp/src/calcCPPP.R')#
+set.seed(4)#
+#
+output <- generateCPPP(R.model,#
+                       D.model,#
+                       D.mcmc,#
+                       mcmc,#
+                       dataNames = 'x',#
+                       paramNames = c('alpha','beta'), #
+                       NSamp = 100,#
+                       NPDist = 10,#
+                       burnInProp = 0.1,#
+                       thin = nthin,#
+                       averageParams = TRUE,#
+                       discFuncGenerator=likeDiscFuncGenerator)
+rm(list=ls())#
+library(nimble)#
+library(parallel)#
+options(mc.cores=1)#
+nthin <- 2#
+#
+pumpCode <- nimbleCode({#
+  for (i in 1:N){#
+    theta[i] ~ dgamma(alpha,beta)#
+    lambda[i] <- theta[i]*t[i]#
+    x[i] ~ dpois(lambda[i])#
+  }#
+  alpha ~ dexp(1.0)#
+  beta ~ dgamma(0.1,1.0)#
+})#
+#
+pumpConsts <- list(N = 10,#
+                   t = c(94.3, 15.7, 62.9, 126, 5.24,#
+                     31.4, 1.05, 1.05, 2.1, 10.5))#
+pumpData <- list(x = c(5, 1, 5, 14, 3, 19, 1, 1, 4, 22))#
+pumpInits <- list(alpha = 1, beta = 1,#
+                  theta = rep(0.1, pumpConsts$N))#
+## build model#
+R.model <- nimbleModel(code=pumpCode,#
+                       constants=pumpConsts,#
+                       data=pumpData,#
+                       inits=pumpInits,#
+                       check=FALSE)#
+message('R model created')#
+#
+## configure and build mcmc#
+mcmc.spec <- configureMCMC(R.model,#
+                           print=FALSE,#
+                           monitors = c("alpha", "beta"),#
+                           thin=nthin)#
+mcmc <- buildMCMC(mcmc.spec)#
+message('MCMC built')#
+#
+## compile model in C++#
+D.model <- compileNimble(R.model)#
+D.mcmc <- compileNimble(mcmc, project = R.model)#
+D.mcmc$run(3000)#
+message('NIMBLE model compiled')#
+#
+source('~/Dropbox/nimble/occupancy/analysis/cppp/src/calcCPPP.R')#
+set.seed(4)#
+#
+output <- generateCPPP(R.model,#
+                       D.model,#
+                       D.mcmc,#
+                       mcmc,#
+                       dataNames = 'x',#
+                       paramNames = c('alpha','beta'), #
+                       NSamp = 100,#
+                       NPDist = 10,#
+                       burnInProp = 0.1,#
+                       thin = nthin,#
+                       averageParams = TRUE,#
+                       discFuncGenerator=likeDiscFuncGenerator)

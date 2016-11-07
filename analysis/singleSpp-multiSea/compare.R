@@ -1,5 +1,6 @@
 rm(list=ls())
 library(nimble)
+library(coda)
 setwd("~/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea")
 source('../all/plotting.R')
 save.dir <- "../../../saved/singleSpp-multiSea/saved"
@@ -26,7 +27,7 @@ ss.ms.orig[[1]] <- rename_MCMC_comparison_method(c('nimble', 'jags'),
 
 
 ss.ms.opt2[[1]] <- rename_MCMC_comparison_method('nimbleOpt2',
-                                                 'slice',
+                                                 'slice + latentSubSamp',
                                                  comparison=ss.ms.opt2[[1]])
 
 ss.ms.opt4[[1]] <- rename_MCMC_comparison_method(c('nimble',
@@ -42,7 +43,7 @@ ss.ms.opt4[[1]] <- rename_MCMC_comparison_method(c('nimble',
 ##                                                  comparison=ss.ms.opt5[[1]])
 ## compare mcmcs
 ss.ms.occ.all <- combine_MCMC_comparison_results(ss.ms.orig[[1]],
-                                                 ## ss.ms.opt2[[1]],
+                                                 ss.ms.opt2[[1]],
                                                  ss.ms.opt4[[1]],
                                                  ## ss.ms.opt5[[1]],
                                                  name = "ss.ms" )
