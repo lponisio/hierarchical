@@ -88,6 +88,7 @@ calcCPPP <- function(MCMCIter,
                      runUntilConverged = NULL,
                      maxIter = NULL,
                      convStep= NULL){
+  
   if(firstRun  == 0){
     cppp.C.mcmc$run(MCMCIter)
     samples <- mcmc(as.matrix(cppp.C.mcmc$mvSamples))
@@ -95,8 +96,8 @@ calcCPPP <- function(MCMCIter,
     if(runUntilConverged == TRUE){
       ## use Geweke diagnostic to see if MCMC has converged
       convergeTest <- geweke.diag(samples)$z
-      ## any na values get set to a very large z value so the MCMC will
-      ## continue to be run. note that nan values correspond to
+      ## any na values get set to a very large z value so the MCMC
+      ## will continue to be run. note that nan values correspond to
       ## posterior samples that are constant, indicating a lack of
       ## convergence
       convergeTest[!is.finite(convergeTest)] <- 10 
@@ -137,8 +138,8 @@ generateCPPP <-  function(R.model,
                           averageParams,
                           returnChains = TRUE,
                           runUntilConverged = TRUE,
-                          maxIter = 5*10^5,
-                          convStep = 0.1,
+                          maxIter = 4*10^3,
+                          convStep = 0.5,
                           ...){
   if(!inherits(R.model, "RmodelBaseClass")){
     stop("R.model is not an Rmodel")
@@ -223,6 +224,7 @@ generateCPPP <-  function(R.model,
   simPppDist <- function(iteration){
     message(paste("refitting data iteration", iteration))
     simulate(orig.C.model,  includeData =  TRUE)
+    print(orig.C.model$alpha)
     out <- calcCPPP(MCMCIter,
                     NSamp,
                     C.pppFunc,

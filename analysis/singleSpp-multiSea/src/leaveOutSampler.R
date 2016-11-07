@@ -7,7 +7,11 @@ RW_sampler_latentSubsamp <- nimbleFunction(
     latentSamplerList <- nimbleFunctionList(sampler_BASE)
     allTargets <- model$expandNodeNames(target)
     for(latentNode in 1:latentNodeLength){
-      latentSamplerList[[latentNode]] <- sampler_binary(model, mvSaved, target = allTargets[latentNode], control = control$control) 
+      latentSamplerList[[latentNode]] <- sampler_binary(model,
+                                                        mvSaved,
+                                                        target =
+                                                        allTargets[latentNode],
+                                                        control = control$control) 
     }
   },
   run = function() {
@@ -19,6 +23,6 @@ RW_sampler_latentSubsamp <- nimbleFunction(
   },
   methods = list(
     reset = function() {}
-))
+    ))
 
 
