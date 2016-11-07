@@ -58,9 +58,10 @@ MCMCdefs.opt2 <- list('nimbleOpt2' = quote({
   ## happens to be all top nodes
   zeroOneNodes <- Rmodel$getNodeNames(topOnly = TRUE)
   for(zon in zeroOneNodes) customSpec$addSampler(target = zon,
-                                                 type =
-                                                 "slice",
+                                                 type ="slice",
                                                  print=FALSE)
+  customSpec$removeSamplers('z')
+  customSpec$addSampler('z', type = "RW_sampler_latentSubsamp", control = list(leaveOutProportion = .3 , control = list()))
   customSpec
 }))
 
@@ -75,7 +76,7 @@ ss.ms.opt2 <- compareMCMCs(input1,
                            summary=FALSE,
                            check=FALSE)
 
-save(ss.ms.opt2, file=file.path(save.dir, "opt2.Rdata"))
+save(ss.ms.opt2, file="opt2.Rdata")
 
 
 ## *********************************************************************
@@ -88,12 +89,15 @@ occ.R.model <- nimbleModel(code=ss.ms.occ,
                            data=input1$data,
                            inits=input1$inits,
                            check=FALSE)
-## ad auto blocking
-customSpec <- configureMCMC(occ.R.model, autoBlock=TRUE)
+
+
+
 occ.mcmc <- buildMCMC(occ.R.model)
 occ.C.model <- compileNimble(occ.R.model)
 occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model)
-occ.C.mcmc$run(niter)
+occ.C.mcmc$run(5)
+
+as.matrix(occ.C.mcmc$mvSamples)
 
 source('../cppp/src/calcCPPP.R', chdir = TRUE)
 options(mc.cores=1)
