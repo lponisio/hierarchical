@@ -9,7 +9,7 @@ save.dir <- "../../../saved/singleSpp-multiSea/saved"
 load(file=file.path(save.dir, "orig.Rdata"))
 
 ## custom sampler for zs, slice for other parms
-load(file=file.path(save.dir, "opt2.Rdata"))
+load(file=file.path(save.dir, "opt2_saddness.Rdata"))
 
 ## custom function for latent state
 load(file=file.path(save.dir, "opt4.Rdata"))
@@ -31,10 +31,10 @@ ss.ms.opt2[[1]] <- rename_MCMC_comparison_method('nimbleOpt2',
                                                  comparison=ss.ms.opt2[[1]])
 
 ss.ms.opt4[[1]] <- rename_MCMC_comparison_method(c('nimble',
-                                                   'autoBlock',
+                                                   ## 'autoBlock',
                                                    'nimble_slice'),
                                                  c('filter',
-                                                   'filter + autoblock',
+                                                   ## 'filter + autoblock',
                                                    'filter + slice'),
                                                  comparison=ss.ms.opt4[[1]])
 
@@ -44,8 +44,7 @@ ss.ms.opt4[[1]] <- rename_MCMC_comparison_method(c('nimble',
 ## compare mcmcs
 ss.ms.occ.all <- combine_MCMC_comparison_results(ss.ms.orig[[1]],
                                                  ss.ms.opt2[[1]],
-                                                 ss.ms.opt4[[1]],
-                                                 ## ss.ms.opt5[[1]],
+                                                 ## ss.ms.opt4[[1]],
                                                  name = "ss.ms" )
 
 make_MCMC_comparison_pages(ss.ms.occ.all,

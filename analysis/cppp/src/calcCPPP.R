@@ -81,6 +81,7 @@ pppFunc <- nimbleFunction(
 ## calculate proportion of deviances that are greater or equal to the
 ## observed value
 calcCPPP <- function(MCMCIter,
+                     burnIn,
                      NSamp,
                      C.pppFunc,
                      cppp.C.mcmc,
@@ -91,7 +92,7 @@ calcCPPP <- function(MCMCIter,
   
   if(firstRun  == 0){
     cppp.C.mcmc$run(MCMCIter)
-    samples <- mcmc(as.matrix(cppp.C.mcmc$mvSamples))
+    samples <- mcmc(as.matrix(cppp.C.mcmc$mvSamples)[-c(1:burnIn),])
 
     if(runUntilConverged == TRUE){
       ## use Geweke diagnostic to see if MCMC has converged
@@ -105,7 +106,7 @@ calcCPPP <- function(MCMCIter,
       while(any(abs(convergeTest) > zVal)){
         cppp.C.mcmc$run(MCMCIter*convStep, reset = FALSE)
         this.niter <- MCMCIter + convStep*MCMCIter
-        samples <- mcmc(as.matrix(cppp.C.mcmc$mvSamples))
+        samples <- mcmc(as.matrix(cppp.C.mcmc$mvSamples)[-c(1:burnIn),])
         convergeTest <- geweke.diag(samples)$z
         convergeTest[!is.finite(convergeTest)] <- 10 
         if(this.niter > maxIter)
@@ -138,7 +139,7 @@ generateCPPP <-  function(R.model,
                           averageParams,
                           returnChains = TRUE,
                           runUntilConverged = TRUE,
-                          maxIter = 4*10^3,
+                          maxIter = 1*10^4,
                           convStep = 0.5,
                           ...){
   if(!inherits(R.model, "RmodelBaseClass")){
@@ -214,6 +215,7 @@ generateCPPP <-  function(R.model,
 
   ## calculate deviances
   obs.cppp <- calcCPPP(MCMCIter,
+                       burnIn,
                        NSamp,
                        C.pppFunc,
                        orig.C.mcmc,
@@ -226,6 +228,7 @@ generateCPPP <-  function(R.model,
     simulate(orig.C.model,  includeData =  TRUE)
     print(orig.C.model$alpha)
     out <- calcCPPP(MCMCIter,
+                    burnIn,
                     NSamp,
                     C.pppFunc,
                     orig.C.mcmc,
