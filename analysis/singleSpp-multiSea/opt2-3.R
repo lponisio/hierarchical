@@ -62,7 +62,7 @@ MCMCdefs.opt2 <- list('nimbleOpt2' = quote({
                                                  print=FALSE)
   customSpec$removeSamplers('z')
   customSpec$addSampler('z', type = "sampler_latentSub",
-                        control = list(leaveOutProportion = 0.7,
+                        control = list(leaveOutProportion = 0.85,
                           control = list()))
   customSpec
 }))
