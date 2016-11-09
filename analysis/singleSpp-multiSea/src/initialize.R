@@ -7,6 +7,7 @@ library(nimble)
 library(igraph)
 source("src/dynamicOcc.R")
 source("src/dataGen.R")
+source("src/leaveOutSampler.R")
 source("../all/plotting.R")
 source("../all/runNimble.R")
 

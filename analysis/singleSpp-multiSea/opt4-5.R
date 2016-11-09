@@ -44,7 +44,7 @@ input1 <- c(code=ss.ms.occ,
 ## *********************************************************************
 
 ss.ms.opt4 <- compareMCMCs(input1,
-                           MCMCs=c('nimble', 'autoBlock', 'nimble_slice'),
+                           MCMCs=c('nimble', 'nimble_slice'),
                            niter=niter,
                            burnin = burnin,
                            summary=FALSE,
@@ -78,45 +78,45 @@ MCMCdefs.opt5 <- list('nimbleOpt5' = quote({
 ## run with compareMCMCs
 ## *********************************************************************
 
-ss.ms.opt5 <- compareMCMCs(input1,
-                           MCMCs=c('nimbleOpt5'),
-                           MCMCdefs = MCMCdefs.opt5,
-                           niter=niter,
-                           burnin = burnin,
-                           summary=FALSE,
-                           check=FALSE)
+## ss.ms.opt5 <- compareMCMCs(input1,
+##                            MCMCs=c('nimbleOpt5'),
+##                            MCMCdefs = MCMCdefs.opt5,
+##                            niter=niter,
+##                            burnin = burnin,
+##                            summary=FALSE,
+##                            check=FALSE)
 
-save(ss.ms.opt5, file=file.path(save.dir, "opt5.Rdata"))
+## save(ss.ms.opt5, file=file.path(save.dir, "opt5.Rdata"))
 
 
-## *********************************************************************
-occ.R.model <- nimbleModel(code=ss.ms.occ,
-                           constants=input1$constants,
-                           data=input1$data,
-                           inits=input1$inits,
-                           check=FALSE)
+## ## *********************************************************************
+## occ.R.model <- nimbleModel(code=ss.ms.occ,
+##                            constants=input1$constants,
+##                            data=input1$data,
+##                            inits=input1$inits,
+##                            check=FALSE)
 
-occ.mcmc <- buildMCMC(occ.R.model)
-occ.C.model <- compileNimble(occ.R.model)
-occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model)
-occ.C.mcmc$run(niter)
+## occ.mcmc <- buildMCMC(occ.R.model)
+## occ.C.model <- compileNimble(occ.R.model)
+## occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model)
+## occ.C.mcmc$run(niter)
 
-source('../cppp/src/calcCPPP.R', chdir = TRUE)
-options(mc.cores=1)
+## source('../cppp/src/calcCPPP.R', chdir = TRUE)
+## options(mc.cores=1)
 
-test.opt4 <- generateCPPP(occ.R.model,
-                          occ.C.model,
-                          occ.C.mcmc,
-                          occ.mcmc,
-                          dataName = 'y',
-                          paramNames = input1$monitors, 
-                          MCMCIter = niter, 
-                          NSamp = 10^3,
-                          NPDist = 10^3,
-                          burnInProportion = 0.10,
-                          thin = 1,
-                          averageParams = TRUE,
-                          discFuncGenerator=likeDiscFuncGenerator)
+## test.opt4 <- generateCPPP(occ.R.model,
+##                           occ.C.model,
+##                           occ.C.mcmc,
+##                           occ.mcmc,
+##                           dataName = 'y',
+##                           paramNames = input1$monitors, 
+##                           MCMCIter = niter, 
+##                           NSamp = 10^3,
+##                           NPDist = 10^3,
+##                           burnInProportion = 0.10,
+##                           thin = 1,
+##                           averageParams = TRUE,
+##                           discFuncGenerator=likeDiscFuncGenerator)
 
-save(test.opt4, file=file.path(save.dir, "ssms_noz_CPPP.Rdata"))
+## save(test.opt4, file=file.path(save.dir, "ssms_noz_CPPP.Rdata"))
 

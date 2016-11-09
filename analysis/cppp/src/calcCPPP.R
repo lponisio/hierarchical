@@ -3,6 +3,7 @@ library(coda)
 ## draws a random number from the posterior, reassigned it as the
 ## paramter value, simulates data from the model
 
+
 virtualDiscFunction <- nimbleFunctionVirtual(run = function()
                                              returnType(double(0))
                                              )
@@ -80,21 +81,48 @@ pppFunc <- nimbleFunction(
 ## calculate proportion of deviances that are greater or equal to the
 ## observed value
 calcCPPP <- function(MCMCIter,
+                     burnIn,
                      NSamp,
                      C.pppFunc,
                      cppp.C.mcmc,
-                     firstRun){
+                     firstRun,
+                     runUntilConverged = NULL,
+                     maxIter = NULL,
+                     convStep= NULL){
+  
   if(firstRun  == 0){
     cppp.C.mcmc$run(MCMCIter)
-    samples <- mcmc(as.matrix(cppp.C.mcmc$mvSamples))
+    samples <- mcmc(as.matrix(cppp.C.mcmc$mvSamples)[-c(1:burnIn),])
+
+    if(runUntilConverged == TRUE){
+      ## use Geweke diagnostic to see if MCMC has converged
+      convergeTest <- geweke.diag(samples)$z
+      ## any na values get set to a very large z value so the MCMC
+      ## will continue to be run. note that nan values correspond to
+      ## posterior samples that are constant, indicating a lack of
+      ## convergence
+      convergeTest[!is.finite(convergeTest)] <- 10 
+      zVal <- 1.96
+      while(any(abs(convergeTest) > zVal)){
+        cppp.C.mcmc$run(MCMCIter*convStep, reset = FALSE)
+        this.niter <- MCMCIter + convStep*MCMCIter
+        samples <- mcmc(as.matrix(cppp.C.mcmc$mvSamples)[-c(1:burnIn),])
+        convergeTest <- geweke.diag(samples)$z
+        convergeTest[!is.finite(convergeTest)] <- 10 
+        if(this.niter > maxIter)
+          convergeTest <- 0
+      }
+    } 
   } else{
+    convergeTest <- NA
     samples <- NA
   }
   
   pre.pp <- C.pppFunc$run(NSamp)
   if(!is.finite(pre.pp))    pre.pp <- NA
   return(list(pre.pp = pre.pp,
-              samples = samples))    
+              samples = samples,
+              converge.stat = convergeTest))    
 }
 
 
@@ -110,6 +138,9 @@ generateCPPP <-  function(R.model,
                           discFuncGenerator, 
                           averageParams,
                           returnChains = TRUE,
+                          runUntilConverged = TRUE,
+                          maxIter = 1*10^4,
+                          convStep = 0.5,
                           ...){
   if(!inherits(R.model, "RmodelBaseClass")){
     stop("R.model is not an Rmodel")
@@ -184,6 +215,7 @@ generateCPPP <-  function(R.model,
 
   ## calculate deviances
   obs.cppp <- calcCPPP(MCMCIter,
+                       burnIn,
                        NSamp,
                        C.pppFunc,
                        orig.C.mcmc,
@@ -194,23 +226,29 @@ generateCPPP <-  function(R.model,
   simPppDist <- function(iteration){
     message(paste("refitting data iteration", iteration))
     simulate(orig.C.model,  includeData =  TRUE)
+    print(orig.C.model$alpha)
     out <- calcCPPP(MCMCIter,
+                    burnIn,
                     NSamp,
                     C.pppFunc,
                     orig.C.mcmc,
-                    firstRun = 0)
+                    firstRun = 0,
+                    runUntilConverged=runUntilConverged,
+                    maxIter = maxIter,
+                    convStep=convStep)
     return(out)
   }
 
   sim.cppp <- mclapply(1:NPDist, simPppDist)
   sim.ppp <- sapply(sim.cppp, function(x) x$pre.pp)
   sim.samples <- lapply(sim.cppp, function(x) x$samples)
+  chain.diag <- lapply(sim.cppp, function(x) x$converge.stat)
 
   ## calculates the number of simulated ppp that fall below the obs
   out.cppp <- mean(obs.cppp <= sim.ppp,
                    na.rm = TRUE)
-  chain.diag <- do.call(rbind, lapply(
-    lapply(sim.samples, geweke.diag), function(x) x$z))
+  ## chain.diag <- do.call(rbind, lapply(
+  ##   lapply(sim.samples, geweke.diag), function(x) x$z))
   
   nimble:::values(orig.C.model, dataNames) <- origData 
 

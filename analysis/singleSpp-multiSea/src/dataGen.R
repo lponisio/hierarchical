@@ -14,62 +14,63 @@ expit <- function(x) {
 ## detection is specified by the bounds of a uniform distribution.
 
 ## Function arguments:
-## R - Number of sites
-## J - Number of replicate surveys
-## K - Number of years
+## nsite - Number of sites
+## nreps - Number of replicate surveys
+## nyear - Number of years
 ## psi1 - occupancy probability in first year
 ## range.p - bounds of uniform distribution from which annual p drawn
 ## range.psi and range.gamma - same for survival and colonization probability
 
-genDynamicOccData <- function(R = 50,
-                              J = 10, K = 10,
+genDynamicOccData <- function(nsite = 100,
+                              nreps = 10,
+                              nyear = 10,
                               psi1 = 0.4,
                               range.p = c(0.2, 0.4),
                               range.phi = c(0.6, 0.8),
                               range.gamma = c(0, 0.1)) {
   ## Set up some required arrays
-  site <- 1:R					## Sites
-  year <- 1:K					## Years
-  psi <- rep(NA, K)				## Occupancy probability
-  muZ <- z <- array(dim = c(R, K))	## Expected and realized occurrence
-  y <- array(NA, dim = c(R, J, K))	## Detection histories
+  site <- 1:nsite					## Sites
+  year <- 1:nyear					## Years
+  psi <- rep(NA, nyear)				## Occupancy probability
+  muZ <- z <- array(dim = c(nsite, nyear))	## Expected and realized occurrence
+  y <- array(NA, dim = c(nsite, nreps, nyear))	## Detection histories
 
   ## Determine initial occupancy and demographic parameters
   psi[1] <- psi1				## Initial occupancy probability
-  p <- runif(n = K, min = range.p[1], max = range.p[2])
-  phi <- runif(n = K-1, min = range.phi[1], max = range.phi[2])
-  gamma <- runif(n = K-1, min = range.gamma[1], max = range.gamma[2])
+  p <- runif(n = nyear, min = range.p[1], max = range.p[2])
+  phi <- runif(n = nyear-1, min = range.phi[1], max = range.phi[2])
+  gamma <- runif(n = nyear-1, min = range.gamma[1], max = range.gamma[2])
 
   ## Generate latent states of occurrence
   ## First year
-  z[,1] <- rbinom(R, 1, psi[1])		## Initial occupancy state
+  z[,1] <- rbinom(nsite, 1, psi[1])		## Initial occupancy state
   ## Later years
-  for(i in 1:R){				## Loop over sites
-    for(k in 2:K){				## Loop over years
+  for(i in 1:nsite){				## Loop over sites
+    for(k in 2:nyear){				## Loop over years
       muZ[k] <- z[i, k-1]*phi[k-1] + (1-z[i, k-1])*gamma[k-1] ## Prob for occ.
       z[i,k] <- rbinom(1, 1, muZ[k])
     }
   }
 
   ## Generate detection/nondetection data
-  for(i in 1:R){
-    for(k in 1:K){
+  for(i in 1:nsite){
+    for(k in 1:nyear){
       prob <- z[i,k] * p[k]
-      for(j in 1:J){
+      for(j in 1:nreps){
         y[i,j,k] <- rbinom(1, 1, prob)
       }
     }
   }
 
   ## Compute annual population occupancy
-  for (k in 2:K){
+  for (k in 2:nyear){
     psi[k] <- psi[k-1]*phi[k-1] + (1-psi[k-1])*gamma[k-1]
   }
 
   ## Plot apparent occupancy
   psi.app <- apply(apply(y, c(1,3), max), 2, mean)
 
-  return(list(R = R, J = J, K = K,
+  return(list(nsite = nsite, nreps = nreps, nyear = nyear,
               psi = psi, psi.app = psi.app, z = z,
               phi = phi, gamma = gamma, p = p, y = y))
 }

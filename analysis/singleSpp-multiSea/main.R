@@ -4,7 +4,6 @@ setwd("~//Dropbox//nimble//occupancy//analysis//singleSpp-multiSea")
 ## original model
 source('original.R')
 
-
 ## custom samplers for zs and reflective sampler, or slice sampler
 source('opt2-3.R')
 

@@ -61,7 +61,9 @@ MCMCdefs.opt2 <- list('nimbleOpt2' = quote({
                                                  type ="slice",
                                                  print=FALSE)
   customSpec$removeSamplers('z')
-  customSpec$addSampler('z', type = "RW_sampler_latentSubsamp", control = list(leaveOutProportion = .3 , control = list()))
+  customSpec$addSampler('z', type = "sampler_latentSub",
+                        control = list(leaveOutProportion = 0.85,
+                          control = list()))
   customSpec
 }))
 
@@ -76,7 +78,7 @@ ss.ms.opt2 <- compareMCMCs(input1,
                            summary=FALSE,
                            check=FALSE)
 
-save(ss.ms.opt2, file="opt2.Rdata")
+save(ss.ms.opt2, file=file.path(save.dir, "opt2_saddness.Rdata"))
 
 
 ## *********************************************************************
@@ -84,36 +86,35 @@ save(ss.ms.opt2, file="opt2.Rdata")
 ## *********************************************************************
 ## build model
 
-occ.R.model <- nimbleModel(code=ss.ms.occ,
-                           constants=input1$constants,
-                           data=input1$data,
-                           inits=input1$inits,
-                           check=FALSE)
+## occ.R.model <- nimbleModel(code=ss.ms.occ,
+##                            constants=input1$constants,
+##                            data=input1$data,
+##                            inits=input1$inits,
+##                            check=FALSE)
 
 
 
-occ.mcmc <- buildMCMC(occ.R.model)
-occ.C.model <- compileNimble(occ.R.model)
-occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model)
-occ.C.mcmc$run(5)
+## occ.mcmc <- buildMCMC(occ.R.model)
+## occ.C.model <- compileNimble(occ.R.model)
+## occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model)
+## occ.C.mcmc$run(niter)
 
-as.matrix(occ.C.mcmc$mvSamples)
+## as.matrix(occ.C.mcmc$mvSamples)
 
-source('../cppp/src/calcCPPP.R', chdir = TRUE)
-options(mc.cores=1)
+## source('../cppp/src/calcCPPP.R', chdir = TRUE)
+## options(mc.cores=6)
 
-test.opt2 <- generateCPPP(occ.R.model,
-                          occ.C.model,
-                          occ.C.mcmc,
-                          occ.mcmc,
-                          dataName = 'y',
-                          paramNames = input1$monitors, 
-                          MCMCIter = niter, 
-                          NSamp = 10^3,
-                          NPDist = 10^3,
-                          burnInProportion = 0.10,
-                          thin = 1,
-                          averageParams = TRUE,
-                          discFuncGenerator=likeDiscFuncGenerator)
+## test.opt2 <- generateCPPP(occ.R.model,
+##                           occ.C.model,
+##                           occ.C.mcmc,
+##                           occ.mcmc,
+##                           dataName = 'y',
+##                           paramNames = input1$monitors, 
+##                           NSamp = 10^3,
+##                           NPDist = 10^3,
+##                           burnInProp = 0.10,
+##                           thin = 1,
+##                           averageParams = TRUE,
+##                           discFuncGenerator=likeDiscFuncGenerator)
 
-save(test.opt2, file=file.path(save.dir, "ssms_CPPP.Rdata"))
+## save(test.opt2, file=file.path(save.dir, "ssms_CPPP.Rdata"))
