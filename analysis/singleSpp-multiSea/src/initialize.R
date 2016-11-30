@@ -1,7 +1,7 @@
 library(devtools)
-install_github("nimble-dev/nimble",
-               ref = "devel",
-               subdir = "packages/nimble")
+# install_github("nimble-dev/nimble",
+#                ref = "devel",
+#                subdir = "packages/nimble")
 
 library(nimble)
 library(igraph)

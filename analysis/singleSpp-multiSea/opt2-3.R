@@ -10,6 +10,7 @@ model.input <- prepModDataOcc(data)
 ##  Multi-season occupancy model: custom z sampler
 ## *********************************************************************
 
+
 ss.ms.occ <- nimbleCode({
   ## Specify priors
   psi1 ~ dunif(0, 1)
@@ -56,14 +57,15 @@ MCMCdefs.opt2 <- list('nimbleOpt2' = quote({
   customSpec$removeSamplers('p', print=FALSE)
   customSpec$removeSamplers('psi1', print=FALSE)
   ## happens to be all top nodes
-  zeroOneNodes <- Rmodel$getNodeNames(topOnly = TRUE)
-  for(zon in zeroOneNodes) customSpec$addSampler(target = zon,
-                                                 type ="slice",
+  # zeroOneNodes <- Rmodel$getNodeNames(topOnly = TRUE)
+  # for(zon in zeroOneNodes) 
+    customSpec$addSampler(target = c('phi', 'gamma', 'p', 'psi1'),
+                                                 type ="sampler_crossLevelBinary",
                                                  print=FALSE)
   customSpec$removeSamplers('z')
-  customSpec$addSampler('z', type = "sampler_latentSub",
-                        control = list(leaveOutProportion = 0.85,
-                          control = list()))
+  # customSpec$addSampler('z', type = "sampler_latentSub",
+  #                       control = list(leaveOutProportion = 0.85,
+  #                         control = list()))
   customSpec
 }))
 
