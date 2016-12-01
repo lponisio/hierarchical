@@ -52,20 +52,21 @@ input1 <- c(code=ss.ms.occ,
 
 MCMCdefs.opt2 <- list('nimbleOpt2' = quote({
   customSpec <- configureMCMC(Rmodel)
-  customSpec$removeSamplers('phi', print=FALSE)
-  customSpec$removeSamplers('gamma', print=FALSE)
-  customSpec$removeSamplers('p', print=FALSE)
-  customSpec$removeSamplers('psi1', print=FALSE)
-  ## happens to be all top nodes
-  # zeroOneNodes <- Rmodel$getNodeNames(topOnly = TRUE)
-  # for(zon in zeroOneNodes) 
-    customSpec$addSampler(target = c('phi', 'gamma', 'p', 'psi1'),
-                                                 type ="sampler_crossLevelBinary",
-                                                 print=FALSE)
+  ## customSpec$removeSamplers('phi', print=FALSE)
+  ## customSpec$removeSamplers('gamma', print=FALSE)
+  ## customSpec$removeSamplers('p', print=FALSE)
+  ## customSpec$removeSamplers('psi1', print=FALSE)
   customSpec$removeSamplers('z')
-  # customSpec$addSampler('z', type = "sampler_latentSub",
-  #                       control = list(leaveOutProportion = 0.85,
-  #                         control = list()))
+  ## happens to be all top nodes
+  ## zeroOneNodes <- Rmodel$getNodeNames(topOnly = TRUE)
+  ## for(zon in zeroOneNodes) 
+  customSpec$addSampler(target = c('phi', 'gamma', 'p', 'psi1'),
+                                               type ="sampler_crossLevelBinary",
+                                               print=FALSE)
+  ## z.nodes <- Rmodel$expandNodeNames('z')
+  ## for(zon in z.nodes){ 
+  ##   customSpec$addSampler(zon, type = "sampler_binary_new")
+  ## }
   customSpec
 }))
 

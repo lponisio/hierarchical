@@ -31,6 +31,7 @@ genSpatialOccData <- function(ngrid = 50,
   X <- rmvn(1, rep(0, n), cor.mat)
   
   Xraster <- rasterFromXYZ(cbind(simgrid[, 1:2] - 0.5, X))
+  quartz()
   plot(Xraster)
   ## simulate elevation data
   elev <- raster(matrix(rnorm(n), ngrid, ngrid),
@@ -40,11 +41,16 @@ genSpatialOccData <- function(ngrid = 50,
 
   ## calculate probabilities of occurrence
   psi <- expit(alpha + beta1 * raster::values(elev) +
-               raster::values(Xraster))  
+               raster::values(Xraster))
+  
+  ## quartz()
+  ## rasterFromXYZ(cbind(coordinates(elev), psi))
 
   ## Latent occurrence state
   z <- rbinom(n = n, size = 1, prob = psi) 
   z <- rasterFromXYZ(cbind(coordinates(elev), z))
+  quartz()
+  plot(z)
 
   coords <- coordinates(z)
   fulldata <- data.frame(coords,
