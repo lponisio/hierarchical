@@ -64,6 +64,7 @@ sampler_binary_new <- nimbleFunction(
 sampler_crossLevelBinary <- nimbleFunction(
   contains = sampler_BASE,
   setup = function(model, mvSaved, target, control) {
+
     ## control list extraction
     adaptive       <- control$adaptive
     adaptScaleOnly <- control$adaptScaleOnly
@@ -72,18 +73,25 @@ sampler_crossLevelBinary <- nimbleFunction(
     propCov        <- control$propCov
     ## node list generation
     target       <- model$expandNodeNames(target)
-    lowNodes     <- model$getDependencies(target, self = FALSE, stochOnly = TRUE, includeData = FALSE)
+    lowNodes     <- model$getDependencies(target, self = FALSE,
+                                          stochOnly = TRUE,
+                                          includeData = FALSE)
     lowCalcNodes <- model$getDependencies(lowNodes)
     calcNodes    <- model$getDependencies(c(target, lowNodes))
     ## nested function and function list definitions
     mvInternal <- modelValues(model)
-    RWblockControl <- list(adaptive = adaptive, adaptScaleOnly = adaptScaleOnly, adaptInterval = adaptInterval, scale = scale, propCov = propCov)
-    topRWblockSamplerFunction <- sampler_RW_block(model, mvInternal, target, RWblockControl)
-    # lsf <- sampler_binary_new(model, mvSaved, lowNodes[1], control = list())
+
+    RWblockControl <- list(adaptive = adaptive,
+                           adaptScaleOnly = adaptScaleOnly,
+                           adaptInterval = adaptInterval,
+                           scale = scale, propCov = propCov)
+    topRWblockSamplerFunction <- sampler_RW_block(model, mvInternal,
+                                                  target, RWblockControl)
     lowSamplerFunctions <- nimbleFunctionList(binarySampler_baseClass)
     for(iLN in seq_along(lowNodes)) {
       lowNode <- lowNodes[iLN]
-      lowSamplerFunctions[[iLN]] <- sampler_binary_new(model, mvSaved, lowNode, control = list())
+      lowSamplerFunctions[[iLN]] <- sampler_binary_new(model, mvSaved,
+                                                       lowNode, control = list())
     }
     my_setAndCalculateTop <- setAndCalculate(model, target)
     my_decideAndJump <- decideAndJump(model, mvSaved, calcNodes)

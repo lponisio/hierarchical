@@ -22,14 +22,14 @@ checkChains <- function(all.mods.samps, f.path){
       layout(matrix(1:4, ncol=2))
 
       apply(all.mods.samps[z,,], 1, function(x){
-       traceplot(mcmc(x), type = "l",
-                  main= params[which(apply(all.mods.samps[z,,], 1, function(y)
-                    all(match(x,y))))])
-        ## plot(x, type="l",
-        ##      xlab = 'iteration',
-        ##      main= params[which(apply(all.mods.samps[z,,], 1, function(y)
-        ##        all(match(x,y))))]
-        ##      )
+       ## traceplot(mcmc(x), type = "l",
+       ##            main= params[which(apply(all.mods.samps[z,,], 1, function(y)
+       ##              all(match(x,y))))])
+        plot(x[seq(from=1, to=length(x), by=100)], type="l",
+             xlab = 'iteration',
+             main= params[which(apply(all.mods.samps[z,,], 1, function(y)
+               all(match(x,y))))]
+             )
       })
     }
 

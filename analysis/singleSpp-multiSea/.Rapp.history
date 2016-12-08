@@ -1,12 +1,1683 @@
 rm(list=ls())#
-setwd("~//Dropbox//nimble//occupancy//analysis//singleSpp-multiSea")#
+setwd('~/Dropbox/hedgerow_assembly/analysis/networkLevel')#
+source('plotting/src/predictIntervals.R')#
+source('plotting/src/CIplotting.R')#
+source('plotting/src/plotPanels_resilence.R')#
+source('src/initialize.R')#
 #
-## original model#
-source('original.R')#
+## ************************************************************#
+## robustness to species extinction#
+## ************************************************************#
+## either "abund" or "degree"#
+extinction.method <- "degree"#
 #
-## custom samplers for zs and reflective sampler, or slice sampler#
-source('opt2-3.R')#
+load(file=file.path(save.path,#
+            sprintf('resilience_%s.Rdata', extinction.method)))#
 #
-## custom function for latent state,  block sampler of phi[i-1],#
-## gamma[i-1]#
-source('opt4-5.R')
+dd <- expand.grid(ypr=seq(from= min(res$ypr, na.rm=TRUE),#
+                          to= max(res$ypr, na.rm=TRUE),#
+                          length=10))#
+load(file=file.path(save.path,#
+            sprintf('mods/resilience_ypr_%s.Rdata',#
+                    extinction.method)))#
+#
+dd.ypr <- cbind(dd, Robustness=0)#
+#
+ypr.pi <- predict.int(mod= mod.ypr,#
+                        dd=dd.ypr,#
+                        y="Robustness",#
+                        family="gaussian")#
+#
+## plot.predict.ypr(new.dd=ypr.pi,#
+##                  ylabel="Robustness to \n species extinction",#
+##                  dats=res,#
+##                  y1="Robustness",#
+##                  extinction.method=extinction.method)#
+#
+## ************************************************************#
+## robustness to perturbation#
+## ************************************************************#
+#
+load(file=file.path(save.path, 'mods/AlgCon.Rdata'))#
+#
+dd.ypr.alg <- expand.grid(ypr=seq(from= min(all.alg.Con.status$ypr,#
+                                    na.rm=TRUE),#
+                    to= max(all.alg.Con.status$ypr,#
+                      na.rm=TRUE),#
+                    length=10),#
+                  AlgCon=0)#
+#
+ypr.pi.alg <- predict.int(mod= alg.con.mod.ypr,#
+                        dd=dd.ypr.alg,#
+                        y="AlgCon",#
+                        family="gaussian")#
+#
+## plot.predict.ypr(new.dd=ypr.pi.alg,#
+##                  ylabel="Robustness to \n cascading effects",#
+##                  dats=all.alg.Con.status,#
+##                  y1="AlgCon",#
+##                  extinction.method="perturb")#
+#
+plot.panels()
+rm(list=ls())#
+setwd('~/Dropbox/hedgerow_assembly/analysis/networkLevel')#
+source('plotting/src/predictIntervals.R')#
+source('plotting/src/CIplotting.R')#
+source('plotting/src/plotPanels_resilence.R')#
+source('src/initialize.R')#
+#
+## ************************************************************#
+## robustness to species extinction#
+## ************************************************************#
+## either "abund" or "degree"#
+extinction.method <- "degree"#
+#
+load(file=file.path(save.path,#
+            sprintf('resilience_%s.Rdata', extinction.method)))#
+#
+dd <- expand.grid(ypr=seq(from= min(res$ypr, na.rm=TRUE),#
+                          to= max(res$ypr, na.rm=TRUE),#
+                          length=10))#
+load(file=file.path(save.path,#
+            sprintf('mods/resilience_ypr_%s.Rdata',#
+                    extinction.method)))#
+#
+dd.ypr <- cbind(dd, Robustness=0)#
+#
+ypr.pi <- predict.int(mod= mod.ypr,#
+                        dd=dd.ypr,#
+                        y="Robustness",#
+                        family="gaussian")#
+#
+## plot.predict.ypr(new.dd=ypr.pi,#
+##                  ylabel="Robustness to \n species extinction",#
+##                  dats=res,#
+##                  y1="Robustness",#
+##                  extinction.method=extinction.method)#
+#
+## ************************************************************#
+## robustness to perturbation#
+## ************************************************************#
+#
+load(file=file.path(save.path, 'mods/AlgCon.Rdata'))#
+#
+dd.ypr.alg <- expand.grid(ypr=seq(from= min(all.alg.Con.status$ypr,#
+                                    na.rm=TRUE),#
+                    to= max(all.alg.Con.status$ypr,#
+                      na.rm=TRUE),#
+                    length=10),#
+                  AlgCon=0)#
+#
+ypr.pi.alg <- predict.int(mod= alg.con.mod.ypr,#
+                        dd=dd.ypr.alg,#
+                        y="AlgCon",#
+                        family="gaussian")#
+#
+## plot.predict.ypr(new.dd=ypr.pi.alg,#
+##                  ylabel="Robustness to \n cascading effects",#
+##                  dats=all.alg.Con.status,#
+##                  y1="AlgCon",#
+##                  extinction.method="perturb")#
+#
+plot.panels()
+quantile(c(,1,3,4,5,6,7))
+quantile(c(0,1,3,4,5,6,7))
+rm(list=ls())#
+setwd('~/Dropbox/hedgerow_assembly/analysis/networkLevel')#
+source('plotting/src/predictIntervals.R')#
+source('plotting/src/CIplotting.R')#
+source('plotting/src/plotPanels_resilence.R')#
+source('src/initialize.R')#
+#
+## ************************************************************#
+## robustness to species extinction#
+## ************************************************************#
+## either "abund" or "degree"#
+extinction.method <- "degree"#
+#
+load(file=file.path(save.path,#
+            sprintf('resilience_%s.Rdata', extinction.method)))#
+#
+dd <- expand.grid(ypr=seq(from= min(res$ypr, na.rm=TRUE),#
+                          to= max(res$ypr, na.rm=TRUE),#
+                          length=10))#
+load(file=file.path(save.path,#
+            sprintf('mods/resilience_ypr_%s.Rdata',#
+                    extinction.method)))#
+#
+dd.ypr <- cbind(dd, Robustness=0)#
+#
+ypr.pi <- predict.int(mod= mod.ypr,#
+                        dd=dd.ypr,#
+                        y="Robustness",#
+                        family="gaussian")#
+#
+## plot.predict.ypr(new.dd=ypr.pi,#
+##                  ylabel="Robustness to \n species extinction",#
+##                  dats=res,#
+##                  y1="Robustness",#
+##                  extinction.method=extinction.method)#
+#
+## ************************************************************#
+## robustness to perturbation#
+## ************************************************************#
+#
+load(file=file.path(save.path, 'mods/AlgCon.Rdata'))#
+#
+dd.ypr.alg <- expand.grid(ypr=seq(from= min(all.alg.Con.status$ypr,#
+                                    na.rm=TRUE),#
+                    to= max(all.alg.Con.status$ypr,#
+                      na.rm=TRUE),#
+                    length=10),#
+                  AlgCon=0)#
+#
+ypr.pi.alg <- predict.int(mod= alg.con.mod.ypr,#
+                        dd=dd.ypr.alg,#
+                        y="AlgCon",#
+                        family="gaussian")#
+#
+## plot.predict.ypr(new.dd=ypr.pi.alg,#
+##                  ylabel="Robustness to \n cascading effects",#
+##                  dats=all.alg.Con.status,#
+##                  y1="AlgCon",#
+##                  extinction.method="perturb")#
+#
+plot.panels()
+?quantile
+?quantile
+rm(list=ls())#
+setwd('~/Dropbox/hedgerow_assembly/analysis/networkLevel')#
+source('plotting/src/predictIntervals.R')#
+source('plotting/src/CIplotting.R')#
+source('plotting/src/plotPanels_resilence.R')#
+source('src/initialize.R')#
+#
+## ************************************************************#
+## robustness to species extinction#
+## ************************************************************#
+## either "abund" or "degree"#
+extinction.method <- "degree"#
+#
+load(file=file.path(save.path,#
+            sprintf('resilience_%s.Rdata', extinction.method)))#
+#
+dd <- expand.grid(ypr=seq(from= min(res$ypr, na.rm=TRUE),#
+                          to= max(res$ypr, na.rm=TRUE),#
+                          length=10))#
+load(file=file.path(save.path,#
+            sprintf('mods/resilience_ypr_%s.Rdata',#
+                    extinction.method)))#
+#
+dd.ypr <- cbind(dd, Robustness=0)#
+#
+ypr.pi <- predict.int(mod= mod.ypr,#
+                        dd=dd.ypr,#
+                        y="Robustness",#
+                        family="gaussian")#
+#
+## plot.predict.ypr(new.dd=ypr.pi,#
+##                  ylabel="Robustness to \n species extinction",#
+##                  dats=res,#
+##                  y1="Robustness",#
+##                  extinction.method=extinction.method)#
+#
+## ************************************************************#
+## robustness to perturbation#
+## ************************************************************#
+#
+load(file=file.path(save.path, 'mods/AlgCon.Rdata'))#
+#
+dd.ypr.alg <- expand.grid(ypr=seq(from= min(all.alg.Con.status$ypr,#
+                                    na.rm=TRUE),#
+                    to= max(all.alg.Con.status$ypr,#
+                      na.rm=TRUE),#
+                    length=10),#
+                  AlgCon=0)#
+#
+ypr.pi.alg <- predict.int(mod= alg.con.mod.ypr,#
+                        dd=dd.ypr.alg,#
+                        y="AlgCon",#
+                        family="gaussian")#
+#
+## plot.predict.ypr(new.dd=ypr.pi.alg,#
+##                  ylabel="Robustness to \n cascading effects",#
+##                  dats=all.alg.Con.status,#
+##                  y1="AlgCon",#
+##                  extinction.method="perturb")#
+#
+plot.panels()
+quantile(c(0,1,3,4,5,6,7), probs=0.05)
+quantile(c(0,1,3,4,5,6,7), probs=0.95)
+rm(list=ls())#
+setwd('~/Dropbox/hedgerow_assembly/analysis/networkLevel')#
+source('plotting/src/predictIntervals.R')#
+source('plotting/src/CIplotting.R')#
+source('plotting/src/plotPanels_resilence.R')#
+source('src/initialize.R')#
+#
+## ************************************************************#
+## robustness to species extinction#
+## ************************************************************#
+## either "abund" or "degree"#
+extinction.method <- "degree"#
+#
+load(file=file.path(save.path,#
+            sprintf('resilience_%s.Rdata', extinction.method)))#
+#
+dd <- expand.grid(ypr=seq(from= min(res$ypr, na.rm=TRUE),#
+                          to= max(res$ypr, na.rm=TRUE),#
+                          length=10))#
+load(file=file.path(save.path,#
+            sprintf('mods/resilience_ypr_%s.Rdata',#
+                    extinction.method)))#
+#
+dd.ypr <- cbind(dd, Robustness=0)#
+#
+ypr.pi <- predict.int(mod= mod.ypr,#
+                        dd=dd.ypr,#
+                        y="Robustness",#
+                        family="gaussian")#
+#
+## plot.predict.ypr(new.dd=ypr.pi,#
+##                  ylabel="Robustness to \n species extinction",#
+##                  dats=res,#
+##                  y1="Robustness",#
+##                  extinction.method=extinction.method)#
+#
+## ************************************************************#
+## robustness to perturbation#
+## ************************************************************#
+#
+load(file=file.path(save.path, 'mods/AlgCon.Rdata'))#
+#
+dd.ypr.alg <- expand.grid(ypr=seq(from= min(all.alg.Con.status$ypr,#
+                                    na.rm=TRUE),#
+                    to= max(all.alg.Con.status$ypr,#
+                      na.rm=TRUE),#
+                    length=10),#
+                  AlgCon=0)#
+#
+ypr.pi.alg <- predict.int(mod= alg.con.mod.ypr,#
+                        dd=dd.ypr.alg,#
+                        y="AlgCon",#
+                        family="gaussian")#
+#
+## plot.predict.ypr(new.dd=ypr.pi.alg,#
+##                  ylabel="Robustness to \n cascading effects",#
+##                  dats=all.alg.Con.status,#
+##                  y1="AlgCon",#
+##                  extinction.method="perturb")#
+#
+plot.panels()
+library(RColorBrewer)#
+library(lme4)#
+library(lmerTest)#
+setwd('~/Dropbox/hedgerow_assembly/analysis/networkLevel')#
+source('plotting/src/predictIntervals.R')#
+source('plotting/src/CIplotting.R')#
+source('plotting/src/plotPanels.R')#
+source('src/misc.R')#
+load(file='saved/corMets.Rdata')#
+#
+dd <- expand.grid(ypr=seq(from= min(cor.dats$ypr, na.rm=TRUE),#
+                          to= max(cor.dats$ypr, na.rm=TRUE),#
+                          length=10))#
+#
+## ************************************************************#
+## nodf#
+## ************************************************************#
+load(file='saved/mods/baci_nodf.Rdata')#
+#
+dd.nodf <- cbind(dd, zNODF=0)#
+#
+nodf.pi <- predict.int(mod= baci.nodf.mod,#
+                        dd=dd.nodf,#
+                        y="zNODF",#
+                       family="gaussian")#
+## ************************************************************#
+## modularity#
+## ************************************************************#
+load(file='saved/mods/baci_mod.Rdata')#
+dd.mod <- cbind(dd, zmod.met.D=0)#
+mod.pi <- predict.int(mod= baci.mod.mod,#
+                        dd=dd.mod,#
+                        y="zmod.met.D",#
+                      family="gaussian")#
+## ************************************************************#
+## specialization#
+## ************************************************************#
+load(file='saved/mods/baci_h2.Rdata')#
+dd.h2 <- cbind(dd, zH2=0)#
+h2.pi <- predict.int(mod= baci.h2.mod,#
+                        dd=dd.h2,#
+                        y="zH2",#
+                        family="gaussian")#
+## ************************************************************#
+## niche overlap - Plants#
+## ************************************************************#
+load(file='saved/mods/baci_no_plant.Rdata')#
+#
+dd.nop <- cbind(dd, niche.overlap.LL =0)#
+#
+nop.pi <- predict.int(mod= baci.no.plant.mod,#
+                        dd=dd.nop,#
+                        y="niche.overlap.plants",#
+                        family="gaussian")#
+## ************************************************************#
+## niche overlap - Polinators#
+## ************************************************************#
+load(file='saved/mods/baci_no_pol.Rdata')#
+#
+dd.nopol <- cbind(dd, niche.overlap.HL =0)#
+nopol.pi <- predict.int(mod= baci.no.pol.mod,#
+                        dd=dd.nopol,#
+                        y="niche.overlap.pol",#
+                        family="gaussian")#
+#
+## ************************************************************#
+## connectance#
+## ************************************************************#
+load(file='saved/mods/baci_conn.Rdata')#
+#
+dd.conn <- cbind(dd, connectance =0)#
+conn.pi <- predict.int(mod= baci.conn.mod,#
+                        dd=dd.conn,#
+                        y="connectance",#
+                        family="gaussian")#
+#
+## ************************************************************#
+## plant richness#
+## ************************************************************#
+load(file='saved/mods/baci_rich_ll.Rdata')#
+#
+dd.rich.ll <- cbind(dd, number.of.species.LL =0)#
+rich.ll.pi <- predict.int(mod= baci.rich.ll.mod,#
+                        dd=dd.rich.ll,#
+                        y="number.of.species.LL",#
+                        family="poisson")#
+## ************************************************************#
+## pol richness#
+## ************************************************************#
+load(file='saved/mods/baci_rich_hl.Rdata')#
+#
+dd.rich.hl <- cbind(dd, number.of.species.HL =0)#
+rich.hl.pi <- predict.int(mod= baci.rich.hl.mod,#
+                        dd=dd.rich.hl,#
+                        y="number.of.species.HL",#
+                        family="poisson")#
+## ************************************************************#
+## all panels#
+## ************************************************************#
+plot.panels()
+library(RColorBrewer)#
+library(lme4)#
+library(lmerTest)#
+setwd('~/Dropbox/hedgerow_assembly/analysis/networkLevel')#
+source('plotting/src/predictIntervals.R')#
+source('plotting/src/CIplotting.R')#
+source('plotting/src/plotPanels.R')#
+source('src/misc.R')#
+load(file='saved/corMets.Rdata')#
+#
+dd <- expand.grid(ypr=seq(from= min(cor.dats$ypr, na.rm=TRUE),#
+                          to= max(cor.dats$ypr, na.rm=TRUE),#
+                          length=10))#
+#
+## ************************************************************#
+## nodf#
+## ************************************************************#
+load(file='saved/mods/baci_nodf.Rdata')#
+#
+dd.nodf <- cbind(dd, zNODF=0)#
+#
+nodf.pi <- predict.int(mod= baci.nodf.mod,#
+                        dd=dd.nodf,#
+                        y="zNODF",#
+                       family="gaussian")#
+## ************************************************************#
+## modularity#
+## ************************************************************#
+load(file='saved/mods/baci_mod.Rdata')#
+dd.mod <- cbind(dd, zmod.met.D=0)#
+mod.pi <- predict.int(mod= baci.mod.mod,#
+                        dd=dd.mod,#
+                        y="zmod.met.D",#
+                      family="gaussian")#
+## ************************************************************#
+## specialization#
+## ************************************************************#
+load(file='saved/mods/baci_h2.Rdata')#
+dd.h2 <- cbind(dd, zH2=0)#
+h2.pi <- predict.int(mod= baci.h2.mod,#
+                        dd=dd.h2,#
+                        y="zH2",#
+                        family="gaussian")#
+## ************************************************************#
+## niche overlap - Plants#
+## ************************************************************#
+load(file='saved/mods/baci_no_plant.Rdata')#
+#
+dd.nop <- cbind(dd, niche.overlap.LL =0)#
+#
+nop.pi <- predict.int(mod= baci.no.plant.mod,#
+                        dd=dd.nop,#
+                        y="niche.overlap.plants",#
+                        family="gaussian")#
+## ************************************************************#
+## niche overlap - Polinators#
+## ************************************************************#
+load(file='saved/mods/baci_no_pol.Rdata')#
+#
+dd.nopol <- cbind(dd, niche.overlap.HL =0)#
+nopol.pi <- predict.int(mod= baci.no.pol.mod,#
+                        dd=dd.nopol,#
+                        y="niche.overlap.pol",#
+                        family="gaussian")#
+#
+## ************************************************************#
+## connectance#
+## ************************************************************#
+load(file='saved/mods/baci_conn.Rdata')#
+#
+dd.conn <- cbind(dd, connectance =0)#
+conn.pi <- predict.int(mod= baci.conn.mod,#
+                        dd=dd.conn,#
+                        y="connectance",#
+                        family="gaussian")#
+#
+## ************************************************************#
+## plant richness#
+## ************************************************************#
+load(file='saved/mods/baci_rich_ll.Rdata')#
+#
+dd.rich.ll <- cbind(dd, number.of.species.LL =0)#
+rich.ll.pi <- predict.int(mod= baci.rich.ll.mod,#
+                        dd=dd.rich.ll,#
+                        y="number.of.species.LL",#
+                        family="poisson")#
+## ************************************************************#
+## pol richness#
+## ************************************************************#
+load(file='saved/mods/baci_rich_hl.Rdata')#
+#
+dd.rich.hl <- cbind(dd, number.of.species.HL =0)#
+rich.hl.pi <- predict.int(mod= baci.rich.hl.mod,#
+                        dd=dd.rich.hl,#
+                        y="number.of.species.HL",#
+                        family="poisson")#
+## ************************************************************#
+## all panels#
+## ************************************************************#
+plot.panels()
+rm(list=ls())#
+setwd("~/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea")#
+#
+source('src/initialize.R')#
+set.seed(444)#
+data <- genDynamicOccData()#
+model.input <- prepModDataOcc(data)#
+#
+## *********************************************************************#
+##  Multi-season occupancy model: custom z sampler#
+## *********************************************************************#
+ss.ms.occ <- nimbleCode({#
+  ## Specify priors#
+  psi1 ~ dunif(0, 1)#
+  for(k in 1:(nyear-1)){#
+    phi[k] ~ dunif(0, 1)#
+    gamma[k] ~ dunif(0, 1)#
+    p[k] ~ dunif(0, 1)#
+  }#
+  p[nyear] ~ dunif(0, 1)#
+#
+  ## Ecological submodel: Define state conditional on parameters#
+  for (i in 1:nsite){#
+    z[i,1] ~ dbern(psi1)#
+    for (k in 2:nyear){#
+      muZ[i,k]<- z[i,k-1]*phi[k-1] + (1-z[i,k-1])*gamma[k-1]#
+      z[i,k] ~ dbern(muZ[i,k])#
+    }#
+  }#
+#
+  ## Observation model#
+  for (i in 1:nsite){#
+    for (j in 1:nrep){#
+      for (k in 1:nyear){#
+        muy[i,j,k] <- z[i,k]*p[k]#
+        y[i,j,k] ~ dbern(muy[i,j,k])#
+      }#
+    }#
+  }#
+#
+})#
+#
+input1 <- c(code=ss.ms.occ,#
+            model.input)
+rm(list=ls())#
+setwd("~/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea")#
+#
+source('src/initialize.R')#
+set.seed(444)#
+data <- genDynamicOccData()#
+model.input <- prepModDataOcc(data)#
+#
+## *********************************************************************#
+##  Multi-season occupancy model: custom z sampler#
+## *********************************************************************#
+ss.ms.occ <- nimbleCode({#
+  ## Specify priors#
+  psi1 ~ dunif(0, 1)#
+  for(k in 1:(nyear-1)){#
+    phi[k] ~ dunif(0, 1)#
+    gamma[k] ~ dunif(0, 1)#
+    p[k] ~ dunif(0, 1)#
+  }#
+  p[nyear] ~ dunif(0, 1)#
+#
+  ## Ecological submodel: Define state conditional on parameters#
+  for (i in 1:nsite){#
+    z[i,1] ~ dbern(psi1)#
+    for (k in 2:nyear){#
+      muZ[i,k]<- z[i,k-1]*phi[k-1] + (1-z[i,k-1])*gamma[k-1]#
+      z[i,k] ~ dbern(muZ[i,k])#
+    }#
+  }#
+#
+  ## Observation model#
+  for (i in 1:nsite){#
+    for (j in 1:nrep){#
+      for (k in 1:nyear){#
+        muy[i,j,k] <- z[i,k]*p[k]#
+        y[i,j,k] ~ dbern(muy[i,j,k])#
+      }#
+    }#
+  }#
+#
+})#
+#
+input1 <- c(code=ss.ms.occ,#
+            model.input)#
+#
+## *********************************************************************#
+## opt 2: add custom z sampler and slice on uniform(0,1) nodes#
+## *********************************************************************#
+#
+MCMCdefs.opt2 <- list('nimbleOpt2' = quote({#
+  customSpec <- configureMCMC(Rmodel)#
+  customSpec$removeSamplers('phi', print=FALSE)#
+  customSpec$removeSamplers('gamma', print=FALSE)#
+  customSpec$removeSamplers('p', print=FALSE)#
+  customSpec$removeSamplers('psi1', print=FALSE)#
+  ## happens to be all top nodes#
+  # zeroOneNodes <- Rmodel$getNodeNames(topOnly = TRUE)#
+  # for(zon in zeroOneNodes) #
+    customSpec$addSampler(target = c('phi', 'gamma', 'p', 'psi1'),#
+                                                 type ="sampler_crossLevelBinary",#
+                                                 print=FALSE)#
+  customSpec$removeSamplers('z')#
+  # customSpec$addSampler('z', type = "sampler_latentSub",#
+  #                       control = list(leaveOutProportion = 0.85,#
+  #                         control = list()))#
+  customSpec#
+}))#
+#
+## *********************************************************************#
+## run with compareMCMCs#
+#
+ss.ms.opt2 <- compareMCMCs(input1,#
+                           MCMCs=c('nimbleOpt2'),#
+                           MCMCdefs = MCMCdefs.opt2,#
+                           niter= niter,#
+                           burnin = burnin,#
+                           summary=FALSE,#
+                           check=FALSE)
+niter
+library(devtools)#
+# install_github("nimble-dev/nimble",#
+#                ref = "devel",#
+#                subdir = "packages/nimble")#
+#
+library(nimble)#
+library(igraph)#
+source("src/dynamicOcc.R")#
+source("src/dataGen.R")#
+source("src/leaveOutSampler.R")#
+source("../all/plotting.R")#
+source("../all/sampler_crossLevel_new.R")#
+source("../all/runNimble.R")#
+#
+save.dir <- "../../../saved/singleSpp-multiSea/saved"#
+#
+## MCMC settings#
+scale <- 1e2#
+burnin <- 1e1*scale#
+niter <- (1e3)*scale
+niter
+data <- genDynamicOccData()#
+model.input <- prepModDataOcc(data)
+niter
+ss.ms.occ <- nimbleCode({#
+  ## Specify priors#
+  psi1 ~ dunif(0, 1)#
+  for(k in 1:(nyear-1)){#
+    phi[k] ~ dunif(0, 1)#
+    gamma[k] ~ dunif(0, 1)#
+    p[k] ~ dunif(0, 1)#
+  }#
+  p[nyear] ~ dunif(0, 1)#
+#
+  ## Ecological submodel: Define state conditional on parameters#
+  for (i in 1:nsite){#
+    z[i,1] ~ dbern(psi1)#
+    for (k in 2:nyear){#
+      muZ[i,k]<- z[i,k-1]*phi[k-1] + (1-z[i,k-1])*gamma[k-1]#
+      z[i,k] ~ dbern(muZ[i,k])#
+    }#
+  }#
+#
+  ## Observation model#
+  for (i in 1:nsite){#
+    for (j in 1:nrep){#
+      for (k in 1:nyear){#
+        muy[i,j,k] <- z[i,k]*p[k]#
+        y[i,j,k] ~ dbern(muy[i,j,k])#
+      }#
+    }#
+  }#
+#
+})#
+#
+input1 <- c(code=ss.ms.occ,#
+            model.input)
+input
+input1
+library(devtools)#
+install_github("nimble-dev/nimble",#
+               ref = "devel",#
+               subdir = "packages/nimble")#
+#
+library(nimble)#
+library(igraph)#
+source("src/dynamicOcc.R")#
+source("src/dataGen.R")#
+source("src/leaveOutSampler.R")#
+source("../all/plotting.R")#
+source("../all/sampler_crossLevel_new.R")#
+source("../all/runNimble.R")#
+#
+save.dir <- "../../../saved/singleSpp-multiSea/saved"#
+#
+## MCMC settings#
+scale <- 1e2#
+burnin <- 1e1*scale#
+niter <- (1e3)*scale
+niter
+set.seed(444)#
+data <- genDynamicOccData()#
+model.input <- prepModDataOcc(data)#
+#
+## *********************************************************************#
+##  Multi-season occupancy model: custom z sampler#
+## *********************************************************************#
+ss.ms.occ <- nimbleCode({#
+  ## Specify priors#
+  psi1 ~ dunif(0, 1)#
+  for(k in 1:(nyear-1)){#
+    phi[k] ~ dunif(0, 1)#
+    gamma[k] ~ dunif(0, 1)#
+    p[k] ~ dunif(0, 1)#
+  }#
+  p[nyear] ~ dunif(0, 1)#
+#
+  ## Ecological submodel: Define state conditional on parameters#
+  for (i in 1:nsite){#
+    z[i,1] ~ dbern(psi1)#
+    for (k in 2:nyear){#
+      muZ[i,k]<- z[i,k-1]*phi[k-1] + (1-z[i,k-1])*gamma[k-1]#
+      z[i,k] ~ dbern(muZ[i,k])#
+    }#
+  }#
+#
+  ## Observation model#
+  for (i in 1:nsite){#
+    for (j in 1:nrep){#
+      for (k in 1:nyear){#
+        muy[i,j,k] <- z[i,k]*p[k]#
+        y[i,j,k] ~ dbern(muy[i,j,k])#
+      }#
+    }#
+  }#
+#
+})#
+#
+input1 <- c(code=ss.ms.occ,#
+            model.input)#
+#
+## *********************************************************************#
+## opt 2: add custom z sampler and slice on uniform(0,1) nodes#
+## *********************************************************************#
+#
+MCMCdefs.opt2 <- list('nimbleOpt2' = quote({#
+  customSpec <- configureMCMC(Rmodel)#
+  customSpec$removeSamplers('phi', print=FALSE)#
+  customSpec$removeSamplers('gamma', print=FALSE)#
+  customSpec$removeSamplers('p', print=FALSE)#
+  customSpec$removeSamplers('psi1', print=FALSE)#
+  ## happens to be all top nodes#
+  # zeroOneNodes <- Rmodel$getNodeNames(topOnly = TRUE)#
+  # for(zon in zeroOneNodes) #
+    customSpec$addSampler(target = c('phi', 'gamma', 'p', 'psi1'),#
+                                                 type ="sampler_crossLevelBinary",#
+                                                 print=FALSE)#
+  customSpec$removeSamplers('z')#
+  # customSpec$addSampler('z', type = "sampler_latentSub",#
+  #                       control = list(leaveOutProportion = 0.85,#
+  #                         control = list()))#
+  customSpec#
+}))#
+#
+## *********************************************************************#
+## run with compareMCMCs#
+#
+ss.ms.opt2 <- compareMCMCs(input1,#
+                           MCMCs=c('nimbleOpt2'),#
+                           MCMCdefs = MCMCdefs.opt2,#
+                           niter= niter,#
+                           burnin = burnin,#
+                           summary=FALSE,#
+                           check=FALSE)
+library(nimble)#
+library(igraph)#
+source("src/dynamicOcc.R")#
+source("src/dataGen.R")#
+source("src/leaveOutSampler.R")#
+source("../all/plotting.R")#
+source("../all/sampler_crossLevel_new.R")#
+source("../all/runNimble.R")#
+#
+save.dir <- "../../../saved/singleSpp-multiSea/saved"#
+#
+## MCMC settings#
+scale <- 1e2#
+burnin <- 1e1*scale#
+niter <- (1e3)*scale
+library(nimble)#
+library(igraph)#
+source("src/dynamicOcc.R")#
+source("src/dataGen.R")#
+source("src/leaveOutSampler.R")#
+source("../all/plotting.R")#
+source("../all/samplers/sampler_crossLevel_new.R")#
+source("../all/runNimble.R")#
+#
+save.dir <- "../../../saved/singleSpp-multiSea/saved"#
+#
+## MCMC settings#
+scale <- 1e2#
+burnin <- 1e1*scale#
+niter <- (1e3)*scale
+ss.ms.occ <- nimbleCode({#
+  ## Specify priors#
+  psi1 ~ dunif(0, 1)#
+  for(k in 1:(nyear-1)){#
+    phi[k] ~ dunif(0, 1)#
+    gamma[k] ~ dunif(0, 1)#
+    p[k] ~ dunif(0, 1)#
+  }#
+  p[nyear] ~ dunif(0, 1)#
+#
+  ## Ecological submodel: Define state conditional on parameters#
+  for (i in 1:nsite){#
+    z[i,1] ~ dbern(psi1)#
+    for (k in 2:nyear){#
+      muZ[i,k]<- z[i,k-1]*phi[k-1] + (1-z[i,k-1])*gamma[k-1]#
+      z[i,k] ~ dbern(muZ[i,k])#
+    }#
+  }#
+#
+  ## Observation model#
+  for (i in 1:nsite){#
+    for (j in 1:nrep){#
+      for (k in 1:nyear){#
+        muy[i,j,k] <- z[i,k]*p[k]#
+        y[i,j,k] ~ dbern(muy[i,j,k])#
+      }#
+    }#
+  }#
+#
+})#
+#
+input1 <- c(code=ss.ms.occ,#
+            model.input)#
+#
+## *********************************************************************#
+## opt 2: add custom z sampler and slice on uniform(0,1) nodes#
+## *********************************************************************#
+#
+MCMCdefs.opt2 <- list('nimbleOpt2' = quote({#
+  customSpec <- configureMCMC(Rmodel)#
+  customSpec$removeSamplers('phi', print=FALSE)#
+  customSpec$removeSamplers('gamma', print=FALSE)#
+  customSpec$removeSamplers('p', print=FALSE)#
+  customSpec$removeSamplers('psi1', print=FALSE)#
+  ## happens to be all top nodes#
+  # zeroOneNodes <- Rmodel$getNodeNames(topOnly = TRUE)#
+  # for(zon in zeroOneNodes) #
+    customSpec$addSampler(target = c('phi', 'gamma', 'p', 'psi1'),#
+                                                 type ="sampler_crossLevelBinary",#
+                                                 print=FALSE)#
+  customSpec$removeSamplers('z')#
+  # customSpec$addSampler('z', type = "sampler_latentSub",#
+  #                       control = list(leaveOutProportion = 0.85,#
+  #                         control = list()))#
+  customSpec#
+}))#
+#
+## *********************************************************************#
+## run with compareMCMCs#
+#
+ss.ms.opt2 <- compareMCMCs(input1,#
+                           MCMCs=c('nimbleOpt2'),#
+                           MCMCdefs = MCMCdefs.opt2,#
+                           niter= niter,#
+                           burnin = burnin,#
+                           summary=FALSE,#
+                           check=FALSE)
+Q
+source('src/initialize.R')#
+set.seed(444)#
+data <- genDynamicOccData()#
+model.input <- prepModDataOcc(data)#
+#
+## *********************************************************************#
+##  Multi-season occupancy model: custom z sampler#
+## *********************************************************************#
+ss.ms.occ <- nimbleCode({#
+  ## Specify priors#
+  psi1 ~ dunif(0, 1)#
+  for(k in 1:(nyear-1)){#
+    phi[k] ~ dunif(0, 1)#
+    gamma[k] ~ dunif(0, 1)#
+    p[k] ~ dunif(0, 1)#
+  }#
+  p[nyear] ~ dunif(0, 1)#
+#
+  ## Ecological submodel: Define state conditional on parameters#
+  for (i in 1:nsite){#
+    z[i,1] ~ dbern(psi1)#
+    for (k in 2:nyear){#
+      muZ[i,k]<- z[i,k-1]*phi[k-1] + (1-z[i,k-1])*gamma[k-1]#
+      z[i,k] ~ dbern(muZ[i,k])#
+    }#
+  }#
+#
+  ## Observation model#
+  for (i in 1:nsite){#
+    for (j in 1:nrep){#
+      for (k in 1:nyear){#
+        muy[i,j,k] <- z[i,k]*p[k]#
+        y[i,j,k] ~ dbern(muy[i,j,k])#
+      }#
+    }#
+  }#
+#
+})#
+#
+input1 <- c(code=ss.ms.occ,#
+            model.input)#
+#
+## *********************************************************************#
+## opt 2: add custom z sampler and slice on uniform(0,1) nodes#
+## *********************************************************************#
+#
+MCMCdefs.opt2 <- list('nimbleOpt2' = quote({#
+  customSpec <- configureMCMC(Rmodel)#
+  customSpec$removeSamplers('phi', print=FALSE)#
+  customSpec$removeSamplers('gamma', print=FALSE)#
+  customSpec$removeSamplers('p', print=FALSE)#
+  customSpec$removeSamplers('psi1', print=FALSE)#
+  ## happens to be all top nodes#
+  # zeroOneNodes <- Rmodel$getNodeNames(topOnly = TRUE)#
+  # for(zon in zeroOneNodes) #
+    customSpec$addSampler(target = c('phi', 'gamma', 'p', 'psi1'),#
+                                                 type ="sampler_crossLevelBinary",#
+                                                 print=FALSE)#
+  customSpec$removeSamplers('z')#
+  # customSpec$addSampler('z', type = "sampler_latentSub",#
+  #                       control = list(leaveOutProportion = 0.85,#
+  #                         control = list()))#
+  customSpec#
+}))#
+#
+## *********************************************************************#
+## run with compareMCMCs#
+#
+ss.ms.opt2 <- compareMCMCs(input1,#
+                           MCMCs=c('nimbleOpt2'),#
+                           MCMCdefs = MCMCdefs.opt2,#
+                           niter= niter,#
+                           burnin = burnin,#
+                           summary=FALSE,#
+                           check=FALSE)
+source('src/initialize.R')#
+set.seed(444)#
+data <- genDynamicOccData()#
+model.input <- prepModDataOcc(data)#
+#
+## *********************************************************************#
+##  Multi-season occupancy model: custom z sampler#
+## *********************************************************************#
+ss.ms.occ <- nimbleCode({#
+  ## Specify priors#
+  psi1 ~ dunif(0, 1)#
+  for(k in 1:(nyear-1)){#
+    phi[k] ~ dunif(0, 1)#
+    gamma[k] ~ dunif(0, 1)#
+    p[k] ~ dunif(0, 1)#
+  }#
+  p[nyear] ~ dunif(0, 1)#
+#
+  ## Ecological submodel: Define state conditional on parameters#
+  for (i in 1:nsite){#
+    z[i,1] ~ dbern(psi1)#
+    for (k in 2:nyear){#
+      muZ[i,k]<- z[i,k-1]*phi[k-1] + (1-z[i,k-1])*gamma[k-1]#
+      z[i,k] ~ dbern(muZ[i,k])#
+    }#
+  }#
+#
+  ## Observation model#
+  for (i in 1:nsite){#
+    for (j in 1:nrep){#
+      for (k in 1:nyear){#
+        muy[i,j,k] <- z[i,k]*p[k]#
+        y[i,j,k] ~ dbern(muy[i,j,k])#
+      }#
+    }#
+  }#
+#
+})#
+#
+input1 <- c(code=ss.ms.occ,#
+            model.input)#
+#
+## *********************************************************************#
+## opt 2: add custom z sampler and slice on uniform(0,1) nodes#
+## *********************************************************************#
+#
+MCMCdefs.opt2 <- list('nimbleOpt2' = quote({#
+  customSpec <- configureMCMC(Rmodel)#
+  customSpec$removeSamplers('phi', print=FALSE)#
+  customSpec$removeSamplers('gamma', print=FALSE)#
+  customSpec$removeSamplers('p', print=FALSE)#
+  customSpec$removeSamplers('psi1', print=FALSE)#
+  ## happens to be all top nodes#
+  # zeroOneNodes <- Rmodel$getNodeNames(topOnly = TRUE)#
+  # for(zon in zeroOneNodes) #
+    customSpec$addSampler(target = c('phi', 'gamma', 'p', 'psi1'),#
+                                                 type ="sampler_crossLevelBinary",#
+                                                 print=FALSE)#
+  customSpec$removeSamplers('z')#
+  # customSpec$addSampler('z', type = "sampler_latentSub",#
+  #                       control = list(leaveOutProportion = 0.85,#
+  #                         control = list()))#
+  customSpec#
+}))#
+#
+## *********************************************************************#
+## run with compareMCMCs#
+#
+ss.ms.opt2 <- compareMCMCs(input1,#
+                           MCMCs=c('nimbleOpt2'),#
+                           MCMCdefs = MCMCdefs.opt2,#
+                           niter= niter,#
+                           burnin = burnin,#
+                           summary=FALSE,#
+                           check=FALSE)
+adaptive       <- control$adaptive#
+    adaptScaleOnly <- control$adaptScaleOnly#
+    adaptInterval  <- control$adaptInterval#
+    scale          <- control$scale#
+    propCov        <- control$propCov#
+    ## node list generation#
+    target       <- model$expandNodeNames(target)#
+    lowNodes     <- model$getDependencies(target, self = FALSE,#
+                                          stochOnly = TRUE,#
+                                          includeData = FALSE)#
+    lowCalcNodes <- model$getDependencies(lowNodes)#
+    calcNodes    <- model$getDependencies(c(target, lowNodes))#
+    ## nested function and function list definitions#
+    mvInternal <- modelValues(model)#
+    RWblockControl <- list(adaptive = adaptive,#
+                           adaptScaleOnly = adaptScaleOnly,#
+                           adaptInterval = adaptInterval,#
+                           scale = scale, propCov = propCov)
+scale
+targert
+target
+RWblockControl
+topRWblockSamplerFunction <- sampler_RW_block(model, mvInternal,#
+                                                  target, RWblockControl)
+topRWblockSAmpleFunction
+topRWblockSamplerFunction
+lowSamplerFunctions <- nimbleFunctionList(sampler_BASE)#
+    for(iLN in seq_along(lowNodes)) {#
+      lowNode <- lowNodes[iLN]#
+      lowSamplerFunctions[[iLN]] <- sampler_binary_new(model, mvSaved,#
+                                                       lowNode, control = list())#
+    }#
+    my_setAndCalculateTop <- setAndCalculate(model, target)#
+    my_decideAndJump <- decideAndJump(model, mvSaved, calcNodes)
+my_setAndCalculateTop
+lowSamplerFunctions
+lowNodes
+lowCalcNodes
+Q
+source('src/initialize.R')#
+set.seed(444)#
+data <- genDynamicOccData()#
+model.input <- prepModDataOcc(data)#
+#
+## *********************************************************************#
+##  Multi-season occupancy model: custom z sampler#
+## *********************************************************************#
+ss.ms.occ <- nimbleCode({#
+  ## Specify priors#
+  psi1 ~ dunif(0, 1)#
+  for(k in 1:(nyear-1)){#
+    phi[k] ~ dunif(0, 1)#
+    gamma[k] ~ dunif(0, 1)#
+    p[k] ~ dunif(0, 1)#
+  }#
+  p[nyear] ~ dunif(0, 1)#
+#
+  ## Ecological submodel: Define state conditional on parameters#
+  for (i in 1:nsite){#
+    z[i,1] ~ dbern(psi1)#
+    for (k in 2:nyear){#
+      muZ[i,k]<- z[i,k-1]*phi[k-1] + (1-z[i,k-1])*gamma[k-1]#
+      z[i,k] ~ dbern(muZ[i,k])#
+    }#
+  }#
+#
+  ## Observation model#
+  for (i in 1:nsite){#
+    for (j in 1:nrep){#
+      for (k in 1:nyear){#
+        muy[i,j,k] <- z[i,k]*p[k]#
+        y[i,j,k] ~ dbern(muy[i,j,k])#
+      }#
+    }#
+  }#
+#
+})#
+#
+input1 <- c(code=ss.ms.occ,#
+            model.input)#
+#
+## *********************************************************************#
+## opt 2: add custom z sampler and slice on uniform(0,1) nodes#
+## *********************************************************************#
+#
+MCMCdefs.opt2 <- list('nimbleOpt2' = quote({#
+  customSpec <- configureMCMC(Rmodel)#
+  customSpec$removeSamplers('phi', print=FALSE)#
+  customSpec$removeSamplers('gamma', print=FALSE)#
+  customSpec$removeSamplers('p', print=FALSE)#
+  customSpec$removeSamplers('psi1', print=FALSE)#
+  ## happens to be all top nodes#
+  # zeroOneNodes <- Rmodel$getNodeNames(topOnly = TRUE)#
+  # for(zon in zeroOneNodes) #
+    customSpec$addSampler(target = c('phi', 'gamma', 'p', 'psi1'),#
+                                                 type ="sampler_crossLevelBinary",#
+                                                 print=FALSE)#
+  customSpec$removeSamplers('z')#
+  # customSpec$addSampler('z', type = "sampler_latentSub",#
+  #                       control = list(leaveOutProportion = 0.85,#
+  #                         control = list()))#
+  customSpec#
+}))#
+#
+## *********************************************************************#
+## run with compareMCMCs#
+#
+ss.ms.opt2 <- compareMCMCs(input1,#
+                           MCMCs=c('nimbleOpt2'),#
+                           MCMCdefs = MCMCdefs.opt2,#
+                           niter= niter,#
+                           burnin = burnin,#
+                           summary=FALSE,#
+                           check=FALSE)
+lowSamplerFunctions
+my_setAndCalculateTop <- setAndCalculate(model, target)#
+    my_decideAndJump <- decideAndJump(model, mvSaved, calcNodes)
+Q
+source('src/initialize.R')#
+set.seed(444)#
+data <- genDynamicOccData()#
+model.input <- prepModDataOcc(data)#
+#
+## *********************************************************************#
+##  Multi-season occupancy model: custom z sampler#
+## *********************************************************************#
+ss.ms.occ <- nimbleCode({#
+  ## Specify priors#
+  psi1 ~ dunif(0, 1)#
+  for(k in 1:(nyear-1)){#
+    phi[k] ~ dunif(0, 1)#
+    gamma[k] ~ dunif(0, 1)#
+    p[k] ~ dunif(0, 1)#
+  }#
+  p[nyear] ~ dunif(0, 1)#
+#
+  ## Ecological submodel: Define state conditional on parameters#
+  for (i in 1:nsite){#
+    z[i,1] ~ dbern(psi1)#
+    for (k in 2:nyear){#
+      muZ[i,k]<- z[i,k-1]*phi[k-1] + (1-z[i,k-1])*gamma[k-1]#
+      z[i,k] ~ dbern(muZ[i,k])#
+    }#
+  }#
+#
+  ## Observation model#
+  for (i in 1:nsite){#
+    for (j in 1:nrep){#
+      for (k in 1:nyear){#
+        muy[i,j,k] <- z[i,k]*p[k]#
+        y[i,j,k] ~ dbern(muy[i,j,k])#
+      }#
+    }#
+  }#
+#
+})#
+#
+input1 <- c(code=ss.ms.occ,#
+            model.input)#
+#
+## *********************************************************************#
+## opt 2: add custom z sampler and slice on uniform(0,1) nodes#
+## *********************************************************************#
+#
+MCMCdefs.opt2 <- list('nimbleOpt2' = quote({#
+  customSpec <- configureMCMC(Rmodel)#
+  customSpec$removeSamplers('phi', print=FALSE)#
+  customSpec$removeSamplers('gamma', print=FALSE)#
+  customSpec$removeSamplers('p', print=FALSE)#
+  customSpec$removeSamplers('psi1', print=FALSE)#
+  ## happens to be all top nodes#
+  # zeroOneNodes <- Rmodel$getNodeNames(topOnly = TRUE)#
+  # for(zon in zeroOneNodes) #
+    customSpec$addSampler(target = c('phi', 'gamma', 'p', 'psi1'),#
+                                                 type ="sampler_crossLevelBinary",#
+                                                 print=FALSE)#
+  customSpec$removeSamplers('z')#
+  # customSpec$addSampler('z', type = "sampler_latentSub",#
+  #                       control = list(leaveOutProportion = 0.85,#
+  #                         control = list()))#
+  customSpec#
+}))#
+#
+## *********************************************************************#
+## run with compareMCMCs#
+#
+ss.ms.opt2 <- compareMCMCs(input1,#
+                           MCMCs=c('nimbleOpt2'),#
+                           MCMCdefs = MCMCdefs.opt2,#
+                           niter= niter,#
+                           burnin = burnin,#
+                           summary=FALSE,#
+                           check=FALSE)
+source('src/initialize.R')#
+set.seed(444)#
+data <- genDynamicOccData()#
+model.input <- prepModDataOcc(data)#
+#
+## *********************************************************************#
+##  Multi-season occupancy model: custom z sampler#
+## *********************************************************************#
+ss.ms.occ <- nimbleCode({#
+  ## Specify priors#
+  psi1 ~ dunif(0, 1)#
+  for(k in 1:(nyear-1)){#
+    phi[k] ~ dunif(0, 1)#
+    gamma[k] ~ dunif(0, 1)#
+    p[k] ~ dunif(0, 1)#
+  }#
+  p[nyear] ~ dunif(0, 1)#
+#
+  ## Ecological submodel: Define state conditional on parameters#
+  for (i in 1:nsite){#
+    z[i,1] ~ dbern(psi1)#
+    for (k in 2:nyear){#
+      muZ[i,k]<- z[i,k-1]*phi[k-1] + (1-z[i,k-1])*gamma[k-1]#
+      z[i,k] ~ dbern(muZ[i,k])#
+    }#
+  }#
+#
+  ## Observation model#
+  for (i in 1:nsite){#
+    for (j in 1:nrep){#
+      for (k in 1:nyear){#
+        muy[i,j,k] <- z[i,k]*p[k]#
+        y[i,j,k] ~ dbern(muy[i,j,k])#
+      }#
+    }#
+  }#
+#
+})#
+#
+input1 <- c(code=ss.ms.occ,#
+            model.input)#
+#
+## *********************************************************************#
+## opt 2: add custom z sampler and slice on uniform(0,1) nodes#
+## *********************************************************************#
+#
+MCMCdefs.opt2 <- list('nimbleOpt2' = quote({#
+  customSpec <- configureMCMC(Rmodel)#
+  customSpec$removeSamplers('phi', print=FALSE)#
+  customSpec$removeSamplers('gamma', print=FALSE)#
+  customSpec$removeSamplers('p', print=FALSE)#
+  customSpec$removeSamplers('psi1', print=FALSE)#
+  ## happens to be all top nodes#
+  # zeroOneNodes <- Rmodel$getNodeNames(topOnly = TRUE)#
+  # for(zon in zeroOneNodes) #
+    customSpec$addSampler(target = c('phi', 'gamma', 'p', 'psi1'),#
+                                                 type ="sampler_crossLevelBinary",#
+                                                 print=FALSE)#
+  customSpec$removeSamplers('z')#
+  # customSpec$addSampler('z', type = "sampler_latentSub",#
+  #                       control = list(leaveOutProportion = 0.85,#
+  #                         control = list()))#
+  customSpec#
+}))#
+#
+## *********************************************************************#
+## run with compareMCMCs#
+#
+ss.ms.opt2 <- compareMCMCs(input1,#
+                           MCMCs=c('nimbleOpt2'),#
+                           MCMCdefs = MCMCdefs.opt2,#
+                           niter= niter,#
+                           burnin = burnin,#
+                           summary=FALSE,#
+                           check=FALSE)
+source('src/initialize.R')#
+set.seed(444)#
+data <- genDynamicOccData()#
+model.input <- prepModDataOcc(data)#
+#
+## *********************************************************************#
+##  Multi-season occupancy model: custom z sampler#
+## *********************************************************************#
+ss.ms.occ <- nimbleCode({#
+  ## Specify priors#
+  psi1 ~ dunif(0, 1)#
+  for(k in 1:(nyear-1)){#
+    phi[k] ~ dunif(0, 1)#
+    gamma[k] ~ dunif(0, 1)#
+    p[k] ~ dunif(0, 1)#
+  }#
+  p[nyear] ~ dunif(0, 1)#
+#
+  ## Ecological submodel: Define state conditional on parameters#
+  for (i in 1:nsite){#
+    z[i,1] ~ dbern(psi1)#
+    for (k in 2:nyear){#
+      muZ[i,k]<- z[i,k-1]*phi[k-1] + (1-z[i,k-1])*gamma[k-1]#
+      z[i,k] ~ dbern(muZ[i,k])#
+    }#
+  }#
+#
+  ## Observation model#
+  for (i in 1:nsite){#
+    for (j in 1:nrep){#
+      for (k in 1:nyear){#
+        muy[i,j,k] <- z[i,k]*p[k]#
+        y[i,j,k] ~ dbern(muy[i,j,k])#
+      }#
+    }#
+  }#
+#
+})#
+#
+input1 <- c(code=ss.ms.occ,#
+            model.input)#
+#
+## *********************************************************************#
+## opt 2: add custom z sampler and slice on uniform(0,1) nodes#
+## *********************************************************************#
+#
+MCMCdefs.opt2 <- list('nimbleOpt2' = quote({#
+  customSpec <- configureMCMC(Rmodel)#
+  customSpec$removeSamplers('phi', print=FALSE)#
+  customSpec$removeSamplers('gamma', print=FALSE)#
+  customSpec$removeSamplers('p', print=FALSE)#
+  customSpec$removeSamplers('psi1', print=FALSE)#
+  ## happens to be all top nodes#
+  # zeroOneNodes <- Rmodel$getNodeNames(topOnly = TRUE)#
+  # for(zon in zeroOneNodes) #
+    customSpec$addSampler(target = c('phi', 'gamma', 'p', 'psi1'),#
+                                                 type ="sampler_crossLevelBinary",#
+                                                 print=FALSE)#
+  customSpec$removeSamplers('z')#
+  # customSpec$addSampler('z', type = "sampler_latentSub",#
+  #                       control = list(leaveOutProportion = 0.85,#
+  #                         control = list()))#
+  customSpec#
+}))#
+#
+## *********************************************************************#
+## run with compareMCMCs#
+#
+ss.ms.opt2 <- compareMCMCs(input1,#
+                           MCMCs=c('nimbleOpt2'),#
+                           MCMCdefs = MCMCdefs.opt2,#
+                           niter= niter,#
+                           burnin = burnin,#
+                           summary=FALSE,#
+                           check=FALSE)
+source('src/initialize.R')#
+set.seed(444)#
+data <- genDynamicOccData()#
+model.input <- prepModDataOcc(data)#
+#
+## *********************************************************************#
+##  Multi-season occupancy model: custom z sampler#
+## *********************************************************************#
+ss.ms.occ <- nimbleCode({#
+  ## Specify priors#
+  psi1 ~ dunif(0, 1)#
+  for(k in 1:(nyear-1)){#
+    phi[k] ~ dunif(0, 1)#
+    gamma[k] ~ dunif(0, 1)#
+    p[k] ~ dunif(0, 1)#
+  }#
+  p[nyear] ~ dunif(0, 1)#
+#
+  ## Ecological submodel: Define state conditional on parameters#
+  for (i in 1:nsite){#
+    z[i,1] ~ dbern(psi1)#
+    for (k in 2:nyear){#
+      muZ[i,k]<- z[i,k-1]*phi[k-1] + (1-z[i,k-1])*gamma[k-1]#
+      z[i,k] ~ dbern(muZ[i,k])#
+    }#
+  }#
+#
+  ## Observation model#
+  for (i in 1:nsite){#
+    for (j in 1:nrep){#
+      for (k in 1:nyear){#
+        muy[i,j,k] <- z[i,k]*p[k]#
+        y[i,j,k] ~ dbern(muy[i,j,k])#
+      }#
+    }#
+  }#
+#
+})#
+#
+input1 <- c(code=ss.ms.occ,#
+            model.input)#
+#
+## *********************************************************************#
+## opt 2: add custom z sampler and slice on uniform(0,1) nodes#
+## *********************************************************************#
+#
+MCMCdefs.opt2 <- list('nimbleOpt2' = quote({#
+  customSpec <- configureMCMC(Rmodel)#
+  customSpec$removeSamplers('phi', print=FALSE)#
+  customSpec$removeSamplers('gamma', print=FALSE)#
+  customSpec$removeSamplers('p', print=FALSE)#
+  customSpec$removeSamplers('psi1', print=FALSE)#
+  ## happens to be all top nodes#
+  # zeroOneNodes <- Rmodel$getNodeNames(topOnly = TRUE)#
+  # for(zon in zeroOneNodes) #
+    customSpec$addSampler(target = c('phi', 'gamma', 'p', 'psi1'),#
+                                                 type ="sampler_crossLevelBinary",#
+                                                 print=FALSE)#
+  customSpec$removeSamplers('z')#
+  # customSpec$addSampler('z', type = "sampler_latentSub",#
+  #                       control = list(leaveOutProportion = 0.85,#
+  #                         control = list()))#
+  customSpec#
+}))#
+#
+## *********************************************************************#
+## run with compareMCMCs#
+#
+ss.ms.opt2 <- compareMCMCs(input1,#
+                           MCMCs=c('nimbleOpt2'),#
+                           MCMCdefs = MCMCdefs.opt2,#
+                           niter= niter,#
+                           burnin = burnin,#
+                           summary=FALSE,#
+                           check=FALSE)
+source('src/initialize.R')#
+set.seed(444)#
+data <- genDynamicOccData()#
+model.input <- prepModDataOcc(data)#
+#
+## *********************************************************************#
+##  Multi-season occupancy model: custom z sampler#
+## *********************************************************************#
+ss.ms.occ <- nimbleCode({#
+  ## Specify priors#
+  psi1 ~ dunif(0, 1)#
+  for(k in 1:(nyear-1)){#
+    phi[k] ~ dunif(0, 1)#
+    gamma[k] ~ dunif(0, 1)#
+    p[k] ~ dunif(0, 1)#
+  }#
+  p[nyear] ~ dunif(0, 1)#
+#
+  ## Ecological submodel: Define state conditional on parameters#
+  for (i in 1:nsite){#
+    z[i,1] ~ dbern(psi1)#
+    for (k in 2:nyear){#
+      muZ[i,k]<- z[i,k-1]*phi[k-1] + (1-z[i,k-1])*gamma[k-1]#
+      z[i,k] ~ dbern(muZ[i,k])#
+    }#
+  }#
+#
+  ## Observation model#
+  for (i in 1:nsite){#
+    for (j in 1:nrep){#
+      for (k in 1:nyear){#
+        muy[i,j,k] <- z[i,k]*p[k]#
+        y[i,j,k] ~ dbern(muy[i,j,k])#
+      }#
+    }#
+  }#
+#
+})#
+#
+input1 <- c(code=ss.ms.occ,#
+            model.input)#
+#
+## *********************************************************************#
+## opt 2: add custom z sampler and slice on uniform(0,1) nodes#
+## *********************************************************************#
+#
+MCMCdefs.opt2 <- list('nimbleOpt2' = quote({#
+  customSpec <- configureMCMC(Rmodel)#
+  customSpec$removeSamplers('phi', print=FALSE)#
+  customSpec$removeSamplers('gamma', print=FALSE)#
+  customSpec$removeSamplers('p', print=FALSE)#
+  customSpec$removeSamplers('psi1', print=FALSE)#
+  ## happens to be all top nodes#
+  # zeroOneNodes <- Rmodel$getNodeNames(topOnly = TRUE)#
+  # for(zon in zeroOneNodes) #
+    customSpec$addSampler(target = c('phi', 'gamma', 'p', 'psi1'),#
+                                                 type ="sampler_crossLevelBinary",#
+                                                 print=FALSE)#
+  customSpec$removeSamplers('z')#
+  # customSpec$addSampler('z', type = "sampler_latentSub",#
+  #                       control = list(leaveOutProportion = 0.85,#
+  #                         control = list()))#
+  customSpec#
+}))#
+#
+## *********************************************************************#
+## run with compareMCMCs#
+#
+ss.ms.opt2 <- compareMCMCs(input1,#
+                           MCMCs=c('nimbleOpt2'),#
+                           MCMCdefs = MCMCdefs.opt2,#
+                           niter= niter,#
+                           burnin = burnin,#
+                           summary=FALSE,#
+                           check=FALSE)
+targetAsScalar <- model$expandNodeNames(target, returnScalarComponents = TRUE)#
+    calcNodes  <- model$getDependencies(target)#
+    lastProb <- 0#
+    currentProb <- 0#
+    proposalProb <- 0#
+    lastValue <- 0
+calcNodes
+getLogProb
+Q
+ss.ms.opt2 <- compareMCMCs(input1,#
+                           MCMCs=c('nimbleOpt2'),#
+                           MCMCdefs = MCMCdefs.opt2,#
+                           niter= niter,#
+                           burnin = burnin,#
+                           summary=FALSE,#
+                           check=FALSE)
+Q
+rm(list=ls())#
+setwd("~/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea")#
+#
+source('src/initialize.R')#
+set.seed(444)#
+data <- genDynamicOccData()#
+model.input <- prepModDataOcc(data)#
+#
+## *********************************************************************#
+##  Multi-season occupancy model: custom z sampler#
+## *********************************************************************#
+ss.ms.occ <- nimbleCode({#
+  ## Specify priors#
+  psi1 ~ dunif(0, 1)#
+  for(k in 1:(nyear-1)){#
+    phi[k] ~ dunif(0, 1)#
+    gamma[k] ~ dunif(0, 1)#
+    p[k] ~ dunif(0, 1)#
+  }#
+  p[nyear] ~ dunif(0, 1)#
+#
+  ## Ecological submodel: Define state conditional on parameters#
+  for (i in 1:nsite){#
+    z[i,1] ~ dbern(psi1)#
+    for (k in 2:nyear){#
+      muZ[i,k]<- z[i,k-1]*phi[k-1] + (1-z[i,k-1])*gamma[k-1]#
+      z[i,k] ~ dbern(muZ[i,k])#
+    }#
+  }#
+#
+  ## Observation model#
+  for (i in 1:nsite){#
+    for (j in 1:nrep){#
+      for (k in 1:nyear){#
+        muy[i,j,k] <- z[i,k]*p[k]#
+        y[i,j,k] ~ dbern(muy[i,j,k])#
+      }#
+    }#
+  }#
+#
+})#
+#
+input1 <- c(code=ss.ms.occ,#
+            model.input)#
+#
+## *********************************************************************#
+## opt 2: add custom z sampler and slice on uniform(0,1) nodes#
+## *********************************************************************#
+#
+MCMCdefs.opt2 <- list('nimbleOpt2' = quote({#
+  customSpec <- configureMCMC(Rmodel)#
+  ## customSpec$removeSamplers('phi', print=FALSE)#
+  ## customSpec$removeSamplers('gamma', print=FALSE)#
+  ## customSpec$removeSamplers('p', print=FALSE)#
+  ## customSpec$removeSamplers('psi1', print=FALSE)#
+  customSpec$removeSamplers('z')#
+  ## happens to be all top nodes#
+                                        # zeroOneNodes <- Rmodel$getNodeNames(topOnly = TRUE)#
+                                        # for(zon in zeroOneNodes) #
+  ## customSpec$addSampler(target = c('phi', 'gamma', 'p', 'psi1'),#
+  ##                                              type ="sampler_crossLevelBinary",#
+  ##                                              print=FALSE) #
+  customSpec$addSampler('z', type = "sampler_binary_new")#
+  customSpec#
+}))
+ss.ms.opt2 <- compareMCMCs(input1,#
+                           MCMCs=c('nimbleOpt2'),#
+                           MCMCdefs = MCMCdefs.opt2,#
+                           niter= niter,#
+                           burnin = burnin,#
+                           summary=FALSE,#
+                           check=FALSE)
+MCMCdefs.opt2 <- list('nimbleOpt2' = quote({#
+  customSpec <- configureMCMC(Rmodel)#
+  ## customSpec$removeSamplers('phi', print=FALSE)#
+  ## customSpec$removeSamplers('gamma', print=FALSE)#
+  ## customSpec$removeSamplers('p', print=FALSE)#
+  ## customSpec$removeSamplers('psi1', print=FALSE)#
+  customSpec$removeSamplers('z')#
+  ## happens to be all top nodes#
+  ## zeroOneNodes <- Rmodel$getNodeNames(topOnly = TRUE)#
+  ## for(zon in zeroOneNodes) #
+  ## customSpec$addSampler(target = c('phi', 'gamma', 'p', 'psi1'),#
+  ##                                              type ="sampler_crossLevelBinary",#
+  ##                                              print=FALSE)#
+browser()#
+  z.nodes <- R.model$expandNodeNames('z')#
+  for(zon in z.nodes){ #
+    customSpec$addSampler(zon, type = "sampler_binary_new")#
+  }#
+  customSpec#
+}))
+ss.ms.opt2 <- compareMCMCs(input1,#
+                           MCMCs=c('nimbleOpt2'),#
+                           MCMCdefs = MCMCdefs.opt2,#
+                           niter= niter,#
+                           burnin = burnin,#
+                           summary=FALSE,#
+                           check=FALSE)
+z.nodes <- R.model$expandNodeNames('z')
+z.nodes
+z.nodes <- Rmodel$expandNodeNames('z')
+z.nodes
+for(zon in z.nodes){ #
+    customSpec$addSampler(zon, type = "sampler_binary_new")#
+  }
+Q
+MCMCdefs.opt2 <- list('nimbleOpt2' = quote({#
+  customSpec <- configureMCMC(Rmodel)#
+  ## customSpec$removeSamplers('phi', print=FALSE)#
+  ## customSpec$removeSamplers('gamma', print=FALSE)#
+  ## customSpec$removeSamplers('p', print=FALSE)#
+  ## customSpec$removeSamplers('psi1', print=FALSE)#
+  customSpec$removeSamplers('z')#
+  ## happens to be all top nodes#
+  ## zeroOneNodes <- Rmodel$getNodeNames(topOnly = TRUE)#
+  ## for(zon in zeroOneNodes) #
+  ## customSpec$addSampler(target = c('phi', 'gamma', 'p', 'psi1'),#
+  ##                                              type ="sampler_crossLevelBinary",#
+  ##                                              print=FALSE)#
+  z.nodes <- Rmodel$expandNodeNames('z')#
+  for(zon in z.nodes){ #
+    customSpec$addSampler(zon, type = "sampler_binary_new")#
+  }#
+  customSpec#
+}))#
+#
+## *********************************************************************#
+## run with compareMCMCs#
+#
+ss.ms.opt2 <- compareMCMCs(input1,#
+                           MCMCs=c('nimbleOpt2'),#
+                           MCMCdefs = MCMCdefs.opt2,#
+                           niter= niter,#
+                           burnin = burnin,#
+                           summary=FALSE,#
+                           check=FALSE)
