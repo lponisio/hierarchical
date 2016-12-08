@@ -6,7 +6,7 @@ binarySampler_baseClass <- nimbleFunctionVirtual(
     getLogProbLastProposal = function() {returnType(double())},
     resetValue = function(){},
     reset = function(){}
-  ))
+    ))
 
 
 sampler_binary_new <- nimbleFunction(
@@ -16,7 +16,7 @@ sampler_binary_new <- nimbleFunction(
     targetAsScalar <- model$expandNodeNames(target, returnScalarComponents = TRUE)
     calcNodes  <- model$getDependencies(target)
     lastProb <- 0
-    currentProb <- 0
+    currentProb <- model$calculate(target)
     proposalProb <- 0
     lastValue <- 0
     ## checks
@@ -58,8 +58,8 @@ sampler_binary_new <- nimbleFunction(
       calculate(model, calcNodes)
     },
     reset = function() { }
+    )
   )
-)
 
 sampler_crossLevelBinary <- nimbleFunction(
   contains = sampler_BASE,
@@ -98,17 +98,30 @@ sampler_crossLevelBinary <- nimbleFunction(
   },
   run = function() {
     modelLP0 <- getLogProb(model, calcNodes) ## 
-    for(iSF in seq_along(lowSamplerFunctions))
-      { modelLP0 <- modelLP0 + lowSamplerFunctions[[iSF]]$getCurrentLogProb() } ## 1
-
+    for(iSF in seq_along(lowSamplerFunctions)){
+        modelLP0 <- modelLP0 +
+                           lowSamplerFunctions[[iSF]]$getCurrentLogProb()
+      } ## 1
+    ## print("#1")
+    ## print(modelLP0)
     propValueVector <- topRWblockSamplerFunction$generateProposalVector() ## propose target'
+    ## print(propValueVector)
     modelLP1 <- my_setAndCalculateTop$run(propValueVector)  ## 5
+    ## print("#5")
+    ## print(modelLP1)
     propLP1 <- 0
-    for(iSF in seq_along(lowSamplerFunctions))
-      { lowSamplerFunctions[[iSF]]$run() ## run lower-level samplers
-         propLP1 <- propLP1 + lowSamplerFunctions[[iSF]]$getLogProbProposal()## calculate 3
-         modelLP1 <- modelLP1 +  lowSamplerFunctions[[iSF]]$getCurrentLogProb() } ## calculate 4
-
+    for(iSF in seq_along(lowSamplerFunctions)){
+      lowSamplerFunctions[[iSF]]$run() ## run lower-level samplers
+        propLP1 <- propLP1 +
+          lowSamplerFunctions[[iSF]]$getLogProbProposal()## calculate
+      ## 3
+        modelLP1 <- modelLP1 +
+                           lowSamplerFunctions[[iSF]]$getCurrentLogProb()
+    } ## calculate 4
+    ## print("#3")
+    ## print(propLP1)
+    ## print("#4")
+    ## print(modelLP1)
     nimCopy(from = mvSaved, to = model, row = 1, nodes = calcNodes, logProb = TRUE)
     nimCopy(from = mvSaved, to = model, row = 1, nodes = lowNodes, logProb = TRUE)
 
@@ -132,7 +145,7 @@ sampler_crossLevelBinary <- nimbleFunction(
         lowSamplerFunctions[[iSF]]$reset()
       }
     }
+    )
   )
-)
 
 

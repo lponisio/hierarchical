@@ -27,7 +27,7 @@ ss.ms.orig[[1]] <- rename_MCMC_comparison_method(c('nimble', 'jags'),
 
 
 ss.ms.opt2[[1]] <- rename_MCMC_comparison_method('nimbleOpt2',
-                                                 'slice + latentSubSamp',
+                                                 'Cross level',
                                                  comparison=ss.ms.opt2[[1]])
 
 ss.ms.opt4[[1]] <- rename_MCMC_comparison_method(c('nimble',

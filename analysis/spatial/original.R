@@ -7,7 +7,7 @@ load.module("msm")
 set.seed(444)
 dats <- genSpatialOccData()
 model.input <- prepModData(dats$data, dats$y, dats$distance,
-                           nsite=250)
+                           nsite=250, inits=dats$inits)
 
 mexp <- nimbleFunction(
   run = function(A = double(2)){

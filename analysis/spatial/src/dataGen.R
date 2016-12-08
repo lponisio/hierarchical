@@ -13,10 +13,10 @@ rmvn <- function(n, mu = 0, V = matrix(1)) {
 genSpatialOccData <- function(ngrid = 50,
                               nreps = 50,
                               alpha = 1,
-                              beta1 = 6,
+                              b1 = 0.5,
                               p = 0.8,
-                              sigma = 0.5,
-                              delta = 0.5){
+                              sigma = 8,
+                              delta = 0.1){
   ## Set up a square lattice region
   simgrid <- expand.grid(1:ngrid, 1:ngrid)
   n <- nrow(simgrid)
@@ -31,8 +31,7 @@ genSpatialOccData <- function(ngrid = 50,
   X <- rmvn(1, rep(0, n), cor.mat)
   
   Xraster <- rasterFromXYZ(cbind(simgrid[, 1:2] - 0.5, X))
-  quartz()
-  plot(Xraster)
+ 
   ## simulate elevation data
   elev <- raster(matrix(rnorm(n), ngrid, ngrid),
                  xmn = 0, xmx = ngrid,
@@ -40,11 +39,9 @@ genSpatialOccData <- function(ngrid = 50,
   elev <- scale(elev)
 
   ## calculate probabilities of occurrence
-  psi <- expit(alpha + beta1 * raster::values(elev) +
+  psi <- expit(alpha + b1 * raster::values(elev) +
                raster::values(Xraster))
   
-  ## quartz()
-  ## rasterFromXYZ(cbind(coordinates(elev), psi))
 
   ## Latent occurrence state
   z <- rbinom(n = n, size = 1, prob = psi) 
@@ -68,12 +65,17 @@ genSpatialOccData <- function(ngrid = 50,
 
   return(list(data=fulldata,
               y=y,
-              distance=dist.mat))
+              distance=dist.mat,
+         inits=list(delta=delta,
+           sigma=sigma,
+           alpha=alpha,
+           b1=b1,
+           p=p)))
 }
 
 
 ## preps data for nimble
-prepModData <- function(fulldata, y, dist.mat, nsite,
+prepModData <- function(fulldata, y, dist.mat, nsite, inits,
                         monitors=c("delta", "sigma", "psi",
                           "p", "alpha", "b1")){
   ## subsample at "sites" (create a grid of sites to avoid any that
@@ -91,9 +93,7 @@ prepModData <- function(fulldata, y, dist.mat, nsite,
   zinits[zinits == 1] <- 2
   zinits[is.na(zinits)] <- 1
   zinits[zinits == 2] <- NA
-  inits <- list(z = zinits,
-                sigma=0.1,
-                delta=0.1)
+  inits$z <- zinits
 
   model.data <- list(D = dist.mat[sites, sites],
                      y = y,
