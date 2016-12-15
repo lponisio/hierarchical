@@ -24,7 +24,7 @@ calc_asympSD = nimbleFunction(
     MCMCIter,
     thin,
     averageParams,
-    discFuncGenerator,
+    discFunc,
     ...){
 
    PPPFunction <- pppFunc(R.model, dataNames, sampledNodes,
@@ -33,7 +33,7 @@ calc_asympSD = nimbleFunction(
                               thin,
                               burnIn,
                               averageParams,
-                              discFuncGenerator=discFuncGenerator,
+                              discFunc=discFunc,
                               ...)
 
   ## pppFunction <- nimbleFunctionList(pppFuncVirtual)
@@ -117,12 +117,12 @@ pppFunc <- nimbleFunction(
     thin,
     burnIn,
     averageParams,
-    discFuncGenerator,
+    discFunc,
     ...){
     
     paramDependencies <- model$getDependencies(paramNames)
     discFunction <- nimbleFunctionList(virtualDiscFunction)
-    discFunction[[1]] <- discFuncGenerator(model, ...) 
+    discFunction[[1]] <- discFunc 
   },
   
   run = function(N = integer(0)){
@@ -176,7 +176,7 @@ calcCPPP <- function(MCMCIter,
     cppp.C.mcmc$run(MCMCIter)
     samples <- mcmc(as.matrix(cppp.C.mcmc$mvSamples)[-c(1:burnIn),])
 
-    if(runUntilConverged == TRUE){
+    if(runUntilConverged){
       ## use Geweke diagnostic to see if MCMC has converged
       convergeTest <- geweke.diag(samples)$z
       ## any na values get set to a very large z value so the MCMC
@@ -218,7 +218,8 @@ generateCPPP <-  function(R.model,
                           NSamp,## number of samples from posterior
                           NPDist, ## number of simulated PPP values
                           burnInProp, ## proportion of mcmc to drop
-                          discFuncGenerator, 
+                          discFuncGenerator1,
+                          discFuncGenerator2, 
                           averageParams,
                           returnChains = TRUE,
                           runUntilConverged = FALSE,
@@ -276,7 +277,7 @@ generateCPPP <-  function(R.model,
   }
 
 
-  
+  ## keep track of the real data
   origData <- nimble:::values(orig.C.model, dataNames)
   
   ## sample posterior, simulate data from sample 
@@ -292,6 +293,9 @@ generateCPPP <-  function(R.model,
   ##                             averageParams,
   ##                             discFuncGenerator=discFuncGenerator,
   ##                             ...)
+
+  discFunc1 <- discFuncGenerator1(R.model, ...)
+  discFunc2 <- discFuncGenerator2(R.model, ...)
   
   bootPPPSD <- calc_asympSD(model = R.model,
                             sampledNodes = paramNames,
@@ -303,7 +307,7 @@ generateCPPP <-  function(R.model,
                             MCMCIter,
                             thin,
                             averageParams,
-                            discFuncGenerator=discFuncGenerator)
+                            discFunc=discFunc1)
 
 
                             
@@ -317,7 +321,7 @@ generateCPPP <-  function(R.model,
                           thin,
                           burnIn,
                           averageParams,
-                          discFuncGenerator = discFuncGenerator)
+                          discFunc = discFunc2)
 browser()
   C.pppFunc <- compileNimble(modelpppFunc,
                              project = R.model)
