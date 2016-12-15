@@ -9,8 +9,12 @@ model.input <- prepModData(dats$data, dats$y, dats$distance,
 
 sp.mod <- nimbleCode({
   ## priors
-  delta ~ dunif(0.1, 10)
-  sigma ~ dunif(0.1, 10)
+  ## delta ~ dunif(0.1, 10)
+  logSigma ~ dnorm(-3, 1)
+  sigma <- exp(logSigma)
+  logDelta ~ dnorm(-3, 1)
+  delta <- exp(logDelta)
+  ## sigma ~ dunif(0.1, 10)
   p ~ dunif(0, 1)
   alpha ~ dnorm(0, 0.001)
   b1 ~ dnorm(0, 0.001)

@@ -18,11 +18,27 @@ library(coda)
 ## nsamps : number of mcmc iterations
 ## theta : 
 calc_asympSD = nimbleFunction(
-  setup = function(model, sampledNodes, mvSample, mvBlock, burnIn = 0, numReps=200,
-    bootstrapPPPFunc){
-    pppFunction <- nimbleFunctionList(pppFuncVirtual)
-    pppFunction[[1]] <- bootstrapPPPFunc 
-    
+  setup = function(model, sampledNodes, mvSample,
+    mvBlock, burnIn = 0, numReps=200,
+    dataNames,
+    MCMCIter,
+    thin,
+    averageParams,
+    discFuncGenerator,
+    ...){
+
+   PPPFunction <- pppFunc(R.model, dataNames, sampledNodes,
+                              mvBlock,
+                              MCMCIter,
+                              thin,
+                              burnIn,
+                              averageParams,
+                              discFuncGenerator=discFuncGenerator,
+                              ...)
+
+  ## pppFunction <- nimbleFunctionList(pppFuncVirtual)
+  ## pppFunction[[1]] <- bootstrapPPPFunc 
+  
   },
   
   run = function(nsamps = double(0)){
@@ -50,7 +66,7 @@ calc_asympSD = nimbleFunction(
       }
       ##as per Caffo, calculate both Q functions using the same
       ##samples from the latent variables
-      blockpppValues[r]  <- bootstrapPPPFunc(nsamps) 
+      blockpppValues[r]  <- PPPFunction$run(nsamps) 
     }
     
     blockpppValuesSD <- sd(blockpppValues)
@@ -60,11 +76,13 @@ calc_asympSD = nimbleFunction(
   where = getLoadingNamespace()
   )
 
-pppFuncVirtual <- nimbleFunctionVirtual(run = function(){ returnType(double(0))})
+pppFuncVirtual <- nimbleFunctionVirtual(
+  run = function(N = integer(0)) returnType(double(0))
+  )
 
-virtualDiscFunction <- nimbleFunctionVirtual(run = function()
-                                             returnType(double(0))
-                                             )
+virtualDiscFunction <- nimbleFunctionVirtual(
+  run = function() returnType(double(0))
+  )
 
 likeDiscFuncGenerator <- nimbleFunction(
   setup = function(model, ...){},
@@ -75,6 +93,7 @@ likeDiscFuncGenerator <- nimbleFunction(
   },
   contains = virtualDiscFunction
   )
+
 
 maxDiscFuncGenerator <- nimbleFunction(
   setup = function(model, ...){
@@ -110,6 +129,7 @@ pppFunc <- nimbleFunction(
     output <- numeric(N)
     if(averageParams == 0){
       discMean <- discFunction[[1]]$run()
+      print(discMean)
     }
     else{
       mcmcSamps <-floor(MCMCIter/thin - burnIn)
@@ -117,8 +137,10 @@ pppFunc <- nimbleFunction(
       for(i in 1:mcmcSamps){
         copy(mcmcMV, model, paramNames, paramNames, row = i + burnIn)
         discMean <- discMean + discFunction[[1]]$run()
+        print(discMean)
       }
       discMean <- discMean / mcmcSamps
+      print(discMean)
     }
     if(is.nan(discMean)) return(NA)
     for(i in 1:N){
@@ -262,14 +284,14 @@ generateCPPP <-  function(R.model,
   mcmcMV <- orig.mcmc$mvSamples
 
   mvBlock <- modelValues(R.model)
-  bootstrapPPPFunc <- pppFunc(R.model, dataNames, paramNames,
-                              mvBlock,
-                              MCMCIter,
-                              thin,
-                              burnIn,
-                              averageParams,
-                              discFuncGenerator=discFuncGenerator,
-                              ...)
+  ## bootstrapPPPFunc <- pppFunc(R.model, dataNames, paramNames,
+  ##                             mvBlock,
+  ##                             MCMCIter,
+  ##                             thin,
+  ##                             burnIn,
+  ##                             averageParams,
+  ##                             discFuncGenerator=discFuncGenerator,
+  ##                             ...)
   
   bootPPPSD <- calc_asympSD(model = R.model,
                             sampledNodes = paramNames,
@@ -277,7 +299,14 @@ generateCPPP <-  function(R.model,
                             mvSample = mcmcMV,
                             burnIn = burnIn,
                             numReps = 200,
-                            bootstrapPPPFunc)
+                            dataNames,
+                            MCMCIter,
+                            thin,
+                            averageParams,
+                            discFuncGenerator=discFuncGenerator)
+
+
+                            
 
 
   modelpppFunc <- pppFunc(R.model,

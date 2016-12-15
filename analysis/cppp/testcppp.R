@@ -42,7 +42,7 @@ message('MCMC built')
 ## compile model in C++
 D.model <- compileNimble(R.model)
 D.mcmc <- compileNimble(mcmc, project = R.model)
-D.mcmc$run(3000)
+D.mcmc$run(1000)
 message('NIMBLE model compiled')
 
 source('~/Dropbox/nimble/occupancy/analysis/cppp/src/calcCPPP.R')
@@ -60,7 +60,3 @@ output <- generateCPPP(R.model,
                        thin = nthin,
                        averageParams = TRUE,
                        discFuncGenerator=likeDiscFuncGenerator)
-
-
-## for max discFunction
-## discArgs = c('alpha','beta')
