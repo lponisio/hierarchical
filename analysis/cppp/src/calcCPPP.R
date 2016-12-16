@@ -46,7 +46,7 @@ pppFunc <- nimbleFunction(
     burnIn,
     averageParams,
     discFunc,
-    numReps,
+    NbootReps,
     mvBlock,
     ...){
     
@@ -55,8 +55,8 @@ pppFunc <- nimbleFunction(
     discFunction[[1]] <- discFunc(model,...) 
   },
   
-  run = function(N = integer(0)){
-    output <- numeric(N)
+  run = function(NpostSamp = integer(0)){
+    output <- numeric(NpostSamp)
     if(averageParams == 0){
       discMean <- discFunction[[1]]$run()
     }
@@ -68,11 +68,11 @@ pppFunc <- nimbleFunction(
         discMean <- discMean + discFunction[[1]]$run()
 
       }
-      discMean <- discMean / mcmcSamps
+      discMean <- discMean/mcmcSamps
       
     }
     if(is.nan(discMean)) return(NA)
-    for(i in 1:N){
+    for(i in 1:NpostSamp){
       randNum <- ceiling(runif(1, 0, (MCMCIter)/thin - burnIn - 1 ))
       nimCopy(mcmcMV, model, paramNames, row = burnIn + randNum)
       calculate(model, paramDependencies)
@@ -86,32 +86,35 @@ pppFunc <- nimbleFunction(
     return(out)
   },
   methods = list(
-    getSD = function(nsamps=double(0)){
-      blockpppValues <- numeric(numReps) ## block estimates of ppp
-      l <- ceiling(min(1000, (nsamps - burnIn)/20)) ##length of each
+    getSD = function(NpostSamp=double(0)){
+      blockpppValues <- numeric(NbootReps) ## block estimates of ppp
+      l <- ceiling(min(1000, (MCMCIter/thin - burnIn)/20)) ##length of each
       ##block, ensures
       ##it's not too big
-      q <- (nsamps - burnIn) - l + 1 ##total number of blocks available
+      ## total number of blocks available
+      q <- (MCMCIter/thin - burnIn) - l + 1
       ##to sample from
-      h <- ceiling((nsamps - burnIn)/l) ##number of blocks to use for ppp
+      ## number of blocks to use for ppp
+      h <- ceiling((MCMCIter/thin - burnIn)/l)
       ##function calculation
-      resize(mvBlock, h*l) ##size our model value object to be
-      ##approximately of size m (number of mc
-      ##samples)
+      resize(mvBlock, h*l) ## size our model value object to be
+      ## approximately of size m (number of mc
+      ## samples)
 
-      for(r in 1:numReps){
+      for(r in 1:NbootReps){
         for(i in 1:h){
           randNum <- runif(1,0,1)
-          randIndex <- ceiling(randNum*q) ##random starting index for
-          ##blocks (post burn-in)
+          ##random starting index for blocks (post burn-in)
+          randIndex <- ceiling(randNum*q)
           for(j in 1:l){
+            ## fill in mvBlock with chosen blocks
             nimCopy(mcmcMV, mvBlock, paramNames, paramNames,
-                    burnIn + randIndex-1+j,  (i-1)*l+j) ##fill in mvBlock with chosen blocks
+                    burnIn + randIndex - 1 + j,  (i - 1)*l + j)
           }
         }
         ##as per Caffo, calculate both Q functions using the same
         ##samples from the latent variables
-        blockpppValues[r]  <- run(nsamps) 
+        blockpppValues[r]  <- run(NpostSamp) 
       }
       
       blockpppValuesSD <- sd(blockpppValues)
@@ -127,7 +130,7 @@ pppFunc <- nimbleFunction(
 ## observed value
 calcCPPP <- function(MCMCIter,
                      burnIn,
-                     NSamp,
+                     NpostSamp,
                      C.pppFunc,
                      cppp.C.mcmc,
                      firstRun,
@@ -139,10 +142,9 @@ calcCPPP <- function(MCMCIter,
   if(firstRun  == 0){
     cppp.C.mcmc$run(MCMCIter)
     samples <- mcmc(as.matrix(cppp.C.mcmc$mvSamples)[-c(1:burnIn),])
-
+    convergeTest <- geweke.diag(samples)$z
     if(runUntilConverged == 1){
       ## use Geweke diagnostic to see if MCMC has converged
-      convergeTest <- geweke.diag(samples)$z
       ## any na values get set to a very large z value so the MCMC
       ## will continue to be run. note that nan values correspond to
       ## posterior samples that are constant, indicating a lack of
@@ -160,11 +162,11 @@ calcCPPP <- function(MCMCIter,
       }
     }
   }
-  pre.pp <- C.pppFunc$run(NSamp)
-  pppSD <- C.pppFunc$getSD(NSamp)
+  pre.pp <- C.pppFunc$run(NpostSamp)
+  bootSD <- C.pppFunc$getSD(NpostSamp)
   if(!is.finite(pre.pp))    pre.pp <- NA
   return(list(pre.pp = pre.pp,
-              pppSD = pppSD,
+              bootSD = bootSD,
               samples = samples,
               converge.stat = convergeTest))    
 }
@@ -176,7 +178,7 @@ generateCPPP <-  function(R.model,
                           orig.mcmc,
                           dataNames, ## names of the data column
                           paramNames, ## vector of parameters to monitor
-                          NSamp,## number of samples from posterior
+                          NpostSamp,## number of samples from posterior
                           NPDist, ## number of simulated PPP values
                           burnInProp, ## proportion of mcmc to drop
                           discFuncGenerator,
@@ -185,7 +187,7 @@ generateCPPP <-  function(R.model,
                           runUntilConverged = FALSE,
                           maxIter = 1*10^4,
                           convStep = 0.5,
-                          nRepBoot,
+                          nRepBoot, ## number of bootstrap samples
                           ...){
   if(!inherits(R.model, "RmodelBaseClass")){
     stop("R.model is not an Rmodel")
@@ -206,7 +208,7 @@ generateCPPP <-  function(R.model,
 
   burnIn <- ceiling(burnInProp*(MCMCIter/thin))
 
-  if(NSamp > MCMCIter){
+  if(NpostSamp > MCMCIter){
     stop("number of samples from posterior must be < number of MCMC iterations")
   }
 
@@ -256,15 +258,15 @@ generateCPPP <-  function(R.model,
                           burnIn,
                           averageParams,
                           discFunc = discFuncGenerator,
-                          numReps=nRepBoot,
+                          NbootReps=nRepBoot,
                           mvBlock=mvBlock)
   C.pppFunc <- compileNimble(modelpppFunc,
                              project = R.model)
-
+  
   ## calculate deviances
   obs.cppp <- calcCPPP(MCMCIter,
                        burnIn,
-                       NSamp,
+                       NpostSamp=NpostSamp,
                        C.pppFunc,
                        orig.C.mcmc,
                        firstRun = 1)
@@ -276,7 +278,7 @@ generateCPPP <-  function(R.model,
     simulate(orig.C.model,  includeData =  TRUE)
     out <- calcCPPP(MCMCIter,
                     burnIn,
-                    NSamp,
+                    NpostSamp,
                     C.pppFunc,
                     orig.C.mcmc,
                     firstRun = 0,
@@ -285,43 +287,39 @@ generateCPPP <-  function(R.model,
                     convStep=convStep)
     return(out)
   }
-
-  sim.cppp <- mclapply(1:NPDist, simPppDist)
-  sim.ppp <- sapply(sim.cppp, function(x) x$pre.pp)
-  sim.SDs <- sapply(sim.cppp, function(x) x$pppSD)
-  sim.CI <- cbind(sim.ppp + sim.SDs*1.96, sim.ppp - sim.SDs*1.96)
-
-  obs.CI <- cbind(obs.cppp$pre.pp + obs.cppp$pppSD*1.96,
-              obs.cppp$pre.pp - obs.cppp$pppSD*1.96)
-
-  lims <- function(f1, f2){
-    mapply(f1, apply(obs.CI, 1, f2), apply(sim.CI, 1, f2))
-  }
   
-  overlap <- lims(min, max) - lims(max, min)
-  ## CI do not overlap if the above is negative
-  overlap[overlap < 0] <- 0
+  ## simulate the ppp values
+  sim.ppp.output <- mclapply(1:NPDist, simPppDist)
 
-  ## for the simulated ppp that do not overlap but are greater than
-  ## the oberved value
-  overlap[max(obs.CI) < apply(sim.CI, 1, min)] <- 1
+  ## extract simulated ppp and boot SDs
+  sim.ppp <- sapply(sim.ppp.output,
+                    function(x) x$pre.pp)
+  sim.vars <- (sapply(sim.ppp.output,
+                      function(x) x$bootSD))^2 
 
-  ## simulate cppp
-  sim.sim.cppp <- sapply(1:NSamp, function(x){
-    mean(rbinom(length(overlap), size=1, overlap), na.rm=TRUE)
-  })
-                         
-  sim.samples <- lapply(sim.cppp, function(x) x$samples)
-  chain.diag <- lapply(sim.cppp, function(x) x$converge.stat)
+  ## approximate the distbution of observed ppp and simulated ppp
+  diff.ppp <- obs.cppp$pre.pp - sim.ppp 
+  diff.vars.ppp <- obs.cppp$bootSD^2 + sim.vars
 
+  ## calculate the average prob that simulated values are less than
+  ## the observed
+  cppp <- mean(pnorm(0, diff.ppp, diff.vars.ppp),
+               na.rm=TRUE)
+
+  ## extract chains and diagnostics
+  sim.samples <- lapply(sim.ppp.output,
+                        function(x) x$samples)
+  chain.diag <- sapply(sim.ppp.output,
+                       function(x) x$converge.stat)
+  
+  ## output real data and model
   nimble:::values(orig.C.model, dataNames) <- origData 
 
-  out <- list(cppp=quantile(sim.sim.cppp, c(0.025, 0.5, 0.975),
-                na.rm=TRUE),
+  out <- list(cppp=cppp,
               obs.ppp=c(estimate=obs.cppp$pre.pp,
-                bootSD=obs.cppp$pppSD),
+                bootVar=(obs.cppp$bootSD)^2),
               sim.cpp.dist=cbind(esimate=sim.ppp,
-                bootSD=sim.SDs),
+                bootVar=sim.vars),
               chain.diagnostics= chain.diag,
               samples=sim.samples)
   if(!returnChains){

@@ -259,18 +259,20 @@ occ.C.mcmc$run(niter)
 source('../cppp/src/calcCPPP.R', chdir = TRUE)
 options(mc.cores=8)
 
-test.opt2 <- generateCPPP(occ.R.model,
-                          occ.C.model,
-                          occ.C.mcmc,
-                          occ.mcmc,
-                          dataName = 'X',
-                          paramNames = input1$monitors, 
-                          NSamp = 10^3,
-                          NPDist = 10^3,
-                          burnInProp = 0.10,
-                          averageParams = TRUE,
-                          discFuncGenerator=likeDiscFuncGenerator,
-                          returnChains=FALSE)
+output <- generateCPPP(occ.R.model,
+                       occ.C.model,
+                       D.mcmc,
+                       occ.mcmc,
+                       dataNames = 'X',
+                       paramNames =  input1$monitors, 
+                       NpostSamp = 100,
+                       NPDist = 100,
+                       burnInProp = 0.1,
+                       thin = nthin,
+                       averageParams = TRUE,
+                       nRepBoot=100,
+                       discFuncGenerator=likeDiscFuncGenerator,
+                       returnChains=FALSE)
 
 save(test.opt2, file=file.path(save.dir, "ms_ss_noz_CPPP.Rdata"))
 
