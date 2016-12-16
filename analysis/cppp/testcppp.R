@@ -59,5 +59,5 @@ output <- generateCPPP(R.model,
                        burnInProp = 0.1,
                        thin = nthin,
                        averageParams = TRUE,
-                       discFuncGenerator1=likeDiscFuncGenerator,
-                       discFuncGenerator2=maxDiscFuncGenerator)
+                       nRepBoot=10,
+                       discFuncGenerator=likeDiscFuncGenerator)
