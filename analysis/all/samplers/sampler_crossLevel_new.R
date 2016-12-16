@@ -1,7 +1,7 @@
 binarySampler_baseClass <- nimbleFunctionVirtual(
-  run = function() {},
+  run = function() {returnType(double())},
   methods = list(
-    getLogProbProposal = function() {returnType(double())},
+    ## getLogProbProposal = function() {returnType(double())},
     getCurrentLogProb = function() {returnType(double())},
     getLogProbLastProposal = function() {returnType(double())},
     resetValue = function(){},
@@ -26,7 +26,7 @@ sampler_binary_new <- nimbleFunction(
   run = function() {
     lastProb <<- exp(getLogProb(model, calcNodes))
     lastValue <<- model[[target]]
-    model[[target]] <<- 1 - model[[target]]
+    model[[target]] <<- 1 - lastValue
     proposalProb <<- exp(calculate(model, calcNodes))
     if(!is.nan(proposalProb) & runif(1,0,1) < proposalProb/(lastProb+proposalProb)){
       nimCopy(from = model, to = mvSaved, row = 1, nodes = calcNodes, logProb = TRUE)
@@ -36,13 +36,15 @@ sampler_binary_new <- nimbleFunction(
       nimCopy(from = mvSaved, to = model, row = 1, nodes = calcNodes, logProb = TRUE)
       currentProb <<- lastProb
     }
+    return(log(proposalProb))
+    returnType(double(0))
   },
   methods = list(
-    getLogProbProposal = function(){
-      returnType(double(0))
-      logProb <- log(proposalProb)
-      return(logProb)
-    },
+    ## getLogProbProposal = function(){
+    ##   returnType(double(0))
+    ##   logProb <- log(proposalProb)
+    ##   return(logProb)
+    ## },
     getCurrentLogProb = function(){
       returnType(double(0))
       logProb <- log(currentProb)
@@ -97,33 +99,26 @@ sampler_crossLevelBinary <- nimbleFunction(
     my_decideAndJump <- decideAndJump(model, mvSaved, calcNodes)
   },
   run = function() {
-    modelLP0 <- getLogProb(model, calcNodes) ## 
+    modelLP0 <- getLogProb(model, calcNodes) ##
+    ## latent node probabilities 
     for(iSF in seq_along(lowSamplerFunctions)){
         modelLP0 <- modelLP0 +
                            lowSamplerFunctions[[iSF]]$getCurrentLogProb()
       } ## 1
-    ## print("#1")
-    ## print(modelLP0)
     propValueVector <- topRWblockSamplerFunction$generateProposalVector() ## propose target'
-    ## print(propValueVector)
     modelLP1 <- my_setAndCalculateTop$run(propValueVector)  ## 5
-    ## print("#5")
-    ## print(modelLP1)
     propLP1 <- 0
     for(iSF in seq_along(lowSamplerFunctions)){
-      lowSamplerFunctions[[iSF]]$run() ## run lower-level samplers
         propLP1 <- propLP1 +
-          lowSamplerFunctions[[iSF]]$getLogProbProposal()## calculate
+          lowSamplerFunctions[[iSF]]$run()## calculate
       ## 3
         modelLP1 <- modelLP1 +
                            lowSamplerFunctions[[iSF]]$getCurrentLogProb()
     } ## calculate 4
-    ## print("#3")
-    ## print(propLP1)
-    ## print("#4")
-    ## print(modelLP1)
-    nimCopy(from = mvSaved, to = model, row = 1, nodes = calcNodes, logProb = TRUE)
-    nimCopy(from = mvSaved, to = model, row = 1, nodes = lowNodes, logProb = TRUE)
+    nimCopy(from = mvSaved, to = model, row = 1,
+            nodes = calcNodes, logProb = TRUE)
+    nimCopy(from = mvSaved, to = model, row = 1,
+            nodes = lowNodes, logProb = TRUE)
 
     propLP0 <- 0
     for(iSF in seq_along(lowSamplerFunctions)){

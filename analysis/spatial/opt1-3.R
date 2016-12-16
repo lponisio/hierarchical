@@ -14,7 +14,7 @@ sp.mod <- nimbleCode({
   sigma <- exp(logSigma)
   logDelta ~ dnorm(-3, 1)
   delta <- exp(logDelta)
-  ## sigma ~ dunif(0.1, 10)
+  ## sigma ~ dunif(0.1, 100)
   p ~ dunif(0, 1)
   alpha ~ dnorm(0, 0.001)
   b1 ~ dnorm(0, 0.001)
