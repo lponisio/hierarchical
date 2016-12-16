@@ -1,78 +1,6 @@
 library(parallel)
 library(coda)
 
-## asymptotic variance is calculated using the moving-block
-## bootstrap method of "Markov Chain Monte Carlo in Statistical Mechanics"
-## by Mignani & Rosa, 2001 (p. 350)
-## model: the C model
-## C.pppFunc: the function that calculates the ppp
-## fixedNodes: (may not need)
-## sampledNodes: parameters that we want to sample
-## mvBlock: (may not need)
-## mvSqmplew: output from MCMC previously run
-## burn in is the burn in
-## numReps: the number of iternations of the moving block bootstrap
-
-## nsamps : number of mcmc iterations
-## theta : 
-## calc_asympSD = nimbleFunction(
-##   setup = function(model, sampledNodes, mvSample,
-##     mvBlock, burnIn = 0, numReps=200,
-##     dataNames,
-##     MCMCIter,
-##     thin,
-##     averageParams,
-##     discFunc,
-##     ...){
-
-##    PPPFunction <- pppFunc(R.model, dataNames, sampledNodes,
-##                               mvBlock,
-##                               MCMCIter,
-##                               thin,
-##                               burnIn,
-##                               averageParams,
-##                               discFunc=discFunc,
-##                               ...)
-
-##   ## pppFunction <- nimbleFunctionList(pppFuncVirtual)
-##   ## pppFunction[[1]] <- bootstrapPPPFunc 
-
-##   },
-
-##   run = function(nsamps = double(0)){
-##     blockpppValues <- numeric(numReps) ## block estimates of ppp
-##     l <- ceiling(min(1000, (nsamps - burnIn)/20)) ##length of each
-##     ##block, ensures
-##     ##it's not too big
-##     q <- (nsamps - burnIn) - l + 1 ##total number of blocks available
-##     ##to sample from
-##     h <- ceiling((nsamps - burnIn)/l) ##number of blocks to use for ppp
-##     ##function calculation
-##     resize(mvBlock, h*l) ##size our model value object to be
-##     ##approximately of size m (number of mc
-##     ##samples)
-
-##     for(r in 1:numReps){
-##       for(i in 1:h){
-##         randNum <- runif(1,0,1)
-##         randIndex <- ceiling(randNum*q) ##random starting index for
-##         ##blocks (post burn-in)
-##         for(j in 1:l){
-##           nimCopy(mvSample, mvBlock, sampledNodes, sampledNodes,
-##                   burnIn + randIndex-1+j,  (i-1)*l+j) ##fill in mvBlock with chosen blocks
-##         }
-##       }
-##       ##as per Caffo, calculate both Q functions using the same
-##       ##samples from the latent variables
-##       blockpppValues[r]  <- PPPFunction$run(nsamps) 
-##     }
-
-##     blockpppValuesSD <- sd(blockpppValues)
-##     returnType(double())
-##     return(blockpppValuesSD)
-##   },
-##   where = getLoadingNamespace()
-##   )
 
 pppFuncVirtual <- nimbleFunctionVirtual(
   run = function(N = integer(0)) returnType(double(0))
@@ -380,7 +308,7 @@ generateCPPP <-  function(R.model,
 
   ## simulate cppp
   sim.sim.cppp <- sapply(1:NSamp, function(x){
-    mean(rbinom(length(overlap), size=1, overlap))
+    mean(rbinom(length(overlap), size=1, overlap), na.rm=TRUE)
   })
                          
   sim.samples <- lapply(sim.cppp, function(x) x$samples)
@@ -388,7 +316,8 @@ generateCPPP <-  function(R.model,
 
   nimble:::values(orig.C.model, dataNames) <- origData 
 
-  out <- list(cppp=quantile(sim.sim.cppp, c(0.025, 0.5, 0.975)),
+  out <- list(cppp=quantile(sim.sim.cppp, c(0.025, 0.5, 0.975),
+                na.rm=TRUE),
               obs.ppp=c(estimate=obs.cppp$pre.pp,
                 bootSD=obs.cppp$pppSD),
               sim.cpp.dist=cbind(esimate=sim.ppp,
