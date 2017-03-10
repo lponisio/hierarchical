@@ -61,7 +61,7 @@ input1 <- c(code=ss.ms.occ,
 
 
 ss.ms.orig <- compareMCMCs(input1,
-                           MCMCs=c('jags', "nimble"),
+                           MCMCs=c('jags', 'nimble'),
                            niter=niter,
                            burnin = burnin,
                            summary=FALSE,

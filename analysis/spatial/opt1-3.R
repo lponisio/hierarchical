@@ -5,12 +5,16 @@ source('src/initialize.R')
 set.seed(444)
 dats <- genSpatialOccData()
 model.input <- prepModData(dats$data, dats$y, dats$distance,
-                           nsite=250)
+                           nsite=250, inits=dats$inits)
 
 sp.mod <- nimbleCode({
   ## priors
-  delta ~ dunif(0.1, 10)
-  sigma ~ dunif(0.1, 10)
+  ## delta ~ dunif(0.1, 10)
+  logSigma ~ dnorm(-3, 1)
+  sigma <- exp(logSigma)
+  logDelta ~ dnorm(-3, 1)
+  delta <- exp(logDelta)
+  ## sigma ~ dunif(0.1, 100)
   p ~ dunif(0, 1)
   alpha ~ dnorm(0, 0.001)
   b1 ~ dnorm(0, 0.001)
@@ -48,8 +52,7 @@ input1 <- c(code=sp.mod,
 ## *********************************************************************
 
 sp.opt1 <- compareMCMCs(input1,
-                        MCMCs=c("nimble", "autoBlock",
-                          "nimble_slice"),
+                        MCMCs=c("nimble"),
                         niter=niter,
                         burnin = burnin,
                         summary=FALSE,
@@ -60,35 +63,35 @@ save(sp.opt1, file=file.path(save.dir, "opt1.Rdata"))
 ## *********************************************************************
 ## opt 2: add custom z sampler and slice on uniform(0,1) nodes
 ## *********************************************************************
-install_github("nlmichaud/nimble/packages/nimble", ref= "AFSliceSampler")
+## install_github("nlmichaud/nimble/packages/nimble", ref= "AFSliceSampler")
 
-MCMCdefs.opt2 <- list('nimbleOpt2' = quote({
-  customSpec <- configureMCMC(Rmodel)
-  ## slice sampler for 0,1 varaibles
-  customSpec$removeSamplers('p', print=FALSE)
-  customSpec$addSampler(target = 'p',
-                        type =
-                        "slice",
-                        print=FALSE)
-  ## multivariate slice sampler
-  customSpec$removeSamplers('rho', print=FALSE)
-  customSpec$addSampler(target = 'rho',
-                                                 type =
-                                                   "AF_slice",
-  control=list(sliceWidths=rep(1, input1$constants$nsite)),
-                                                 print=FALSE)
-  customSpec
-}))
+## MCMCdefs.opt2 <- list('nimbleOpt2' = quote({
+##   customSpec <- configureMCMC(Rmodel)
+##   ## slice sampler for 0,1 varaibles
+##   customSpec$removeSamplers('p', print=FALSE)
+##   customSpec$addSampler(target = 'p',
+##                         type =
+##                         "slice",
+##                         print=FALSE)
+##   ## multivariate slice sampler
+##   customSpec$removeSamplers('rho', print=FALSE)
+##   customSpec$addSampler(target = 'rho',
+##                                                  type =
+##                                                    "AF_slice",
+##   control=list(sliceWidths=rep(1, input1$constants$nsite)),
+##                                                  print=FALSE)
+##   customSpec
+## }))
 
 ## ## *********************************************************************
 ## ## run with compareMCMCs
 
-sp.opt2 <- compareMCMCs(input1,
-                        MCMCs=c('nimbleOpt2'),
-                        MCMCdefs = MCMCdefs.opt2,
-                        niter= niter,
-                        burnin = burnin,
-                        summary=FALSE,
-                        check=FALSE)
+## sp.opt2 <- compareMCMCs(input1,
+##                         MCMCs=c('nimbleOpt2'),
+##                         MCMCdefs = MCMCdefs.opt2,
+##                         niter= niter,
+##                         burnin = burnin,
+##                         summary=FALSE,
+##                         check=FALSE)
 
-save(sp.opt2, file=file.path(save.dir, "opt2.Rdata"))
+## save(sp.opt2, file=file.path(save.dir, "opt2.Rdata"))

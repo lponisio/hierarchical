@@ -1,7 +1,6 @@
 library(parallel)
 library(coda)
 
-
 pppFuncVirtual <- nimbleFunctionVirtual(
   run = function(N = integer(0)) returnType(double(0))
   )
@@ -33,7 +32,6 @@ maxDiscFuncGenerator <- nimbleFunction(
   },
   contains = virtualDiscFunction
   )
-
 
 pppFunc <- nimbleFunction(
     setup = function(model,
@@ -149,7 +147,7 @@ calcCPPP <- function(MCMCIter,
         cppp.C.mcmc$run(MCMCIter)
         samples <- mcmc(as.matrix(cppp.C.mcmc$mvSamples)[-c(1:burnIn),])
         convergeTest <- geweke.diag(samples)$z
-        if(runUntilConverged == 1){
+        if(runUntilConverged == TRUE){
             ## use Geweke diagnostic to see if MCMC has converged
             ## any na values get set to a very large z value so the MCMC
             ## will continue to be run. note that nan values correspond to
@@ -255,6 +253,7 @@ generateCPPP <-  function(R.model,
   paramDependencies <- orig.C.model$getDependencies(paramNames)
   mcmcMV <- orig.mcmc$mvSamples
 
+
   modelpppFunc <- pppFunc(R.model,
                           dataNames,
                           paramNames,
@@ -293,6 +292,19 @@ generateCPPP <-  function(R.model,
                     convStep=convStep)
     return(out)
   }
+  
+  ## simulate the ppp values
+  sim.ppp.output <- mclapply(1:NPDist, simPppDist)
+
+  ## extract simulated ppp and boot SDs
+  sim.ppp <- sapply(sim.ppp.output,
+                    function(x) x$pre.pp)
+  sim.vars <- (sapply(sim.ppp.output,
+                      function(x) x$bootSD))^2 
+
+  ## approximate the distbution of observed ppp and simulated ppp
+  diff.ppp <- obs.cppp$pre.pp - sim.ppp 
+  diff.vars.ppp <- obs.cppp$bootSD^2 + sim.vars
 
   ## simulate the ppp values
   sim.ppp.output <- mclapply(1:NPDist, simPppDist)

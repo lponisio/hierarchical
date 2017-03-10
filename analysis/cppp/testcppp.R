@@ -6,7 +6,7 @@ nthin <- 2
 
 pumpCode <- nimbleCode({
   for (i in 1:N){
-    theta[i] ~ dgamma(alpha,beta)
+    theta[i] ~ dgamma(alpha, beta)
     lambda[i] <- theta[i]*t[i]
     x[i] ~ dpois(lambda[i])
   }
@@ -42,7 +42,7 @@ message('MCMC built')
 ## compile model in C++
 D.model <- compileNimble(R.model)
 D.mcmc <- compileNimble(mcmc, project = R.model)
-D.mcmc$run(3000)
+D.mcmc$run(10000)
 message('NIMBLE model compiled')
 
 source('~/Dropbox/nimble/occupancy/analysis/cppp/src/calcCPPP.R')
@@ -54,13 +54,10 @@ output <- generateCPPP(R.model,
                        mcmc,
                        dataNames = 'x',
                        paramNames = c('alpha','beta'), 
-                       NSamp = 100,
-                       NPDist = 10,
+                       NpostSamp = 100,
+                       NPDist = 100,
                        burnInProp = 0.1,
                        thin = nthin,
                        averageParams = TRUE,
+                       nRepBoot=100,
                        discFuncGenerator=likeDiscFuncGenerator)
-
-
-## for max discFunction
-## discArgs = c('alpha','beta')

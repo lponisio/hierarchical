@@ -1,0 +1,21 @@
+model
+{
+    delta ~ dunif(0.1, 10)
+    sigma ~ dunif(0.1, 10)
+    p ~ dunif(0, 1)
+    alpha ~ dnorm(0, 0.001)
+    b1 ~ dnorm(0, 0.001)
+    rho[1:nsite] ~ dmnorm(zeros[1:nsite], D.tau[1:nsite, 1:nsite])
+    for (i in 1:nsite) {
+        z[i] ~ dbern(psi[i])
+        logit(psi[i]) <- alpha + b1 * elev[i] + rho[i]
+        p.eff[i] <- z[i] * p
+        for (j in 1:nreps) {
+            y[i, j] ~ dbern(p.eff[i])
+        }
+    }
+    dist.mat[1:nsite, 1:nsite] <- -delta * D[1:nsite, 1:nsite]
+    prep.cov[1:nsite, 1:nsite] <- mexp(dist.mat[1:nsite, 1:nsite])
+    D.cov[1:nsite, 1:nsite] <- (sigma^2) * (0.95 * prep.cov[1:nsite, 1:nsite] + 0.05 * DI[1:nsite, 1:nsite])
+    D.tau[1:nsite, 1:nsite] <- (D.cov[1:nsite, 1:nsite])
+}
