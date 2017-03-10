@@ -1,4 +1,4 @@
-rm(list=ls())
+#rm(list=ls())
 library(nimble)
 library(parallel)
 options(mc.cores=1)
@@ -45,7 +45,7 @@ D.mcmc <- compileNimble(mcmc, project = R.model)
 D.mcmc$run(10000)
 message('NIMBLE model compiled')
 
-source('~/Dropbox/nimble/occupancy/analysis/cppp/src/calcCPPP.R')
+#source('~/Dropbox/nimble/occupancy/analysis/cppp/src/calcCPPP.R')
 set.seed(4)
 
 output <- generateCPPP(R.model,
