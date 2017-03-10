@@ -11,7 +11,7 @@ dyesCode <- nimbleCode({
     }
     mu[i] ~ dnorm(theta, sd = sigma.between);
   }
-  
+
   theta ~ dnorm(0.0, 1.0E-10);
   sigma.within ~ dunif(0, 100)
   sigma.between ~ dunif(0, 100)
@@ -57,5 +57,10 @@ dyesModelSimp <- nimbleModel(dyesCodeSimp,
                              constants =list(BATCHES = 6, SAMPLES = 5))
 dyesModelSimp$setData(list(y = data))
 
-output.simp <- crossValidateOne(dyesModelSimp,
-                                "y", niter, niter*0.1, 2, 2)
+output.simp <- crossValidateOne(model=dyesModelSimp,
+                           dataNames= "y",
+                           MCMCIter= niter,
+                           burnInProp=0.1,
+                           thin=1,
+                           leaveOutIndex=2,
+                           MCMCdefs=NULL)

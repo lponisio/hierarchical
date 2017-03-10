@@ -1,258 +1,3 @@
-?try
-rm(list=ls())#
-library(nimble)#
-library(parallel)#
-setwd('~/Dropbox/nimble/occupancy/analysis/crossValidation')#
-source('crossValidationFunction.R')#
-#
-dyesCode <- nimbleCode({#
-  for (i in 1:BATCHES) {#
-    for (j in 1:SAMPLES) {#
-      y[i,j] ~ dnorm(mu[i], sd = sigma.within);#
-    }#
-    mu[i] ~ dnorm(theta, sd = sigma.between);#
-  }#
-  theta ~ dnorm(0.0, 1.0E-10);#
-  sigma.within ~ dunif(0, 100)#
-  sigma.between ~ dunif(0, 100)#
-})#
-#
-dyesModel <- nimbleModel(dyesCode,#
-                         constants = list(BATCHES = 6, SAMPLES = 5))#
-#
-## data <- matrix(c(1545, 1540, 1595, 1445, 1595, 1520, 1440, 1555, 1550,#
-##                  1440, 1630, 1455, 1440, 1490, 1605, 1595, 1515, 1450,#
-##                  1520, 1560, 1510, 1465, 1635, 1480, 1580, 1495, 1560,#
-##                  1545, 1625, 1445), nrow = 6)#
-#
-data <- cbind(rnorm(6, 0, 1), rnorm(6, 6, 1), rnorm(6, 4, 1),#
-              rnorm(6, 7, 1),#
-              rnorm(6, 5, 1))#
-#
-dyesModel$setData(list(y = data))#
-#
-options(mc.cores=1)#
-niter <- 10000#
-output <- crossValidateOne(model=dyesModel,#
-                           dataNames= "y",#
-                           MCMCIter= niter,#
-                           burnIn=niter*0.1,#
-                           thin=1,#
-                           leaveOutIndex=2,#
-                           MCMCdefs=NULL)
-model[[dataNames]]
-model[["x"]]
-try(model[["x"]], silent=TRUE)
-Q
-rm(list=ls())#
-library(nimble)#
-library(parallel)#
-setwd('~/Dropbox/nimble/occupancy/analysis/crossValidation')#
-source('crossValidationFunction.R')#
-#
-dyesCode <- nimbleCode({#
-  for (i in 1:BATCHES) {#
-    for (j in 1:SAMPLES) {#
-      y[i,j] ~ dnorm(mu[i], sd = sigma.within);#
-    }#
-    mu[i] ~ dnorm(theta, sd = sigma.between);#
-  }#
-  theta ~ dnorm(0.0, 1.0E-10);#
-  sigma.within ~ dunif(0, 100)#
-  sigma.between ~ dunif(0, 100)#
-})#
-#
-dyesModel <- nimbleModel(dyesCode,#
-                         constants = list(BATCHES = 6, SAMPLES = 5))#
-#
-## data <- matrix(c(1545, 1540, 1595, 1445, 1595, 1520, 1440, 1555, 1550,#
-##                  1440, 1630, 1455, 1440, 1490, 1605, 1595, 1515, 1450,#
-##                  1520, 1560, 1510, 1465, 1635, 1480, 1580, 1495, 1560,#
-##                  1545, 1625, 1445), nrow = 6)#
-#
-data <- cbind(rnorm(6, 0, 1), rnorm(6, 6, 1), rnorm(6, 4, 1),#
-              rnorm(6, 7, 1),#
-              rnorm(6, 5, 1))#
-#
-dyesModel$setData(list(y = data))#
-#
-options(mc.cores=1)#
-niter <- 10000#
-output <- crossValidateOne(model=dyesModel,#
-                           dataNames= "x",#
-                           MCMCIter= niter,#
-                           burnIn=niter*0.1,#
-                           thin=1,#
-                           leaveOutIndex=2,#
-                           MCMCdefs=NULL)
-rm(list=ls())#
-library(nimble)#
-library(parallel)#
-setwd('~/Dropbox/nimble/occupancy/analysis/crossValidation')#
-source('crossValidationFunction.R')#
-#
-dyesCode <- nimbleCode({#
-  for (i in 1:BATCHES) {#
-    for (j in 1:SAMPLES) {#
-      y[i,j] ~ dnorm(mu[i], sd = sigma.within);#
-    }#
-    mu[i] ~ dnorm(theta, sd = sigma.between);#
-  }#
-  theta ~ dnorm(0.0, 1.0E-10);#
-  sigma.within ~ dunif(0, 100)#
-  sigma.between ~ dunif(0, 100)#
-})#
-#
-dyesModel <- nimbleModel(dyesCode,#
-                         constants = list(BATCHES = 6, SAMPLES = 5))#
-#
-## data <- matrix(c(1545, 1540, 1595, 1445, 1595, 1520, 1440, 1555, 1550,#
-##                  1440, 1630, 1455, 1440, 1490, 1605, 1595, 1515, 1450,#
-##                  1520, 1560, 1510, 1465, 1635, 1480, 1580, 1495, 1560,#
-##                  1545, 1625, 1445), nrow = 6)#
-#
-data <- cbind(rnorm(6, 0, 1), rnorm(6, 6, 1), rnorm(6, 4, 1),#
-              rnorm(6, 7, 1),#
-              rnorm(6, 5, 1))#
-#
-dyesModel$setData(list(y = data))#
-#
-options(mc.cores=1)#
-niter <- 10000#
-output <- crossValidateOne(model=dyesModel,#
-                           dataNames= "x",#
-                           MCMCIter= niter,#
-                           burnIn=niter*0.1,#
-                           thin=1,#
-                           leaveOutIndex=2,#
-                           MCMCdefs=NULL)
-options(mc.cores=1)#
-niter <- 10000#
-output <- crossValidateOne(model=dyesModel,#
-                           dataNames= "theta",#
-                           MCMCIter= niter,#
-                           burnIn=niter*0.1,#
-                           thin=1,#
-                           leaveOutIndex=2,#
-                           MCMCdefs=NULL)
-dyesModel
-class(dyesModel)
-class(dyesModel)[1]
-str(dyesModel)
-?str
-sumamry(dyesModel)
-summary(dyesModel)
-dyesnModel
-dyesModel
-grep("Rmodel", dyesModel)
-grep("Rmodel", dyesModel$show())
-grep("Rmodel", eval(dyesModel))
-eval(dyesModel)
-x <- eval(dyesModel)
-x
-grep("Rmodel", x)
-grep("Rmodel", as.character(x))
-x
-class(x)
-as.character(x)
-is.Rmodel()
-is.nf(dyesModel)
-inherits(dyesModel, "RModelBaseClass")
-inherits(dyesModel, "RmodelBaseClass")
-wooo!
-rm(list=ls())#
-library(nimble)#
-library(parallel)#
-setwd('~/Dropbox/nimble/occupancy/analysis/crossValidation')#
-source('crossValidationFunction.R')#
-#
-dyesCode <- nimbleCode({#
-  for (i in 1:BATCHES) {#
-    for (j in 1:SAMPLES) {#
-      y[i,j] ~ dnorm(mu[i], sd = sigma.within);#
-    }#
-    mu[i] ~ dnorm(theta, sd = sigma.between);#
-  }#
-  theta ~ dnorm(0.0, 1.0E-10);#
-  sigma.within ~ dunif(0, 100)#
-  sigma.between ~ dunif(0, 100)#
-})#
-#
-dyesModel <- nimbleModel(dyesCode,#
-                         constants = list(BATCHES = 6, SAMPLES = 5))#
-#
-## data <- matrix(c(1545, 1540, 1595, 1445, 1595, 1520, 1440, 1555, 1550,#
-##                  1440, 1630, 1455, 1440, 1490, 1605, 1595, 1515, 1450,#
-##                  1520, 1560, 1510, 1465, 1635, 1480, 1580, 1495, 1560,#
-##                  1545, 1625, 1445), nrow = 6)#
-#
-data <- cbind(rnorm(6, 0, 1), rnorm(6, 6, 1), rnorm(6, 4, 1),#
-              rnorm(6, 7, 1),#
-              rnorm(6, 5, 1))#
-#
-dyesModel$setData(list(y = data))#
-#
-options(mc.cores=1)#
-niter <- 10000#
-output <- crossValidateOne(model=dyesModel,#
-                           dataNames= "theta",#
-                           MCMCIter= niter,#
-                           burnIn=niter*0.1,#
-                           thin=1,#
-                           leaveOutIndex=2,#
-                           MCMCdefs=NULL)
-output <- crossValidateOne(model=dyesModel,#
-                           dataNames= "y",#
-                           MCMCIter= niter,#
-                           burnIn=niter*0.1,#
-                           thin=1,#
-                           leaveOutIndex=2,#
-                           MCMCdefs=NULL)
-dataDimenions
-dataDimensions
-leaveOutIndex
-Q
-rm(list=ls())#
-library(nimble)#
-library(parallel)#
-setwd('~/Dropbox/nimble/occupancy/analysis/crossValidation')#
-source('crossValidationFunction.R')#
-#
-dyesCode <- nimbleCode({#
-  for (i in 1:BATCHES) {#
-    for (j in 1:SAMPLES) {#
-      y[i,j] ~ dnorm(mu[i], sd = sigma.within);#
-    }#
-    mu[i] ~ dnorm(theta, sd = sigma.between);#
-  }#
-  theta ~ dnorm(0.0, 1.0E-10);#
-  sigma.within ~ dunif(0, 100)#
-  sigma.between ~ dunif(0, 100)#
-})#
-#
-dyesModel <- nimbleModel(dyesCode,#
-                         constants = list(BATCHES = 6, SAMPLES = 5))#
-#
-## data <- matrix(c(1545, 1540, 1595, 1445, 1595, 1520, 1440, 1555, 1550,#
-##                  1440, 1630, 1455, 1440, 1490, 1605, 1595, 1515, 1450,#
-##                  1520, 1560, 1510, 1465, 1635, 1480, 1580, 1495, 1560,#
-##                  1545, 1625, 1445), nrow = 6)#
-#
-data <- cbind(rnorm(6, 0, 1), rnorm(6, 6, 1), rnorm(6, 4, 1),#
-              rnorm(6, 7, 1),#
-              rnorm(6, 5, 1))#
-#
-dyesModel$setData(list(y = data))#
-#
-options(mc.cores=1)#
-niter <- 10000#
-output <- crossValidateOne(model=dyesModel,#
-                           dataNames= "y",#
-                           MCMCIter= niter,#
-                           burnIn=niter*0.1,#
-                           thin=1,#
-                           leaveOutIndex=5,#
-                           MCMCdefs=NULL)
 rm(list=ls())#
 library(nimble)#
 library(parallel)#
@@ -292,106 +37,19 @@ output <- crossValidateOne(model=dyesModel,#
                            MCMCIter= niter,#
                            burnInProp=0.1,#
                            thin=1,#
-                           leaveOutIndex=5,#
-                           MCMCdefs=NULL)
-output <- crossValidateOne(model=dyesModel,#
-                           dataNames= "y",#
-                           MCMCIter= niter,#
-                           burnInProp=0.1,#
-                           thin=1,#
                            leaveOutIndex=2,#
                            MCMCdefs=NULL)
-rm(list=ls())#
-library(nimble)#
-library(parallel)#
-setwd('~/Dropbox/nimble/occupancy/analysis/crossValidation')#
-source('crossValidationFunction.R')#
-#
-dyesCode <- nimbleCode({#
-  for (i in 1:BATCHES) {#
-    for (j in 1:SAMPLES) {#
-      y[i,j] ~ dnorm(mu[i], sd = sigma.within);#
-    }#
-    mu[i] ~ dnorm(theta, sd = sigma.between);#
-  }#
-  theta ~ dnorm(0.0, 1.0E-10);#
-  sigma.within ~ dunif(0, 100)#
-  sigma.between ~ dunif(0, 100)#
-})#
-#
-dyesModel <- nimbleModel(dyesCode,#
-                         constants = list(BATCHES = 6, SAMPLES = 5))#
-#
-## data <- matrix(c(1545, 1540, 1595, 1445, 1595, 1520, 1440, 1555, 1550,#
-##                  1440, 1630, 1455, 1440, 1490, 1605, 1595, 1515, 1450,#
-##                  1520, 1560, 1510, 1465, 1635, 1480, 1580, 1495, 1560,#
-##                  1545, 1625, 1445), nrow = 6)#
-#
-data <- cbind(rnorm(6, 0, 1), rnorm(6, 6, 1), rnorm(6, 4, 1),#
-              rnorm(6, 7, 1),#
-              rnorm(6, 5, 1))#
-#
-dyesModel$setData(list(y = data))#
-#
-options(mc.cores=1)#
-niter <- 10000#
-output <- crossValidateOne(model=dyesModel,#
-                           dataNames= "y",#
-                           MCMCIter= niter,#
-                           burnInProp=0,#
-                           thin=1,#
-                           leaveOutIndex=2,#
-                           MCMCdefs=NULL)
-v
-source('crossValidationFunction.R')
-rm(list=ls())#
-library(nimble)#
-library(parallel)#
-setwd('~/Dropbox/nimble/occupancy/analysis/crossValidation')#
-source('crossValidationFunction.R')#
-#
-dyesCode <- nimbleCode({#
-  for (i in 1:BATCHES) {#
-    for (j in 1:SAMPLES) {#
-      y[i,j] ~ dnorm(mu[i], sd = sigma.within);#
-    }#
-    mu[i] ~ dnorm(theta, sd = sigma.between);#
-  }#
-  theta ~ dnorm(0.0, 1.0E-10);#
-  sigma.within ~ dunif(0, 100)#
-  sigma.between ~ dunif(0, 100)#
-})#
-#
-dyesModel <- nimbleModel(dyesCode,#
-                         constants = list(BATCHES = 6, SAMPLES = 5))#
-#
-## data <- matrix(c(1545, 1540, 1595, 1445, 1595, 1520, 1440, 1555, 1550,#
-##                  1440, 1630, 1455, 1440, 1490, 1605, 1595, 1515, 1450,#
-##                  1520, 1560, 1510, 1465, 1635, 1480, 1580, 1495, 1560,#
-##                  1545, 1625, 1445), nrow = 6)#
-#
-data <- cbind(rnorm(6, 0, 1), rnorm(6, 6, 1), rnorm(6, 4, 1),#
-              rnorm(6, 7, 1),#
-              rnorm(6, 5, 1))#
-#
-dyesModel$setData(list(y = data))#
-#
-options(mc.cores=1)#
-niter <- 10000#
-output <- crossValidateOne(model=dyesModel,#
-                           dataNames= "y",#
-                           MCMCIter= niter,#
-                           burnInProp=0,#
-                           thin=1,#
-                           leaveOutIndex=2,#
-                           MCMCdefs=NULL)
-output <- crossValidateOne(model=dyesModel,#
-                           dataNames= "y",#
-                           MCMCIter= niter,#
-                           burnInProp=1.6,#
-                           thin=1,#
-                           leaveOutIndex=2,#
-                           MCMCdefs=NULL)
+chunks
+range(chunks)
+dim(MCMCout)
+randIndexStart
+range(randIndexStart)
+indexes <- cbind(randIndexStart, randIndexStart + l - 1)#
+                chunks <- c(apply(indexes, 1, function(x){#
+                    seq(x[1], x[2], 1)}#
+                    ))
+range(chunks)
+Q
 rm(list=ls())#
 library(nimble)#
 library(parallel)#
@@ -474,468 +132,83 @@ output <- crossValidateOne(model=dyesModel,#
                            thin=1,#
                            leaveOutIndex=2,#
                            MCMCdefs=NULL)
+crossVal <- sum(sapply(crossValOut, function(x) x$crossValAverage),#
+                    na.rm=TRUE)#
+    crossValSD <- sqrt(sum(sapply(crossValOut,#
+                                  function(x) x$crossValAveSD^2),#
+                    na.rm=TRUE))
+crossValSD
+Q
 rm(list=ls())#
 library(nimble)#
 library(parallel)#
-options(mc.cores=1)#
-nthin <- 2#
+setwd('~/Dropbox/nimble/occupancy/analysis/crossValidation')#
+source('crossValidationFunction.R')#
 #
-pumpCode <- nimbleCode({#
-  for (i in 1:N){#
-    theta[i] ~ dgamma(alpha,beta)#
-    lambda[i] <- theta[i]*t[i]#
-    x[i] ~ dpois(lambda[i])#
+dyesCode <- nimbleCode({#
+  for (i in 1:BATCHES) {#
+    for (j in 1:SAMPLES) {#
+      y[i,j] ~ dnorm(mu[i], sd = sigma.within);#
+    }#
+    mu[i] ~ dnorm(theta, sd = sigma.between);#
   }#
-  alpha ~ dexp(1.0)#
-  beta ~ dgamma(0.1,1.0)#
+  theta ~ dnorm(0.0, 1.0E-10);#
+  sigma.within ~ dunif(0, 100)#
+  sigma.between ~ dunif(0, 100)#
 })#
 #
-pumpConsts <- list(N = 10,#
-                   t = c(94.3, 15.7, 62.9, 126, 5.24,#
-                     31.4, 1.05, 1.05, 2.1, 10.5))#
-pumpData <- list(x = c(5, 1, 5, 14, 3, 19, 1, 1, 4, 22))#
-pumpInits <- list(alpha = 1, beta = 1,#
-                  theta = rep(0.1, pumpConsts$N))#
-## build model#
-R.model <- nimbleModel(code=pumpCode,#
-                       constants=pumpConsts,#
-                       data=pumpData,#
-                       inits=pumpInits,#
-                       check=FALSE)#
-message('R model created')#
+dyesModel <- nimbleModel(dyesCode,#
+                         constants = list(BATCHES = 6, SAMPLES = 5))#
 #
-## configure and build mcmc#
-mcmc.spec <- configureMCMC(R.model,#
-                           print=FALSE,#
-                           monitors = c("alpha", "beta"),#
-                           thin=nthin)#
-mcmc <- buildMCMC(mcmc.spec)#
-message('MCMC built')#
+## data <- matrix(c(1545, 1540, 1595, 1445, 1595, 1520, 1440, 1555, 1550,#
+##                  1440, 1630, 1455, 1440, 1490, 1605, 1595, 1515, 1450,#
+##                  1520, 1560, 1510, 1465, 1635, 1480, 1580, 1495, 1560,#
+##                  1545, 1625, 1445), nrow = 6)#
 #
-## compile model in C++#
-D.model <- compileNimble(R.model)#
-D.mcmc <- compileNimble(mcmc, project = R.model)#
-D.mcmc$run(3000)#
-message('NIMBLE model compiled')#
+data <- cbind(rnorm(6, 0, 1), rnorm(6, 6, 1), rnorm(6, 4, 1),#
+              rnorm(6, 7, 1),#
+              rnorm(6, 5, 1))#
 #
-source('~/Dropbox/nimble/occupancy/analysis/cppp/src/calcCPPP.R')#
-set.seed(4)#
+dyesModel$setData(list(y = data))#
 #
-output <- generateCPPP(R.model,#
-                       D.model,#
-                       D.mcmc,#
-                       mcmc,#
-                       dataNames = 'x',#
-                       paramNames = c('alpha','beta'), #
-                       MCMCIter = 3000, #
-                       NSamp = 100,#
-                       NPDist = 10,#
-                       burnInProportion = 0.1,#
-                       thin = nthin,#
-                       averageParams = TRUE,#
-                       discFuncGenerator=likeDiscFuncGenerator)
-source('~/Dropbox/nimble/occupancy/analysis/cppp/src/calcCPPP.R')#
-set.seed(4)#
-#
-output <- generateCPPP(R.model,#
-                       D.model,#
-                       D.mcmc,#
-                       mcmc,#
-                       dataNames = 'x',#
-                       paramNames = c('alpha','beta'), #
-                       MCMCIter = 3000, #
-                       NSamp = 100,#
-                       NPDist = 10,#
-                       burnInProportion = 0.1,#
-                       thin = nthin,#
-                       averageParams = TRUE,#
-                       discFuncGenerator=likeDiscFuncGenerator)
-orig.mcmc
-orig.mcmc$mvSamples
-length(orig.mcmc$mvSamples)
-length(as.matrix(orig.mcmc$mvSamples))
-nrow(as.matrix(orig.mcmc$mvSamples))
-as.matrix(orig.mcmc$mvSamples)
-as.matrix(orig.C.mcmc$mvSamples)
-nrow(as.matrix(orig.C.mcmc$mvSamples))
-orig.C.mcmc$thin
-orig.mcmc$thin
-MCMCIter <- nrow(as.matrix(orig.C.mcmc$mvSamples))*orig.C.mcmc$thin
-MCMCIter
-thin <- orig.C.mcmc$thin#
-  MCMCIter <- nrow(as.matrix(orig.C.mcmc$mvSamples))*thin#
-  burnIn <- ceiling(burnInProp*(MCMCIter/thin))
-Q
-source('~/Dropbox/nimble/occupancy/analysis/cppp/src/calcCPPP.R')#
-set.seed(4)#
-#
-output <- generateCPPP(R.model,#
-                       D.model,#
-                       D.mcmc,#
-                       mcmc,#
-                       dataNames = 'x',#
-                       paramNames = c('alpha','beta'), #
-                       MCMCIter = 3000, #
-                       NSamp = 100,#
-                       NPDist = 10,#
-                       burnInProportion = 0.1,#
-                       thin = nthin,#
-                       averageParams = TRUE,#
-                       discFuncGenerator=likeDiscFuncGenerator)
-thin <- orig.C.mcmc$thin#
-  MCMCIter <- nrow(as.matrix(orig.C.mcmc$mvSamples))*thin#
-  burnIn <- ceiling(burnInProp*(MCMCIter/thin))
-Q
-output <- generateCPPP(R.model,#
-                       D.model,#
-                       D.mcmc,#
-                       mcmc,#
-                       dataNames = 'x',#
-                       paramNames = c('alpha','beta'), #
-                       MCMCIter = 3000, #
-                       NSamp = 100,#
-                       NPDist = 10,#
-                       burnInProp = 0.1,#
-                       thin = nthin,#
-                       averageParams = TRUE,#
-                       discFuncGenerator=likeDiscFuncGenerator)
-thin <- orig.C.mcmc$thin#
-  MCMCIter <- nrow(as.matrix(orig.C.mcmc$mvSamples))*thin#
-  burnIn <- ceiling(burnInProp*(MCMCIter/thin))#
-  origData <- nimble:::values(orig.C.model, dataNames)
-Q
-source('~/Dropbox/nimble/occupancy/analysis/cppp/src/calcCPPP.R')#
-set.seed(4)#
-#
-output <- generateCPPP(R.model,#
-                       D.model,#
-                       D.mcmc,#
-                       mcmc,#
-                       dataNames = 'x',#
-                       paramNames = c('alpha','beta'), #
-                       MCMCIter = 3000, #
-                       NSamp = 100,#
-                       NPDist = 10,#
-                       burnInProp = 0.1,#
-                       thin = nthin,#
-                       averageParams = TRUE,#
-                       discFuncGenerator=likeDiscFuncGenerator)
-output <- generateCPPP(R.model,#
-                       D.model,#
-                       D.mcmc,#
-                       mcmc,#
-                       dataNames = 'y',#
-                       paramNames = c('alpha','beta'), #
-                       MCMCIter = 3000, #
-                       NSamp = 100,#
-                       NPDist = 10,#
-                       burnInProp = 0.1,#
-                       thin = nthin,#
-                       averageParams = TRUE,#
-                       discFuncGenerator=likeDiscFuncGenerator)
-source('~/Dropbox/nimble/occupancy/analysis/cppp/src/calcCPPP.R')#
-set.seed(4)#
-#
-output <- generateCPPP(R.model,#
-                       D.model,#
-                       D.mcmc,#
-                       mcmc,#
-                       dataNames = 'y',#
-                       paramNames = c('alpha','beta'), #
-                       MCMCIter = 3000, #
-                       NSamp = 100,#
-                       NPDist = 10,#
-                       burnInProp = 0.1,#
-                       thin = nthin,#
-                       averageParams = TRUE,#
-                       discFuncGenerator=likeDiscFuncGenerator)
-source('~/Dropbox/nimble/occupancy/analysis/cppp/src/calcCPPP.R')#
-set.seed(4)#
-#
-output <- generateCPPP(R.model,#
-                       D.model,#
-                       D.mcmc,#
-                       mcmc,#
-                       dataNames = 'x',#
-                       paramNames = c('alpha','beta'), #
-                       MCMCIter = 3000, #
-                       NSamp = 100,#
-                       NPDist = 10,#
-                       burnInProp = 0.1,#
-                       thin = nthin,#
-                       averageParams = TRUE,#
-                       discFuncGenerator=likeDiscFuncGenerator)
-output <- generateCPPP(R.model,#
-                       D.model,#
-                       D.mcmc,#
-                       mcmc,#
-                       dataNames = 'x',#
-                       paramNames = c('alpha','beta'), #
-                       MCMCIter = 3000, #
-                       NSamp = 100,#
-                       NPDist = 10,#
-                       burnInProp = 0.1,#
-                       thin = nthin,#
-                       averageParams = TRUE,#
-                       discFuncGenerator=likeDiscFuncGenerator)
-source('~/Dropbox/nimble/occupancy/analysis/cppp/src/calcCPPP.R')#
-set.seed(4)#
-#
-output <- generateCPPP(R.model,#
-                       D.model,#
-                       D.mcmc,#
-                       mcmc,#
-                       dataNames = 'x',#
-                       paramNames = c('alpha','beta'), #
-                       MCMCIter = 3000, #
-                       NSamp = 100,#
-                       NPDist = 10,#
-                       burnInProp = 0.1,#
-                       thin = nthin,#
-                       averageParams = TRUE,#
-                       discFuncGenerator=likeDiscFuncGenerator)
-source('~/Dropbox/nimble/occupancy/analysis/cppp/src/calcCPPP.R')#
-set.seed(4)#
-#
-output <- generateCPPP(R.model,#
-                       D.model,#
-                       D.mcmc,#
-                       mcmc,#
-                       dataNames = 'x',#
-                       paramNames = c('alpha','beta'), #
-                       MCMCIter = 3000, #
-                       NSamp = 100,#
-                       NPDist = 10,#
-                       burnInProp = 0.1,#
-                       thin = nthin,#
-                       averageParams = TRUE,#
-                       discFuncGenerator=likeDiscFuncGenerator)
-testParamNames <- try(orig.C.model[[paramNames]], silent=TRUE)
-orig.C.model[[paramNames]]
-paramNames
-testParamNames <- apply(paramNames, function(x){#
-    try(orig.C.model[[x]], silent=TRUE)#
-  }
-)
-testParamNames <- lapply(paramNames, function(x){#
-    try(orig.C.model[[x]], silent=TRUE)#
-  })
-testParamNames
-testParamNames <- lapply(paramNames, function(x){#
-    try(orig.C.model[[x]], silent=TRUE)#
-  })
-lapply(testParamNames, function(x){#
-    if(inherits(x, "try-error")){#
-      stop(paste("paramNames", x,#
-                 "are not parameters in model"))#
+options(mc.cores=1)#
+niter <- 10000#
+output <- crossValidateOne(model=dyesModel,#
+                           dataNames= "y",#
+                           MCMCIter= niter,#
+                           burnInProp=0.1,#
+                           thin=1,#
+                           leaveOutIndex=2,#
+                           MCMCdefs=NULL)
+output
+names(output)
+output$crossVal
+output$crossValSD
+dyesCodeSimp <- nimbleCode({#
+  for (i in 1:BATCHES) {#
+    for (j in 1:SAMPLES) {#
+          y[i,j] ~ dnorm(theta, sd = sigma)#
     }#
-  })
-test2ParamNames <- all(orig.C.model$expandNodeNames(paramNames) %in%#
-                         orig.C.model$getNodeNames(stochOnly=TRUE))#
-  if(test2ParamNames == FALSE){#
-    stop(paste("paramNames", paramNames,#
-               "are not parameters in model"))#
-  }
-source('~/Dropbox/nimble/occupancy/analysis/cppp/src/calcCPPP.R')#
-set.seed(4)#
+  }#
+  theta ~ dnorm(0.0, 1.0E-10);#
+  sigma ~ dunif(0, 100)#
+})#
 #
-output <- generateCPPP(R.model,#
-                       D.model,#
-                       D.mcmc,#
-                       mcmc,#
-                       dataNames = 'x',#
-                       paramNames = c('alpha','beta', "hello"), #
-                       MCMCIter = 3000, #
-                       NSamp = 100,#
-                       NPDist = 10,#
-                       burnInProp = 0.1,#
-                       thin = nthin,#
-                       averageParams = TRUE,#
-                       discFuncGenerator=likeDiscFuncGenerator)
-Q
-source('~/Dropbox/nimble/occupancy/analysis/cppp/src/calcCPPP.R')#
-set.seed(4)#
+dyesModelSimp <- nimbleModel(dyesCodeSimp,#
+                             constants =list(BATCHES = 6, SAMPLES = 5))#
+dyesModelSimp$setData(list(y = data))#
 #
-output <- generateCPPP(R.model,#
-                       D.model,#
-                       D.mcmc,#
-                       mcmc,#
-                       dataNames = 'x',#
-                       paramNames = c('alpha','beta', "hello"), #
-                       MCMCIter = 3000, #
-                       NSamp = 100,#
-                       NPDist = 10,#
-                       burnInProp = 0.1,#
-                       thin = nthin,#
-                       averageParams = TRUE,#
-                       discFuncGenerator=likeDiscFuncGenerator)
-source('~/Dropbox/nimble/occupancy/analysis/cppp/src/calcCPPP.R')#
-set.seed(4)#
-#
-output <- generateCPPP(R.model,#
-                       D.model,#
-                       D.mcmc,#
-                       mcmc,#
-                       dataNames = 'x',#
-                       paramNames = c('alpha','beta', "hello"), #
-                       MCMCIter = 3000, #
-                       NSamp = 100,#
-                       NPDist = 10,#
-                       burnInProp = 0.1,#
-                       thin = nthin,#
-                       averageParams = TRUE,#
-                       discFuncGenerator=likeDiscFuncGenerator)
-source('~/Dropbox/nimble/occupancy/analysis/cppp/src/calcCPPP.R')#
-set.seed(4)#
-#
-output <- generateCPPP(R.model,#
-                       D.model,#
-                       D.mcmc,#
-                       mcmc,#
-                       dataNames = 'x',#
-                       paramNames = c('alpha','beta', "hello"), #
-                       MCMCIter = 3000, #
-                       NSamp = 100,#
-                       NPDist = 10,#
-                       burnInProp = 0.1,#
-                       thin = nthin,#
-                       averageParams = TRUE,#
-                       discFuncGenerator=likeDiscFuncGenerator)
-output <- generateCPPP(R.model,#
-                       D.model,#
-                       D.mcmc,#
-                       mcmc,#
-                       dataNames = 'x',#
-                       paramNames = c('alpha','beta', "hello"), #
-                       MCMCIter = 3000, #
-                       NSamp = 100,#
-                       NPDist = 10,#
-                       burnInProp = 0.1,#
-                       thin = nthin,#
-                       averageParams = TRUE,#
-                       discFuncGenerator=likeDiscFuncGenerator)
-source('~/Dropbox/nimble/occupancy/analysis/cppp/src/calcCPPP.R')#
-set.seed(4)#
-#
-output <- generateCPPP(R.model,#
-                       D.model,#
-                       D.mcmc,#
-                       mcmc,#
-                       dataNames = 'x',#
-                       paramNames = c('alpha','beta', "hello"), #
-                       MCMCIter = 3000, #
-                       NSamp = 100,#
-                       NPDist = 10,#
-                       burnInProp = 0.1,#
-                       thin = nthin,#
-                       averageParams = TRUE,#
-                       discFuncGenerator=likeDiscFuncGenerator)
-source('~/Dropbox/nimble/occupancy/analysis/cppp/src/calcCPPP.R')#
-set.seed(4)#
-#
-output <- generateCPPP(R.model,#
-                       D.model,#
-                       D.mcmc,#
-                       mcmc,#
-                       dataNames = 'x',#
-                       paramNames = c('alpha','beta', "hello"), #
-                       MCMCIter = 3000, #
-                       NSamp = 100,#
-                       NPDist = 10,#
-                       burnInProp = 0.1,#
-                       thin = nthin,#
-                       averageParams = TRUE,#
-                       discFuncGenerator=likeDiscFuncGenerator)
-testParamNames
-Q
-source('~/Dropbox/nimble/occupancy/analysis/cppp/src/calcCPPP.R')#
-set.seed(4)#
-#
-output <- generateCPPP(R.model,#
-                       D.model,#
-                       D.mcmc,#
-                       mcmc,#
-                       dataNames = 'x',#
-                       paramNames = c('alpha','beta', "hello"), #
-                       MCMCIter = 3000, #
-                       NSamp = 100,#
-                       NPDist = 10,#
-                       burnInProp = 0.1,#
-                       thin = nthin,#
-                       averageParams = TRUE,#
-                       discFuncGenerator=likeDiscFuncGenerator)
-output <- generateCPPP(R.model,#
-                       D.model,#
-                       D.mcmc,#
-                       mcmc,#
-                       dataNames = 'x',#
-                       paramNames = c('alpha','beta', "x"), #
-                       MCMCIter = 3000, #
-                       NSamp = 100,#
-                       NPDist = 10,#
-                       burnInProp = 0.1,#
-                       thin = nthin,#
-                       averageParams = TRUE,#
-                       discFuncGenerator=likeDiscFuncGenerator)
-source('~/Dropbox/nimble/occupancy/analysis/cppp/src/calcCPPP.R')#
-set.seed(4)#
-#
-output <- generateCPPP(R.model,#
-                       D.model,#
-                       D.mcmc,#
-                       mcmc,#
-                       dataNames = 'x',#
-                       paramNames = c('alpha','beta', "x"), #
-                       MCMCIter = 3000, #
-                       NSamp = 100,#
-                       NPDist = 10,#
-                       burnInProp = 0.1,#
-                       thin = nthin,#
-                       averageParams = TRUE,#
-                       discFuncGenerator=likeDiscFuncGenerator)
-Q
-source('~/Dropbox/nimble/occupancy/analysis/cppp/src/calcCPPP.R')#
-set.seed(4)#
-#
-output <- generateCPPP(R.model,#
-                       D.model,#
-                       D.mcmc,#
-                       mcmc,#
-                       dataNames = 'x',#
-                       paramNames = c('alpha','beta', "x"), #
-                       MCMCIter = 3000, #
-                       NSamp = 100,#
-                       NPDist = 10,#
-                       burnInProp = 0.1,#
-                       thin = nthin,#
-                       averageParams = TRUE,#
-                       discFuncGenerator=likeDiscFuncGenerator)
-R.model$expandNodeNames(paramNames)
-R.model$getNodeNames(stochOnly=TRUE)
-?getNodeNames
-R.model$getNodeNames(includeData=FALSE,#
-                                              stochOnly=TRUE)
-test2ParamNames <- all(R.model$expandNodeNames(paramNames) %in%#
-                         R.model$getNodeNames(includeData=FALSE,#
-                                              stochOnly=TRUE))
-test2ParamNames
-inherits(orig.C.model)
-inherits(orig.C.model, "CmodelBaseClass"
-)
-orig.mcmc
-class(orig.mcmc)
-orig.C.mcmc
-class(orig.C.mcmc)
-Q
-scale <- 1e2#
-burnin <- 1e2*scale#
-niter <- (1e3)*scale
-scale
-burnin
-niter
-niter/burnin
-## mcmc settings#
-scale <- 1e3#
-burnin <- 1e2*scale#
-niter <- (1e3)*scale
-niter
+output.simp <- crossValidateOne(dyesModelSimp,#
+                                "y", niter, niter*0.1, 2, 2)
+output.simp <- crossValidateOne(model=dyesModelSimp,#
+                           dataNames= "y",#
+                           MCMCIter= niter,#
+                           burnInProp=0.1,#
+                           thin=1,#
+                           leaveOutIndex=2,#
+                           MCMCdefs=NULL)
+names(output.simp)
+output.simp$crossVal
+output.simp$crossValSD
+output$crossValSD
+output$crossVal
