@@ -19,9 +19,9 @@ mexp <- nimbleFunction(
 sp.mod <- nimbleCode({
     ## priors
 
-  logSigma ~ dnorm(-3, 0.001)
+  logSigma ~ dnorm(0, 0.001)
   sigma <- exp(logSigma)
-  logDelta ~ dnorm(-3, 0.001)
+  logDelta ~ dnorm(0, 0.001)
   delta <- exp(logDelta)
 
   p ~ dunif(0, 1)
@@ -49,20 +49,11 @@ sp.mod <- nimbleCode({
   ## create covariance matrix based on distances (must be 1/cov for
   ## JAGS)
 
-  ## mexp is jags's version fo matrix exponentiation, very sensitive
-  ## dist.mat[1:nsite, 1:nsite] <- -delta*D[1:nsite, 1:nsite]
-  ## prep.cov[1:nsite, 1:nsite] <- mexp(dist.mat[1:nsite, 1:nsite])
-  ##  D.cov[1:nsite, 1:nsite] <- (sigma^2)*(0.95*prep.cov[1:nsite, 1:nsite] + 0.05*DI[1:nsite, 1:nsite])
+ ## mexp is jags's version fo matrix exponentiation, very sensitive
+  prep.cov[1:nsite, 1:nsite] <- 1/(exp(delta)*mexp(D[1:nsite, 1:nsite]))
+  D.cov[1:nsite, 1:nsite] <- (sigma^2)*(0.95*prep.cov[1:nsite, 1:nsite] + 0.05*DI[1:nsite, 1:nsite])
 
-    for(i in 1:nsite){
-    for(j in 1:nsite){
-      prep.cov[i, j]  <- exp(-delta*D[i, j])
-      D.cov[i, j] <- (sigma^2)*(0.95*prep.cov[i, j] + 0.05*DI[i, j])
-    }
-  }
-
-  D.tau[1:nsite, 1:nsite] <- (D.cov[1:nsite, 1:nsite])
-
+  D.tau[1:nsite, 1:nsite] <- inverse(D.cov[1:nsite, 1:nsite])
 })
 
 
@@ -87,7 +78,6 @@ save(sp.orig, file=file.path(save.dir, "orig.Rdata"))
 ## model in jags
 ## *********************************************************************
 
-library('rjags')
 library('R2jags')
 
 sp.mod.jags <- function(dd,
@@ -124,20 +114,11 @@ sp.mod.jags <- function(dd,
   ## create covariance matrix based on distances (must be 1/cov for
   ## JAGS)
 
-  dist.mat[1:nsite, 1:nsite] <- -delta*D[1:nsite, 1:nsite]
-  prep.cov[1:nsite, 1:nsite] <- mexp(dist.mat[1:nsite, 1:nsite])
+    prep.cov[1:nsite, 1:nsite] <- 1/(exp(delta)*mexp(D[1:nsite, 1:nsite]))
   D.cov[1:nsite, 1:nsite] <- (sigma^2)*(0.95*prep.cov[1:nsite, 1:nsite] + 0.05*DI[1:nsite, 1:nsite])
 
-  ##  for(i in 1:nsite){
-  ##  for(j in 1:nsite){
-  ##    prep.cov[i, j]  <- exp(-delta*D[i, j])
-  ##    D.cov[i, j] <- (sigma^2)*(0.95*prep.cov[i, j] + 0.05*DI[i, j])
-  ##  }
- ## }
 
-
-
-  D.tau[1:nsite, 1:nsite] <- (D.cov[1:nsite, 1:nsite])
+  D.tau[1:nsite, 1:nsite] <- inverse(D.cov[1:nsite, 1:nsite])
 
   }',fill = TRUE)
     sink()
@@ -174,5 +155,5 @@ res <- analyse.jags(model.input,
                      nc=3)
 
 
-## cols <- c('mean', 'sd', '2.5%', '97.5%', 'Rhat', 'n.eff')
-## res$bugs[,cols]
+## ## cols <- c('mean', 'sd', '2.5%', '97.5%', 'Rhat', 'n.eff')
+## ## res$bugs[,cols]

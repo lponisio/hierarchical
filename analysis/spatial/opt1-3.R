@@ -10,9 +10,9 @@ model.input <- prepModData(dats$data, dats$y, dats$distance,
 sp.mod <- nimbleCode({
   ## priors
   ## delta ~ dunif(0.1, 10)
-  logSigma ~ dnorm(-3, 1)
+  logSigma ~ dnorm(0, 1)
   sigma <- exp(logSigma)
-  logDelta ~ dnorm(-3, 1)
+  logDelta ~ dnorm(0, 1)
   delta <- exp(logDelta)
   ## sigma ~ dunif(0.1, 100)
   p ~ dunif(0, 1)
@@ -41,7 +41,7 @@ sp.mod <- nimbleCode({
 
   D.cov[1:nsite, 1:nsite] <- (sigma^2)*
     (0.95*prep.cov[1:nsite, 1:nsite] + 0.05*DI[1:nsite, 1:nsite])
-  
+
 })
 
 input1 <- c(code=sp.mod,

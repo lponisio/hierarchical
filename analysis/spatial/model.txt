@@ -1,13 +1,12 @@
 model
 {
-    logSigma ~ dnorm(-3, 0.001)
+    logSigma ~ dnorm(0, 1)
     sigma <- exp(logSigma)
-    logDelta ~ dnorm(-3, 0.001)
+    logDelta ~ dnorm(0, 1)
     delta <- exp(logDelta)
     p ~ dunif(0, 1)
     alpha ~ dnorm(0, 0.001)
     b1 ~ dnorm(0, 0.001)
-    rho[1:nsite] ~ dmnorm(zeros[1:nsite], D.tau[1:nsite, 1:nsite])
     for (i in 1:nsite) {
         z[i] ~ dbern(psi[i])
         logit(psi[i]) <- alpha + b1 * elev[i] + rho[i]
@@ -16,11 +15,7 @@ model
             y[i, j] ~ dbern(p.eff[i])
         }
     }
-    for (i in 1:nsite) {
-        for (j in 1:nsite) {
-            prep.cov[i, j] <- exp(-delta * D[i, j])
-            D.cov[i, j] <- (sigma^2) * (0.95 * prep.cov[i, j] + 0.05 * DI[i, j])
-        }
-    }
-    D.tau[1:nsite, 1:nsite] <- (D.cov[1:nsite, 1:nsite])
+    rho[1:nsite] ~ dmnorm(zeros[1:nsite], cov = D.cov[1:nsite, 1:nsite])
+    prep.cov[1:nsite, 1:nsite] <- exp(-delta * D[1:nsite, 1:nsite])
+    D.cov[1:nsite, 1:nsite] <- (sigma^2) * (0.95 * prep.cov[1:nsite, 1:nsite] + 0.05 * DI[1:nsite, 1:nsite])
 }
