@@ -18,7 +18,7 @@ load(file=file.path(save.dir, "opt1.Rdata"))
 ##                                                  'slice',
 ##                                                  comparison=sp.opt2[[1]])
 ## compare mcmcs
-sp.occ.all <- combine_MCMC_comparison_results(sp.orig[[1]],
+sp.occ.all <- combine_MCMC_comparison_results(## sp.orig[[1]],
                                                  sp.opt1[[1]],
                                                  ## sp.opt2[[1]],
                                                  name = "sp" )

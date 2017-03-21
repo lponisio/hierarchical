@@ -45,7 +45,7 @@ pppFunc <- nimbleFunction(
                      discFunc,
                      NbootReps,
                      ...){
-        blockMV <- modelValues(R.model)
+        blockMV <- modelValues(model)
         paramDependencies <- model$getDependencies(paramNames)
         discFunction <- nimbleFunctionList(virtualDiscFunction)
         discFunction[[1]] <- discFunc(model, ...)
@@ -166,12 +166,12 @@ calcCPPP <- function(MCMCIter,
             }
         }
     }
+    rm(list=(samples))
     pre.pp <- C.pppFunc$run(NpostSamp, FALSE)
     bootSD <- C.pppFunc$getSD(NpostSamp)
     if(!is.finite(pre.pp))    pre.pp <- NA
     return(list(pre.pp = pre.pp,
                 bootSD = bootSD,
-                samples = samples,
                 converge.stat = convergeTest))
 }
 
@@ -187,13 +187,11 @@ generateCPPP <-  function(R.model,
                           burnInProp, ## proportion of mcmc to drop
                           discFuncGenerator,
                           averageParams,
-                          returnChains = TRUE,
                           runUntilConverged = FALSE,
                           maxIter = 1*10^4,
                           convStep = 0.5,
                           nRepBoot, ## number of bootstrap samples
                           ...){
-
   if(!inherits(R.model, "RmodelBaseClass")){
     stop("R.model is not an Rmodel")
   }
@@ -324,9 +322,7 @@ generateCPPP <-  function(R.model,
   cppp <- mean(pnorm(0, diff.ppp, diff.vars.ppp),
                na.rm=TRUE)
 
-  ## extract chains and diagnostics
-  sim.samples <- lapply(sim.ppp.output,
-                        function(x) x$samples)
+  ## extract diagnostics
   chain.diag <- sapply(sim.ppp.output,
                        function(x) x$converge.stat)
 
@@ -338,10 +334,7 @@ generateCPPP <-  function(R.model,
                 bootVar=(obs.cppp$bootSD)^2),
               sim.cpp.dist=cbind(esimate=sim.ppp,
                 bootVar=sim.vars),
-              chain.diagnostics= chain.diag,
-              samples=sim.samples)
-  if(!returnChains){
-    out$samples <- NULL
-  }
+              chain.diagnostics= chain.diag)
+
   return(out)
 }

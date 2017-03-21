@@ -46,8 +46,8 @@ genSpatialOccData <- function(ngrid = 50,
   ## Latent occurrence state
   z <- rbinom(n = n, size = 1, prob = psi)
   z <- rasterFromXYZ(cbind(coordinates(elev), z))
-  quartz()
-  plot(z)
+  # quartz()
+  # plot(z)
 
   coords <- coordinates(z)
   fulldata <- data.frame(coords,

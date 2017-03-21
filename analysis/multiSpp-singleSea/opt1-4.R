@@ -102,12 +102,6 @@ ms.ss.occ <- nimbleCode({
       detectionProb = p[1:num.points, 1:max.num.reps,i],
       numReps = num.reps[1:num.points])
   }
-  ## Derived quantities:
-  ## for(j in 1:num.points){
-  ##   N.site[j]<- sum(mu.psi[j,1:(num.species)])
-  ##   N.ground[j]<- sum(mu.psi[j,1:num.species] * ground[1:num.species])
-  ##   N.mid[j]<- sum(mu.psi[j,1:num.species] * mid[1:num.species])
-  ## }
 })
 
 input1 <- c(code=ms.ss.occ, model.input)
@@ -259,11 +253,10 @@ occ.C.mcmc$run(niter)
 source('../cppp/src/calcCPPP.R', chdir = TRUE)
 options(mc.cores=8)
 
-
-output <- generateCPPP(occ.R.model,
-                       occ.C.model,
-                       D.mcmc,
-                       occ.mcmc,
+output <- generateCPPP(R.model=occ.R.model,
+                       orig.C.model=occ.C.model,
+                       orig.C.mcmc=occ.C.mcmc,
+                       orig.mcmc=occ.mcmc,
                        dataNames = 'X',
                        paramNames =  input1$monitors,
                        NpostSamp = 100,
@@ -283,6 +276,19 @@ save(test.opt2, file=file.path(save.dir, "ms_ss_noz_CPPP.Rdata"))
 ## *********************************************************************
 ## if not already run above
 options(mc.cores=6)
+occ.R.model <- nimbleModel(code=ms.ss.occ,
+                           constants=input1$constants,
+                           data=input1$data,
+                           inits=input1$inits,
+                           check=FALSE)
+
+occ.mcmc <- buildMCMC(occ.R.model)
+occ.C.model <- compileNimble(occ.R.model)
+occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model)
+occ.C.mcmc$run(niter)
+
+
+
 source('../crossValidation/crossValidationFunction.R')
 
 occ.R.model <- nimbleModel(code=ms.ss.occ,
