@@ -1,4 +1,4 @@
-rm(list=ls())
+# rm(list=ls())
 library(nimble)
 library(parallel)
 options(mc.cores=1)
@@ -17,7 +17,8 @@ pumpCode <- nimbleCode({
 pumpConsts <- list(N = 10,
                    t = c(94.3, 15.7, 62.9, 126, 5.24,
                      31.4, 1.05, 1.05, 2.1, 10.5))
-pumpData <- list(x = c(5, 1, 5, 14, 3, 19, 1, 1, 4, 22))
+pumpData <- list(x = rep(1, 10))
+# pumpData <- list(x = c(5, 1, 5, 14, 3, 19, 1, 1, 4, 22))
 pumpInits <- list(alpha = 1, beta = 1,
                   theta = rep(0.1, pumpConsts$N))
 
@@ -34,7 +35,7 @@ message('R model created')
 ## configure and build mcmc
 mcmc.spec <- configureMCMC(R.model,
                            print=FALSE,
-                           monitors = c("alpha", "beta"),
+                           monitors = c("alpha", "beta", "theta"),
                            thin=nthin)
 mcmc <- buildMCMC(mcmc.spec)
 message('MCMC built')
@@ -43,21 +44,48 @@ message('MCMC built')
 D.model <- compileNimble(R.model)
 D.mcmc <- compileNimble(mcmc, project = R.model)
 D.mcmc$run(10000)
+output <- as.matrix(D.mcmc$mvSamples)
 message('NIMBLE model compiled')
 
 source('~/Dropbox/nimble/occupancy/analysis/cppp/src/calcCPPP.R')
 set.seed(4)
 
-output <- generateCPPP(R.model,
-                       D.model,
-                       D.mcmc,
-                       mcmc,
+pumpDiscMeasure <- nimbleFunction(
+  setup = function(model, discFunctionArgs){
+    dataNames <- discFunctionArgs[[1]]
+    lambdaNames <- 'lambda'
+  },
+  run = function(){
+    dataVals <- values(model, dataNames)
+    lambdaVals <- values(model, lambdaNames)
+    disc <- 0
+    for(i in 1:dim(dataVals)[1]){
+      disc <- disc + ((dataVals[i] - lambdaVals[i])/sqrt(lambdaVals[i]))
+    }
+    returnType(double(0))
+    return(disc)
+  },
+  contains = virtualDiscFunction
+) 
+
+mcmcGenFunc <- function(model){
+  mcmc.spec <- configureMCMC(model,
+                             print=FALSE,
+                             monitors = c("alpha", "beta", "theta"),
+                             thin=nthin)
+  mcmc <- buildMCMC(mcmc.spec)
+}
+
+CPPPoutput <- generateCPPP(R.model,
+                       output,
+                       mcmcCreator = mcmcGenFunc,
                        dataNames = 'x',
-                       paramNames = c('alpha','beta'), 
-                       NpostSamp = 100,
-                       NPDist = 100,
+                       cpppMCMCIter = 200,
+                       nPPPCalcIters = 200,
+                       nSimPPPVals = 100,
                        burnInProp = 0.1,
                        thin = nthin,
-                       averageParams = TRUE,
-                       nRepBoot=100,
-                       discFuncGenerator=likeDiscFuncGenerator)
+                       nBootstrapSDReps=200,
+                       # discFuncGenerator=pumpDiscMeasure,
+                       discFunctionArgs = list('x'))
+
