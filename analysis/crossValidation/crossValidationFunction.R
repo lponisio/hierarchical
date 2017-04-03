@@ -51,12 +51,14 @@ crossValidateOne <- function(model,
         }
     }
     prepModel <- model$newModel()
+    numBlocks <- prepModel$getVarInfo(dataNames)[['maxs']][leaveOutIndex]
     dataDimensions <- prepModel$getVarInfo(dataNames)[['maxs']]
     if(leaveOutIndex > length(dataDimensions)){
         stop("leaveOutIndex is not an index in the data")
     }
-    numBlocks <- dataDimensions[leaveOutIndex]
-    
+    ## numBlocks <- dataDimensions[leaveOutIndex]
+
+
     saveData <- array(nimble:::values(prepModel, dataNames),
                       dim = c(dataDimensions))
     calcCrossVal <- function(i,

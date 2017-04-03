@@ -1,4 +1,4 @@
-# rm(list=ls())
+rm(list=ls())
 library(nimble)
 library(parallel)
 options(mc.cores=1)
@@ -47,7 +47,7 @@ D.mcmc$run(10000)
 output <- as.matrix(D.mcmc$mvSamples)
 message('NIMBLE model compiled')
 
-source('~/Dropbox/nimble/occupancy/analysis/cppp/src/calcCPPP.R')
+#source('~/Dropbox/nimble/occupancy/analysis/cppp/src/calcCPPP.R')
 set.seed(4)
 
 pumpDiscMeasure <- nimbleFunction(
@@ -80,9 +80,9 @@ CPPPoutput <- generateCPPP(R.model,
                        output,
                        mcmcCreator = mcmcGenFunc,
                        dataNames = 'x',
-                       cpppMCMCIter = 200,
+                       cpppMCMCIter = 2000,
                        nPPPCalcIters = 200,
-                       nSimPPPVals = 100,
+                       nSimPPPVals = 200,
                        burnInProp = 0.1,
                        thin = nthin,
                        nBootstrapSDReps=200,

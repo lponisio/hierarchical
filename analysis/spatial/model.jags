@@ -1,0 +1,38 @@
+model{
+  ## priors
+  logSigma ~ dnorm(0, 0.001)
+  sigma <- exp(logSigma)
+  logDelta ~ dnorm(0, 0.001)
+  delta <- exp(logDelta)
+
+  p ~ dunif(0, 1)
+  alpha ~ dnorm(0, 0.001)
+  b1 ~ dnorm(0, 0.001)
+
+  rho[1:nsite] ~ dmnorm(zeros[1:nsite],
+                        D.tau[1:nsite, 1:nsite])
+
+
+  ## Likelihood
+  ## Ecological model for true occurrence
+  for (i in 1:nsite) {
+    z[i] ~ dbern(psi[i])
+    logit(psi[i]) <- alpha + b1*elev[i] + rho[i]
+    p.eff[i] <- z[i] * p
+
+    ## Observation model for replicated detection/nondetection
+    ## observations
+    for (j in 1:nreps) {
+      y[i,j] ~ dbern(p.eff[i])
+    }
+  }
+
+  ## create covariance matrix based on distances (must be 1/cov for
+  ## JAGS)
+
+  prep.cov[1:nsite, 1:nsite] <- 1/(exp(delta)*mexp(D[1:nsite, 1:nsite]))
+  D.cov[1:nsite, 1:nsite] <- (sigma^2)*(0.95*prep.cov[1:nsite, 1:nsite] + 0.05*DI[1:nsite, 1:nsite])
+
+  D.tau[1:nsite, 1:nsite] <- inverse(D.cov[1:nsite, 1:nsite])
+
+  }

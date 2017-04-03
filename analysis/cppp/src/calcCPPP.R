@@ -264,7 +264,7 @@ generateCPPP <-  function(R.model,
     }
     return(out)
   }
-  
+
 
   ## simulate the ppp values
   sim.ppp.output <- mclapply(X = 1:nCores, FUN = cpppParallelFunction, 
@@ -277,7 +277,7 @@ generateCPPP <-  function(R.model,
                       function(x) x$bootSD))^2 
 
   ## approximate the distbution of observed ppp and simulated ppp
-  diff.ppp <- obs.cppp$pre.pp - sim.ppp 
+  diff.ppp <- obs.cppp$pre.pp - sim.ppp
   diff.vars.ppp <- obs.cppp$bootSD^2 + sim.vars
 
 
@@ -285,7 +285,7 @@ generateCPPP <-  function(R.model,
   ## the observed
   cppp <- mean(pnorm(0, diff.ppp, diff.vars.ppp),
                na.rm=TRUE)
- 
+
     ## extract chains and diagnostics
   if(returnSamples){
     sim.samples <- lapply(sapply(sim.ppp.output, function(x) x),
@@ -305,4 +305,3 @@ generateCPPP <-  function(R.model,
               samples=sim.samples)
   return(out)
 }
-

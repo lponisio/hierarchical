@@ -1,4 +1,168 @@
-rm(list=ls()) #
+scale <- 1e3#
+burnin <- 1e1*scale#
+niter <- (1e3)*scale
+niter
+log(1)
+log(0.1)
+log(8)
+rm(list=ls())#
+setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
+source('src/initialize.R')
+rm(list=ls())#
+setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
+source('src/initialize.R')#
+library(rjags)#
+load.module("msm")#
+#
+set.seed(444)#
+dats <- genSpatialOccData()#
+model.input <- prepModData(dats$data, dats$y, dats$distance,#
+                           nsite=250, inits=dats$inits)#
+#
+mexp <- nimbleFunction(#
+  run = function(A = double(2)){#
+    returnType(double(2))#
+    outMat <- exp(A)#
+    return(outMat)#
+  })#
+#
+sp.mod <- nimbleCode({#
+    ## priors#
+#
+  logSigma ~ dnorm(-3, 0.001)#
+  sigma <- exp(logSigma)#
+  logDelta ~ dnorm(-3, 0.001)#
+  delta <- exp(logDelta)#
+#
+  p ~ dunif(0, 1)#
+  alpha ~ dnorm(0, 0.001)#
+  b1 ~ dnorm(0, 0.001)#
+#
+  rho[1:nsite] ~ dmnorm(zeros[1:nsite],#
+                        D.tau[1:nsite, 1:nsite])#
+  ## Likelihood#
+  ## Ecological model for true occurrence#
+  for (i in 1:nsite) {#
+    z[i] ~ dbern(psi[i])#
+    logit(psi[i]) <- alpha + b1*elev[i] + rho[i]#
+    p.eff[i] <- z[i] * p#
+#
+    ## Observation model for replicated detection/nondetection#
+    ## observations#
+    for (j in 1:nreps) {#
+      y[i,j] ~ dbern(p.eff[i])#
+    }#
+  }#
+#
+  ## create covariance matrix based on distances (must be 1/cov for#
+  ## JAGS)#
+#
+  ## mexp is jags's version fo matrix exponentiation, very sensitive#
+  dist.mat[1:nsite, 1:nsite] <- -delta*D[1:nsite, 1:nsite]#
+  prep.cov[1:nsite, 1:nsite] <- mexp(dist.mat[1:nsite, 1:nsite])#
+   D.cov[1:nsite, 1:nsite] <- (sigma^2)*(0.95*prep.cov[1:nsite, 1:nsite] + 0.05*DI[1:nsite, 1:nsite])#
+#
+  ##   for(i in 1:nsite){#
+  ##   for(j in 1:nsite){#
+  ##     prep.cov[i, j]  <- exp(-delta*D[i, j])#
+  ##     D.cov[i, j] <- (sigma^2)*(0.95*prep.cov[i, j] + 0.05*DI[i, j])#
+  ##   }#
+  ## }#
+#
+  D.tau[1:nsite, 1:nsite] <- (D.cov[1:nsite, 1:nsite])#
+#
+})#
+input1 <- c(code=sp.mod,#
+            model.input)#
+#
+## *********************************************************************#
+## opt 1:vanilla nimble and auto block#
+## *********************************************************************#
+#
+sp.orig <- compareMCMCs(input1,#
+                        MCMCs=c("jags"),#
+                        niter=niter,#
+                        burnin = burnin,#
+                        summary=FALSE,#
+                        check=FALSE)
+rm(list=ls())#
+setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
+source('src/initialize.R')#
+library(rjags)#
+load.module("msm")#
+#
+set.seed(444)#
+dats <- genSpatialOccData()#
+model.input <- prepModData(dats$data, dats$y, dats$distance,#
+                           nsite=250, inits=dats$inits)#
+#
+mexp <- nimbleFunction(#
+  run = function(A = double(2)){#
+    returnType(double(2))#
+    outMat <- exp(A)#
+    return(outMat)#
+  })#
+#
+sp.mod <- nimbleCode({#
+    ## priors#
+#
+  logSigma ~ dnorm(-3, 0.001)#
+  sigma <- exp(logSigma)#
+  logDelta ~ dnorm(-3, 0.001)#
+  delta <- exp(logDelta)#
+#
+  p ~ dunif(0, 1)#
+  alpha ~ dnorm(0, 0.001)#
+  b1 ~ dnorm(0, 0.001)#
+#
+  rho[1:nsite] ~ dmnorm(zeros[1:nsite],#
+                        D.tau[1:nsite, 1:nsite])#
+  ## Likelihood#
+  ## Ecological model for true occurrence#
+  for (i in 1:nsite) {#
+    z[i] ~ dbern(psi[i])#
+    logit(psi[i]) <- alpha + b1*elev[i] + rho[i]#
+    p.eff[i] <- z[i] * p#
+#
+    ## Observation model for replicated detection/nondetection#
+    ## observations#
+    for (j in 1:nreps) {#
+      y[i,j] ~ dbern(p.eff[i])#
+    }#
+  }#
+#
+  ## create covariance matrix based on distances (must be 1/cov for#
+  ## JAGS)#
+#
+  ## mexp is jags's version fo matrix exponentiation, very sensitive#
+  ## dist.mat[1:nsite, 1:nsite] <- -delta*D[1:nsite, 1:nsite]#
+  ## prep.cov[1:nsite, 1:nsite] <- mexp(dist.mat[1:nsite, 1:nsite])#
+  ##  D.cov[1:nsite, 1:nsite] <- (sigma^2)*(0.95*prep.cov[1:nsite, 1:nsite] + 0.05*DI[1:nsite, 1:nsite])#
+#
+    for(i in 1:nsite){#
+    for(j in 1:nsite){#
+      prep.cov[i, j]  <- exp(-delta*D[i, j])#
+      D.cov[i, j] <- (sigma^2)*(0.95*prep.cov[i, j] + 0.05*DI[i, j])#
+    }#
+  }#
+#
+  D.tau[1:nsite, 1:nsite] <- (D.cov[1:nsite, 1:nsite])#
+#
+})#
+input1 <- c(code=sp.mod,#
+            model.input)#
+#
+## *********************************************************************#
+## opt 1:vanilla nimble and auto block#
+## *********************************************************************#
+#
+sp.orig <- compareMCMCs(input1,#
+                        MCMCs=c("jags"),#
+                        niter=niter,#
+                        burnin = burnin,#
+                        summary=FALSE,#
+                        check=FALSE)
+rm(list=ls())#
 setwd('~/Dropbox/nimble/occupancy/analysis/multiSpp-singleSea')#
 #
 source('src/initialize.R')#
@@ -8,139 +172,116 @@ model.input <- prepMutiSpData(survey.data,#
                               survey.dates,#
                               species.groups,#
                               habitat,#
-                              n.zeros)#
+                              n.zeros)
+options(mc.cores=6)#
+source('../crossValidation/crossValidationFunction.R')#
 #
-## *********************************************************************#
-## multi-species site-occupancy models: vectorized with custom#
-## function to remove zs#
-## *********************************************************************#
-#
-ms.ss.occ <- nimbleCode({#
-  ## Define prior distributions for community-level model parameters#
-  cato.occ.mean ~ dunif(0,1)#
-  mu.ucato <- log(cato.occ.mean) - log(1-cato.occ.mean)#
-#
-  fcw.occ.mean ~ dunif(0,1)#
-  mu.ufcw <- log(fcw.occ.mean) - log(1-fcw.occ.mean)#
-#
-  cato.det.mean ~ dunif(0,1)#
-  mu.vcato <- log(cato.det.mean) - log(1-cato.det.mean)#
-#
-  fcw.det.mean ~ dunif(0,1)#
-  mu.vfcw <- log(fcw.det.mean) - log(1-fcw.det.mean)#
+ms.ss.occ.simp <- nimbleCode({#
 #
   ## random effects#
-  sigma.ucato ~ dunif(0, 100)#
-  sigma.ufcw ~ dunif(0, 100)#
-  mu.a1 ~ dnorm(0, 0.001)#
-  sigma.a1 ~ dunif(0, 100)#
-  mu.a2 ~ dnorm(0, 0.001)#
-  sigma.a2 ~ dunif(0, 100)#
-  mu.a3 ~ dnorm(0, 0.001)#
-  sigma.a3 ~ dunif(0, 100)#
-  mu.a4 ~ dnorm(0, 0.001)#
-  sigma.a4 ~ dunif(0, 100)#
-#
-  sigma.vcato ~ dunif(0, 100)#
-  sigma.vfcw ~ dunif(0, 100)#
-  mu.b1 ~ dnorm(0, 0.001)#
-  sigma.b1 ~ dunif(0, 100)#
-  mu.b2 ~ dnorm(0, 0.001)#
-  sigma.b2 ~ dunif(0, 100)#
+  a1 ~ dnorm(0, 0.001)#
+  a2 ~ dnorm(0, 0.001)#
+  a3 ~ dnorm(0, 0.001)#
+  a4 ~ dnorm(0, 0.001)#
+  b1 ~ dnorm(0, 0.001)#
+  b2 ~ dnorm(0, 0.001)#
   for (i in 1:(num.species)) {#
     ## Create priors for species i from the community level prior#
     ## distributions#
 #
-    u.cato[i] ~ dnorm(mu.ucato, sd=sigma.ucato)#
-    u.fcw[i] ~ dnorm(mu.ufcw, sd=sigma.ufcw)#
-    a1[i] ~ dnorm(mu.a1, sd=sigma.a1)#
-    a2[i] ~ dnorm(mu.a2, sd=sigma.a2)#
-    a3[i] ~ dnorm(mu.a3, sd=sigma.a3)#
-    a4[i] ~ dnorm(mu.a4, sd=sigma.a4)#
-#
-    v.cato[i] ~ dnorm(mu.vcato, sd=sigma.vcato)#
-    v.fcw[i] ~ dnorm(mu.vfcw, sd=sigma.vfcw)#
-    b1[i] ~ dnorm(mu.b1, sd=sigma.b1)#
-    b2[i] ~ dnorm(mu.b2, sd=sigma.b2)#
-#
     ## vectorize the calculation of psi.#
-    logit(psi[1:num.points,i]) <-#
-      u.cato[i]*(1-habitat.ind[1:num.points]) +#
-        u.fcw[i]*habitat.ind[1:num.points] +#
-          a1[i]*ufc.linear[1:num.points] +#
-            a2[i]*ufc.quadratic[1:num.points] +#
-              a3[i]*ba.linear[1:num.points] +#
-                a4[i]*ba.quadratic[1:num.points]#
+    logit(psi[1:num.points]) <-#
+      u.cato*(1-habitat.ind[1:num.points]) +#
+        u.fcw*habitat.ind[1:num.points] +#
+          a1*ufc.linear[1:num.points] +#
+            a2*ufc.quadratic[1:num.points] +#
+              a3*ba.linear[1:num.points] +#
+                a4*ba.quadratic[1:num.points]#
     ## vectorized calculation#
-    mu.psi[1:num.points,i] <- psi[1:num.points, i]#
+    mu.psi[1:num.points] <- psi[1:num.points]#
 #
-    ## For our purpose a better way to write this way is to#
-    ## not worry that some elements of date.linear and date.quadratic#
-    ## aren't used, since the benefit of vectorizing the computation#
-    ## should be much greater than the cost of a few extra elements#
-    logit(p[1:num.points, 1:max.num.reps, i]) <-#
-      (v.cato[i]*(1-habitat.ind[1:num.points]) +#
-       v.fcw[i]*habitat.ind[1:num.points]) %*%#
+    logit(p[1:num.points, 1:max.num.reps]) <-#
+      (v.cato*(1-habitat.ind[1:num.points]) +#
+       v.fcw*habitat.ind[1:num.points]) %*%#
          asRow(onesRow[1, 1:max.num.reps])+#
-           b1[i]*date.linear[1:num.points,1:max.num.reps] +#
-             b2[i]*date.quadratic[1:num.points,1:max.num.reps]#
+           b1*date.linear[1:num.points,1:max.num.reps] +#
+             b2*date.quadratic[1:num.points,1:max.num.reps]#
 #
-    ## user defined distribution to combine the bernoulli occupancy#
-    ## and detection events.  We can also make this is a single#
-    ## compuation for the entire matrix of locations-x-visits, for#
-    ## each species (i)#
     X[1:num.points, 1:max.num.reps, i] ~ dBernDetectionMatrix(#
-      occProb = mu.psi[1:num.points,i],#
-      detectionProb = p[1:num.points, 1:max.num.reps,i],#
+      occProb = mu.psi[1:num.points],#
+      detectionProb = p[1:num.points, 1:max.num.reps],#
       numReps = num.reps[1:num.points])#
   }#
-  ## Derived quantities:#
-  ## for(j in 1:num.points){#
-  ##   N.site[j]<- sum(mu.psi[j,1:(num.species)])#
-  ##   N.ground[j]<- sum(mu.psi[j,1:num.species] * ground[1:num.species])#
-  ##   N.mid[j]<- sum(mu.psi[j,1:num.species] * mid[1:num.species])#
-  ## }#
 })#
-input1 <- c(code=ms.ss.occ, model.input)
-## *********************************************************************#
-## ## cross validation#
-## *********************************************************************#
-## if not already run above#
-occ.R.model <- nimbleModel(code=ms.ss.occ,#
-                           constants=input1$constants,#
-                           data=input1$data,#
-                           inits=input1$inits,#
-                           check=FALSE)#
+input2 <- c(code=ms.ss.occ.simp, model.input)#
 #
-niter <- 10#
-options(mc.cores=1)
-source('../crossValidation/crossValidationFunction.R')#
-#
-output <- crossValidateOne(model=occ.R.model,#
-                           dataNames= "X",#
-                           MCMCIter= niter,#
-                           burnIn=niter*0.1,#
-                           thin=1,#
-                           leaveOutIndex=3,#
-                           MCMCdefs=NULL)
-source('../crossValidation/crossValidationFunction.R')#
-#
-output <- crossValidateOne(model=occ.R.model,#
-                           dataNames= "X",#
-                           MCMCIter= niter,#
-                           burnIn=niter*0.1,#
-                           thin=1,#
-                           leaveOutIndex=3,#
-                           MCMCdefs=NULL)
-niter <- 2#
+occ.R.model.simp <- nimbleModel(code=ms.ss.occ.simp,#
+                                constants=input2$constants,#
+                                data=input2$data,#
+                                inits=input2$inits,#
+                                check=FALSE)
 options(mc.cores=1)#
-#
 source('../crossValidation/crossValidationFunction.R')#
 #
-output <- crossValidateOne(model=occ.R.model,#
-                           dataNames= "X",#
-                           MCMCIter= niter,#
-                           burnIn=niter*0.1,#
-                           thin=1,#
-                           leaveOutIndex=3,#
-                           MCMCdefs=NULL)
+ms.ss.occ.simp <- nimbleCode({#
+#
+  ## random effects#
+  a1 ~ dnorm(0, 0.001)#
+  a2 ~ dnorm(0, 0.001)#
+  a3 ~ dnorm(0, 0.001)#
+  a4 ~ dnorm(0, 0.001)#
+  b1 ~ dnorm(0, 0.001)#
+  b2 ~ dnorm(0, 0.001)#
+  for (i in 1:(num.species)) {#
+    ## Create priors for species i from the community level prior#
+    ## distributions#
+#
+    ## vectorize the calculation of psi.#
+    logit(psi[1:num.points]) <-#
+      u.cato*(1-habitat.ind[1:num.points]) +#
+        u.fcw*habitat.ind[1:num.points] +#
+          a1*ufc.linear[1:num.points] +#
+            a2*ufc.quadratic[1:num.points] +#
+              a3*ba.linear[1:num.points] +#
+                a4*ba.quadratic[1:num.points]#
+    ## vectorized calculation#
+    mu.psi[1:num.points] <- psi[1:num.points]#
+#
+    logit(p[1:num.points, 1:max.num.reps]) <-#
+      (v.cato*(1-habitat.ind[1:num.points]) +#
+       v.fcw*habitat.ind[1:num.points]) %*%#
+         asRow(onesRow[1, 1:max.num.reps])+#
+           b1*date.linear[1:num.points,1:max.num.reps] +#
+             b2*date.quadratic[1:num.points,1:max.num.reps]#
+#
+    X[1:num.points, 1:max.num.reps, i] ~ dBernDetectionMatrix(#
+      occProb = mu.psi[1:num.points],#
+      detectionProb = p[1:num.points, 1:max.num.reps],#
+      numReps = num.reps[1:num.points])#
+  }#
+})#
+input2 <- c(code=ms.ss.occ.simp, model.input)#
+#
+occ.R.model.simp <- nimbleModel(code=ms.ss.occ.simp,#
+                                constants=input2$constants,#
+                                data=input2$data,#
+                                inits=input2$inits,#
+                                check=FALSE)
+occ.mcmc <- buildMCMC(ms.ss.occ.simp)
+occ.R.model.simp <- nimbleModel(code=ms.ss.occ.simp,#
+                                constants=input2$constants,#
+                                data=input2$data,#
+                                inits=input2$inits,#
+                                check=FALSE)#
+#
+occ.mcmc <- buildMCMC(occ.R.model.simp)#
+occ.C.model <- compileNimble(occ.R.model.simp)#
+occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model.simp)#
+occ.C.mcmc$run(niter)#
+output.simp <- crossValidateOne(model=occ.R.model.simp,#
+                                dataNames= "X",#
+                                MCMCIter= niter,#
+                                burnInProp=0.1,#
+                                thin=1,#
+                                leaveOutIndex=3,#
+                                MCMCdefs=NULL)

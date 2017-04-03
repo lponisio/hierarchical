@@ -1,7 +1,9 @@
 model
 {
-    delta ~ dunif(0.1, 10)
-    sigma ~ dunif(0.1, 10)
+    logSigma ~ dnorm(0, 0.001)
+    sigma <- exp(logSigma)
+    logDelta ~ dnorm(0, 0.001)
+    delta <- exp(logDelta)
     p ~ dunif(0, 1)
     alpha ~ dnorm(0, 0.001)
     b1 ~ dnorm(0, 0.001)
@@ -14,8 +16,7 @@ model
             y[i, j] ~ dbern(p.eff[i])
         }
     }
-    dist.mat[1:nsite, 1:nsite] <- -delta * D[1:nsite, 1:nsite]
-    prep.cov[1:nsite, 1:nsite] <- mexp(dist.mat[1:nsite, 1:nsite])
-    D.cov[1:nsite, 1:nsite] <- (sigma^2) * (0.95 * prep.cov[1:nsite, 1:nsite] + 0.05 * DI[1:nsite, 1:nsite])
-    D.tau[1:nsite, 1:nsite] <- (D.cov[1:nsite, 1:nsite])
+    prep.cov[1:nsite, 1:nsite] <- 1/(exp(delta) * mexp(D[1:nsite, 1:nsite]))
+    D.cov[1:nsite, 1:nsite] <- (0.95 * prep.cov[1:nsite, 1:nsite] + 0.05 * DI[1:nsite, 1:nsite])
+    D.tau[1:nsite, 1:nsite] <- (1/(sigma^2)) * inverse(D.cov[1:nsite, 1:nsite])
 }
