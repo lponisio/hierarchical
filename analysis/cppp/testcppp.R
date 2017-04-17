@@ -66,7 +66,7 @@ pumpDiscMeasure <- nimbleFunction(
     return(disc)
   },
   contains = virtualDiscFunction
-) 
+)
 
 mcmcGenFunc <- function(model){
   mcmc.spec <- configureMCMC(model,
@@ -77,7 +77,7 @@ mcmcGenFunc <- function(model){
 }
 
 CPPPoutput <- generateCPPP(R.model,
-                       output,
+                       origMCMCOutput=output,
                        mcmcCreator = mcmcGenFunc,
                        dataNames = 'x',
                        cpppMCMCIter = 2000,
@@ -87,5 +87,6 @@ CPPPoutput <- generateCPPP(R.model,
                        thin = nthin,
                        nBootstrapSDReps=200,
                        # discFuncGenerator=pumpDiscMeasure,
-                       discFunctionArgs = list('x'))
+                       discFunctionArgs = list('x'),
+                       nCores = 1)
 

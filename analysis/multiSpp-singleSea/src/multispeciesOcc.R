@@ -62,8 +62,7 @@ rBernDetectionMatrix <- nimbleFunction(
     return(ans)
   })
 
-## This registers the user-provided distribution for use in a model (a
-## bit heavy syntax at the moment)
+## This registers the user-provided distribution for use in a model
 registerDistributions(list(dBernDetectionMatrix = list(
                              BUGSdist = "dBernDetectionMatrix(occProb, detectionProb, numReps)",
                              Rdist = "dBernDetectionMatrix(occProb, detectionProb, numReps)",

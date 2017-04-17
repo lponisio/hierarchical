@@ -63,35 +63,45 @@ save(sp.opt1, file=file.path(save.dir, "opt1.Rdata"))
 ## *********************************************************************
 ## opt 2: add custom z sampler and slice on uniform(0,1) nodes
 ## *********************************************************************
-## install_github("nlmichaud/nimble/packages/nimble", ref= "AFSliceSampler")
 
-## MCMCdefs.opt2 <- list('nimbleOpt2' = quote({
-##   customSpec <- configureMCMC(Rmodel)
-##   ## slice sampler for 0,1 varaibles
-##   customSpec$removeSamplers('p', print=FALSE)
-##   customSpec$addSampler(target = 'p',
-##                         type =
-##                         "slice",
-##                         print=FALSE)
-##   ## multivariate slice sampler
-##   customSpec$removeSamplers('rho', print=FALSE)
-##   customSpec$addSampler(target = 'rho',
-##                                                  type =
-##                                                    "AF_slice",
-##   control=list(sliceWidths=rep(1, input1$constants$nsite)),
-##                                                  print=FALSE)
-##   customSpec
-## }))
+
+MCMCdefs.opt2 <- list('nimbleOpt2' = quote({
+  customSpec <- configureMCMC(Rmodel)
+  ## slice sampler for 0,1 varaibles
+  customSpec$removeSamplers('p', print=FALSE)
+  customSpec$addSampler(target = 'p',
+                        type =
+                        "slice",
+                        print=FALSE)
+  ## multivariate slice sampler
+  customSpec$removeSamplers('rho', print=FALSE)
+  customSpec$addSampler(target = 'rho',
+                                                 type =
+                                                   "AFSS_to_RM_block",
+   control = list(AF_sliceControl =  list(sliceWidths = rep(1, length(pumpParams)), ## set initial slice widths
+                                                       factorBurnIn = 10000,  ## number of iterations until factors stop adapting
+                                                       factorAdaptInterval = 1000,  ## factors will be adapted every 1000 iterations
+                                                       sliceBurnIn = 1000,
+                                                       sliceMaxSteps = 100),
+                               RWcontrol = list(propCov = diag(length(pumpParams)), scale = 1,
+                                                adaptInterval = 500, adaptScaleOnly = F,
+                                                adaptive = T),
+                               nAFSSIters = 8000,
+                               essThreshold = .5,
+                               numESSAdaptations = 50,
+                               timeSwitch = TRUE))
+  customSpec
+}))
 
 ## ## *********************************************************************
 ## ## run with compareMCMCs
 
-## sp.opt2 <- compareMCMCs(input1,
-##                         MCMCs=c('nimbleOpt2'),
-##                         MCMCdefs = MCMCdefs.opt2,
-##                         niter= niter,
-##                         burnin = burnin,
-##                         summary=FALSE,
-##                         check=FALSE)
+sp.opt2 <- compareMCMCs(input1,
+                        MCMCs=c('nimbleOpt2'),
+                        MCMCdefs = MCMCdefs.opt2,
+                        niter= niter,
+                        burnin = burnin,
+                        summary=FALSE,
+                        check=FALSE)
 
-## save(sp.opt2, file=file.path(save.dir, "opt2.Rdata"))
+save(sp.opt2, file=file.path(save.dir, "opt2.Rdata"))

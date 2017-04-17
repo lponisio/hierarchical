@@ -20,36 +20,27 @@ ms.ss.occ <- nimbleCode({
   cato.occ.mean ~ dunif(0,1)
   mu.ucato <- log(cato.occ.mean) - log(1-cato.occ.mean)
   sigma.ucato ~ dunif(0, 100)
-
   fcw.occ.mean ~ dunif(0,1)
   mu.ufcw <- log(fcw.occ.mean) - log(1-fcw.occ.mean)
   sigma.ufcw ~ dunif(0, 100)
-
   cato.det.mean ~ dunif(0,1)
   mu.vcato <- log(cato.det.mean) - log(1-cato.det.mean)
   sigma.vcato ~ dunif(0, 100)
-
   fcw.det.mean ~ dunif(0,1)
   mu.vfcw <- log(fcw.det.mean) - log(1-fcw.det.mean)
   sigma.vfcw ~ dunif(0, 100)
 
   ## random effects
-
   mu.a1 ~ dnorm(0, 0.001)
   sigma.a1 ~ dunif(0, 100)
-
   mu.a2 ~ dnorm(0, 0.001)
   sigma.a2 ~ dunif(0, 100)
-
   mu.a3 ~ dnorm(0, 0.001)
   sigma.a3 ~ dunif(0, 100)
-
   mu.a4 ~ dnorm(0, 0.001)
   sigma.a4 ~ dunif(0, 100)
-
   mu.b1 ~ dnorm(0, 0.001)
   sigma.b1 ~ dunif(0, 100)
-
   mu.b2 ~ dnorm(0, 0.001)
   sigma.b2 ~ dunif(0, 100)
 
@@ -238,6 +229,7 @@ save(ms.ss.opt4, file=file.path(save.dir, "opt4.Rdata"))
 ## *********************************************************************
 ## ## CPPP
 ## *********************************************************************
+load(file=file.path(save.dir, "opt2.Rdata"))
 
 occ.R.model <- nimbleModel(code=ms.ss.occ,
                            constants=input1$constants,
@@ -248,34 +240,41 @@ occ.R.model <- nimbleModel(code=ms.ss.occ,
 occ.mcmc <- buildMCMC(occ.R.model)
 occ.C.model <- compileNimble(occ.R.model)
 occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model)
-occ.C.mcmc$run(niter)
+
+output <- as.matrix(t(ms.ss.opt2$model1$samples[1,,]))
+
+mcmcGenFunc <- function(model){
+  mcmc.spec <- configureMCMC(model,
+                             print=FALSE,
+                             monitors = input1$monitors,
+                             thin=1)
+  mcmc <- buildMCMC(mcmc.spec)
+}
 
 source('../cppp/src/calcCPPP.R', chdir = TRUE)
-options(mc.cores=8)
 
-output <- generateCPPP(R.model=occ.R.model,
-                       orig.C.model=occ.C.model,
-                       orig.C.mcmc=occ.C.mcmc,
-                       orig.mcmc=occ.mcmc,
+CPPPoutput <- generateCPPP(occ.R.model,
+                       origMCMCOutput=output,
+                       mcmcCreator = mcmcGenFunc,
                        dataNames = 'X',
-                       paramNames =  input1$monitors,
-                       NpostSamp = 100,
-                       NPDist = 100,
+                       cpppMCMCIter = 10^4,
+                       nPPPCalcIters = 100,
+                       nSimPPPVals =100,
                        burnInProp = 0.1,
-                       thin = nthin,
-                       averageParams = TRUE,
-                       nRepBoot=100,
-                       discFuncGenerator=likeDiscFuncGenerator,
-                       returnChains=FALSE)
+                       thin=1,
+                       nBootstrapSDReps=100,
+                       discFuncGenerator=likeDiscFuncGenerator)
 
-save(test.opt2, file=file.path(save.dir, "ms_ss_noz_CPPP.Rdata"))
+save(CPPPoutput, file=file.path(save.dir, "ms_ss_noz_CPPP.Rdata"))
 
 
 ## *********************************************************************
 ## ## cross validation
 ## *********************************************************************
 ## if not already run above
-options(mc.cores=6)
+load(file=file.path(save.dir, "opt2.Rdata"))
+
+options(mc.cores=2)
 occ.R.model <- nimbleModel(code=ms.ss.occ,
                            constants=input1$constants,
                            data=input1$data,
@@ -286,8 +285,6 @@ occ.mcmc <- buildMCMC(occ.R.model)
 occ.C.model <- compileNimble(occ.R.model)
 occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model)
 occ.C.mcmc$run(niter)
-
-
 
 source('../crossValidation/crossValidationFunction.R')
 
@@ -309,7 +306,7 @@ output <- crossValidateOne(model=occ.R.model,
 
 ## *********************************************************************
 
-options(mc.cores=1)
+options(mc.cores=2)
 source('../crossValidation/crossValidationFunction.R')
 
 ms.ss.occ.simp <- nimbleCode({

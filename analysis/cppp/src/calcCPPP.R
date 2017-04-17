@@ -125,8 +125,8 @@ generateCPPP <-  function(R.model,
                           origMCMCOutput,
                           mcmcCreator = NULL,
                           cpppMCMCIter = NULL,
-                          thin = NULL,
-                          dataNames, ## names of the data 
+                          thin = 1,
+                          dataNames, ## names of the data
                           nPPPCalcIters,## number of samples from posterior
                           nSimPPPVals, ## number of simulated PPP values
                           burnInProp, ## proportion of mcmc to drop
@@ -142,7 +142,7 @@ generateCPPP <-  function(R.model,
   if(!inherits(R.model, "RmodelBaseClass")){
     stop("R.model is not an Rmodel")
   }
-  
+
   if(is(R.model$CobjectInterface, "uninitializedField")){
      compileNimble(R.model)
   }
@@ -215,7 +215,7 @@ generateCPPP <-  function(R.model,
                           discFunctionArgs)
   C.pppFunc <- compileNimble(modelpppFunc,
                              project = R.model)
-  
+
   ## calculate deviances
   obs.cppp <- calcCPPP(origMCMCIter,
                        burnIn,
@@ -223,21 +223,21 @@ generateCPPP <-  function(R.model,
                        C.pppFunc,
                        samples = origMCMCOutput,
                        returnSamples = returnSamples)
-  
+
 
   cpppParallelFunction <- function(coreNum, nBootIter){
     R.newModel <- R.model$newModel()
     C.newModel <- compileNimble(R.newModel)
     if(is.null(mcmcCreator)){
-      newMCMC.spec <-   configureMCMC(R.newModel, 
+      newMCMC.spec <-   configureMCMC(R.newModel,
                                       print=FALSE,
-                                      thin=nthin)
+                                      nthin=thin)
       newMCMC <- buildMCMC(newMCMC.spec)
     }
     else{
       newMCMC <- mcmcCreator(R.newModel)
     }
-    
+
     modelpppFunc <- pppFunc(R.newModel,
                             dataNames,
                             paramNames,
@@ -247,7 +247,7 @@ generateCPPP <-  function(R.model,
                             discFunc = discFuncGenerator,
                             nBootstrapSDReps=nBootstrapSDReps,
                             discFunctionArgs)
-    
+
     C.newMcmc <- compileNimble(newMCMC, project = R.newModel)
     C.newPppFunc <- compileNimble(modelpppFunc,
                                   project = R.newModel)
@@ -267,14 +267,14 @@ generateCPPP <-  function(R.model,
 
 
   ## simulate the ppp values
-  sim.ppp.output <- mclapply(X = 1:nCores, FUN = cpppParallelFunction, 
+  sim.ppp.output <- mclapply(X = 1:nCores, FUN = cpppParallelFunction,
                              nBootIter =  ceiling(nSimPPPVals/nCores))
-  
+
   ## extract simulated ppp and boot SDs
   sim.ppp <- sapply(sapply(sim.ppp.output,
                     function(x) x), function(x)  x$pre.pp)
   sim.vars <- (sapply(sapply(sim.ppp.output, function(x) x),
-                      function(x) x$bootSD))^2 
+                      function(x) x$bootSD))^2
 
   ## approximate the distbution of observed ppp and simulated ppp
   diff.ppp <- obs.cppp$pre.pp - sim.ppp
@@ -292,7 +292,7 @@ generateCPPP <-  function(R.model,
                          function(x) x$samples)
   }
   else sim.samples <- NULL
-  
+
 
   ## output real data and model
   nimble:::values(R.model, dataNames) <- origData
