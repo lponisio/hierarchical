@@ -62,10 +62,10 @@ save(ss.ms.orig, file=file.path(save.dir, "orig.Rdata"))
 
 
 ## *********************************************************************
-## opt 1: sampler only a subset of latent states
+## sampler only a subset of latent states
 ## *********************************************************************
 
-MCMCdefs.opt1 <- list('nimbleOpt1' = quote({
+MCMCdefs.subsamp <- list('nimbleSubsamp' = quote({
     customSpec <- configureMCMC(Rmodel)
     customSpec$removeSamplers('z')
     customSpec$addSampler('z', type = 'sampler_latentSub',
@@ -74,22 +74,22 @@ MCMCdefs.opt1 <- list('nimbleOpt1' = quote({
     customSpec
 }))
 
-ss.ms.opt1 <- compareMCMCs(input1,
-                           MCMCs=c('nimbleOpt1'),
-                           MCMCdefs = MCMCdefs.opt1,
+ss.ms.subsamp <- compareMCMCs(input1,
+                           MCMCs=c('nimbleSubsamp'),
+                           MCMCdefs = MCMCdefs.subsamp,
                            niter= niter,
                            burnin = burnin,
                            summary=FALSE,
                            check=FALSE)
 
-save(ss.ms.opt1, file=file.path(save.dir, 'opt1.Rdata'))
+save(ss.ms.subsamp, file=file.path(save.dir, 'subsamp.Rdata'))
 
 
 ## *********************************************************************
-## opt 2: cross level sampler
+## cross level sampler
 ## *********************************************************************
 
-MCMCdefs.opt2 <- list('nimbleOpt2' = quote({
+MCMCdefs.crosslevel <- list('nimbleCrosslevel' = quote({
     customSpec <- configureMCMC(Rmodel)
     customSpec$removeSamplers('z')
     customSpec$addSampler(target = c('phi', 'gamma', 'p', 'psi1'),
@@ -98,12 +98,12 @@ MCMCdefs.opt2 <- list('nimbleOpt2' = quote({
     customSpec
 }))
 
-ss.ms.opt2 <- compareMCMCs(input1,
-                           MCMCs=c('nimbleOpt2'),
-                           MCMCdefs = MCMCdefs.opt2,
+ss.ms.crosslevel <- compareMCMCs(input1,
+                           MCMCs=c('nimbleCrosslevel'),
+                           MCMCdefs = MCMCdefs.crosslevel,
                            niter= niter,
                            burnin = burnin,
                            summary=FALSE,
                            check=FALSE)
 
-save(ss.ms.opt2, file=file.path(save.dir, 'opt2.Rdata'))
+save(ss.ms.crosslevel, file=file.path(save.dir, 'crosslevel.Rdata'))
