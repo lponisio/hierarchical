@@ -1,230 +1,240 @@
-load('~/Documents/vital_signs/output/gha_stats.rdata')
-ls()
-summary(spstats.mult.gha)
-load('~/Documents/vital_signs/output/gha_stats.rdata')#
-load('~/Documents/vital_signs/output/tanz_stats.rdata')#
-load('~/Documents/vital_signs/output/ug_stats.rdata')
-get_buffer_data <- function(data, buffer_size){#
-  bufdat <- data.frame()#
-  for (i in 1:length(data)){#
-    name <- names(data[i])#
-    clust <- as.data.frame(data[[i]][buffer_size])#
-    clust <- cbind(cluster = name, clust)#
-    bufdat <- rbind(bufdat, clust)#
-  }#
-  return(bufdat)#
-}#
-#
-tanz <- get_buffer_data(spstats.mult.tanz, '810')#
-tanz_crop <- tanz %>% filter(X810.class == 30)#
-#
-#Buffer of 810 m#
-tanz <- rbind(spstats.mult.tanz$`Sumbawanga Cluster`$`810`, spstats.mult.tanz$`Ihemi Cluster - Mufindi`$`810`)#
-#
-sumb <- as.data.frame(spstats.tanz$`Sumbawanga Cluster`)#
-sumb <- cbind(cluster = 'Sumbawanga', sumb)#
-sumb2 <- as.data.frame(spstats.tanz$`Sumbawanga2 Cluster`)#
-sumb2 <- cbind(cluster = 'Sumbawanga2', sumb2)#
-ih <- as.data.frame(spstats.tanz$`Ihemi Cluster`)#
-ih <- cbind(cluster = 'Ihemi', ih)#
-ih2 <- as.data.frame(spstats.tanz$`Ihemi2 Cluster`)#
-ih2 <- cbind(cluster = 'Ihemi2', ih2)#
-lud <- as.data.frame(spstats.tanz$`Ludewa Cluster`)#
-lud <- cbind(cluster = 'Ludewa', lud)#
-kil <- as.data.frame(spstats.tanz$`Kilombero Cluster`)#
-kil <- cbind(cluster = 'Kilombero', kil)#
-mb <- as.data.frame(spstats.tanz$`MBarali Cluster`)#
-mb <- cbind(cluster = 'Mbarali', mb)#
-ruf <- as.data.frame(spstats.tanz$`Rufiji Cluster`)#
-ruf <- cbind(cluster = 'Rufiji', ruf)#
-#
-giant <- rbind(sumb, ih, lud, ih2, kil, mb, sumb2, ruf)#
-#
-irrigated.croplands <- giant %>% filter(X10.class == 11)#
-rain.croplands <- giant %>% filter(X10.class == 14)#
-mosaic.croplands <- giant %>% filter(X10.class == 20)#
-#
-ggplot(data = melt(mosaic.croplands[,c("X10.total.area",#
-         "X10.patch.density", "X10.mean.shape.index")]),#
-       mapping = aes(x = value)) + geom_histogram(bins = 5) + facet_wrap(~variable, scales = 'free_x') + ggtitle("Mosaic Cropland")
-library(dplyr)#
-library(reshape2)#
-library(ggplot2)
-tanz <- get_buffer_data(spstats.mult.tanz, '810')#
-tanz_crop <- tanz %>% filter(X810.class == 30)#
-#
-#Buffer of 810 m#
-tanz <- rbind(spstats.mult.tanz$`Sumbawanga Cluster`$`810`, spstats.mult.tanz$`Ihemi Cluster - Mufindi`$`810`)#
-#
-sumb <- as.data.frame(spstats.tanz$`Sumbawanga Cluster`)#
-sumb <- cbind(cluster = 'Sumbawanga', sumb)#
-sumb2 <- as.data.frame(spstats.tanz$`Sumbawanga2 Cluster`)#
-sumb2 <- cbind(cluster = 'Sumbawanga2', sumb2)#
-ih <- as.data.frame(spstats.tanz$`Ihemi Cluster`)#
-ih <- cbind(cluster = 'Ihemi', ih)#
-ih2 <- as.data.frame(spstats.tanz$`Ihemi2 Cluster`)#
-ih2 <- cbind(cluster = 'Ihemi2', ih2)#
-lud <- as.data.frame(spstats.tanz$`Ludewa Cluster`)#
-lud <- cbind(cluster = 'Ludewa', lud)#
-kil <- as.data.frame(spstats.tanz$`Kilombero Cluster`)#
-kil <- cbind(cluster = 'Kilombero', kil)#
-mb <- as.data.frame(spstats.tanz$`MBarali Cluster`)#
-mb <- cbind(cluster = 'Mbarali', mb)#
-ruf <- as.data.frame(spstats.tanz$`Rufiji Cluster`)#
-ruf <- cbind(cluster = 'Rufiji', ruf)#
-#
-giant <- rbind(sumb, ih, lud, ih2, kil, mb, sumb2, ruf)#
-#
-irrigated.croplands <- giant %>% filter(X10.class == 11)#
-rain.croplands <- giant %>% filter(X10.class == 14)#
-mosaic.croplands <- giant %>% filter(X10.class == 20)#
-#
-ggplot(data = melt(mosaic.croplands[,c("X10.total.area",#
-         "X10.patch.density", "X10.mean.shape.index")]),#
-       mapping = aes(x = value)) + geom_histogram(bins = 5) + facet_wrap(~variable, scales = 'free_x') + ggtitle("Mosaic Cropland")
-library(dplyr)#
-library(reshape2)#
-library(ggplot2)
-get_buffer_data <- function(data, buffer_size){#
-  bufdat <- data.frame()#
-  for (i in 1:length(data)){#
-    name <- names(data[i])#
-    clust <- as.data.frame(data[[i]][buffer_size])#
-    clust <- cbind(cluster = name, clust)#
-    bufdat <- rbind(bufdat, clust)#
-  }#
-  return(bufdat)#
-}#
-#
-tanz <- get_buffer_data(spstats.mult.tanz, '810')#
-tanz_crop <- tanz %>% filter(X810.class == 30)
-tanz <- rbind(spstats.mult.tanz$`Sumbawanga Cluster`$`810`, spstats.mult.tanz$`Ihemi Cluster - Mufindi`$`810`)
-sumb <- as.data.frame(spstats.tanz$`Sumbawanga Cluster`)
 rm(list=ls())#
 library(nimble)#
-library(coda)#
-setwd("~/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea")#
+setwd("~/Dropbox/nimble/occupancy/analysis/spatial")#
 source('../all/plotting.R')#
-save.dir <- "../../../saved/singleSpp-multiSea/saved"#
+save.dir <-  "../../../saved/spatial/saved"#
 #
 ## original model jags and nimble#
 load(file=file.path(save.dir, "orig.Rdata"))#
 #
-## custom sampler for zs, slice for other parms#
-load(file=file.path(save.dir, "opt2_saddness.Rdata"))#
+## vanilla nimble and auto block#
+load(file=file.path(save.dir, "opt1.Rdata"))#
 #
-## custom function for latent state#
-load(file=file.path(save.dir, "opt4.Rdata"))#
+## ## custom sampler for zs, slice for other parms#
+load(file=file.path(save.dir, "opt2.Rdata"))#
 #
-## costum function for latent state + block samplers on phi[i-1],#
-## gamma[i-1]#
-load(file=file.path(save.dir, "opt5.Rdata")) #
-#
-## rename results#
-#
-ss.ms.orig[[1]] <- rename_MCMC_comparison_method(c('nimble', 'jags'),#
-                                                 c('NIMBLE-latent',#
-                                                   'JAGS-latent'),#
-                                                 comparison=ss.ms.orig[[1]])#
-ss.ms.opt2[[1]] <- rename_MCMC_comparison_method('nimbleOpt2',#
-                                                 'Cross level',#
-                                                 comparison=ss.ms.opt2[[1]])#
-#
-ss.ms.opt4[[1]] <- rename_MCMC_comparison_method(c('nimble',#
-                                                   ## 'autoBlock',#
-                                                   'nimble_slice'),#
-                                                 c('filter',#
-                                                   ## 'filter + autoblock',#
-                                                   'filter + slice'),#
-                                                 comparison=ss.ms.opt4[[1]])#
-#
-## ss.ms.opt5[[1]] <- rename_MCMC_comparison_method('nimbleOpt5',#
-##                                                  'block phi gam',#
-##                                                  comparison=ss.ms.opt5[[1]])#
+## ## rename results#
+sp.opt2[[1]] <- rename_MCMC_comparison_method('nimbleOpt2',#
+                                              'AF slice',#
+                                              comparison=sp.opt2[[1]])#
 ## compare mcmcs#
-ss.ms.occ.all <- combine_MCMC_comparison_results(ss.ms.orig[[1]],#
-                                                 ss.ms.opt2[[1]],#
-                                                 ## ss.ms.opt4[[1]],#
-                                                 name = "ss.ms" )#
+sp.occ.all <- combine_MCMC_comparison_results(## sp.orig[[1]],#
+                                              ## sp.opt1[[1]],#
+                                              sp.opt2[[1]],#
+                                              name = "sp" )#
+make_MCMC_comparison_pages(sp.occ.all,#
+                           dir=file.path(save.dir,#
+                                         "../figures/comparisons"))#
 #
-make_MCMC_comparison_pages(ss.ms.occ.all,#
-                           dir=file.path(save.dir, "../figures/comparisons"))#
-checkChains(ss.ms.occ.all[[1]]$samples,#
+checkChains(sp.occ.all[[1]]$samples,#
             f.path = file.path(save.dir,#
-              "../figures/chains/%s.pdf")#
-            )#
-## ****************************************#
-## custom figs#
-## ****************************************#
+                               "../figures/chains/%s.pdf"))#
+## $logDelta#
+## [1] -2.302585#
 #
-by.param <- apply(ss.ms.occ.all[[1]]$samples, c(1,2), effectiveSize)/#
-  ss.ms.occ.all[[1]]$timing#
-by.config <- ss.ms.occ.all[[1]]$efficiency#
-source('../all/plotting.R')#
-plotEffSize(by.config, by.param, f.path= file.path(save.dir,#
-              "../figures/comparisons/%s%s.pdf"), "SingleSpp-MultiSea",#
-            at=9, adj1=0.3, adj2=0.3, widths=c(4.5, 8.5))
+## $logSigma#
+## [1] 2.079442#
+#
+## $alpha#
+## [1] 5#
+#
+## $p#
+## [1] 0.8
 rm(list=ls())#
-library(nimble)#
-library(coda)#
 setwd("~/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea")#
-source('../all/plotting.R')#
-save.dir <- "../../../saved/singleSpp-multiSea/saved"#
 #
-## original model jags and nimble#
-load(file=file.path(save.dir, "orig.Rdata"))#
+source('src/initialize.R')#
+set.seed(444)#
+data <- genDynamicOccData()#
+model.input <- prepModDataOcc(data)
+model.input
+model.input$inits
+rm(list=ls())#
+setwd("~/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea")#
 #
-## custom sampler for zs, slice for other parms#
-load(file=file.path(save.dir, "opt2_saddness.Rdata"))#
+source('src/initialize.R')#
+set.seed(444)#
+data <- genDynamicOccData()#
+model.input <- prepModDataOcc(data)
+rm(list=ls())#
+setwd("~/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea")#
 #
-## custom function for latent state#
-load(file=file.path(save.dir, "opt4.Rdata"))#
+source('src/initialize.R')#
+set.seed(444)#
+data <- genDynamicOccData()#
+model.input <- prepModDataOcc(data)
+niter
+rm(list=ls())#
+setwd('~/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea')#
 #
-## costum function for latent state + block samplers on phi[i-1],#
-## gamma[i-1]#
-load(file=file.path(save.dir, "opt5.Rdata")) #
+source('src/initialize.R')#
+set.seed(444)#
+data <- genDynamicOccData()#
+model.input <- prepModDataOcc(data)#
 #
-## rename results#
+## *********************************************************************#
+##  Multi-season occupancy model#
+## *********************************************************************#
 #
-ss.ms.orig[[1]] <- rename_MCMC_comparison_method(c('nimble', 'jags'),#
-                                                 c('NIMBLE-latent',#
-                                                   'JAGS-latent'),#
-                                                 comparison=ss.ms.orig[[1]])#
-ss.ms.opt2[[1]] <- rename_MCMC_comparison_method('nimbleOpt2',#
-                                                 'Cross level',#
-                                                 comparison=ss.ms.opt2[[1]])#
+ss.ms.occ <- nimbleCode({#
+    ## Specify priors#
+    psi1 ~ dunif(0, 1)#
 #
-ss.ms.opt4[[1]] <- rename_MCMC_comparison_method(c('nimble',#
-                                                   ## 'autoBlock',#
-                                                   'nimble_slice'),#
-                                                 c('filter',#
-                                                   ## 'filter + autoblock',#
-                                                   'filter + slice'),#
-                                                 comparison=ss.ms.opt4[[1]])#
+    for(year in 1:(nyear-1)){#
+        phi[year] ~ dunif(0, 1)#
+        gamma[year] ~ dunif(0, 1)#
+        p[year] ~ dunif(0, 1)#
+    }#
+    p[nyear] ~ dunif(0, 1)#
 #
-## ss.ms.opt5[[1]] <- rename_MCMC_comparison_method('nimbleOpt5',#
-##                                                  'block phi gam',#
-##                                                  comparison=ss.ms.opt5[[1]])#
-## compare mcmcs#
-ss.ms.occ.all <- combine_MCMC_comparison_results(ss.ms.orig[[1]],#
-                                                 ss.ms.opt2[[1]],#
-                                                 ss.ms.opt4[[1]],#
-                                                 name = "ss.ms" )#
+    ## Ecological submodel: Define state conditional on parameters#
+    for (site in 1:nsite){#
+        z[site,1] ~ dbern(pssite1)#
+        for (year in 2:nyear){#
+            muZ[site,year]<- z[site,year-1]*phi[year-1] +#
+                (1-z[site,year-1])*gamma[year-1]#
+            z[i,year] ~ dbern(muZ[site,year])#
+        }#
+    }#
 #
-make_MCMC_comparison_pages(ss.ms.occ.all,#
-                           dir=file.path(save.dir, "../figures/comparisons"))#
-checkChains(ss.ms.occ.all[[1]]$samples,#
-            f.path = file.path(save.dir,#
-              "../figures/chains/%s.pdf")#
-            )#
-## ****************************************#
-## custom figs#
-## ****************************************#
+    ## Observation model#
+    for (site in 1:nsite){#
+        for (rep in 1:nrep){#
+            for (year in 1:nyear){#
+                muy[site,rep,year] <- z[site,year]*p[year]#
+                y[site,rep,year] ~ dbern(muy[site,rep,year])#
+            }#
+        }#
+    }#
 #
-by.param <- apply(ss.ms.occ.all[[1]]$samples, c(1,2), effectiveSize)/#
-  ss.ms.occ.all[[1]]$timing#
-by.config <- ss.ms.occ.all[[1]]$efficiency#
-source('../all/plotting.R')#
-plotEffSize(by.config, by.param, f.path= file.path(save.dir,#
-              "../figures/comparisons/%s%s.pdf"), "SingleSpp-MultiSea",#
-            at=9, adj1=0.3, adj2=0.3, widths=c(4.5, 8.5))
+})#
+#
+input1 <- c(code=ss.ms.occ,#
+            model.input)
+rm(list=ls())#
+setwd('~/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea')#
+#
+source('src/initialize.R')#
+set.seed(444)#
+data <- genDynamicOccData()#
+model.input <- prepModDataOcc(data)#
+#
+## *********************************************************************#
+##  Multi-season occupancy model#
+## *********************************************************************#
+#
+ss.ms.occ <- nimbleCode({#
+    ## Specify priors#
+    psi1 ~ dunif(0, 1)#
+#
+    for(year in 1:(nyear-1)){#
+        phi[year] ~ dunif(0, 1)#
+        gamma[year] ~ dunif(0, 1)#
+        p[year] ~ dunif(0, 1)#
+    }#
+    p[nyear] ~ dunif(0, 1)#
+#
+    ## Ecological submodel: Define state conditional on parameters#
+    for (site in 1:nsite){#
+        z[site,1] ~ dbern(pssite1)#
+        for (year in 2:nyear){#
+            muZ[site,year]<- z[site,year-1]*phi[year-1] +#
+                (1-z[site,year-1])*gamma[year-1]#
+            z[i,year] ~ dbern(muZ[site,year])#
+        }#
+    }#
+#
+    ## Observation model#
+    for (site in 1:nsite){#
+        for (rep in 1:nrep){#
+            for (year in 1:nyear){#
+                muy[site,rep,year] <- z[site,year]*p[year]#
+                y[site,rep,year] ~ dbern(muy[site,rep,year])#
+            }#
+        }#
+    }#
+#
+})#
+#
+input1 <- c(code=ss.ms.occ,#
+            model.input)
+MCMCdefs.opt1 <- list('nimbleOpt1' = quote({#
+    customSpec <- configureMCMC(Rmodel)#
+    customSpec$removeSamplers('z')#
+    customSpec$addSampler('z', type = 'sampler_latentSub',#
+                          control = list(leaveOutProportion = 0.5,#
+                                         control = list()))#
+    customSpec#
+}))#
+## *********************************************************************#
+ss.ms.opt1 <- compareMCMCs(input1,#
+                           MCMCs=c('nimbleOpt1'),#
+                           MCMCdefs = MCMCdefs.opt1,#
+                           niter= niter,#
+                           burnin = burnin,#
+                           summary=FALSE,#
+                           check=FALSE)#
+#
+save(ss.ms.opt1, file=file.path(save.dir, 'opt1.Rdata'))
+ss.ms.opt1 <- compareMCMCs(input1,#
+                           MCMCs='nimble',#
+                           niter= niter,#
+                           burnin = burnin,#
+                           summary=FALSE,#
+                           check=FALSE)
+rm(list=ls())#
+setwd("~/Dropbox/nimble/occupancy/analysis/singleSpp-multiSea")#
+source('src/initialize.R')#
+#
+set.seed(444)#
+data <- genDynamicOccData()#
+model.input <- prepModDataOcc(data)#
+## *********************************************************************#
+##  original multi-season occupancy : JAGS & NIMBLE#
+## *********************************************************************#
+#
+ss.ms.occ <- nimbleCode({#
+  ## Specify priors#
+  psi1 ~ dunif(0, 1)#
+#
+  for(k in 1:(nyear-1)){#
+    phi[k] ~ dunif(0, 1)#
+    gamma[k] ~ dunif(0, 1)#
+    p[k] ~ dunif(0, 1)#
+  }#
+  p[nyear] ~ dunif(0, 1)#
+#
+  ## Ecological submodel: Define state conditional on parameters#
+  for (i in 1:nsite){#
+    z[i,1] ~ dbern(psi1)#
+    for (k in 2:nyear){#
+      muZ[i,k]<- z[i,k-1]*phi[k-1] + (1-z[i,k-1])*gamma[k-1]#
+      z[i,k] ~ dbern(muZ[i,k])#
+    }#
+  }#
+#
+  ## Observation model#
+  for (i in 1:nsite){#
+    for (j in 1:nrep){#
+      for (k in 1:nyear){#
+        muy[i,j,k] <- z[i,k]*p[k]#
+        y[i,j,k] ~ dbern(muy[i,j,k])#
+      }#
+    }#
+  }#
+#
+})#
+#
+## *********************************************************************#
+## orginal model in nimble#
+#
+input1 <- c(code=ss.ms.occ,#
+            model.input)#
+ss.ms.orig <- compareMCMCs(input1,#
+                           MCMCs=c('jags', 'nimble'),#
+                           niter=niter,#
+                           burnin = burnin,#
+                           summary=FALSE,#
+                           check=FALSE)#
+#
+save(ss.ms.orig, file=file.path(save.dir, "orig.Rdata"))

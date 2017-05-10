@@ -15,50 +15,41 @@ ss.ms.occ <- nimbleCode({
   ## Specify priors
   psi1 ~ dunif(0, 1)
 
-  for(k in 1:(nyear-1)){
-    phi[k] ~ dunif(0, 1)
-    gamma[k] ~ dunif(0, 1)
-    p[k] ~ dunif(0, 1)
+  for(year in 1:(nyear-1)){
+    phi[year] ~ dunif(0, 1)
+    gamma[year] ~ dunif(0, 1)
+    p[year] ~ dunif(0, 1)
   }
   p[nyear] ~ dunif(0, 1)
 
   ## Ecological submodel: Define state conditional on parameters
-  for (i in 1:nsite){
-    z[i,1] ~ dbern(psi1)
-    for (k in 2:nyear){
-      muZ[i,k]<- z[i,k-1]*phi[k-1] + (1-z[i,k-1])*gamma[k-1]
-      z[i,k] ~ dbern(muZ[i,k])
+  for (site in 1:nsite){
+    z[site,1] ~ dbern(psi1)
+    for (year in 2:nyear){
+      muZ[site,year]<- z[site,year-1]*phi[year-1] + (1-z[site,year-1])*gamma[year-1]
+      z[site,year] ~ dbern(muZ[site,year])
     }
   }
 
   ## Observation model
-  for (i in 1:nsite){
-    for (j in 1:nrep){
-      for (k in 1:nyear){
-        muy[i,j,k] <- z[i,k]*p[k]
-        y[i,j,k] ~ dbern(muy[i,j,k])
+  for (site in 1:nsite){
+    for (rep in 1:nrep){
+      for (year in 1:nyear){
+        muy[site,rep,year] <- z[site,year]*p[year]
+        y[site,rep,year] ~ dbern(muy[site,rep,year])
       }
     }
   }
 
-  ## Derived parameters: Sample and population occupancy, growth rate
-  ## and turnover
-  ## psi[1] <- psi1
-  ## n.occ[1]<-sum(z[1:nsite,1])
-  ## for (k in 2:nyear){
-  ##   psi[k] <- psi[k-1]*phi[k-1] + (1-psi[k-1])*gamma[k-1]
-  ##   n.occ[k] <- sum(z[1:nsite,k])
-  ##   growthr[k-1] <- psi[k]/psi[k-1]
-  ##   turnover[k-1] <- (1 - psi[k-1]) * gamma[k-1]/psi[k]
-  ## }
 })
-
-## *********************************************************************
-## orginal model in nimble
 
 input1 <- c(code=ss.ms.occ,
             model.input)
 
+
+## *********************************************************************
+## original: vanilla nimble and JAGS
+## *********************************************************************
 
 ss.ms.orig <- compareMCMCs(input1,
                            MCMCs=c('jags', 'nimble'),
@@ -68,3 +59,51 @@ ss.ms.orig <- compareMCMCs(input1,
                            check=FALSE)
 
 save(ss.ms.orig, file=file.path(save.dir, "orig.Rdata"))
+
+
+## *********************************************************************
+## opt 1: sampler only a subset of latent states
+## *********************************************************************
+
+MCMCdefs.opt1 <- list('nimbleOpt1' = quote({
+    customSpec <- configureMCMC(Rmodel)
+    customSpec$removeSamplers('z')
+    customSpec$addSampler('z', type = 'sampler_latentSub',
+                          control = list(leaveOutProportion = 0.5,
+                                         control = list()))
+    customSpec
+}))
+
+ss.ms.opt1 <- compareMCMCs(input1,
+                           MCMCs=c('nimbleOpt1'),
+                           MCMCdefs = MCMCdefs.opt1,
+                           niter= niter,
+                           burnin = burnin,
+                           summary=FALSE,
+                           check=FALSE)
+
+save(ss.ms.opt1, file=file.path(save.dir, 'opt1.Rdata'))
+
+
+## *********************************************************************
+## opt 2: cross level sampler
+## *********************************************************************
+
+MCMCdefs.opt2 <- list('nimbleOpt2' = quote({
+    customSpec <- configureMCMC(Rmodel)
+    customSpec$removeSamplers('z')
+    customSpec$addSampler(target = c('phi', 'gamma', 'p', 'psi1'),
+                          type ='sampler_crossLevelBinary',
+                          print=FALSE)
+    customSpec
+}))
+
+ss.ms.opt2 <- compareMCMCs(input1,
+                           MCMCs=c('nimbleOpt2'),
+                           MCMCdefs = MCMCdefs.opt2,
+                           niter= niter,
+                           burnin = burnin,
+                           summary=FALSE,
+                           check=FALSE)
+
+save(ss.ms.opt2, file=file.path(save.dir, 'opt2.Rdata'))
