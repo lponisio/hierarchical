@@ -14,6 +14,6 @@ source("src/dataGen.R")
 save.dir <-  "../../../saved/spatial/saved"
 
 ## MCMC settings
-scale <- 2e3
+scale <- 1e1
 burnin <- 1e1*scale
 niter <- (1e3)*scale

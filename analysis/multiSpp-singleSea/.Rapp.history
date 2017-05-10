@@ -1,3 +1,1065 @@
+files.years <- sapply(strsplit(sapply(strsplit(files, "_"), function(x)#
+    x[2]), "\\.")), function(y) y[1])
+files.years <- sapply(strsplit(sapply(strsplit(files, "_"), function(x)#
+    x[2]), "\\."), function(y) y[1])
+files.yeras
+files.years
+files.sites
+files.years
+by.site
+split.ch.yrs <- strsplit(changing.points$cp, "-")
+split.ch.yrs
+lapply(split.ch.yrs, function(x) min(as.numeric(x)))
+min.ch.pt <- sapply(split.ch.yrs, function(x) min(as.numeric(x))
+)
+min.ch.pt
+max.ch.pt <- sapply(split.ch.yrs, function(x) max(as.numeric(x))
+)
+split.ch.yrs
+files.years
+min.ch.pt
+split.ch.yrs <- lapply(by.site, function(x) strsplit(x, "-")
+)
+split.ch.yrs <- lapply(by.site, function(x) strsplit(x$cp, "-"))
+split.ch.yrs
+split.ch.yrs <- sapply(by.site, function(x) strsplit(x$cp, "-"))
+split.ch.yrs
+by.site
+changing.points$sites <- as.character(changing.points)#
+by.site <- split(changing.points, changing.points$sites)
+changing.points$sites <- as.character(changing.points$sites)#
+by.site <- split(changing.points, changing.points$sites)
+changins.points
+by.site
+split.ch.yrs <- sapply(by.site, function(x) strsplit(x$cp, "-"))
+split.ch.years
+split.ch.yrs
+changing.points
+by.site
+min.ch.yrs
+min.ch.pt
+changing.points$sites <- as.character(changing.points$sites)#
+by.site <- split(changing.points, changing.points$sites)#
+#
+files <-#
+    list.files("~/Dropbox/hedgerow_assembly/analysis/changePoint/cptPeel/baci",#
+               pattern="pairs")#
+#
+files <- files[sapply(strsplit(files, "_"), function(x) x[1])#
+               %in% changing.points$sites]#
+#
+files.sites <- sapply(strsplit(files, "_"), function(x) x[1])#
+files.years <- sapply(strsplit(sapply(strsplit(files, "_"), function(x)
+files.cites
+changing.points$sites <- as.character(changing.points$sites)#
+by.site <- split(changing.points, changing.points$sites)#
+#
+files <-#
+    list.files("~/Dropbox/hedgerow_assembly/analysis/changePoint/cptPeel/baci",#
+               pattern="pairs")#
+#
+files <- files[sapply(strsplit(files, "_"), function(x) x[1])#
+               %in% changing.points$sites]
+files
+files.sites <- sapply(strsplit(files, "_"), function(x) x[1])
+files.sites
+by.sites
+by.site
+split.ch.yrs
+min.ch.pt <- lapply(split.ch.yrs, function(x) min(as.numeric(x))))
+v
+split.ch.yrs <- sapply(by.site, function(x) strsplit(x$cp, "-"))
+cplit.ch.yrs
+split.ch.yrs
+split.ch.yrs <- unlist(sapply(by.site,#
+                              function(x){#
+                                  strsplit(x$cp, "-")#
+                            }), recursive=FALSE)
+split.ch.yrs
+split.ch.yrs <- sapply(sapply(by.site, function(x){#
+                                  strsplit(x$cp, "-")#
+                            }), function(y) y[1])
+split.ch.yrs
+sapply(by.site, function(x){#
+                                  strsplit(x$cp, "-")
+)
+sapply(by.site, function(x){#
+                                  strsplit(x$cp, "-")#
+                            })
+by.site
+lapply(by.site, function(x){#
+                                  strsplit(x$cp, "-")#
+                            })
+library(tiddy)
+library(tidy)
+library(tiddyr)
+library(tidyr)
+?seperate
+?separate
+head(by.site)
+sapply(by.site, function(x){#
+                                 seperate(x, x$cp, "-")
+)
+sapply(by.site, function(x){#
+                                 seperate(x, x$cp, "-")#
+                            })
+sapply(by.site, function(x){#
+                                 separate(x, x$cp, "-")#
+                            })
+sapply(by.site, function(x){#
+                                 separate(x, cp, "-")#
+                            })
+lapply(by.site, function(x){#
+                                 separate(x, cp, "-")#
+                            })
+?seperate
+?separate
+lapply(by.site, function(x){#
+                                 separate(x, cp, into=min, "-")#
+                            }
+)
+lapply(by.site, function(x){#
+                                 separate(x, cp, by="-")#
+                            })
+?separate
+lapply(by.site, function(x){#
+    separate(x, cp, into=c("min","max"),#
+             by="-")#
+                            })
+warnings
+warnings()
+sapply(by.site, function(x){#
+    separate(x, cp, into=c("min","max"))#
+             })
+lapply(by.site, function(x){#
+    separate(x, cp, into=c("min","max"))#
+             })
+by,site
+by.site
+rm(list=ls())#
+library(reshape)#
+setwd("~/Dropbox/hedgerow_assembly/analysis/changePoint/cptPeel")#
+#
+results <- read.table('results_4.txt', sep=' ')#
+logs <- read.table('LogLs_4.txt', sep=' ')#
+#
+## split the year and creates an extra table with year 1 and period#
+results$V1 <- as.character(results$V1)#
+results$V2 <- as.character(results$V2)#
+years1  <-  as.numeric(sapply(strsplit(results$V1, "_"), function(x) x[2]))#
+years2  <-  as.numeric(sapply(strsplit(results$V2, "_"), function(x) x[2]))#
+anos <- min(years1):max(years2)#
+anos.unique <- unique(c(years1, years2))#
+anos <- anos[anos %in% anos.unique]#
+#
+years <- as.data.frame(matrix(NA, (length(anos)-1),2))#
+for(n in 1:(length(anos)-1)){#
+    years[n,2] <- paste(anos[n], anos[n+1], sep="-")#
+}#
+#
+years[,1] <- anos[-length(anos)]#
+colnames(years) <- c('first', 'period')#
+#
+## creates other variables for results#
+sites  <- sapply(strsplit(results$V1, "_"), function(x) x[1])#
+max <- apply(results[,c(3:5)], 1, max)#
+numberOfOnes <- apply(results[,c(3:5)], 1,#
+                      function(x) length(which(x==1)))#
+max.index <- rep(NA, dim(results)[1])#
+results <- cbind(results,  sites, years1, max, numberOfOnes, max.index)#
+#
+## checking if there is more than 1 value, and if yes, returns the#
+## index with the maxlog#
+for(row in 1:dim(results)[1]){#
+    if(results$numberOfOnes[row] > 1){#
+        results$max.index[row] <- which.max(logs[row,c(3:5)])#
+    }#
+    else {## return the position of the max#
+        results$max.index[row] <- which(results[row,c(3:5)] ==#
+                                        results$max[row])[1]#
+    }#
+}#
+#
+sigs <- results[results$max>0.949,]#
+cp <- rep(NA, dim(sigs)[1])#
+value <- rep(NA, dim(sigs)[1])#
+sigs <- cbind(sigs, cp, value)#
+#
+## cp is always the year + next year#
+for(i in 1:dim(sigs)[1]){#
+    y1 <- which(years$first %in% sigs$years1[i] == TRUE)#
+    print(paste(i,  years$period[y1+(sigs$max.index[i]-1)]))#
+    sigs$cp[i] <- years$period[y1+(sigs$max.index[i]-1)]#
+    sigs$value[i] <- sigs[i,c(3:5)][sigs$max.index[i]]#
+}#
+#
+sigs$value <- unlist(sigs$value)#
+changing.points <- sigs[,c(6,11,12)]#
+#
+write.csv(changing.points, "changing_points.csv", row.names=FALSE)#
+#
+####
+changing.points$sites <- as.character(changing.points$sites)#
+by.site <- split(changing.points, changing.points$sites)#
+#
+files <-#
+    list.files("~/Dropbox/hedgerow_assembly/analysis/changePoint/cptPeel/baci",#
+               pattern="pairs")#
+#
+files <- files[sapply(strsplit(files, "_"), function(x) x[1])#
+               %in% changing.points$sites]#
+#
+files.sites <- sapply(strsplit(files, "_"), function(x) x[1])#
+files.years <- sapply(strsplit(sapply(strsplit(files, "_"), function(x)#
+    x[2]), "\\."), function(y) y[1])#
+#
+library(tidyr)#
+#
+split.ch.yrs <- lapply(by.site, function(x){#
+    separate(x, cp, into=c("min","max"))#
+             })
+split.ch.yrs
+ls()
+years
+split.ch.yrs
+lapply(split.ch.yrs, duplicated)
+split.ch.yrs[lapply(split.ch.yrs, duplicated)]
+out.years <- vector(type="list", sum(sapply(split.ch.yrs, nrow)))
+?vector
+out.years <- vector(mode="list",#
+                    sum(sapply(split.ch.yrs, nrow)))
+out.yrs
+out.years
+begs <- vector(mode="list",#
+                    sum(sapply(split.ch.yrs, nrow)))#
+ends <- vector(mode="list",#
+                    sum(sapply(split.ch.yrs, nrow)))#
+#
+for(j in 1:length(split.ch.yrs)){#
+    this.sites <- split.ch.yrs[[j]]#
+    this.sites <- this.sites[!duplicated(this.sites)]#
+    for(i in 1:nrow(this.site)){#
+        browser()#
+        bgs[[i]] <- 2006:this.site$min[i]#
+        ends[[i]] <- this.site$max[i]:2014#
+        if(i > 2){#
+            bgs[[i]] <- bgs[[i]][!bgs[[i]] %in% bgs[[i - 1]]]#
+            ends[[i]] <- ends[[i]][!ends[[i]] %in% ends[[i - 1]]]#
+        }#
+    }#
+}
+begs <- vector(mode="list",#
+                    sum(sapply(split.ch.yrs, nrow)))#
+ends <- vector(mode="list",#
+                    sum(sapply(split.ch.yrs, nrow)))#
+#
+for(j in 1:length(split.ch.yrs)){#
+    this.site <- split.ch.yrs[[j]]#
+    this.site <- this.site[!duplicated(this.site)]#
+    for(i in 1:nrow(this.site)){#
+        browser()#
+        bgs[[i]] <- 2006:this.site$min[i]#
+        ends[[i]] <- this.site$max[i]:2014#
+        if(i > 2){#
+            bgs[[i]] <- bgs[[i]][!bgs[[i]] %in% bgs[[i - 1]]]#
+            ends[[i]] <- ends[[i]][!ends[[i]] %in% ends[[i - 1]]]#
+        }#
+    }#
+}
+2006:this.site$min[i]
+ends[[i]] <- this.site$max[i]:2014
+ends
+Q
+for(j in 1:length(split.ch.yrs)){#
+    this.site <- split.ch.yrs[[j]]#
+    this.site <- this.site[!duplicated(this.site)]#
+    for(i in 1:nrow(this.site)){#
+        bgs[[i]] <- 2006:this.site$min[i]#
+        ends[[i]] <- this.site$max[i]:2014#
+        if(i > 2){#
+            browser()#
+            bgs[[i]] <- bgs[[i]][!bgs[[i]] %in% bgs[[i - 1]]]#
+            ends[[i]] <- ends[[i]][!ends[[i]] %in% ends[[i - 1]]]#
+        }#
+    }#
+}
+for(j in 1:length(split.ch.yrs)){#
+    this.site <- split.ch.yrs[[j]]#
+    this.site <- this.site[!duplicated(this.site)]#
+    for(i in 1:nrow(this.site)){#
+        begs[[i]] <- 2006:this.site$min[i]#
+        ends[[i]] <- this.site$max[i]:2014#
+        if(i > 2){#
+            browser()#
+            begs[[i]] <- begs[[i]][!begs[[i]] %in% begs[[i - 1]]]#
+            ends[[i]] <- ends[[i]][!ends[[i]] %in% ends[[i - 1]]]#
+        }#
+    }#
+}
+negs
+begs
+Q
+begs <- vector(mode="list",#
+                    sum(sapply(split.ch.yrs, nrow)))#
+ends <- vector(mode="list",#
+                    sum(sapply(split.ch.yrs, nrow)))#
+#
+for(j in 1:length(split.ch.yrs)){#
+    this.site <- split.ch.yrs[[j]]#
+    this.site <- this.site[!duplicated(this.site)]#
+    for(i in 1:nrow(this.site)){#
+        begs[[i]] <- 2006:this.site$min[i]#
+        ends[[i]] <- this.site$max[i]:2014#
+        if(i >= 2){#
+            browser()#
+            begs[[i]] <- begs[[i]][!begs[[i]] %in% begs[[i - 1]]]#
+            ends[[i]] <- ends[[i]][!ends[[i]] %in% ends[[i - 1]]]#
+        }#
+    }#
+}
+begs
+begs[[i]][!begs[[i]] %in% begs[[i - 1]]]
+!begs[[i]] %in% begs[[i - 1]]
+begs[[i - 1]]]
+begs[[i - 1]]
+begs[[i]]
+begs
+begs <- vector(mode="list", length(split.ch.yrs))#
+ends <- vector(mode="list", length(split.ch.yrs))
+Q
+begs
+begs <- vector(mode="list", length(split.ch.yrs))#
+ends <- vector(mode="list", length(split.ch.yrs))#
+#
+for(j in 1:length(split.ch.yrs)){#
+    this.site <- split.ch.yrs[[j]]#
+    this.site <- this.site[!duplicated(this.site)]#
+    begs[[j]] <- list()#
+    ends[[j]] <- list()    #
+    for(i in 1:nrow(this.site)){#
+        begs[[j]][[i]] <- 2006:this.site$min[i]#
+        ends[[j]][[i]] <- this.site$max[i]:2014#
+        if(i >= 2){#
+            browser()#
+            begs[[j]][[i]] <- begs[[j]][[i]][!begs[[j]][[i]] %in%#
+                                             begs[[j]][[i - 1]]]#
+            ends[[j]][[i]] <- ends[[j]][[i]][!ends[[j]][[i]] %in%#
+                                             ends[[j]][[i - 1]]]#
+        }#
+    }#
+}
+begs
+begs[[j]][[i]][!begs[[j]][[i]] %in%#
+                                             begs[[j]][[i - 1]]]
+split.ch.yrs
+begs
+order(this.site$min)
+this.site[order(this.site$min),]
+Q
+begs <- vector(mode="list", length(split.ch.yrs))#
+ends <- vector(mode="list", length(split.ch.yrs))#
+#
+for(j in 1:length(split.ch.yrs)){#
+    this.site <- split.ch.yrs[[j]]#
+    this.site <- this.site[!duplicated(this.site)]#
+    this.site <- this.site[order(this.site$min),]#
+    begs[[j]] <- list()#
+    ends[[j]] <- list()#
+    for(i in 1:nrow(this.site)){#
+        begs[[j]][[i]] <- 2006:this.site$min[i]#
+        ends[[j]][[i]] <- this.site$max[i]:2014#
+        if(i >= 2){#
+            browser()#
+            begs[[j]][[i]] <- begs[[j]][[i]][!begs[[j]][[i]] %in%#
+                                             begs[[j]][[i - 1]]]#
+            ends[[j]][[i]] <- ends[[j]][[i]][!ends[[j]][[i]] %in%#
+                                             ends[[j]][[i - 1]]]#
+        }#
+    }#
+}
+begs[[j]][[i]] <- begs[[j]][[i]][!begs[[j]][[i]] %in%#
+                                             begs[[j]][[i - 1]]]
+begs
+for(j in 1:length(split.ch.yrs)){#
+    this.site <- split.ch.yrs[[j]]#
+    this.site <- this.site[!duplicated(this.site)]#
+    this.site <- this.site[order(this.site$min),]#
+    begs[[j]] <- list()#
+    ends[[j]] <- list()#
+    for(i in 1:nrow(this.site)){#
+        begs[[j]][[i]] <- 2006:this.site$min[i]#
+        ends[[j]][[i]] <- this.site$max[i]:2014#
+        if(i >= 2){#
+            begs[[j]][[i]] <- begs[[j]][[i]][!begs[[j]][[i]] %in%#
+                                             begs[[j]][[i - 1]]]#
+            ends[[j]][[i]] <- ends[[j]][[i]][!ends[[j]][[i]] %in%#
+                                             ends[[j]][[i - 1]]]#
+        }#
+    }#
+}
+Q
+for(j in 1:length(split.ch.yrs)){#
+    this.site <- split.ch.yrs[[j]]#
+    this.site <- this.site[!duplicated(this.site)]#
+    this.site <- this.site[order(this.site$min),]#
+    begs[[j]] <- list()#
+    ends[[j]] <- list()#
+    for(i in 1:nrow(this.site)){#
+        begs[[j]][[i]] <- 2006:this.site$min[i]#
+        ends[[j]][[i]] <- this.site$max[i]:2014#
+        if(i >= 2){#
+            begs[[j]][[i]] <- begs[[j]][[i]][!begs[[j]][[i]] %in%#
+                                             begs[[j]][[i - 1]]]#
+            ends[[j]][[i]] <- ends[[j]][[i]][!ends[[j]][[i]] %in%#
+                                             ends[[j]][[i - 1]]]#
+        }#
+    }#
+}
+for(j in 1:length(split.ch.yrs)){#
+    this.site <- split.ch.yrs[[j]]#
+    this.site <- this.site[!duplicated(this.site)]#
+    this.site <- this.site[order(this.site$min),]#
+    begs[[j]] <- list()#
+    ends[[j]] <- list()#
+    for(i in 1:nrow(this.site)){#
+        begs[[j]][[i]] <- 2006:this.site$min[i]#
+        if(this.site$max[i] == 2014){#
+            ends[[j]][[i]] <- 2014#
+        }else{#
+            ends[[j]][[i]] <- this.site$max[i]:2014#
+        }#
+        if(i >= 2){#
+            begs[[j]][[i]] <- begs[[j]][[i]][!begs[[j]][[i]] %in%#
+                                             begs[[j]][[i - 1]]]#
+            ends[[j]][[i]] <- ends[[j]][[i]][!ends[[j]][[i]] %in%#
+                                             ends[[j]][[i - 1]]]#
+        }#
+    }#
+}
+for(j in 1:length(split.ch.yrs)){#
+    this.site <- split.ch.yrs[[j]]#
+    this.site <- this.site[!duplicated(this.site)]#
+    this.site <- this.site[order(this.site$min),]#
+    begs[[j]] <- list()#
+    ends[[j]] <- list()#
+    for(i in 1:nrow(this.site)){#
+        begs[[j]][[i]] <- 2006:this.site$min[i]#
+        browser()#
+        if(this.site$max[i] == 2014){#
+            ends[[j]][[i]] <- 2014#
+        }else{#
+            ends[[j]][[i]] <- this.site$max[i]:2014#
+        }#
+        if(i >= 2){#
+            begs[[j]][[i]] <- begs[[j]][[i]][!begs[[j]][[i]] %in%#
+                                             begs[[j]][[i - 1]]]#
+            ends[[j]][[i]] <- ends[[j]][[i]][!ends[[j]][[i]] %in%#
+                                             ends[[j]][[i - 1]]]#
+        }#
+    }#
+}
+this.site$max
+this.site$max[i]
+Q
+for(j in 1:length(split.ch.yrs)){#
+    this.site <- split.ch.yrs[[j]]#
+    this.site <- this.site[!duplicated(this.site)]#
+    this.site <- this.site[order(this.site$min),]#
+    begs[[j]] <- list()#
+    ends[[j]] <- list()#
+    for(i in 1:nrow(this.site)){#
+        begs[[j]][[i]] <- 2006:this.site$min[i]#
+        print(this.site$max[i])#
+        if(this.site$max[i] == 2014){#
+            ends[[j]][[i]] <- 2014#
+        }else{#
+            ends[[j]][[i]] <- this.site$max[i]:2014#
+        }#
+        if(i >= 2){#
+            begs[[j]][[i]] <- begs[[j]][[i]][!begs[[j]][[i]] %in%#
+                                             begs[[j]][[i - 1]]]#
+            ends[[j]][[i]] <- ends[[j]][[i]][!ends[[j]][[i]] %in%#
+                                             ends[[j]][[i - 1]]]#
+        }#
+    }#
+}
+2006:this.site$min[i,]
+this.site$min
+this.site$min[i]
+this.site$max[i]
+this.site
+Q
+for(j in 1:length(split.ch.yrs)){#
+    this.site <- split.ch.yrs[[j]]#
+    this.site <- this.site[!duplicated(this.site),]#
+    this.site <- this.site[order(this.site$min),]#
+    begs[[j]] <- list()#
+    ends[[j]] <- list()#
+    for(i in 1:nrow(this.site)){#
+        begs[[j]][[i]] <- 2006:this.site$min[i]#
+        print(this.site$max[i])#
+        if(this.site$max[i] == 2014){#
+            ends[[j]][[i]] <- 2014#
+        }else{#
+            ends[[j]][[i]] <- this.site$max[i]:2014#
+        }#
+        if(i >= 2){#
+            begs[[j]][[i]] <- begs[[j]][[i]][!begs[[j]][[i]] %in%#
+                                             begs[[j]][[i - 1]]]#
+            ends[[j]][[i]] <- ends[[j]][[i]][!ends[[j]][[i]] %in%#
+                                             ends[[j]][[i - 1]]]#
+        }#
+    }#
+}
+2014:2014
+for(j in 1:length(split.ch.yrs)){#
+    this.site <- split.ch.yrs[[j]]#
+    this.site <- this.site[!duplicated(this.site),]#
+    this.site <- this.site[order(this.site$min),]#
+    begs[[j]] <- list()#
+    ends[[j]] <- list()#
+    for(i in 1:nrow(this.site)){#
+        begs[[j]][[i]] <- 2006:this.site$min[i]#
+        ends[[j]][[i]] <- this.site$max[i]:2014#
+        if(i >= 2){#
+            begs[[j]][[i]] <- begs[[j]][[i]][!begs[[j]][[i]] %in%#
+                                             begs[[j]][[i - 1]]]#
+            ends[[j]][[i]] <- ends[[j]][[i]][!ends[[j]][[i]] %in%#
+                                             ends[[j]][[i - 1]]]#
+        }#
+    }#
+}
+begs
+split.ch.yrs[[12]]
+for(j in 1:length(split.ch.yrs)){#
+    this.site <- split.ch.yrs[[j]]#
+    this.site <- this.site[!duplicated(this.site$min),]#
+    this.site <- this.site[order(this.site$min),]#
+    begs[[j]] <- list()#
+    ends[[j]] <- list()#
+    for(i in 1:nrow(this.site)){#
+        begs[[j]][[i]] <- 2006:this.site$min[i]#
+        ends[[j]][[i]] <- this.site$max[i]:2014#
+        if(i >= 2){#
+            begs[[j]][[i]] <- begs[[j]][[i]][!begs[[j]][[i]] %in%#
+                                             begs[[j]][[i - 1]]]#
+            ends[[j]][[i]] <- ends[[j]][[i]][!ends[[j]][[i]] %in%#
+                                             ends[[j]][[i - 1]]]#
+        }#
+    }#
+}
+begs
+ends
+begs
+for(j in 1:length(split.ch.yrs)){#
+    this.site <- split.ch.yrs[[j]]#
+    this.site <- this.site[!duplicated(this.site$min),]#
+    this.site <- this.site[order(this.site$min),]#
+    begs[[j]] <- list()#
+    for(i in 1:nrow(this.site)){#
+        begs[[j]][[i]] <- 2006:this.site$min[i]#
+        if(i >= 2){#
+            begs[[j]][[i]] <- begs[[j]][[i]][!begs[[j]][[i]] %in%#
+                                             begs[[j]][[i - 1]]]#
+        }#
+        if(i == nrow(this.site)){#
+             begs[[j]][[i + 1]] <- this.site$min[i]:2014#
+        }#
+    }#
+}
+begs
+list.files
+files
+names(split.ch.yrs)
+clusters <- vector(mode="list", length(split.ch.yrs))#
+#
+for(j in 1:length(split.ch.yrs)){#
+    this.site <- split.ch.yrs[[j]]#
+    this.site <- this.site[!duplicated(this.site$min),]#
+    this.site <- this.site[order(this.site$min),]#
+    clusters[[j]] <- list()#
+    for(i in 1:nrow(this.site)){#
+        clusters[[j]][[i]] <- 2006:this.site$min[i]#
+        if(i >= 2){#
+            clusters[[j]][[i]] <- clusters[[j]][[i]][!clusters[[j]][[i]] %in%#
+                                             clusters[[j]][[i - 1]]]#
+        }#
+        if(i == nrow(this.site)){#
+             clusters[[j]][[i + 1]] <- this.site$min[i]:2014#
+        }#
+    }#
+}#
+names(clusers) <- names(split.ch.yrs)
+names(clusters) <- names(split.ch.yrs)
+clusters
+lapply(clusters, function(x){#
+    browser()#
+    }
+)
+x
+Q
+for(i in clusters){#
+    browser()#
+}
+i
+Q
+for(i in 1:length(clusters)){#
+    browser()#
+}
+i
+Q
+for(i in 1:length(clusters)){#
+    for(j in length(clusters[[i]]){#
+        browser()#
+        paste(names(split.ch.yrs)[i], "_",#
+              clusters[[i]][[j]], ".pairs", sep="")#
+        }#
+}
+Q
+for(i in 1:length(clusters)){#
+    for(j in length(clusters[[i]])){#
+        browser()#
+        paste(names(split.ch.yrs)[i], "_",#
+              clusters[[i]][[j]], ".pairs", sep="")#
+        }#
+}
+i
+j
+Q
+for(i in 1:length(clusters)){#
+    for(j in 1:length(clusters[[i]])){#
+        browser()#
+        paste(names(split.ch.yrs)[i], "_",#
+              clusters[[i]][[j]], ".pairs", sep="")#
+        }#
+}
+paste(names(split.ch.yrs)[i], "_",#
+              clusters[[i]][[j]], ".pairs", sep="")
+Q
+for(i in 1:length(clusters)){#
+    for(j in 1:length(clusters[[i]])){#
+        clusters[[i]][[j]] <- paste(names(split.ch.yrs)[i], "_",#
+              clusters[[i]][[j]], ".pairs", sep="")#
+        }#
+}
+clusters
+files
+lapply(clusters, function(x){#
+    x <- x[x %in% files]#
+    }
+)
+lapply(clusters, function(x){#
+    browser()#
+    x <- x[x %in% files]#
+})
+x
+Q
+lapply(clusters, function(x){#
+    lapply(xm function(y){#
+        y <- y[y %in% files]#
+    })#
+})
+lapply(clusters, function(x){#
+    lapply(x, function(y){#
+        y <- y[y %in% files]#
+    })#
+})
+lapply(clusters, function(x){#
+    lapply(x, function(y){#
+        browser()#
+        y <- y[y %in% files]#
+    })#
+})
+y
+y[y %in% files]
+y %in% files
+Q
+clusters <- vector(mode="list", length(split.ch.yrs))#
+#
+for(j in 1:length(split.ch.yrs)){#
+    this.site <- split.ch.yrs[[j]]#
+    this.site <- this.site[!duplicated(this.site$min),]#
+    this.site <- this.site[order(this.site$min),]#
+    clusters[[j]] <- list()#
+    for(i in 1:nrow(this.site)){#
+        clusters[[j]][[i]] <- 2006:this.site$min[i]#
+        if(i >= 2){#
+            clusters[[j]][[i]] <- clusters[[j]][[i]][!clusters[[j]][[i]] %in%#
+                                             clusters[[j]][[i - 1]]]#
+        }#
+        if(i == nrow(this.site)){#
+             clusters[[j]][[i + 1]] <- this.site$min[i]:2014#
+        }#
+    }#
+}#
+names(clusters) <- names(split.ch.yrs)#
+#
+for(i in 1:length(clusters)){#
+    for(j in 1:length(clusters[[i]])){#
+        clusters[[i]][[j]] <- paste(names(split.ch.yrs)[i], "_",#
+              clusters[[i]][[j]], ".pairs", sep="")#
+        }#
+}#
+#
+clusters <- lapply(clusters, function(x){#
+    lapply(x, function(y){#
+        browser()#
+        y <- y[y %in% files]#
+    })#
+})
+Q
+clusters <- vector(mode="list", length(split.ch.yrs))#
+#
+for(j in 1:length(split.ch.yrs)){#
+    this.site <- split.ch.yrs[[j]]#
+    this.site <- this.site[!duplicated(this.site$min),]#
+    this.site <- this.site[order(this.site$min),]#
+    clusters[[j]] <- list()#
+    for(i in 1:nrow(this.site)){#
+        clusters[[j]][[i]] <- 2006:this.site$min[i]#
+        if(i >= 2){#
+            clusters[[j]][[i]] <- clusters[[j]][[i]][!clusters[[j]][[i]] %in%#
+                                             clusters[[j]][[i - 1]]]#
+        }#
+        if(i == nrow(this.site)){#
+             clusters[[j]][[i + 1]] <- this.site$min[i]:2014#
+        }#
+    }#
+}#
+names(clusters) <- names(split.ch.yrs)#
+#
+for(i in 1:length(clusters)){#
+    for(j in 1:length(clusters[[i]])){#
+        clusters[[i]][[j]] <- paste(names(split.ch.yrs)[i], "_",#
+              clusters[[i]][[j]], ".pairs", sep="")#
+        }#
+}#
+#
+clusters <- lapply(clusters, function(x){#
+    lapply(x, function(y){#
+        y <- y[y %in% files]#
+    })#
+})
+clusters
+files <-#
+    list.files("~/Dropbox/hedgerow_assembly/analysis/changePoint/cptPeel/baci",#
+               pattern="pairs")
+files
+files[sapply(strsplit(files, "_"), function(x) x[1])#
+               %in% changing.points$sites]
+files <- files[sapply(strsplit(files, "_"), function(x) x[1])#
+               %in% changing.points$sites]
+clsuters
+clusters
+lapply(clusters, function(x) do.call(paste0, x)
+)
+lapply(clusters, function(x) do.call(paste, x, sep=","))
+lapply(clusters, function(x) do.call(function(y) paste(y, sep=","),#
+                                     x)
+)
+lapply(clusters, function(x) do.call(paste, x))
+pasteComma <- function(...){#
+    paste(..., sep=",")#
+}
+lapply(clusters, function(x) do.call(pasteComma, x))
+pasteComma <- function(...){#
+    paste(..., sep=", ")#
+}#
+#
+lapply(clusters, function(x) do.call(pasteComma, x))
+prep.table <- lapply(clusters, function(x) do.call(pasteComma, x))
+unlist(prep.table)
+prep.table <- sapply(clusters, function(x) do.call(pasteComma, x))
+prep.table
+write.csv(changing.points, "changing_points.csv", row.names=FALSE)
+write.csv(changing.points, "../saved/changing_points.csv", row.names=FALSE)
+rm(list=ls())#
+library(MASS)#
+library(lme4)#
+library(nlme)#
+#
+setwd("~/Dropbox/hedgerow_assembly/analysis/changePoint")#
+#
+source('../../dataPrep/src/misc.R')#
+load('cptPeel/baci/graphs.Rdata')#
+load('../../data/networks/allSpecimens.Rdata')#
+samples <- read.csv("../../data/samples.csv")#
+dats <- read.csv('saved/changing_points.csv')#
+BACI.site <- c('Barger', 'Butler', 'Hrdy', 'MullerB', 'Sperandio')
+rm(list=ls())#
+library(reshape)#
+setwd("~/Dropbox/hedgerow_assembly/analysis/changePoint/cptPeel")#
+#
+results <- read.table('results_4.txt', sep=' ')#
+logs <- read.table('LogLs_4.txt', sep=' ')#
+#
+## split the year and creates an extra table with year 1 and period#
+results$V1 <- as.character(results$V1)#
+results$V2 <- as.character(results$V2)#
+years1  <-  as.numeric(sapply(strsplit(results$V1, "_"), function(x) x[2]))#
+years2  <-  as.numeric(sapply(strsplit(results$V2, "_"), function(x) x[2]))#
+anos <- min(years1):max(years2)#
+anos.unique <- unique(c(years1, years2))#
+anos <- anos[anos %in% anos.unique]#
+#
+years <- as.data.frame(matrix(NA, (length(anos)-1),2))#
+for(n in 1:(length(anos)-1)){#
+    years[n,2] <- paste(anos[n], anos[n+1], sep="-")#
+}#
+#
+years[,1] <- anos[-length(anos)]#
+colnames(years) <- c('first', 'period')#
+#
+## creates other variables for results#
+sites  <- sapply(strsplit(results$V1, "_"), function(x) x[1])#
+max <- apply(results[,c(3:5)], 1, max)#
+numberOfOnes <- apply(results[,c(3:5)], 1,#
+                      function(x) length(which(x==1)))#
+max.index <- rep(NA, dim(results)[1])#
+results <- cbind(results,  sites, years1, max, numberOfOnes, max.index)#
+#
+## checking if there is more than 1 value, and if yes, returns the#
+## index with the maxlog#
+for(row in 1:dim(results)[1]){#
+    if(results$numberOfOnes[row] > 1){#
+        results$max.index[row] <- which.max(logs[row,c(3:5)])#
+    }#
+    else {## return the position of the max#
+        results$max.index[row] <- which(results[row,c(3:5)] ==#
+                                        results$max[row])[1]#
+    }#
+}#
+#
+sigs <- results[results$max>0.949,]#
+cp <- rep(NA, dim(sigs)[1])#
+value <- rep(NA, dim(sigs)[1])#
+sigs <- cbind(sigs, cp, value)#
+#
+## cp is always the year + next year#
+for(i in 1:dim(sigs)[1]){#
+    y1 <- which(years$first %in% sigs$years1[i] == TRUE)#
+    print(paste(i,  years$period[y1+(sigs$max.index[i]-1)]))#
+    sigs$cp[i] <- years$period[y1+(sigs$max.index[i]-1)]#
+    sigs$value[i] <- sigs[i,c(3:5)][sigs$max.index[i]]#
+}#
+#
+sigs$value <- unlist(sigs$value)#
+changing.points <- sigs[,c(6,11,12)]#
+#
+write.csv(changing.points,#
+          file="../saved/changing_points.csv",#
+          row.names=FALSE)
+####
+changing.points$sites <- as.character(changing.points$sites)#
+by.site <- split(changing.points, changing.points$sites)#
+#
+files <-#
+    list.files("baci",#
+               pattern="pairs")#
+#
+files <- files[sapply(strsplit(files, "_"), function(x) x[1])#
+               %in% changing.points$sites]
+split.ch.yrs <- lapply(by.site, function(x){#
+    separate(x, cp, into=c("min","max"))#
+})#
+#
+clusters <- vector(mode="list", length(split.ch.yrs))#
+#
+for(j in 1:length(split.ch.yrs)){#
+    this.site <- split.ch.yrs[[j]]#
+    this.site <- this.site[!duplicated(this.site$min),]#
+    this.site <- this.site[order(this.site$min),]#
+    clusters[[j]] <- list()#
+    for(i in 1:nrow(this.site)){#
+        clusters[[j]][[i]] <- 2006:this.site$min[i]#
+        if(i >= 2){#
+            clusters[[j]][[i]] <- clusters[[j]][[i]][!clusters[[j]][[i]] %in%#
+                                             clusters[[j]][[i - 1]]]#
+        }#
+        if(i == nrow(this.site)){#
+             clusters[[j]][[i + 1]] <- this.site$min[i]:2014#
+        }#
+    }#
+}#
+names(clusters) <- names(split.ch.yrs)#
+#
+for(i in 1:length(clusters)){#
+    for(j in 1:length(clusters[[i]])){#
+        clusters[[i]][[j]] <- paste(names(split.ch.yrs)[i], "_",#
+              clusters[[i]][[j]], ".pairs", sep="")#
+        }#
+}#
+#
+clusters <- lapply(clusters, function(x){#
+    lapply(x, function(y){#
+        y <- y[y %in% files]#
+    })#
+})
+pasteComma <- function(...){#
+    paste(..., sep=", ")#
+}#
+#
+prep.table <- unlist(lapply(clusters,#
+                            function(x) do.call(pasteComma, x)))#
+write.table(prep.table, file=
+?write.table
+write.table(prep.table, file='.../saved/consensus.txt')
+write.table(prep.table, file='../saved/consensus.txt')
+write.table(prep.table, file='../saved/consensus.txt', row.names=FALSE)
+?write.table
+write.table(prep.table, file='../saved/consensus.txt', col.names=FALSE)
+write.table(prep.table, file='../saved/consensus.txt', col.names=FALSE)
+rm(list=ls())#
+library(reshape)#
+setwd('~/Dropbox/hedgerow_assembly/analysis/changePoint/cptPeel')#
+source('../src/extractingOutput.R', chdir = TRUE)#
+#
+results <- read.table('results_4.txt', sep=' ')#
+logs <- read.table('LogLs_4.txt', sep=' ')#
+#
+chpts <- makeChangepointData(results=results, logs=logs)#
+#
+makeConsensusTable(changing.points=chpts)
+rm(list=ls())#
+library(reshape)#
+setwd('~/Dropbox/hedgerow_assembly/analysis/changePoint/cptPeel')#
+source('../src/extractingOutput.R', chdir = TRUE)#
+#
+results <- read.table('results_4.txt', sep=' ')#
+logs <- read.table('LogLs_4.txt', sep=' ')#
+#
+chpts <- makeChangepointData(results=results, logs=logs)#
+#
+makeConsensusTable(changing.points=chpts)
+library(vegan)
+?rarify
+?rarify
+?rarefy
+rm(list=ls())#
+setwd('~/Dropbox/hedgerow_assembly/analysis/variability')#
+source('src/initialize.R')#
+#
+## ************************************************************#
+## pollinators#
+## ************************************************************#
+#
+pol.cv <- cv.trait(spec,#
+                   specs[specs$speciesType =="pollinator",],#
+                   trait1="occ.date",#
+                   trait2="degree",#
+                   method= "time", time.col="assem",#
+                   abund.col="weighted.closeness",#
+                   cv.function=cv,#
+                   zero2na=TRUE,#
+                   standard.cv=TRUE,#
+                   na.rm=TRUE)#
+#
+pol.mod <- lmer(formula.cv, data=pol.cv$lm.data)#
+summary(pol.mod)#
+vif.mer(pol.mod)#
+#
+## variance inflation factors > 2, so not great (Zurr et al. 2010)#
+#
+## models with each explanatory variable#
+pol.mod.degree <- lmer(cv ~ degree + (1|Site) +#
+                           (1|GenusSpecies),#
+                       data=pol.cv$lm.data)#
+summary(pol.mod.degree)#
+#
+pol.mod.occ <- lmer(cv ~ occ.date + (1|Site) +#
+                        (1|GenusSpecies),#
+                    data=pol.cv$lm.data)#
+summary(pol.mod.occ)#
+#
+## ************************************************************#
+## the reviewers wanted a quantile regression, can only include on#
+## random effect at a time#
+#
+pol.lm.cv.quant <- lqmm(fixed=cv ~ occ.date + degree, random=~1,#
+                        group= GenusSpecies,#
+                        data=pol.cv$lm.data,#
+                        control=list(LP_max_iter=10^4))#
+pol.sum.boot.quant <- summary.boot.lqmm(boot(pol.lm.cv.quant,#
+                                             R=100))#
+#
+## ************************************************************#
+## plant#
+## ************************************************************#
+plant.cv <- cv.trait(spec,#
+                     specs[specs$speciesType =="plant",],#
+                     trait1="occ.plant.date",#
+                     trait2="plant.degree",#
+                     method= "time", time.col="assem",#
+                     abund.col="weighted.closeness",#
+                     cv.function=cv,#
+                     zero2na=TRUE,#
+                     standard.cv=TRUE,#
+                     na.rm=TRUE,#
+                     species.type="PlantGenusSpecies")#
+#
+plant.mod <- lmer(formula.plant.cv, data=plant.cv$lm.data)#
+summary(plant.mod)#
+vif.mer(plant.mod)#
+## variance inflation factors > 2, so not great (Zurr et al. 2010)#
+#
+plant.mod.degree <- lmer(cv ~ plant.degree + (1|Site) +#
+                             (1|GenusSpecies),#
+                         data=plant.cv$lm.data)#
+#
+plant.mod.occ <- lmer(cv ~ occ.plant.date + (1|Site) +#
+                          (1|GenusSpecies),#
+                      data=plant.cv$lm.data)#
+## ************************************************************#
+## the reviewers wanted a quantile regression, can only include on#
+## random effect at a time#
+#
+plant.lm.cv.quant <- lqmm(fixed=cv ~ occ.plant.date + plant.degree,#
+                          random=~1,#
+                          group= GenusSpecies,#
+                          data=plant.cv$lm.data,#
+                          control=list(LP_max_iter=10^3))#
+plant.sum.boot.quant <- summary.boot.lqmm(boot(plant.lm.cv.quant,#
+                                               R=100))#
+#
+## ************************************************************#
+## correlation betwen degree and persistence#
+#
+cor.test(pol.cv$lm.data$degree, pol.cv$lm.data$occ.date)#
+cor.test(plant.cv$lm.data$plant.degree,#
+         plant.cv$lm.data$occ.plant.date)#
+#
+## ************************************************************#
+## residual plots#
+#
+resid.plot <- function(){#
+    layout(matrix(1:6, nrow=2, byrow=TRUE))#
+    plot(fitted(pol.mod), residuals(pol.mod),#
+         xlab = "Fitted Values", ylab = "Residuals",#
+         main="Pollinators")#
+    abline(h=0, lty=2)#
+    lines(smooth.spline(fitted(pol.mod),#
+                        residuals(pol.mod)))#
+#
+    qqnorm(residuals(pol.mod), abline(0,1))#
+#
+    plot(density(residuals(pol.mod)))#
+#
+    plot(fitted(plant.mod),#
+         residuals(plant.mod),#
+         xlab = "Fitted Values", ylab = "Residuals",#
+         main="Plants")#
+    abline(h=0, lty=2)#
+    lines(smooth.spline(fitted(plant.mod),#
+                        residuals(plant.mod)))#
+    qqnorm(residuals(plant.mod), abline(0,1))#
+#
+    plot(density(residuals(plant.mod)))#
+}#
+resid.plot()#
+#
+## save#
+save(pol.cv, pol.mod, plant.cv, plant.mod,#
+     file="saved/contMods.Rdata")
 rm(list=ls())#
 setwd('~/Dropbox/nimble/occupancy/analysis/multiSpp-singleSea')#
 #
@@ -8,91 +1070,13 @@ model.input <- prepMutiSpData(survey.data,#
                               survey.dates,#
                               species.groups,#
                               habitat,#
-                              n.zeros)#
-#
-## *********************************************************************#
-## multi-species site-occupancy models: vectorized with custom#
-## function to remove zs#
-## *********************************************************************#
-#
-ms.ss.occ <- nimbleCode({#
-  ## Define prior distributions for community-level model parameters#
-  cato.occ.mean ~ dunif(0,1)#
-  mu.ucato <- log(cato.occ.mean) - log(1-cato.occ.mean)#
-  sigma.ucato ~ dunif(0, 100)#
-  fcw.occ.mean ~ dunif(0,1)#
-  mu.ufcw <- log(fcw.occ.mean) - log(1-fcw.occ.mean)#
-  sigma.ufcw ~ dunif(0, 100)#
-  cato.det.mean ~ dunif(0,1)#
-  mu.vcato <- log(cato.det.mean) - log(1-cato.det.mean)#
-  sigma.vcato ~ dunif(0, 100)#
-  fcw.det.mean ~ dunif(0,1)#
-  mu.vfcw <- log(fcw.det.mean) - log(1-fcw.det.mean)#
-  sigma.vfcw ~ dunif(0, 100)#
-#
-  ## random effects#
-  mu.a1 ~ dnorm(0, 0.001)#
-  sigma.a1 ~ dunif(0, 100)#
-  mu.a2 ~ dnorm(0, 0.001)#
-  sigma.a2 ~ dunif(0, 100)#
-  mu.a3 ~ dnorm(0, 0.001)#
-  sigma.a3 ~ dunif(0, 100)#
-  mu.a4 ~ dnorm(0, 0.001)#
-  sigma.a4 ~ dunif(0, 100)#
-  mu.b1 ~ dnorm(0, 0.001)#
-  sigma.b1 ~ dunif(0, 100)#
-  mu.b2 ~ dnorm(0, 0.001)#
-  sigma.b2 ~ dunif(0, 100)#
-  for (i in 1:(num.species)) {#
-    ## Create priors for species i from the community level prior#
-    ## distributions#
-#
-    u.cato[i] ~ dnorm(mu.ucato, sd=sigma.ucato)#
-    u.fcw[i] ~ dnorm(mu.ufcw, sd=sigma.ufcw)#
-    a1[i] ~ dnorm(mu.a1, sd=sigma.a1)#
-    a2[i] ~ dnorm(mu.a2, sd=sigma.a2)#
-    a3[i] ~ dnorm(mu.a3, sd=sigma.a3)#
-    a4[i] ~ dnorm(mu.a4, sd=sigma.a4)#
-#
-    v.cato[i] ~ dnorm(mu.vcato, sd=sigma.vcato)#
-    v.fcw[i] ~ dnorm(mu.vfcw, sd=sigma.vfcw)#
-    b1[i] ~ dnorm(mu.b1, sd=sigma.b1)#
-    b2[i] ~ dnorm(mu.b2, sd=sigma.b2)#
-#
-    ## vectorize the calculation of psi.#
-    logit(psi[1:num.points,i]) <-#
-      u.cato[i]*(1-habitat.ind[1:num.points]) +#
-        u.fcw[i]*habitat.ind[1:num.points] +#
-          a1[i]*ufc.linear[1:num.points] +#
-            a2[i]*ufc.quadratic[1:num.points] +#
-              a3[i]*ba.linear[1:num.points] +#
-                a4[i]*ba.quadratic[1:num.points]#
-    ## vectorized calculation#
-    mu.psi[1:num.points,i] <- psi[1:num.points, i]#
-#
-    ## For our purpose a better way to write this way is to#
-    ## not worry that some elements of date.linear and date.quadratic#
-    ## aren't used, since the benefit of vectorizing the computation#
-    ## should be much greater than the cost of a few extra elements#
-    logit(p[1:num.points, 1:max.num.reps, i]) <-#
-      (v.cato[i]*(1-habitat.ind[1:num.points]) +#
-       v.fcw[i]*habitat.ind[1:num.points]) %*%#
-         asRow(onesRow[1, 1:max.num.reps])+#
-           b1[i]*date.linear[1:num.points,1:max.num.reps] +#
-             b2[i]*date.quadratic[1:num.points,1:max.num.reps]#
-#
-    ## user defined distribution to combine the bernoulli occupancy#
-    ## and detection events.  We can also make this is a single#
-    ## compuation for the entire matrix of locations-x-visits, for#
-    ## each species (i)#
-#
-    X[1:num.points, 1:max.num.reps, i] ~ dBernDetectionMatrix(#
-      occProb = mu.psi[1:num.points,i],#
-      detectionProb = p[1:num.points, 1:max.num.reps,i],#
-      numReps = num.reps[1:num.points])#
-  }#
-})#
-#
-input1 <- c(code=ms.ss.occ, model.input)
-source('../cppp/src/calcCPPP.R', chdir = TRUE)
-generateCPPP
+                              n.zeros)
+load(file=file.path(save.dir, "opt4.Rdata"))
+ls()
+load(file=file.path(save.dir, "opt2.Rdata"))
+ms.ss.opt2
+names(ms.ss.opt2)
+names(ms.ss.opt2$model1)
+class(ms.ss.opt2$samples)
+class(ms.ss.opt2$model1$samples)
+as.matrix(ms.ss.opt2$model1$samples)

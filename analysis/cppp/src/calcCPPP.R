@@ -53,7 +53,6 @@ pppFunc <- nimbleFunction(
         for(i in 1:nPPPCalcIters){
             randNum <- ceiling(runif(1, 0, (MCMCIter)/thin - burnIn - 1 ))
             values(model, dataNames) <<- origDataValues
-            calculate(model, dataDependencies)
             if(useBlockMatrix == TRUE){
               values(model, paramNames) <<- blockMatrix[randNum, ]
             }
@@ -61,10 +60,11 @@ pppFunc <- nimbleFunction(
               values(model, paramNames) <<- MCMCOutput[burnIn + randNum, ]
             }
             calculate(model, paramDependencies)
+            calculate(model, dataDependencies)
             obsDeviance <- discFunction[[1]]$run()
             simulate(model, dataNames, includeData = TRUE)
-            calculate(model, dataDependencies)
             calculate(model, paramDependencies)
+            calculate(model, dataDependencies)
             simDeviance <- discFunction[[1]]$run()
             if(simDeviance >= obsDeviance) output[i] <- 1
             else output[i] <- 0

@@ -15,12 +15,11 @@ checkChains <- function(all.mods.samps, f.path){
   niter <- dim(all.mods.samps)[3]
   params <- names(all.mods.samps[1,,1])
   mods <- names(all.mods.samps[,1,1])
-  if(is.null(mods)) mods <- "nimble"
+   if(is.null(mods)) mods <- "AF slice"
 
   lapply(mods, function(z){
     f <- function(){
       layout(matrix(1:4, ncol=2))
-
       apply(all.mods.samps[z,,], 1, function(x){
        ## traceplot(mcmc(x), type = "l",
        ##            main= params[which(apply(all.mods.samps[z,,], 1, function(y)
@@ -74,7 +73,7 @@ plotEffSize <- function(eff.size, eff.param,
     plot(NA, ylim=c(0,1), xlim=c(0,1), yaxt= "n", xaxt="n", bty="n")
     legend("top", legend=rownames(eff.param),
            pch=16, col=cols, bty="n", ncol=3)
-    
+
     plot(NA, ylim=log(range(eff.param)), xlim=c(1, ncol(eff.param)),
          xlab="", ylab="", xaxt="n")
     for(i in 1:nrow(eff.param)){
@@ -98,14 +97,14 @@ plotEffSize <- function(eff.size, eff.param,
 
     par(oma=c(5, 6, 0.5, 1),
         mar=c(0.5, 0, 0.5, 1), cex.axis=1.5)
-    
+
     diffs <- t(apply(eff.param, 1,
                      function(x) log(x) - log(eff.param["JAGS-latent",])))[-1,]
-    
+
     plot(NA, ylim=c(0,1), xlim=c(0,1), yaxt= "n", xaxt="n", bty="n")
     legend("top", legend=rownames(diffs),
            pch=16, col=cols[-1], bty="n", ncol=3)
-    
+
     plot(NA, ylim=range(diffs), xlim=c(1, ncol(diffs)),
          xlab="", ylab="", xaxt="n")
     for(i in 1:nrow(diffs)){

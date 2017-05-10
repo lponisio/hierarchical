@@ -15,17 +15,30 @@ load(file=file.path(save.dir, "opt2.Rdata"))
 
 ## ## rename results
 sp.opt2[[1]] <- rename_MCMC_comparison_method('nimbleOpt2',
-                                                 'slice',
-                                                 comparison=sp.opt2[[1]])
+                                              'AF slice',
+                                              comparison=sp.opt2[[1]])
 ## compare mcmcs
-sp.occ.all <- combine_MCMC_comparison_results(sp.orig[[1]],
-                                                 sp.opt1[[1]],
-                                                 sp.opt2[[1]],
-                                                 name = "sp" )
+sp.occ.all <- combine_MCMC_comparison_results(## sp.orig[[1]],
+                                              ## sp.opt1[[1]],
+                                              sp.opt2[[1]],
+                                              name = "sp" )
 make_MCMC_comparison_pages(sp.occ.all,
                            dir=file.path(save.dir,
-                             "../figures/comparisons"))
+                                         "../figures/comparisons"))
 
 checkChains(sp.occ.all[[1]]$samples,
             f.path = file.path(save.dir,
-            "../figures/chains/%s.pdf"))
+                               "../figures/chains/%s.pdf"))
+
+
+## $logDelta
+## [1] -2.302585
+
+## $logSigma
+## [1] 2.079442
+
+## $alpha
+## [1] 0.5
+
+## $p
+## [1] 0.8
