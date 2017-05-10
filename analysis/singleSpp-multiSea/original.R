@@ -69,7 +69,7 @@ MCMCdefs.subsamp <- list('nimbleSubsamp' = quote({
     customSpec <- configureMCMC(Rmodel)
     customSpec$removeSamplers('z')
     customSpec$addSampler('z', type = 'sampler_latentSub',
-                          control = list(leaveOutProportion = 0.5,
+                          control = list(leaveOutProportion = 0.6,
                                          control = list()))
     customSpec
 }))

@@ -44,44 +44,11 @@ input1 <- c(code=ss.ms.occ,
 ## *********************************************************************
 
 ss.ms.filter <- compareMCMCs(input1,
-                           MCMCs=c('nimble', 'nimble_slice'),
+                           MCMCs=c('nimble'),
                            niter=niter,
                            burnin = burnin,
                            summary=FALSE,
                            check=FALSE)
 
 save(ss.ms.filter, file=file.path(save.dir, "filter.Rdata"))
-
-
-## *********************************************************************
-## block together phi and gamma
-## *********************************************************************
-
-## MCMCdefs.opt5 <- list('nimbleOpt5' = quote({
-##   customSpec <- configureMCMC(Rmodel)
-##   ## find node names for random effects
-##   parms.phi <- Rmodel$getNodeNames(includeData = FALSE)[grepl("^phi",
-##                                      Rmodel$getNodeNames(includeData = FALSE))]
-##   parms.gam <- Rmodel$getNodeNames(includeData = FALSE)[grepl("^gamma",
-##                                      Rmodel$getNodeNames(includeData =
-##                                                          FALSE))]
-##   phi.gam <- cbind(parms.phi, parms.gam)[-1,]
-##   for(i in 1:nrow(phi.gam)){
-##     customSpec$removeSamplers(phi.gam[i,], print=FALSE)
-##     customSpec$addSampler(target = phi.gam[i,],
-##                           type = "RW_block")
-##   }
-##   customSpec
-## }))
-
-## ss.ms.opt5 <- compareMCMCs(input1,
-##                            MCMCs=c('nimbleOpt5'),
-##                            MCMCdefs = MCMCdefs.opt5,
-##                            niter=niter,
-##                            burnin = burnin,
-##                            summary=FALSE,
-##                            check=FALSE)
-
-## save(ss.ms.opt5, file=file.path(save.dir, "opt5.Rdata"))
-
 
