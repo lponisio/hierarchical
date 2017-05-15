@@ -119,18 +119,10 @@ ms.ss.occ <- nimbleCode({
     }
   }
 
-  ## Derived quantities:
-  ## Create a loop to determine point level
-  ## richness estimates for the whole community
-  ## and for subsets or assemblages of interest.
-  ## for(j in 1:num.points){
-  ##   N.site[j]<- sum(mu.psi[j,1:(num.species)])
-  ##   N.ground[j]<- inprod(Z[j,1:num.species],ground[1:num.species])
-  ##   N.mid[j]<- inprod(Z[j,1:num.species],mid[1:num.species])
-  ## }
+
 })
 
- 
+
 model.input$data[["onesRow"]] <- NULL
 model.input$constants[["max.num.reps"]] <- NULL
 

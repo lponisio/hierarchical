@@ -68,4 +68,4 @@ source('../all/plotting.R')
 plotEffSize(by.config, by.param, f.path= file.path(save.dir,
                                                    "../figures/comparisons/%s%s.pdf"),
             "SingleSpp-MultiSea",
-            at=9, adj1=0.3, adj2=0.3, widths=c(4.5, 8.5))
+            at=9, adj1=1, adj2=0.3, widths=c(4.5, 8.5))

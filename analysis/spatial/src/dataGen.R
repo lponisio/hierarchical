@@ -25,7 +25,7 @@ genSpatialOccData <- function(ngrid = 50,
     dist.mat <- as.matrix(dist(simgrid))
 
     prep.cor.mat <- exp(-delta * dist.mat)
-    cor.mat <- sigma^2*(0.95*prep.cor.mat +
+    cor.mat <- sigma*(0.95*prep.cor.mat +
                         0.05*diag(nrow(prep.cor.mat)))
     ## Generate spatial random effect
     X <- rmvn(1, rep(0, n), cor.mat)
@@ -41,13 +41,17 @@ genSpatialOccData <- function(ngrid = 50,
     ## calculate probabilities of occurrence
     psi <- expit(alpha + ## b1 * raster::values(elev) +
                  raster::values(Xraster))
+    psi.rast <-  rasterFromXYZ(cbind(coordinates(Xraster), psi))
 
+    quartz(width=6)
+    layout(matrix(1:2))
+    par(oma=c(0,0,0,0), mar=c(2,2,1,2))
+    plot(psi.rast, main="psi")
 
     ## Latent occurrence state
     z <- rbinom(n = n, size = 1, prob = psi)
     z <- rasterFromXYZ(cbind(coordinates(Xraster), z))
-    quartz()
-    plot(z)
+    plot(z, main="z")
 
     coords <- coordinates(z)
     fulldata <- data.frame(coords,
@@ -67,17 +71,16 @@ genSpatialOccData <- function(ngrid = 50,
                 y=y,
                 distance=dist.mat,
                 inits=list(
-                    logDelta=log(delta),
-                    logSigma=log(sigma),
+                    delta=delta,
+                    sigma=sigma,
                     alpha=alpha,
-                    ## b1=b1,
                     p=p)))
 }
 
 
 ## preps data for nimble
 prepModData <- function(fulldata, y, dist.mat, nsite, inits,
-                        monitors=c("logDelta", "logSigma", "psi",
+                        monitors=c("delta", "sigma", "psi",
                                    "p", "alpha")){
     ## subsample at "sites" (create a grid of sites to avoid any that
     ## are too close to eachother)

@@ -7,20 +7,20 @@ save.dir <-  "../../../saved/spatial/saved"
 ## original model jags and nimble
 load(file=file.path(save.dir, "orig.Rdata"))
 
-## vanilla nimble and auto block
-load(file=file.path(save.dir, "opt1.Rdata"))
+## ## vanilla nimble and auto block
+load(file=file.path(save.dir, "nimble.Rdata"))
 
 ## ## custom sampler for zs, slice for other parms
-load(file=file.path(save.dir, "opt2.Rdata"))
+load(file=file.path(save.dir, "AFSlice.Rdata"))
 
 ## ## rename results
-sp.opt2[[1]] <- rename_MCMC_comparison_method('nimbleOpt2',
+sp.AFSlice[[1]] <- rename_MCMC_comparison_method('nimbleAFSlice',
                                               'AF slice',
-                                              comparison=sp.opt2[[1]])
+                                              comparison=sp.AFSlice[[1]])
 ## compare mcmcs
-sp.occ.all <- combine_MCMC_comparison_results(## sp.orig[[1]],
-                                              ## sp.opt1[[1]],
-                                              sp.opt2[[1]],
+sp.occ.all <- combine_MCMC_comparison_results(sp.orig[[1]],
+                                              sp.nimble[[1]],
+                                              sp.AFSlice[[1]],
                                               name = "sp" )
 make_MCMC_comparison_pages(sp.occ.all,
                            dir=file.path(save.dir,

@@ -103,7 +103,7 @@ input1 <- c(code=ms.ss.occ, model.input)
 ## *********************************************************************
 
 ms.ss.opt1 <- compareMCMCs(input1,
-                           MCMCs=c('nimble', 'autoBlock'),
+                           MCMCs=c('nimble'),
                            niter=niter,
                            burnin = burnin,
                            summary=FALSE,
@@ -151,79 +151,79 @@ save(ms.ss.opt2, file=file.path(save.dir, "opt2.Rdata"))
 ## "type"
 ## *********************************************************************
 
-## remove the samples, add block samplers
-MCMCdefs.opt3 <- list('nimbleOpt3' = quote({
-  customSpec <- configureMCMC(Rmodel)
-  ## find node names for random effects
-  sp.parms.a <- Rmodel$getNodeNames(includeData = FALSE)[grepl("^a",
-                                      Rmodel$getNodeNames(includeData = FALSE))]
-  sp.parms.b <- Rmodel$getNodeNames(includeData = FALSE)[grepl("^b",
-                                      Rmodel$getNodeNames(includeData = FALSE))]
-  sp.parms.u <- Rmodel$getNodeNames(includeData = FALSE)[grepl("^u",
-                                      Rmodel$getNodeNames(includeData = FALSE))]
-  sp.parms.v <- Rmodel$getNodeNames(includeData = FALSE)[grepl("^v",
-                                      Rmodel$getNodeNames(includeData = FALSE))]
-  customSpec$removeSamplers(c(sp.parms.a, sp.parms.b, sp.parms.u,
-                              sp.parms.v),
-                            print=FALSE)
+## ## remove the samples, add block samplers
+## MCMCdefs.opt3 <- list('nimbleOpt3' = quote({
+##   customSpec <- configureMCMC(Rmodel)
+##   ## find node names for random effects
+##   sp.parms.a <- Rmodel$getNodeNames(includeData = FALSE)[grepl("^a",
+##                                       Rmodel$getNodeNames(includeData = FALSE))]
+##   sp.parms.b <- Rmodel$getNodeNames(includeData = FALSE)[grepl("^b",
+##                                       Rmodel$getNodeNames(includeData = FALSE))]
+##   sp.parms.u <- Rmodel$getNodeNames(includeData = FALSE)[grepl("^u",
+##                                       Rmodel$getNodeNames(includeData = FALSE))]
+##   sp.parms.v <- Rmodel$getNodeNames(includeData = FALSE)[grepl("^v",
+##                                       Rmodel$getNodeNames(includeData = FALSE))]
+##   customSpec$removeSamplers(c(sp.parms.a, sp.parms.b, sp.parms.u,
+##                               sp.parms.v),
+##                             print=FALSE)
 
-  customSpec$addSampler(target = sp.parms.a,
-                        type = "RW_block")
-  customSpec$addSampler(target = sp.parms.b,
-                        type = "RW_block")
-  customSpec$addSampler(target = sp.parms.u,
-                        type = "RW_block")
-  customSpec$addSampler(target = sp.parms.v,
-                        type = "RW_block")
-  customSpec
-}))
+##   customSpec$addSampler(target = sp.parms.a,
+##                         type = "RW_block")
+##   customSpec$addSampler(target = sp.parms.b,
+##                         type = "RW_block")
+##   customSpec$addSampler(target = sp.parms.u,
+##                         type = "RW_block")
+##   customSpec$addSampler(target = sp.parms.v,
+##                         type = "RW_block")
+##   customSpec
+## }))
 
-## run the model
-ms.ss.opt3 <- compareMCMCs(input1,
-                           MCMCs=c('nimbleOpt3'),
-                           MCMCdefs = MCMCdefs.opt3,
-                           niter= niter,
-                           burnin = burnin,
-                           summary=FALSE,
-                           check=FALSE)
+## ## run the model
+## ms.ss.opt3 <- compareMCMCs(input1,
+##                            MCMCs=c('nimbleOpt3'),
+##                            MCMCdefs = MCMCdefs.opt3,
+##                            niter= niter,
+##                            burnin = burnin,
+##                            summary=FALSE,
+##                            check=FALSE)
 
-save(ms.ss.opt3, file=file.path(save.dir, "opt3.Rdata"))
+## save(ms.ss.opt3, file=file.path(save.dir, "opt3.Rdata"))
 
 ## *********************************************************************
 ## ## option 4: sigma sampler
 ## *********************************************************************
 
-## remove the samples, add block samplers
-MCMCdefs.opt4 <- list('nimbleOpt4' = quote({
-  customSpec <- configureMCMC(Rmodel)
-  ## find node names for random effects
-  sigma.parms <- Rmodel$getNodeNames(includeData = FALSE)[grepl("^sigma",
-                                       Rmodel$getNodeNames(includeData = FALSE))]
-  mu.parms <- paste("mu",
-                    sapply(strsplit(sigma.parms, "[.]"), function(x) x[2]),
-                    sep=".")
-  customSpec$removeSamplers(sigma.parms,
-                            print=FALSE)
+## ## remove the samples, add block samplers
+## MCMCdefs.opt4 <- list('nimbleOpt4' = quote({
+##   customSpec <- configureMCMC(Rmodel)
+##   ## find node names for random effects
+##   sigma.parms <- Rmodel$getNodeNames(includeData = FALSE)[grepl("^sigma",
+##                                        Rmodel$getNodeNames(includeData = FALSE))]
+##   mu.parms <- paste("mu",
+##                     sapply(strsplit(sigma.parms, "[.]"), function(x) x[2]),
+##                     sep=".")
+##   customSpec$removeSamplers(sigma.parms,
+##                             print=FALSE)
 
-  for(i in 1:length(sigma.parms)){
-    customSpec$addSampler(target = sigma.parms[i],
-                          type = "sampler_RW_log_shift",
-                          control = list(shiftNodes = mu.parms[i]))
+##   for(i in 1:length(sigma.parms)){
+##     customSpec$addSampler(target = sigma.parms[i],
+##                           type = "sampler_RW_log_shift",
+##                           control = list(shiftNodes = mu.parms[i]))
 
-  }
-  customSpec
-}))
+##   }
+##   customSpec
+## }))
 
-## run the model
-ms.ss.opt4 <- compareMCMCs(input1,
-                           MCMCs=c('nimbleOpt4'),
-                           MCMCdefs = MCMCdefs.opt4,
-                           niter= niter,
-                           burnin = burnin,
-                           summary=FALSE,
-                           check=FALSE)
+## ## run the model
+## ms.ss.opt4 <- compareMCMCs(input1,
+##                            MCMCs=c('nimbleOpt4'),
+##                            MCMCdefs = MCMCdefs.opt4,
+##                            niter= niter,
+##                            burnin = burnin,
+##                            summary=FALSE,
+##                            check=FALSE)
 
-save(ms.ss.opt4, file=file.path(save.dir, "opt4.Rdata"))
+## save(ms.ss.opt4, file=file.path(save.dir, "opt4.Rdata"))
 
 
 ## *********************************************************************

@@ -15,7 +15,7 @@ genDynamicOccData <- function(nsite = 100,
                               range.gamma = c(0, 0.1)) {
 
     ##  Generation and analysis of simulated data for multi season
-    ##  occupancy model
+    ##  occupancy model (Kery and Schaud 2012)
 
     ## Function to simulate detection/nondetection data for dynamic site-occ model
     ## Annual variation in probabilities of patch survival, colonization and
