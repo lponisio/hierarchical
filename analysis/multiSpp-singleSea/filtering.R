@@ -15,17 +15,21 @@ model.input <- prepMutiSpData(survey.data,
 ## function to remove zs
 ## *********************************************************************
 
+
 ms.ss.occ <- nimbleCode({
   ## Define prior distributions for community-level model parameters
   cato.occ.mean ~ dunif(0,1)
   mu.ucato <- log(cato.occ.mean) - log(1-cato.occ.mean)
   sigma.ucato ~ dunif(0, 100)
+
   fcw.occ.mean ~ dunif(0,1)
   mu.ufcw <- log(fcw.occ.mean) - log(1-fcw.occ.mean)
   sigma.ufcw ~ dunif(0, 100)
+
   cato.det.mean ~ dunif(0,1)
   mu.vcato <- log(cato.det.mean) - log(1-cato.det.mean)
   sigma.vcato ~ dunif(0, 100)
+
   fcw.det.mean ~ dunif(0,1)
   mu.vfcw <- log(fcw.det.mean) - log(1-fcw.det.mean)
   sigma.vfcw ~ dunif(0, 100)
@@ -72,10 +76,6 @@ ms.ss.occ <- nimbleCode({
     ## vectorized calculation
     mu.psi[1:num.points,i] <- psi[1:num.points, i]
 
-    ## For our purpose a better way to write this way is to
-    ## not worry that some elements of date.linear and date.quadratic
-    ## aren't used, since the benefit of vectorizing the computation
-    ## should be much greater than the cost of a few extra elements
     logit(p[1:num.points, 1:max.num.reps, i]) <-
       (v.cato[i]*(1-habitat.ind[1:num.points]) +
        v.fcw[i]*habitat.ind[1:num.points]) %*%
@@ -99,55 +99,55 @@ input1 <- c(code=ms.ss.occ, model.input)
 
 
 ## *********************************************************************
-## option 1 (vanilla NIMBLE) using compare MCMC
+## vanilla NIMBLE
 ## *********************************************************************
 
-ms.ss.opt1 <- compareMCMCs(input1,
+ms.ss.filter <- compareMCMCs(input1,
                            MCMCs=c('nimble'),
                            niter=niter,
                            burnin = burnin,
                            summary=FALSE,
                            check=FALSE)
 
-save(ms.ss.opt1, file=file.path(save.dir, "opt1.Rdata"))
+save(ms.ss.filter, file=file.path(save.dir, "filter.Rdata"))
 
 
 ## *********************************************************************
-## option 2: block sampler for species random effects for each species
+##  block sampler for species random effects for each species
 ## *********************************************************************
 
-## remove the samples, add block samplers
-MCMCdefs.opt2 <- list('nimbleOpt2' = quote({
-  customSpec <- configureMCMC(Rmodel)
-  ## find node names of each species for random effects
-  base.names <- c("a1", "a2", "a3", "a4", "b1", "b2", "u.cato",
-                  "u.fcw", "v.cato", "v.fcw" )
-  exp.names.list <- list()
-  for(bn in base.names){
-    exp.names.list[[bn]] <- Rmodel$expandNodeNames(bn)
-  }
-  for(i in 1:length(exp.names.list[[1]])){
-    blocknames <- unlist(lapply(exp.names.list, function(x) x[i]))
-    customSpec$removeSamplers(blocknames, print=FALSE)
-    customSpec$addSampler(target = blocknames,
-                          type = "RW_block")
-  }
-  customSpec
-}))
+## ## remove the samples, add block samplers
+## MCMCdefs.opt2 <- list('nimbleOpt2' = quote({
+##   customSpec <- configureMCMC(Rmodel)
+##   ## find node names of each species for random effects
+##   base.names <- c("a1", "a2", "a3", "a4", "b1", "b2", "u.cato",
+##                   "u.fcw", "v.cato", "v.fcw" )
+##   exp.names.list <- list()
+##   for(bn in base.names){
+##     exp.names.list[[bn]] <- Rmodel$expandNodeNames(bn)
+##   }
+##   for(i in 1:length(exp.names.list[[1]])){
+##     blocknames <- unlist(lapply(exp.names.list, function(x) x[i]))
+##     customSpec$removeSamplers(blocknames, print=FALSE)
+##     customSpec$addSampler(target = blocknames,
+##                           type = "RW_block")
+##   }
+##   customSpec
+## }))
 
-## run the model
-ms.ss.opt2 <- compareMCMCs(input1,
-                           MCMCs=c('nimbleOpt2'),
-                           MCMCdefs = MCMCdefs.opt2,
-                           niter= niter,
-                           burnin = burnin,
-                           summary=FALSE,
-                           check=FALSE)
+## ## run the model
+## ms.ss.opt2 <- compareMCMCs(input1,
+##                            MCMCs=c('nimbleOpt2'),
+##                            MCMCdefs = MCMCdefs.opt2,
+##                            niter= niter,
+##                            burnin = burnin,
+##                            summary=FALSE,
+##                            check=FALSE)
 
-save(ms.ss.opt2, file=file.path(save.dir, "opt2.Rdata"))
+## save(ms.ss.opt2, file=file.path(save.dir, "spBlock.Rdata"))
 
 ## *********************************************************************
-## ## option 3: block sampler for species random effects for each
+## ##  block sampler for species random effects for each
 ## "type"
 ## *********************************************************************
 
@@ -187,10 +187,10 @@ save(ms.ss.opt2, file=file.path(save.dir, "opt2.Rdata"))
 ##                            summary=FALSE,
 ##                            check=FALSE)
 
-## save(ms.ss.opt3, file=file.path(save.dir, "opt3.Rdata"))
+## save(ms.ss.opt3, file=file.path(save.dir, "paramBlock.Rdata"))
 
 ## *********************************************************************
-## ## option 4: sigma sampler
+## ##  sigma sampler
 ## *********************************************************************
 
 ## ## remove the samples, add block samplers
@@ -223,13 +223,13 @@ save(ms.ss.opt2, file=file.path(save.dir, "opt2.Rdata"))
 ##                            summary=FALSE,
 ##                            check=FALSE)
 
-## save(ms.ss.opt4, file=file.path(save.dir, "opt4.Rdata"))
+## save(ms.ss.opt4, file=file.path(save.dir, "sigma.Rdata"))
 
 
 ## *********************************************************************
 ## ## CPPP
 ## *********************************************************************
-load(file=file.path(save.dir, "opt2.Rdata"))
+load(file=file.path(save.dir, "filter.Rdata"))
 
 occ.R.model <- nimbleModel(code=ms.ss.occ,
                            constants=input1$constants,
@@ -241,7 +241,7 @@ occ.mcmc <- buildMCMC(occ.R.model)
 occ.C.model <- compileNimble(occ.R.model)
 occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model)
 
-output <- as.matrix(t(ms.ss.opt2$model1$samples[1,,]))
+output <- as.matrix(t(ms.ss.opt1$model1$samples[1,,]))
 
 mcmcGenFunc <- function(model){
   mcmc.spec <- configureMCMC(model,
@@ -263,18 +263,19 @@ CPPPoutput <- generateCPPP(occ.R.model,
                        burnInProp = 0.1,
                        thin=1,
                        nBootstrapSDReps=100,
+                       nCores = 5,
                        discFuncGenerator=likeDiscFuncGenerator)
 
-save(CPPPoutput, file=file.path(save.dir, "ms_ss_noz_CPPP.Rdata"))
+save(CPPPoutput, file=file.path(save.dir, "ms_ss_filter_CPPP.Rdata"))
 
 
 ## *********************************************************************
 ## ## cross validation
 ## *********************************************************************
 ## if not already run above
-load(file=file.path(save.dir, "opt2.Rdata"))
+load(file=file.path(save.dir, "filter.Rdata"))
 
-options(mc.cores=2)
+options(mc.cores=5)
 occ.R.model <- nimbleModel(code=ms.ss.occ,
                            constants=input1$constants,
                            data=input1$data,
@@ -306,7 +307,7 @@ output <- crossValidateOne(model=occ.R.model,
 
 ## *********************************************************************
 
-options(mc.cores=2)
+options(mc.cores=5)
 source('../crossValidation/crossValidationFunction.R')
 
 ms.ss.occ.simp <- nimbleCode({

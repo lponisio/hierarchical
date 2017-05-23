@@ -268,8 +268,9 @@ generateCPPP <-  function(R.model,
 
     ## simulate the ppp values
     sim.ppp.output <- mclapply(X = 1:nCores, FUN = cpppParallelFunction,
-                               nBootIter =  ceiling(nSimPPPVals/nCores))
-
+                               nBootIter =
+                                   ceiling(nSimPPPVals/nCores))
+    paste(sim.ppp.output)
     ## extract simulated ppp and boot SDs
     sim.ppp <- sapply(sapply(sim.ppp.output,
                              function(x) x), function(x)  x$pre.pp)

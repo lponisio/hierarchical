@@ -2,8 +2,6 @@
 ## DynamicOccupancy removes the z's and muZ's from the model and computes
 ## the probability of all reps over all years for one site.
 dDynamicOccupancy <- nimbleFunction(
-  ## I've checked that this runs and compiles, but I haven't tested if
-  ## I got the logic right!
   run = function(x = double(2),
     nrep = double(),
     psi1 = double(),

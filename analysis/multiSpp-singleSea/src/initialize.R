@@ -8,7 +8,8 @@ library(igraph)
 library(reshape)
 source("../all/plotting.R")
 source("../all/runNimble.R")
-source('../all/samplers/sampler_RW_shift.R')
+source("../all/samplers/sampler_crossLevel_new.R")
+source("../all/samplers/leaveOutSampler.R")
 source("src/reformatData.R")
 source("src/multispeciesOcc.R")
 
@@ -20,7 +21,7 @@ survey.dates <- read.csv("data/survey_dates.csv")
 habitat <- read.csv("data/habitat.csv")
 
 ## mcmc settings
-scale <- 1e2
+scale <- 1e3
 burnin <- 1e2*scale
 niter <- (1e3)*scale
 

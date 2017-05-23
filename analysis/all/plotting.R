@@ -20,12 +20,10 @@ checkChains <- function(all.mods.samps, f.path, only.one="jags"){
         f <- function(){
             layout(matrix(1:4, ncol=2))
             apply(all.mods.samps[z,,], 1, function(x){
-                ## traceplot(mcmc(x), type = "l",
-                ##            main= params[which(apply(all.mods.samps[z,,], 1, function(y)
-                ##              all(match(x,y))))])
                 plot(x[seq(from=1, to=length(x), by=100)], type="l",
                      xlab = 'iteration',
-                     main= params[which(apply(all.mods.samps[z,,], 1, function(y)
+                     main= params[which(apply(all.mods.samps[z,,], 1,
+                                              function(y)
                          all(match(x,y))))]
                      )
             })
@@ -45,8 +43,8 @@ plotEffSize <- function(eff.size, eff.param,
     names(cols) <- names(eff.size$mean)
     f <- function(){
         layout(matrix(1:2, ncol=1))
-        par(oma=c(5, 7.5, 0.5, 1),
-            mar=c(0.5, 0, 3, 1), cex.axis=1.5)
+        par(oma=c(6.5, 8, 0.5, 1),
+            mar=c(0.5, 0, 2.5, 1), cex.axis=1.5)
         ## barplots
         mp1 <- barplot(eff.size$mean, names="", las=1, col=cols)
         mtext("Mean", 3, line=0.5, cex=1.5)

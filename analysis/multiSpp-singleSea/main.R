@@ -5,7 +5,7 @@ setwd('~/Dropbox/nimble/occupancy/analysis/multiSpp-singleSea')
 source('original.R')
 
 ## remove Zs and add block samplers to species random effects
-source('opt1-4.R')
+source('filtering.R')
 
 ## comparisons
 source('compare.R')

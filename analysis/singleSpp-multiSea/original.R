@@ -88,6 +88,7 @@ save(ss.ms.subsamp, file=file.path(save.dir, 'subsamp.Rdata'))
 ## *********************************************************************
 ## cross level sampler
 ## *********************************************************************
+## sample latent and top-level parameters jointly, not included in ms
 
 MCMCdefs.crosslevel <- list('nimbleCrosslevel' = quote({
     customSpec <- configureMCMC(Rmodel)

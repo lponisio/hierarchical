@@ -12,7 +12,7 @@ load(file=file.path(save.dir, "orig.Rdata"))
 load(file=file.path(save.dir, "subsamp.Rdata"))
 
 ## cross level sampler
-load(file=file.path(save.dir, "crosslevel.Rdata"))
+## load(file=file.path(save.dir, "crosslevel.Rdata"))
 
 ## filter over latent states
 load(file=file.path(save.dir, "filter.Rdata"))
@@ -27,20 +27,20 @@ ss.ms.orig[[1]] <- rename_MCMC_comparison_method(c('nimble', 'jags'),
 
 
 ss.ms.crosslevel[[1]] <- rename_MCMC_comparison_method('nimbleCrosslevel',
-                                                       'Cross-level',
+                                                       'NIMBLE-cross-level',
                                                        comparison=ss.ms.crosslevel[[1]])
 
 ss.ms.subsamp[[1]] <- rename_MCMC_comparison_method('nimbleSubsamp',
-                                                    'Subsample latent',
+                                                    'NIMBLE-subsample',
                                                     comparison=ss.ms.subsamp[[1]])
 
 ss.ms.filter[[1]] <- rename_MCMC_comparison_method('nimble',
-                                                   'Filter',
+                                                   'NIMBLE-filter',
                                                    comparison=ss.ms.filter[[1]])
 
 ## compare mcmcs
 ss.ms.occ.all <- combine_MCMC_comparison_results(ss.ms.orig[[1]],
-                                                 ss.ms.crosslevel[[1]],
+                                                 ## ss.ms.crosslevel[[1]],
                                                  ss.ms.subsamp[[1]],
                                                  ss.ms.filter[[1]],
                                                  name = "ss.ms" )
@@ -59,13 +59,25 @@ checkChains(ss.ms.occ.all[[1]]$samples,
 ## custom figs
 ## ****************************************
 
-by.param <- apply(ss.ms.occ.all[[1]]$samples, c(1,2), effectiveSize)/
-    ss.ms.occ.all[[1]]$timing
-by.config <- ss.ms.occ.all[[1]]$efficiency
+by.param <- apply(ss.ms.occ.all$ss.ms$samples, c(1,2), effectiveSize)/
+    ss.ms.occ.all$ss.ms$timing
+by.config <- ss.ms.occ.all$ss.ms$efficiency
 
 
 source('../all/plotting.R')
 plotEffSize(by.config, by.param, f.path= file.path(save.dir,
                                                    "../figures/comparisons/%s%s.pdf"),
             "SingleSpp-MultiSea",
-            at=9, adj1=1, adj2=0.3, widths=c(4.5, 8.5))
+            at=50, adj1=1, adj2=0.3, widths=c(4.5, 8.5))
+
+
+
+(ss.ms.occ.all$ss.ms$efficiency$mean["JAGS-latent"] - ss.ms.occ.all$ss.ms$efficiency$mean["NIMBLE-latent"])/max(ss.ms.occ.all$ss.ms$efficiency$mean["JAGS-latent"])
+
+(ss.ms.occ.all$ss.ms$efficiency$mean["JAGS-latent"] - ss.ms.occ.all$ss.ms$efficiency$mean["NIMBLE-filter"])/max(ss.ms.occ.all$ss.ms$efficiency$mean["JAGS-latent"])
+
+(ss.ms.occ.all$ss.ms$efficiency$mean["JAGS-latent"] -
+ ss.ms.occ.all$ss.ms$efficiency$mean["NIMBLE-subsample"])/max(ss.ms.occ.all$ss.ms$efficiency$mean["JAGS-latent"])
+
+(ss.ms.occ.all$ss.ms$efficiency$mean["NIMBLE-subsample"] - ss.ms.occ.all$ss.ms$efficiency$mean["NIMBLE-latent"])/max(ss.ms.occ.all$ss.ms$efficiency$mean["NIMBLE-subsample"])
+
