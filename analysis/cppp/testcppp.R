@@ -1,7 +1,7 @@
 rm(list=ls())
 library(nimble)
 library(parallel)
-options(mc.cores=1)
+options(mc.cores=2)
 nthin <- 2
 
 pumpCode <- nimbleCode({

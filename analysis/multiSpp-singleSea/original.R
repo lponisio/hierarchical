@@ -9,8 +9,7 @@ model.input <- prepMutiSpData(survey.data,
                               species.groups,
                               habitat,
                               n.zeros,
-                              remove.zs=FALSE,
-                              vectorized=TRUE)
+                              remove.zs=FALSE)
 
 ## *********************************************************************
 ## multi-species site-occupancy models: original
@@ -85,12 +84,7 @@ ms.ss.occ <- nimbleCode({
         ## Create a loop to estimate the Z matrix (true occurrence for
         ## species i at point j).
         for (j in 1:num.points) {
-            ## Occurence model: u.cato and u.fcw are the occurrence
-            ## probabilities (on the logit scale) for species i at points in
-            ## the CATO and FCW study area, respectively, for average values
-            ## of UFC and BA. The coefficients for the four 'a' terms are
-            ## the linear and squared effects of understory foliage and tree
-            ## basal area on species i.
+
             logit(psi[j,i]) <- u.cato[i]*(1-habitat.ind[j]) +
                 u.fcw[i]*habitat.ind[j] +
                 a1[i]*ufc.linear[j] +
@@ -117,15 +111,7 @@ ms.ss.occ <- nimbleCode({
     }
 })
 
-       ## Detection model for the observed data X: v.cato and v.fcw
-                ## are the detection probabilities (on the logit scale) for
-                ## species i at points j during sampling periods k in the CATO
-                ## and FCW study area, respectively, for for linear and
-                ## squared terms of Julian dates.
 
-
-model.input$data[["onesRow"]] <- NULL
-model.input$constants[["max.num.reps"]] <- NULL
 
 input1 <- c(code=ms.ss.occ, model.input)
 
@@ -149,7 +135,7 @@ MCMCdefs.subsamp <- list('nimbleSubsamp' = quote({
     customSpec <- configureMCMC(Rmodel)
     customSpec$removeSamplers('Z')
     customSpec$addSampler('Z', type = 'sampler_latentSub',
-                          control = list(leaveOutProportion = 0.5,
+                          control = list(leaveOutProportion = 0.2,
                                          control = list()))
     customSpec
 }))

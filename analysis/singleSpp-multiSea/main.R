@@ -1,13 +1,10 @@
 rm(list=ls())
 setwd("~//Dropbox//nimble//occupancy//analysis//singleSpp-multiSea")
 
-## original model
+## vanilla nimble and jags, subsample latent states, cross level
+## sampler
 source('original.R')
 
-## custom samplers for zs and reflective sampler, or slice sampler
-source('opt2-3.R')
-
-## custom function for latent state,  block sampler of phi[i-1],
-## gamma[i-1]
-source('opt4-5.R')
+## custom function for latent state
+source('filtering.R')
 

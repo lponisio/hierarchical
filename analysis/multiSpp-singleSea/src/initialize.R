@@ -1,4 +1,4 @@
-## library(devtools)
+library(devtools)
 ## install_github("nimble-dev/nimble",
 ##                ref = "devel",
 ##                subdir = "packages/nimble")
@@ -21,7 +21,7 @@ survey.dates <- read.csv("data/survey_dates.csv")
 habitat <- read.csv("data/habitat.csv")
 
 ## mcmc settings
-scale <- 1e3
+scale <- 1e1
 burnin <- 1e2*scale
 niter <- (1e3)*scale
 

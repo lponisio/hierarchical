@@ -2,10 +2,9 @@ sampler_latentSub <- nimbleFunction(
   contains = sampler_BASE,
   setup = function(model, mvSaved, target, control) {
     leaveOutProportion <- control$leaveOutProportion
-    latentNodeLength <- length(model[[target]])
-
-    latentSamplerList <- nimbleFunctionList(sampler_BASE)
     allTargets <- model$expandNodeNames(target)
+    latentNodeLength <- length(allTargets)
+    latentSamplerList <- nimbleFunctionList(sampler_BASE)
     for(latentNode in 1:latentNodeLength){
       latentSamplerList[[latentNode]] <-
         sampler_binary(model,

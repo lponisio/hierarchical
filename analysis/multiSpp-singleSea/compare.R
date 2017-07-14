@@ -32,10 +32,10 @@ load(file=file.path(save.dir, "subsamp.Rdata"))
 
 
 
-## ms.ss.orig[[1]] <- rename_MCMC_comparison_method(c('nimble', 'jags'),
-##                                                  c('NIMBLE-latent',
-##                                                    'JAGS-latent'),
-##                                                  comparison=ms.ss.orig[[1]])
+ms.ss.orig[[1]] <- rename_MCMC_comparison_method(c('nimble', 'jags'),
+                                                 c('NIMBLE-latent',
+                                                   'JAGS-latent'),
+                                                 comparison=ms.ss.orig[[1]])
 
 ms.ss.filter[[1]] <- rename_MCMC_comparison_method(c('nimble'),
                                                  c('NIMBLE-filter'),
@@ -61,7 +61,7 @@ ms.ss.subsamp[[1]] <- rename_MCMC_comparison_method('nimbleSubsamp',
 ##                                                  comparison=ms.ss.opt4[[1]])
 
 ## compare mcmcs
-ms.ss.occ.all <- combine_MCMC_comparison_results(## ms.ss.orig[[1]],
+ms.ss.occ.all <- combine_MCMC_comparison_results(ms.ss.orig[[1]],
                                                  ms.ss.filter[[1]],
                                                  ms.ss.crosslevel[[1]],
                                                  ms.ss.subsamp[[1]],

@@ -79,7 +79,8 @@ sampler_crossLevelBinary <- nimbleFunction(
                                           stochOnly = TRUE,
                                           includeData = FALSE)
     lowCalcNodes <- model$getDependencies(lowNodes)
-    calcNodes    <- model$getDependencies(c(target, lowNodes))
+    targetCalcNodes    <- model$getDependencies(c(target))#, lowNodes))  This may be incorrect, let's try without lowNodes
+    targetCalcNodes <- targetCalcNodes[!(targetCalcNodes %in% lowNodes)]
     ## nested function and function list definitions
     mvInternal <- modelValues(model)
 
@@ -96,10 +97,10 @@ sampler_crossLevelBinary <- nimbleFunction(
                                                        lowNode, control = list())
     }
     my_setAndCalculateTop <- setAndCalculate(model, target)
-    my_decideAndJump <- decideAndJump(model, mvSaved, calcNodes)
+    my_decideAndJump <- decideAndJump(model, mvSaved, targetCalcNodes)
   },
   run = function() {
-    modelLP0 <- getLogProb(model, calcNodes) ##
+    modelLP0 <- getLogProb(model, targetCalcNodes) ##
     ## latent node probabilities 
     for(iSF in seq_along(lowSamplerFunctions)){
         modelLP0 <- modelLP0 +
@@ -116,7 +117,7 @@ sampler_crossLevelBinary <- nimbleFunction(
                            lowSamplerFunctions[[iSF]]$getCurrentLogProb()
     } ## calculate 4
     nimCopy(from = mvSaved, to = model, row = 1,
-            nodes = calcNodes, logProb = TRUE)
+            nodes = targetCalcNodes, logProb = TRUE)
     nimCopy(from = mvSaved, to = model, row = 1,
             nodes = lowNodes, logProb = TRUE)
 
