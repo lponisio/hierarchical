@@ -10,6 +10,10 @@ model.input <- prepMutiSpData(survey.data,
                               habitat,
                               n.zeros)
 
+load('~/Dropbox/nimble/saved/multiSpp-singleSea/saved/orig.Rdata')
+
+model.input$inits <- c(model.input$inits, ms.ss.orig[[1]]$summary["nimble", "mean",])
+
 ## *********************************************************************
 ## multi-species site-occupancy models: vectorized with custom
 ## function to remove zs
@@ -73,7 +77,6 @@ ms.ss.occ <- nimbleCode({
             a2[i]*ufc.quadratic[1:num.points] +
               a3[i]*ba.linear[1:num.points] +
                 a4[i]*ba.quadratic[1:num.points]
-    ## vectorized calculation
     mu.psi[1:num.points,i] <- psi[1:num.points, i]
 
     logit(p[1:num.points, 1:max.num.reps, i]) <-

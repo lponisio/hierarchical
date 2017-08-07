@@ -8,19 +8,23 @@ pdf.f <- function(f, file, ...) {
     f()
 }
 
-checkChains <- function(all.mods.samps, f.path, only.one="jags"){
+checkChains <- function(all.mods.samps, f.path,
+                        only.one="jags",
+                        params=NULL){
     ## function to plot values of parameters as a function of
     ## iterations. Input is a MCMCcompare object
     niter <- dim(all.mods.samps)[3]
-    params <- names(all.mods.samps[1,,1])
+    if(is.null(params)){
+        params <- names(all.mods.samps[1,,1])
+    }
     mods <- names(all.mods.samps[,1,1])
     if(is.null(mods)) mods <- only.one
 
     lapply(mods, function(z){
         f <- function(){
             layout(matrix(1:4, ncol=2))
-            apply(all.mods.samps[z,,], 1, function(x){
-                plot(x[seq(from=1, to=length(x), by=100)], type="l",
+            apply(all.mods.samps[z,params,], 1, function(x){
+                plot(x[seq(from=1, to=length(x), length.out=1000)], type="l",
                      xlab = 'iteration',
                      main= params[which(apply(all.mods.samps[z,,], 1,
                                               function(y)

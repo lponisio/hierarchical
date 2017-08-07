@@ -1,159 +1,261 @@
+## ************************************************************#
 rm(list=ls())#
-setwd('~/Dropbox/nimble/occupancy/analysis/multiSpp-singleSea')#
+setwd('~/Dropbox/collapse/analysis/occupancy')#
+source('src/misc.R')#
+library('abind')#
+library('nimble')#
+source('src/prep.R')#
+source('../../../nimble/occupancy/analysis/all/plotting.R')#
+w.rain <- TRUE#
 #
-source('src/initialize.R')
+## ************************************************************#
+## prep data#
+## ************************************************************#
+save.dir <- "../../saved"#
+#
+model.input <- prep(nzero=0,#
+                    threshold=3,#
+                    phen=TRUE,#
+                    save.dir=save.dir,#
+                    spec,#
+                    sr.sched,#
+                    all.traits,#
+                    trait.ev = "degree",#
+                    rain=rain,#
+                    HRarea=sum.dist.area,#
+                    natural=natural.land,#
+                    natural.decay="natural350",#
+                    w.rain=w.rain)
+## ************************************************************#
 rm(list=ls())#
+setwd('~/Dropbox/collapse/analysis/occupancy')#
+source('src/misc.R')#
+library('abind')#
+library('nimble')#
+source('src/prep.R')#
+source('../../../nimble/occupancy/analysis/all/plotting.R')#
+w.rain <- TRUE#
+#
+## ************************************************************#
+## prep data#
+## ************************************************************#
+save.dir <- "../../saved"#
+#
+model.input <- prep(nzero=0,#
+                    threshold=3,#
+                    phen=TRUE,#
+                    save.dir=save.dir,#
+                    spec,#
+                    sr.sched,#
+                    all.traits,#
+                    trait.ev = "degree",#
+                    rain=rain,#
+                    HRarea=sum.dist.area,#
+                    natural=natural.land,#
+                    natural.decay="natural350",#
+                    w.rain=w.rain)
+## ************************************************************#
+rm(list=ls())#
+setwd('~/Dropbox/collapse/analysis/occupancy')#
+source('src/misc.R')#
+library('abind')#
+library('nimble')#
+source('src/prep.R')#
+source('../../../nimble/occupancy/analysis/all/plotting.R')#
+w.rain <- TRUE#
+#
+## ************************************************************#
+## prep data#
+## ************************************************************#
+save.dir <- "../../saved"#
+#
+model.input <- prep(nzero=0,#
+                    threshold=3,#
+                    phen=TRUE,#
+                    save.dir=save.dir,#
+                    spec,#
+                    sr.sched,#
+                    all.traits,#
+                    trait.ev = "degree",#
+                    rain=rain,#
+                    HRarea=sum.dist.area,#
+                    natural=natural.land,#
+                    natural.decay="natural350",#
+                    w.rain=w.rain)
+## ************************************************************#
+rm(list=ls())#
+setwd('~/Dropbox/collapse/analysis/occupancy')#
+source('src/misc.R')#
+library('abind')#
+library('nimble')#
+source('src/prep.R')#
+source('../../../nimble/occupancy/analysis/all/plotting.R')#
+w.rain <- TRUE#
+#
+## ************************************************************#
+## prep data#
+## ************************************************************#
+save.dir <- "../../saved"#
+#
+model.input <- prep(nzero=0,#
+                    threshold=3,#
+                    phen=TRUE,#
+                    save.dir=save.dir,#
+                    spec,#
+                    sr.sched,#
+                    all.traits,#
+                    trait.ev = "degree",#
+                    rain=rain,#
+                    HRarea=sum.dist.area,#
+                    natural=natural.land,#
+                    natural.decay="natural350",#
+                    w.rain=w.rain)
+rm(list=ls())#
+library(nimble)#
+library(coda)#
+#
 setwd('~/Dropbox/nimble/occupancy/analysis/multiSpp-singleSea')#
+source('../all/plotting.R')#
+save.dir <-  "../../../saved/multiSpp-singleSea/saved"#
 #
-source('src/initialize.R')#
-## don't agument data#
-n.zeroes <- 0#
-model.input <- prepMutiSpData(survey.data,#
-                              survey.dates,#
-                              species.groups,#
-                              habitat,#
-                              n.zeros)#
+## original model jags and nimble#
+load(file=file.path(save.dir, "orig.Rdata"))#
 #
-## *********************************************************************#
-## multi-species site-occupancy models: vectorized with custom#
-## function to remove zs#
-## *********************************************************************#
-ms.ss.occ <- nimbleCode({#
-  ## Define prior distributions for community-level model parameters#
-  cato.occ.mean ~ dunif(0,1)#
-  mu.ucato <- log(cato.occ.mean) - log(1-cato.occ.mean)#
-  sigma.ucato ~ dunif(0, 100)#
-#
-  fcw.occ.mean ~ dunif(0,1)#
-  mu.ufcw <- log(fcw.occ.mean) - log(1-fcw.occ.mean)#
-  sigma.ufcw ~ dunif(0, 100)#
-#
-  cato.det.mean ~ dunif(0,1)#
-  mu.vcato <- log(cato.det.mean) - log(1-cato.det.mean)#
-  sigma.vcato ~ dunif(0, 100)#
-#
-  fcw.det.mean ~ dunif(0,1)#
-  mu.vfcw <- log(fcw.det.mean) - log(1-fcw.det.mean)#
-  sigma.vfcw ~ dunif(0, 100)#
-#
-  ## random effects#
-  mu.a1 ~ dnorm(0, 0.001)#
-  sigma.a1 ~ dunif(0, 100)#
-  mu.a2 ~ dnorm(0, 0.001)#
-  sigma.a2 ~ dunif(0, 100)#
-  mu.a3 ~ dnorm(0, 0.001)#
-  sigma.a3 ~ dunif(0, 100)#
-  mu.a4 ~ dnorm(0, 0.001)#
-  sigma.a4 ~ dunif(0, 100)#
-  mu.b1 ~ dnorm(0, 0.001)#
-  sigma.b1 ~ dunif(0, 100)#
-  mu.b2 ~ dnorm(0, 0.001)#
-  sigma.b2 ~ dunif(0, 100)#
-  for (i in 1:(num.species)) {#
-    ## Create priors for species i from the community level prior#
-    ## distributions#
-#
-    u.cato[i] ~ dnorm(mu.ucato, sd=sigma.ucato)#
-    u.fcw[i] ~ dnorm(mu.ufcw, sd=sigma.ufcw)#
-    a1[i] ~ dnorm(mu.a1, sd=sigma.a1)#
-    a2[i] ~ dnorm(mu.a2, sd=sigma.a2)#
-    a3[i] ~ dnorm(mu.a3, sd=sigma.a3)#
-    a4[i] ~ dnorm(mu.a4, sd=sigma.a4)#
-#
-    v.cato[i] ~ dnorm(mu.vcato, sd=sigma.vcato)#
-    v.fcw[i] ~ dnorm(mu.vfcw, sd=sigma.vfcw)#
-    b1[i] ~ dnorm(mu.b1, sd=sigma.b1)#
-    b2[i] ~ dnorm(mu.b2, sd=sigma.b2)#
-#
-    ## vectorize the calculation of psi.#
-    logit(psi[1:num.points,i]) <-#
-      u.cato[i]*(1-habitat.ind[1:num.points]) +#
-        u.fcw[i]*habitat.ind[1:num.points] +#
-          a1[i]*ufc.linear[1:num.points] +#
-            a2[i]*ufc.quadratic[1:num.points] +#
-              a3[i]*ba.linear[1:num.points] +#
-                a4[i]*ba.quadratic[1:num.points]#
-    ## vectorized calculation#
-    mu.psi[1:num.points,i] <- psi[1:num.points, i]#
-#
-    logit(p[1:num.points, 1:max.num.reps, i]) <-#
-      (v.cato[i]*(1-habitat.ind[1:num.points]) +#
-       v.fcw[i]*habitat.ind[1:num.points]) %*%#
-         asRow(onesRow[1, 1:max.num.reps])+#
-           b1[i]*date.linear[1:num.points,1:max.num.reps] +#
-             b2[i]*date.quadratic[1:num.points,1:max.num.reps]#
-#
-    ## user defined distribution to combine the bernoulli occupancy#
-    ## and detection events.  We can also make this is a single#
-    ## compuation for the entire matrix of locations-x-visits, for#
-    ## each species (i)#
-#
-    X[1:num.points, 1:max.num.reps, i] ~ dBernDetectionMatrix(#
-      occProb = mu.psi[1:num.points,i],#
-      detectionProb = p[1:num.points, 1:max.num.reps,i],#
-      numReps = num.reps[1:num.points])#
-  }#
-})#
-#
-input1 <- c(code=ms.ss.occ, model.input)
+## vectorized, likelihood for latent state, derived quantity#
+## calculation#
 load(file=file.path(save.dir, "filter.Rdata"))#
 #
-occ.R.model <- nimbleModel(code=ms.ss.occ,#
-                           constants=input1$constants,#
-                           data=input1$data,#
-                           inits=input1$inits,#
-                           check=FALSE)#
+## cross level sampler#
+load(file=file.path(save.dir, "crosslevel.Rdata"))#
 #
-occ.mcmc <- buildMCMC(occ.R.model)#
-occ.C.model <- compileNimble(occ.R.model)#
-occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model)#
+## subsampling#
+load(file=file.path(save.dir, "subsamp.Rdata"))#
+ms.ss.orig[[1]] <- rename_MCMC_comparison_method(c('nimble', 'jags'),#
+                                                 c('NIMBLE-latent',#
+                                                   'JAGS-latent'),#
+                                                 comparison=ms.ss.orig[[1]])#
 #
-output <- as.matrix(t(ms.ss.filter$model1$samples[1,,]))#
+ms.ss.filter[[1]] <- rename_MCMC_comparison_method(c('nimble'),#
+                                                 c('NIMBLE-filter'),#
+                                                 comparison=ms.ss.filter[[1]])#
 #
-mcmcGenFunc <- function(model){#
-  mcmc.spec <- configureMCMC(model,#
-                             print=FALSE,#
-                             monitors = input1$monitors,#
-                             thin=1)#
-  mcmc <- buildMCMC(mcmc.spec)#
-}#
+ms.ss.crosslevel[[1]] <- rename_MCMC_comparison_method('nimbleCrosslevel',#
+                                                       'NIMBLE-cross-level',#
+                                                       comparison=ms.ss.crosslevel[[1]])#
 #
-source('../cppp/src/calcCPPP.R', chdir = TRUE)#
+ms.ss.subsamp[[1]] <- rename_MCMC_comparison_method('nimbleSubsamp',#
+                                                    'NIMBLE-subsample',#
+                                                    comparison=ms.ss.subsamp[[1]])#
 #
-CPPPoutput <- generateCPPP(occ.R.model,#
-                       origMCMCOutput=output,#
-                       mcmcCreator = mcmcGenFunc,#
-                       dataNames = 'X',#
-                       cpppMCMCIter = 10^4,#
-                       nPPPCalcIters = 100,#
-                       nSimPPPVals =100,#
-                       burnInProp = 0.1,#
-                       thin=1,#
-                       nBootstrapSDReps=100,#
-                       nCores = 2,#
-                       discFuncGenerator=likeDiscFuncGenerator)
-occ.R.model <- nimbleModel(code=ms.ss.occ,#
-                           constants=input1$constants,#
-                           data=input1$data,#
-                           inits=input1$inits,#
-                           check=FALSE)
-occ.mcmc <- buildMCMC(occ.R.model)#
-occ.C.model <- compileNimble(occ.R.model)#
-occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model)
-## This registers the user-provided distribution for use in a model#
-registerDistributions(list(dBernDetectionMatrix = list(#
-                             BUGSdist = "dBernDetectionMatrix(occProb, detectionProb, numReps)",#
-                             Rdist = "dBernDetectionMatrix(occProb, detectionProb, numReps)",#
-                             types = c('value = double(2)',#
-                               'occProb = double(1)',#
-                               'detectionProb = double(2)',#
-                               'numReps = double(1)'))#
-                           ))
-occ.R.model <- nimbleModel(code=ms.ss.occ,#
-                           constants=input1$constants,#
-                           data=input1$data,#
-                           inits=input1$inits,#
-                           check=FALSE)
-install("nimble")
-install("nimble")
-install.packages("nimble")
+## compare mcmcs#
+ms.ss.occ.all <- combine_MCMC_comparison_results(ms.ss.orig[[1]],#
+                                                 ms.ss.filter[[1]],#
+                                                 ms.ss.crosslevel[[1]],#
+                                                 ms.ss.subsamp[[1]],#
+                                                 name = "ms.ss")#
+#
+make_MCMC_comparison_pages(ms.ss.occ.all,#
+                           dir=file.path(save.dir, "../figures/comparisons"))#
+## look at samples#
+#
+checkChains(ms.ss.occ.all$ms.ss$samples,#
+            f.path = file.path(save.dir,#
+            "../figures/chains/%s.pdf")#
+)#
+## ****************************************#
+## custom figs#
+## ****************************************#
+#
+by.param <- apply(ms.ss.occ.all$ms.ss$samples, c(1,2), effectiveSize)/#
+  ms.ss.occ.all$ms.ss$timing#
+by.config <- ms.ss.occ.all$ms.ss$efficiency#
+#
+source('../all/plotting.R')#
+plotEffSize(by.config, by.param, f.path= file.path(save.dir,#
+              "../figures/comparisons/%s%s.pdf"), "MultiSpp-SingleSea",#
+            at=0.4, adj1=0.03, adj2=0.1)#
+#
+(ms.ss.occ.all$ms.ss$efficiency$mean["NIMBLE-latent"] -#
+ ms.ss.occ.all$ms.ss$efficiency$mean["JAGS-latent"])/max(ms.ss.occ.all$ms.ss$efficiency$mean["NIMBLE-latent"])#
+#
+(ms.ss.occ.all$ms.ss$efficiency$mean["NIMBLE-filter"] -#
+ ms.ss.occ.all$ms.ss$efficiency$mean["JAGS-latent"])/max(ms.ss.occ.all$ms.ss$efficiency$mean["NIMBLE-filter"])
+21600/760
+6528/17
+9*60
+12*0/02
+12*0.02
+12*4
+12*4*0.02
+rm(list=ls())#
+library(nimble)#
+library(coda)#
+#
+setwd('~/Dropbox/nimble/occupancy/analysis/multiSpp-singleSea')#
+source('../all/plotting.R')#
+save.dir <-  "../../../saved/multiSpp-singleSea/saved"#
+#
+## original model jags and nimble#
+load(file=file.path(save.dir, "orig.Rdata"))#
+#
+## vectorized, likelihood for latent state, derived quantity#
+## calculation#
+load(file=file.path(save.dir, "filter.Rdata"))#
+#
+## cross level sampler#
+load(file=file.path(save.dir, "crosslevel.Rdata"))#
+#
+## subsampling#
+load(file=file.path(save.dir, "subsamp.Rdata"))#
+ms.ss.orig[[1]] <- rename_MCMC_comparison_method(c('nimble', 'jags'),#
+                                                 c('NIMBLE-latent',#
+                                                   'JAGS-latent'),#
+                                                 comparison=ms.ss.orig[[1]])#
+#
+ms.ss.filter[[1]] <- rename_MCMC_comparison_method(c('nimble'),#
+                                                 c('NIMBLE-filter'),#
+                                                 comparison=ms.ss.filter[[1]])#
+#
+ms.ss.crosslevel[[1]] <- rename_MCMC_comparison_method('nimbleCrosslevel',#
+                                                       'NIMBLE-cross-level',#
+                                                       comparison=ms.ss.crosslevel[[1]])#
+#
+ms.ss.subsamp[[1]] <- rename_MCMC_comparison_method('nimbleSubsamp',#
+                                                    'NIMBLE-subsample',#
+                                                    comparison=ms.ss.subsamp[[1]])#
+#
+## compare mcmcs#
+ms.ss.occ.all <- combine_MCMC_comparison_results(ms.ss.orig[[1]],#
+                                                 ms.ss.filter[[1]],#
+                                                 ms.ss.crosslevel[[1]],#
+                                                 ms.ss.subsamp[[1]],#
+                                                 name = "ms.ss")#
+#
+make_MCMC_comparison_pages(ms.ss.occ.all,#
+                           dir=file.path(save.dir, "../figures/comparisons"))#
+## look at samples#
+#
+checkChains(ms.ss.occ.all$ms.ss$samples,#
+            f.path = file.path(save.dir,#
+            "../figures/chains/%s.pdf")#
+)#
+## ****************************************#
+## custom figs#
+## ****************************************#
+#
+by.param <- apply(ms.ss.occ.all$ms.ss$samples, c(1,2), effectiveSize)/#
+  ms.ss.occ.all$ms.ss$timing#
+by.config <- ms.ss.occ.all$ms.ss$efficiency#
+#
+source('../all/plotting.R')#
+plotEffSize(by.config, by.param, f.path= file.path(save.dir,#
+              "../figures/comparisons/%s%s.pdf"), "MultiSpp-SingleSea",#
+            at=0.4, adj1=0.03, adj2=0.1)#
+#
+(ms.ss.occ.all$ms.ss$efficiency$mean["NIMBLE-latent"] -#
+ ms.ss.occ.all$ms.ss$efficiency$mean["JAGS-latent"])/max(ms.ss.occ.all$ms.ss$efficiency$mean["NIMBLE-latent"])#
+#
+(ms.ss.occ.all$ms.ss$efficiency$mean["NIMBLE-filter"] -#
+ ms.ss.occ.all$ms.ss$efficiency$mean["JAGS-latent"])/max(ms.ss.occ.all$ms.ss$efficiency$mean["NIMBLE-filter"])
+130*2
+55+65+10
