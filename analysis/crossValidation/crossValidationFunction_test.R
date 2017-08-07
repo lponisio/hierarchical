@@ -1,7 +1,7 @@
 rm(list=ls())
 library(nimble)
 library(parallel)
-setwd('~/Dropbox/nimble/occupancy/analysis/crossValidation')
+setwd('occupancy/analysis/crossValidation')
 source('crossValidationFunction.R')
 
 dyesCode <- nimbleCode({

@@ -13,7 +13,9 @@ source("../all/samplers/leaveOutSampler.R")
 source("src/reformatData.R")
 source("src/multispeciesOcc.R")
 
-save.dir <-  "../../../saved/multiSpp-singleSea/saved"
+dir.create(file.path("../../../occupancy_saved/saved/multiSpp-singleSea/saved"),
+           showWarnings = TRUE)
+save.dir <-  "../../../occupancy_saved/saved/multiSpp-singleSea/saved"
 
 survey.data <- read.csv("data/occupancy_data.csv")
 species.groups <- read.csv("data/species_groups.csv")

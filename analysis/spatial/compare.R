@@ -1,8 +1,9 @@
 rm(list=ls())
 library(nimble)
-setwd("~/Dropbox/nimble/occupancy/analysis/spatial")
+setwd("occupancy/analysis/spatial")
 source('../all/plotting.R')
-save.dir <-  "../../../saved/spatial/saved"
+source('src/initialize.R')
+
 
 ## original model jags and nimble
 load(file=file.path(save.dir, "orig.Rdata"))

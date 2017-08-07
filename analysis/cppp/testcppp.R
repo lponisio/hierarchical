@@ -47,7 +47,7 @@ D.mcmc$run(10000)
 output <- as.matrix(D.mcmc$mvSamples)
 message('NIMBLE model compiled')
 
-source('~/Dropbox/nimble/occupancy/analysis/cppp/src/calcCPPP.R')
+source('occupancy/analysis/cppp/src/calcCPPP.R')
 set.seed(4)
 
 pumpDiscMeasure <- nimbleFunction(

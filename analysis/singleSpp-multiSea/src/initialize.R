@@ -12,7 +12,9 @@ source("../all/samplers/sampler_crossLevel_new.R")
 source("../all/samplers/leaveOutSampler.R")
 source("../all/runNimble.R")
 
-save.dir <- "../../../saved/singleSpp-multiSea/saved"
+dir.create(file.path("../../../occupancy_saved/saved/singleSpp-multiSea/saved"),
+           showWarnings = FALSE)
+save.dir <-  "../../../occupancy_saved/saved/singleSpp-multiSea/saved"
 
 ## MCMC settings
 scale <- 1e1

@@ -1,5 +1,5 @@
 rm(list=ls())
-setwd("~/Dropbox/nimble/occupancy/analysis/spatial")
+setwd("occupancy/analysis/spatial")
 source('src/initialize.R')
 library('rjags')
 load.module("msm")
@@ -55,7 +55,8 @@ sp.mod <- nimbleCode({
 
     ## mexp is jags's version fo matrix exponentiation, very sensitive
     prep.cov[1:nsite, 1:nsite] <- 1/(exp(delta)*mexp(D[1:nsite, 1:nsite]))
-    D.cov[1:nsite, 1:nsite] <- (0.95*prep.cov[1:nsite, 1:nsite] + 0.05*DI[1:nsite, 1:nsite])
+    D.cov[1:nsite, 1:nsite] <- (0.95*prep.cov[1:nsite, 1:nsite] +
+                                0.05*DI[1:nsite, 1:nsite])
 
     D.tau[1:nsite, 1:nsite] <- (1/(sigma))*inverse(D.cov[1:nsite, 1:nsite])
 })

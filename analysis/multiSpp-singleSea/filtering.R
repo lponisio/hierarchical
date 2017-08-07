@@ -1,5 +1,5 @@
 rm(list=ls())
-setwd('~/Dropbox/nimble/occupancy/analysis/multiSpp-singleSea')
+setwd('occupancy/analysis/multiSpp-singleSea')
 
 source('src/initialize.R')
 ## don't agument data
@@ -10,9 +10,11 @@ model.input <- prepMutiSpData(survey.data,
                               habitat,
                               n.zeros)
 
-load('~/Dropbox/nimble/saved/multiSpp-singleSea/saved/orig.Rdata')
+load(file=file.path(save.dir, "orig.Rdata"))
 
-model.input$inits <- c(model.input$inits, ms.ss.orig[[1]]$summary["nimble", "mean",])
+model.input$inits <- c(model.input$inits,
+                       ms.ss.orig[[1]]$summary["nimble",
+                                               "mean",])
 
 ## *********************************************************************
 ## multi-species site-occupancy models: vectorized with custom

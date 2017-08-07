@@ -1,5 +1,5 @@
 rm(list=ls())
-setwd("~//Dropbox//nimble//occupancy//analysis//singleSpp-multiSea")
+setwd("occupancy/analysis/singleSpp-multiSea")
 
 ## vanilla nimble and jags, subsample latent states, cross level
 ## sampler

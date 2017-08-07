@@ -1,5 +1,5 @@
 rm(list=ls())
-setwd("~/Dropbox/nimble/occupancy/analysis/spatial")
+setwd("occupancy/analysis/spatial")
 source('src/initialize.R')
 source('src/afESS2.R')
 

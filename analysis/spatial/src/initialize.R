@@ -11,7 +11,10 @@ source("../all/plotting.R")
 source("../all/runNimble.R")
 source("src/dataGen.R")
 
-save.dir <-  "../../../saved/spatial/saved"
+dir.create(file.path("../../../occupancy_saved/saved/spatial/saved"),
+           showWarnings = FALSE)
+save.dir <-  "../../../occupancy_saved/saved/spatial/saved"
+
 
 ## MCMC settings
 scale <- 1e2

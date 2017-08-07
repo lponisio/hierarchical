@@ -3,7 +3,7 @@ library(nimble)
 library(parallel)
 options(mc.cores=2)
 nthin <- 2
-source('~/Dropbox/occupancy-nimble/cppp/src/calcCPPP.R')
+source('occupancy/cppp/src/calcCPPP.R')
 
 
 pumpCode <- nimbleCode({
@@ -33,7 +33,7 @@ R.model <- nimbleModel(code=pumpCode,
                        check=FALSE)
 message('R model created')
 
-pumpCPPPF <- nimGenerateCPPP(R.model, 'x', c('alpha','beta'), 10, 10, 2) 
+pumpCPPPF <- nimGenerateCPPP(R.model, 'x', c('alpha','beta'), 10, 10, 2)
 message('CPPP function built')
 
 compileNimble(R.model)
