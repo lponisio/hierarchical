@@ -14,7 +14,7 @@ source("src/reformatData.R")
 source("src/multispeciesOcc.R")
 
 dir.create(file.path("../../../occupancy_saved/saved/multiSpp-singleSea/saved"),
-           showWarnings = TRUE)
+           showWarnings = FALSE)
 save.dir <-  "../../../occupancy_saved/saved/multiSpp-singleSea/saved"
 
 survey.data <- read.csv("data/occupancy_data.csv")

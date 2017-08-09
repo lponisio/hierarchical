@@ -1,4 +1,5 @@
 rm(list=ls())
+setwd('~/Dropbox')
 setwd('occupancy/analysis/multiSpp-singleSea')
 
 source('src/initialize.R')
@@ -11,9 +12,9 @@ model.input <- prepMutiSpData(survey.data,
                               n.zeros,
                               remove.zs=FALSE)
 
-load(file=file.path(save.dir, "orig.Rdata"))
+load(file=file.path(save.dir, "filter.Rdata"))
 model.input$inits <- c(model.input$inits,
-                       ms.ss.orig[[1]]$summary["nimble",
+                       ms.ss.filter[[1]]$summary["nimble",
                                                "mean",])
 
 ## *********************************************************************
@@ -181,5 +182,28 @@ ms.ss.crosslevel <- compareMCMCs(input1,
 save(ms.ss.crosslevel, file=file.path(save.dir, 'crosslevel.Rdata'))
 
 
+## *********************************************************************
+## bimodal posterior?
+## *********************************************************************
+
+ms.ss.model <- nimbleModel(code=ms.ss.occ,
+                           constants=model.input$constants,
+                           data=model.input$data,
+                           inits=model.input$inits,
+                           check=FALSE)
+
+## configure and build mcmc
+mcmc.spec <- configureMCMC(ms.ss.model,
+                           print=FALSE,
+                           monitors = model.input$monitors,
+                           thin=thin)
+mcmc <- buildMCMC(mcmc.spec)
+
+## compile model in C++
+C.model <- compileNimble(R.model)
+C.mcmc <- compileNimble(mcmc, project = R.model)
+
+## run model
+C.mcmc$run(niter)
 
 
