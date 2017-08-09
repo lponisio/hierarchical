@@ -10,6 +10,7 @@ model.input <- prepMutiSpData(survey.data,
                               species.groups,
                               habitat,
                               n.zeros,
+                              monitors,
                               remove.zs=FALSE)
 
 load(file=file.path(save.dir, "filter.Rdata"))
@@ -118,7 +119,7 @@ input1 <- c(code=ms.ss.occ, model.input)
 ## *********************************************************************
 ## original model with nimble
 
-ms.ss.orig <- compareMCMCs(input1,
+ms.ss.orig <- compareMCMCs_withMonitors(input1,
                            MCMCs=c('jags', 'nimble'),
                            niter=niter,
                            burnin = burnin,
@@ -140,11 +141,12 @@ MCMCdefs.subsamp <- list('nimbleSubsamp' = quote({
     customSpec
 }))
 
-ms.ss.subsamp <- compareMCMCs(input1,
+ms.ss.subsamp <- compareMCMCs_withMonitors(input1,
                               MCMCs=c('nimbleSubsamp'),
                               MCMCdefs = MCMCdefs.subsamp,
                               niter= niter,
                               burnin = burnin,
+                              monitors=model.input$monitors,
                               summary=FALSE,
                               check=FALSE)
 
@@ -171,11 +173,12 @@ MCMCdefs.crosslevel <- list('nimbleCrosslevel' = quote({
     customSpec
 }))
 
-ms.ss.crosslevel <- compareMCMCs(input1,
+ms.ss.crosslevel <- compareMCMCs_withMonitors(input1,
                                  MCMCs=c('nimbleCrosslevel'),
                                  MCMCdefs = MCMCdefs.crosslevel,
                                  niter= niter,
                                  burnin = burnin,
+                                 monitors=model.input$monitors,
                                  summary=FALSE,
                                  check=FALSE)
 
@@ -185,7 +188,10 @@ save(ms.ss.crosslevel, file=file.path(save.dir, 'crosslevel.Rdata'))
 ## *********************************************************************
 ## bimodal posterior?
 ## *********************************************************************
-
+load(file=file.path(save.dir, "filter.Rdata"))
+model.input$inits <- c(model.input$inits,
+                       ms.ss.filter[[1]]$summary["nimble",
+                                               "mean",])
 ms.ss.model <- nimbleModel(code=ms.ss.occ,
                            constants=model.input$constants,
                            data=model.input$data,
@@ -195,15 +201,23 @@ ms.ss.model <- nimbleModel(code=ms.ss.occ,
 ## configure and build mcmc
 mcmc.spec <- configureMCMC(ms.ss.model,
                            print=FALSE,
-                           monitors = model.input$monitors,
-                           thin=thin)
+                           monitors = model.input$monitors)
+top.level <- c("sigma.ucato", "sigma.ufcw",  "sigma.a1", "sigma.a2",
+               "sigma.a3", "sigma.a4", "sigma.vcato", "sigma.vfcw",
+               "sigma.b1", "sigma.b2, mu.ucato", "mu.ufcw",
+               "mu.a1", "mu.a2",    "mu.a3", "mu.a4",
+               "mu.vcato", "mu.vfcw",  "mu.b1", "mu.b2")
+
+mcmc.spec$removeSamplers(top.level)
 mcmc <- buildMCMC(mcmc.spec)
 
 ## compile model in C++
-C.model <- compileNimble(R.model)
-C.mcmc <- compileNimble(mcmc, project = R.model)
+C.model <- compileNimble(ms.ss.model)
+C.mcmc <- compileNimble(mcmc, project = ms.ss.model)
 
 ## run model
 C.mcmc$run(niter)
-
+mcmc.spec$addSamplers(top.level)
+mcmc <- buildMCMC(mcmc.spec)
+C.mcmc <- compileNimble(mcmc, project = ms.ss.model)
 

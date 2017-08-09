@@ -1,4 +1,5 @@
 rm(list=ls())
+setwd('~/Dropbox')
 setwd('occupancy/analysis/multiSpp-singleSea')
 
 source('src/initialize.R')
@@ -8,7 +9,8 @@ model.input <- prepMutiSpData(survey.data,
                               survey.dates,
                               species.groups,
                               habitat,
-                              n.zeros)
+                              n.zeros,
+                              monitors)
 
 load(file=file.path(save.dir, "orig.Rdata"))
 
@@ -20,7 +22,6 @@ model.input$inits <- c(model.input$inits,
 ## multi-species site-occupancy models: vectorized with custom
 ## function to remove zs
 ## *********************************************************************
-
 
 ms.ss.occ <- nimbleCode({
   ## Define prior distributions for community-level model parameters
@@ -107,12 +108,13 @@ input1 <- c(code=ms.ss.occ, model.input)
 ## vanilla NIMBLE
 ## *********************************************************************
 
-ms.ss.filter <- compareMCMCs(input1,
+ms.ss.filter <- compareMCMCs_withMonitors(input1,
                            MCMCs=c('nimble'),
                            niter=niter,
                            burnin = burnin,
                            summary=FALSE,
-                           check=FALSE)
+                           check=FALSE,
+                           monitors=model.input$monitors)
 
 save(ms.ss.filter, file=file.path(save.dir, "filter.Rdata"))
 
