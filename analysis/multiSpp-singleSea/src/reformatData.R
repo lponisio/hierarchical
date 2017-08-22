@@ -164,6 +164,7 @@ prepMutiSpData <- function(survey.data,
     ## zs with 1s as 1s and 0s as NAs
     zs <- apply(data$X, c(1, 3), max, rm.na=TRUE)
     zs[zs == 0] <- NA
+    zs[!is.finite(zs)] <- NA
 
     model.data <- list(Z = zs,
                        X = data$X.aug,
@@ -182,26 +183,28 @@ prepMutiSpData <- function(survey.data,
     ## initial values
     omega.draw <- runif(1, num.species/(num.species + n.zeroes), 1)
 
-    ## inital conditions with 1s as NAs and NAs as 1s
+    ## inital conditions. 1 should be 1, NA should be a 0 or 1
     zinits <- zs
     zinits[zinits == 1] <- 2
-    zinits[is.na(zinits)] <- 1
+    ## zinits[is.na(zinits)] <- 1
+    zinits[is.na(zinits)] <- sample(0:1, sum(is.na(zinits)),
+                                    replace=TRUE)
     zinits[zinits == 2] <- NA
 
     inits <-list(Z=zinits,
                  omega = omega.draw,
                  w = c(rep(1, num.species),
-                       rbinom(n.zeroes, size = 1, prob = omega.draw)))
-                 ## u.cato = rnorm(num.species + n.zeroes),
-                 ## v.cato = rnorm(num.species + n.zeroes),
-                 ## u.fcw = rnorm(num.species + n.zeroes) ,
-                 ## v.fcw = rnorm(num.species + n.zeroes),
-                 ## a1 = rnorm(num.species + n.zeroes),
-                 ## a2 = rnorm(num.species + n.zeroes),
-                 ## a3 = rnorm(num.species + n.zeroes),
-                 ## a4 = rnorm(num.species + n.zeroes),
-                 ## b1 = rnorm(num.species + n.zeroes),
-                 ## b2 = rnorm(num.species + n.zeroes))
+                       rbinom(n.zeroes, size = 1, prob = omega.draw)),
+                 u.cato = rnorm(num.species + n.zeroes),
+                 v.cato = rnorm(num.species + n.zeroes),
+                 u.fcw = rnorm(num.species + n.zeroes) ,
+                 v.fcw = rnorm(num.species + n.zeroes),
+                 a1 = rnorm(num.species + n.zeroes),
+                 a2 = rnorm(num.species + n.zeroes),
+                 a3 = rnorm(num.species + n.zeroes),
+                 a4 = rnorm(num.species + n.zeroes),
+                 b1 = rnorm(num.species + n.zeroes),
+                 b2 = rnorm(num.species + n.zeroes))
 
     ## constants
     constants <- list(num.species = num.species,

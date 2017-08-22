@@ -16,7 +16,8 @@ model.input <- prepMutiSpData(survey.data,
 load(file=file.path(save.dir, "filter.Rdata"))
 model.input$inits <- c(model.input$inits,
                        ms.ss.filter[[1]]$summary["nimble",
-                                               "mean",])
+                                                 "median",])
+rm(ms.ss.filter)
 
 ## *********************************************************************
 ## multi-species site-occupancy models: original
@@ -28,45 +29,35 @@ ms.ss.occ <- nimbleCode({
     mu.ucato <- log(cato.occ.mean) - log(1-cato.occ.mean)
     sigma.ucato ~ dunif(0, 100)
     tau.ucato <-  1/(sigma.ucato*sigma.ucato)
-
     fcw.occ.mean ~ dunif(0,1)
     mu.ufcw <- log(fcw.occ.mean) - log(1-fcw.occ.mean)
     sigma.ufcw ~ dunif(0, 100)
     tau.ufcw <-  1/(sigma.ufcw*sigma.ufcw)
-
     cato.det.mean ~ dunif(0,1)
     mu.vcato <- log(cato.det.mean) - log(1-cato.det.mean)
-
     fcw.det.mean ~ dunif(0,1)
     mu.vfcw <- log(fcw.det.mean) - log(1-fcw.det.mean)
 
     ## random effects
-
     mu.a1 ~ dnorm(0, 0.001)
     sigma.a1 ~ dunif(0, 100)
     tau.a1 <-  1/(sigma.a1*sigma.a1)
-
     mu.a2 ~ dnorm(0, 0.001)
     sigma.a2 ~ dunif(0, 100)
     tau.a2 <-  1/(sigma.a2*sigma.a2)
-
     mu.a3 ~ dnorm(0, 0.001)
     sigma.a3 ~ dunif(0, 100)
     tau.a3 <-  1/(sigma.a3*sigma.a3)
-
     mu.a4 ~ dnorm(0, 0.001)
     sigma.a4 ~ dunif(0, 100)
     tau.a4 <-  1/(sigma.a4*sigma.a4)
-
     sigma.vcato ~ dunif(0, 100)
     sigma.vfcw ~ dunif(0, 100)
     tau.vcato <-  1/(sigma.vcato*sigma.vcato)
     tau.vfcw <-  1/(sigma.vfcw*sigma.vfcw)
-
     mu.b1 ~ dnorm(0, 0.001)
     sigma.b1 ~ dunif(0, 100)
     tau.b1 <-  1/(sigma.b1*sigma.b1)
-
     mu.b2 ~ dnorm(0, 0.001)
     sigma.b2 ~ dunif(0, 100)
     tau.b2 <-  1/(sigma.b2*sigma.b2)
@@ -74,7 +65,6 @@ ms.ss.occ <- nimbleCode({
     for (i in 1:(num.species)) {
         ## Create priors for species i from the community level prior
         ## distributions
-
         u.cato[i] ~ dnorm(mu.ucato, tau.ucato)
         u.fcw[i] ~ dnorm(mu.ufcw, tau.ufcw)
         a1[i] ~ dnorm(mu.a1, tau.a1)
@@ -85,7 +75,6 @@ ms.ss.occ <- nimbleCode({
         v.fcw[i] ~ dnorm(mu.vfcw, tau.vfcw)
         b1[i] ~ dnorm(mu.b1, tau.b1)
         b2[i] ~ dnorm(mu.b2, tau.b2)
-
         ## Create a loop to estimate the Z matrix (true occurrence for
         ## species i at point j).
         for (j in 1:num.points) {
@@ -97,7 +86,6 @@ ms.ss.occ <- nimbleCode({
                 a4[i]*ba.quadratic[j]
             mu.psi[j,i] <- psi[j,i]
             Z[j,i] ~ dbern(mu.psi[j,i])
-
             ## Create a loop to estimate detection for species i at point k
             ## during sampling period k.
             for (k in 1:num.reps[j]) {
@@ -120,11 +108,12 @@ input1 <- c(code=ms.ss.occ, model.input)
 ## original model with nimble
 
 ms.ss.orig <- compareMCMCs_withMonitors(input1,
-                           MCMCs=c('jags', 'nimble'),
+                           MCMCs=c('nimble'),
                            niter=niter,
                            burnin = burnin,
                            summary=FALSE,
-                           check=FALSE)
+                           check=FALSE,
+                           monitors=model.input$monitors)
 
 save(ms.ss.orig, file=file.path(save.dir, "orig.Rdata"))
 
@@ -188,36 +177,63 @@ save(ms.ss.crosslevel, file=file.path(save.dir, 'crosslevel.Rdata'))
 ## *********************************************************************
 ## bimodal posterior?
 ## *********************************************************************
-load(file=file.path(save.dir, "filter.Rdata"))
-model.input$inits <- c(model.input$inits,
-                       ms.ss.filter[[1]]$summary["nimble",
-                                               "mean",])
+
+## compile all together?
 ms.ss.model <- nimbleModel(code=ms.ss.occ,
                            constants=model.input$constants,
                            data=model.input$data,
                            inits=model.input$inits,
-                           check=FALSE)
+                           check=FALSE,
+                           calculate=FALSE)
 
-## configure and build mcmc
 mcmc.spec <- configureMCMC(ms.ss.model,
                            print=FALSE,
                            monitors = model.input$monitors)
-top.level <- c("sigma.ucato", "sigma.ufcw",  "sigma.a1", "sigma.a2",
-               "sigma.a3", "sigma.a4", "sigma.vcato", "sigma.vfcw",
-               "sigma.b1", "sigma.b2, mu.ucato", "mu.ufcw",
-               "mu.a1", "mu.a2",    "mu.a3", "mu.a4",
-               "mu.vcato", "mu.vfcw",  "mu.b1", "mu.b2")
 
-mcmc.spec$removeSamplers(top.level)
-mcmc <- buildMCMC(mcmc.spec)
+## remove all samplers for non latent nodes
+top.level <- ms.ss.model$getNodeNames(topOnly = TRUE)
+mid.level <- c("a1", "a2", "a3", "a4", "b1", "b2")
+non.latent <- c(top.level, mid.level)
 
-## compile model in C++
-C.model <- compileNimble(ms.ss.model)
-C.mcmc <- compileNimble(mcmc, project = ms.ss.model)
+mcmc.spec$removeSamplers(non.latent)
+mcmc_no_top <- buildMCMC(mcmc.spec)
 
-## run model
-C.mcmc$run(niter)
-mcmc.spec$addSamplers(top.level)
-mcmc <- buildMCMC(mcmc.spec)
-C.mcmc <- compileNimble(mcmc, project = ms.ss.model)
+## default settings with samplers on all nodes
+mcmc.spec.default <- configureMCMC(ms.ss.model,
+                           print=FALSE,
+                           monitors = model.input$monitors)
+mcmc <- buildMCMC(mcmc.spec.default)
 
+
+## compile it all together
+C.mcmc <- compileNimble(mcmc, mcmc_no_top,  ms.ss.model)
+
+## for(node in non.latent) {
+##     ##writeLines(paste0(node, ': ', C.mcmc$ms.ss.model[[node]], ', ',
+##     ##model.input$inits[[node]]))
+##     if(!identical(as.numeric(C.mcmc$ms.ss.model[[node]]),
+##                   as.numeric(model.input$inits[[node]])))
+##         writeLines(paste0('problem with ', node))
+## }
+
+C.mcmc$mcmc_no_top$run(niter = 100000)
+
+## Z.after.first.sampling <- C.mcmc$ms.ss.model$Z
+## first.round.samples <- as.matrix(C.mcmc$mcmc_no_top$mvSamples)
+
+## C.mcmc$mcmc$run(niter = 2)
+## second.round.samples <- as.matrix(C.mcmc$mcmc$mvSamples)
+
+## comparison <- rbind(first.round.samples[10000,], second.round.samples[1,])
+
+C.mcmc$mcmc$run(niter = 10000)
+
+samps <- as.matrix(C.mcmc$mcmc$mvSamples)
+
+sums <- apply(samps, 2, function(x){
+    c(mean(x), sd(x), (mean(x)-1.96*sd(x)), (mean(x)+1.96*sd(x)))
+})
+
+sums[,"cato.occ.mean"]
+## [1] 0.998051344 0.001663662 0.994 790566 1.001312123
+## =(

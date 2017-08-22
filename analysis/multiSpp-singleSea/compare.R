@@ -1,23 +1,39 @@
 rm(list=ls())
 library(nimble)
 library(coda)
-
+setwd('~/Dropbox')
 setwd('occupancy/analysis/multiSpp-singleSea')
 source('../all/plotting.R')
 source('src/initialize.R')
 
+thinChains <- function(chains, nthin){
+    apply(chains, c(1,2), function(x){
+        x[!seq(nthin, length(x))] <- NULL
+    })
+}
+
 ## original model jags and nimble
 load(file=file.path(save.dir, "orig.Rdata"))
+ms.ss.orig[[1]]$samples <- thinChains(ms.ss.orig[[1]]$samples, nthin=100)
+save(ms.ss.orig, file=file.path(save.dir, "orig.Rdata"))
 
 ## vectorized, likelihood for latent state, derived quantity
 ## calculation
 load(file=file.path(save.dir, "filter.Rdata"))
+ms.ss.filter[[1]]$samples <- thinChains(ms.ss.filter[[1]]$samples,
+                                        nthin=100)
+save(ms.ss.filter, file=file.path(save.dir, "filter.Rdata"))
 
 ## cross level sampler
 load(file=file.path(save.dir, "crosslevel.Rdata"))
+ms.ss.crosslevel[[1]]$samples <- thinChains(ms.ss.crosslevel[[1]]$samples, nthin=100)
+save(ms.ss.crosslevel, file=file.path(save.dir, "crosslevel.Rdata"))
+
 
 ## subsampling
 load(file=file.path(save.dir, "subsamp.Rdata"))
+ms.ss.subsamp[[1]]$samples <- thinChains(ms.ss.subsamp[[1]]$samples, nthin=100)
+save(ms.ss.subsamp, file=file.path(save.dir, "subsamp.Rdata"))
 
 
 ms.ss.orig[[1]] <- rename_MCMC_comparison_method(c('nimble', 'jags'),
@@ -43,6 +59,7 @@ ms.ss.occ.all <- combine_MCMC_comparison_results(ms.ss.orig[[1]],
                                                  ms.ss.crosslevel[[1]],
                                                  ms.ss.subsamp[[1]],
                                                  name = "ms.ss")
+save(ms.ss.occ.all, file=file.path(save.dir, "combined.Rdata"))
 
 make_MCMC_comparison_pages(ms.ss.occ.all,
                            dir=file.path(save.dir, "../figures/comparisons"))
