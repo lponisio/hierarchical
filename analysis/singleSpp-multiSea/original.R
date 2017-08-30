@@ -26,7 +26,8 @@ ss.ms.occ <- nimbleCode({
   for (site in 1:nsite){
     z[site,1] ~ dbern(psi1)
     for (year in 2:nyear){
-      muZ[site,year]<- z[site,year-1]*phi[year-1] + (1-z[site,year-1])*gamma[year-1]
+        muZ[site,year]<- z[site,year-1]*phi[year-1] +
+            (1-z[site,year-1])*gamma[year-1]
       z[site,year] ~ dbern(muZ[site,year])
     }
   }

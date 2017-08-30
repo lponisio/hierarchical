@@ -194,17 +194,17 @@ prepMutiSpData <- function(survey.data,
     inits <-list(Z=zinits,
                  omega = omega.draw,
                  w = c(rep(1, num.species),
-                       rbinom(n.zeroes, size = 1, prob = omega.draw)),
-                 u.cato = rnorm(num.species + n.zeroes),
-                 v.cato = rnorm(num.species + n.zeroes),
-                 u.fcw = rnorm(num.species + n.zeroes) ,
-                 v.fcw = rnorm(num.species + n.zeroes),
-                 a1 = rnorm(num.species + n.zeroes),
-                 a2 = rnorm(num.species + n.zeroes),
-                 a3 = rnorm(num.species + n.zeroes),
-                 a4 = rnorm(num.species + n.zeroes),
-                 b1 = rnorm(num.species + n.zeroes),
-                 b2 = rnorm(num.species + n.zeroes))
+                       rbinom(n.zeroes, size = 1, prob = omega.draw)))
+                 ## u.cato = rnorm(num.species + n.zeroes),
+                 ## v.cato = rnorm(num.species + n.zeroes),
+                 ## u.fcw = rnorm(num.species + n.zeroes) ,
+                 ## v.fcw = rnorm(num.species + n.zeroes),
+                 ## a1 = rnorm(num.species + n.zeroes),
+                 ## a2 = rnorm(num.species + n.zeroes),
+                 ## a3 = rnorm(num.species + n.zeroes),
+                 ## a4 = rnorm(num.species + n.zeroes),
+                 ## b1 = rnorm(num.species + n.zeroes),
+                 ## b2 = rnorm(num.species + n.zeroes))
 
     ## constants
     constants <- list(num.species = num.species,

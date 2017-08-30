@@ -1,6 +1,9 @@
 rm(list=ls())
 library(nimble)
 library(parallel)
+library(testthat)
+setwd("~/Dropbox")
+
 options(mc.cores=2)
 nthin <- 2
 
@@ -14,14 +17,39 @@ pumpCode <- nimbleCode({
   beta ~ dgamma(0.1,1.0)
 })
 
-pumpConsts <- list(N = 10,
-                   t = c(94.3, 15.7, 62.9, 126, 5.24,
-                     31.4, 1.05, 1.05, 2.1, 10.5))
-pumpData <- list(x = rep(1, 10))
-# pumpData <- list(x = c(5, 1, 5, 14, 3, 19, 1, 1, 4, 22))
+test.examples <- list(
+    list(name = 'too little data',
+         data = list(x = c(1, 2)),
+         expected.accepted = NULL),
+    list(name = 'rejected',
+         data = list(x = rep(1, 10)),
+         expected.accepted = FALSE),
+    list(name = 'accepted',
+         data = list(x = c(5, 1, 5, 14, 3, 19, 1, 1, 4, 22)),
+         expected.accepted = TRUE))
+
+for (example in test.examples) {
+    test_that(example$name, {
+        pumpData <- example$data
+        runExample(pumpData, expected.accepted = example$expected.accepted)
+    })
+}
+
+
+
 pumpInits <- list(alpha = 1, beta = 1,
                   theta = rep(0.1, pumpConsts$N))
 
+
+pumpConsts <- list(N = 10,
+                   t = c(94.3, 15.7, 62.9, 126, 5.24,
+                         31.4, 1.05, 1.05, 2.1, 10.5))
+
+pumpData = list(x = c(5, 1, 5, 14, 3, 19, 1, 1, 4, 22))
+
+runExample <- function(pumpData, expected.accepted) {
+    TODO
+}
 
 
 ## build model
@@ -48,7 +76,6 @@ output <- as.matrix(D.mcmc$mvSamples)
 message('NIMBLE model compiled')
 
 source('occupancy/analysis/cppp/src/calcCPPP.R')
-set.seed(4)
 
 pumpDiscMeasure <- nimbleFunction(
   setup = function(model, discFunctionArgs){

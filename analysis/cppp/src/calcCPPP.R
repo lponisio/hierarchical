@@ -20,7 +20,7 @@ likeDiscFuncGenerator <- nimbleFunction(
     contains = virtualDiscFunction
 )
 
-pppFunc <- nimbleFunction(
+calcPPP <- nimbleFunction(
     setup = function(model,
                      dataNames,
                      paramNames,
@@ -34,21 +34,19 @@ pppFunc <- nimbleFunction(
         dataDependencies <- model$getDependencies(dataNames)
         discFunction <- nimbleFunctionList(virtualDiscFunction)
         discFunction[[1]] <- discFunc(model, discFunctionArgs)
-        l <- ceiling(min(1000, (MCMCIter/thin - burnIn)/20)) ##length of each
-        ##block, ensures
-        ##it's not too big
-        ## total number of blocks available
+        l <- ceiling(min(1000, (MCMCIter/thin - burnIn)/20))
+        ## length of each block, ensures it's not too big total number
+        ## of blocks available
         q <- (MCMCIter/thin - burnIn) - l + 1
-        ##to sample from
-        ## number of blocks to use for ppp
+        ## to sample from number of blocks to use for ppp
         h <- ceiling((MCMCIter/thin - burnIn)/l)
         ##function calculation
         blockMatrix <- matrix(0, nrow = h*l, ncol = length(paramNames))
-        ## approximately of size m (number of mc
-        ## samples)
+        ## approximately of size m (number of mc samples)
     },
-    run = function(MCMCOutput = double(2), nPPPCalcIters = integer(0), useBlockMatrix = logical(0)){
-        output <- numeric(nPPPCalcIters)
+    run = function(MCMCOutput = double(2), nPPPCalcIters = integer(0),
+                   useBlockMatrix = logical(0)){
+        countDeviant <- numeric(nPPPCalcIters)
         origDataValues <- values(model, dataNames)
         for(i in 1:nPPPCalcIters){
             randNum <- ceiling(runif(1, 0, (MCMCIter)/thin - burnIn - 1 ))
@@ -66,28 +64,32 @@ pppFunc <- nimbleFunction(
             calculate(model, paramDependencies)
             calculate(model, dataDependencies)
             simDeviance <- discFunction[[1]]$run()
-            if(simDeviance >= obsDeviance) output[i] <- 1
-            else output[i] <- 0
+            if(simDeviance >= obsDeviance) countDeviant[i] <- 1
+            else countDeviant[i] <- 0
         }
-        out <- mean(output)
+        out <- mean(countDeviant)
         returnType(double(0))
         return(out)
     },
     methods = list(
-        getSD = function(MCMCOutput = double(2), nPPPCalcIters=double(0)){
-            blockpppValues <- numeric(nBootstrapSDReps) ## block estimates of ppp
+        calcBlockBootstrapSD = function(MCMCOutput = double(2),
+                                        nPPPCalcIters=double(0)){
+            blockpppValues <- numeric(nBootstrapSDReps)
+            ## block estimates of ppp
             for(r in 1:nBootstrapSDReps){
                 for(i in 1:h){
                     randNum <- runif(1,0,1)
-                    ##random starting index for blocks (post burn-in)
+                    ## random starting index for blocks (post burn-in)
                     randIndex <- ceiling(randNum*q)
                     for(j in 1:l){
                         ## fill in blockMV with chosen blocks
-                        blockMatrix[(i - 1)*l + j,] <<- MCMCOutput[burnIn + randIndex - 1 + j,]
+                        blockMatrix[(i - 1)*l + j,] <<-
+                            MCMCOutput[burnIn +
+                                       randIndex - 1 + j,]
                     }
                 }
-                ##as per Caffo, calculate both Q functions using the same
-                ##samples from the latent variables
+                ## as per Caffo, calculate both Q functions using the same
+                ## samples from the latent variables
                 blockpppValues[r]  <- run(MCMCOutput, nPPPCalcIters, TRUE)
             }
             blockpppValuesSD <- sd(blockpppValues)
@@ -104,7 +106,7 @@ pppFunc <- nimbleFunction(
 calcCPPP <- function(MCMCIter,
                      burnIn,
                      nPPPCalcIters,
-                     C.pppFunc,
+                     C.calcPPP,
                      C.mcmc = NULL,
                      samples = NULL,
                      returnSamples){
@@ -112,8 +114,8 @@ calcCPPP <- function(MCMCIter,
         C.mcmc$run(MCMCIter, reset = TRUE, simulateAll = TRUE)
         samples <- as.matrix(C.mcmc$mvSamples)
     }
-    pre.pp <- C.pppFunc$run(samples, nPPPCalcIters, FALSE)
-    bootSD <- C.pppFunc$getSD(samples, nPPPCalcIters)
+    pre.pp <- C.calcPPP$run(samples, nPPPCalcIters, FALSE)
+    bootSD <- C.calcPPP$calcBlockBootstrapSD(samples, nPPPCalcIters)
     if(!is.finite(pre.pp))    pre.pp <- NA
     return(list(pre.pp = pre.pp,
                 bootSD = bootSD,
@@ -197,14 +199,13 @@ generateCPPP <-  function(R.model,
                    "are not parameters in model"))
     }
 
-
     ## keep track of the real data
     origData <- nimble:::values(R.model, dataNames)
 
     ## sample posterior, simulate data from sample
     paramDependencies <- R.model$getDependencies(paramNames)
 
-    modelpppFunc <- pppFunc(R.model,
+    modelcalcPPP <- calcPPP(R.model,
                             dataNames,
                             paramNames,
                             origMCMCIter,
@@ -213,19 +214,19 @@ generateCPPP <-  function(R.model,
                             discFunc = discFuncGenerator,
                             nBootstrapSDReps=nBootstrapSDReps,
                             discFunctionArgs)
-    C.pppFunc <- compileNimble(modelpppFunc,
+    C.calcPPP <- compileNimble(modelcalcPPP,
                                project = R.model)
 
     ## calculate deviances
     obs.cppp <- calcCPPP(origMCMCIter,
                          burnIn,
                          nPPPCalcIters=nPPPCalcIters,
-                         C.pppFunc,
+                         C.calcPPP,
                          samples = origMCMCOutput,
                          returnSamples = returnSamples)
 
 
-    cpppParallelFunction <- function(coreNum, nBootIter){
+    cpppTask <- function(coreNum, nBootIter){
         R.newModel <- R.model$newModel()
         C.newModel <- compileNimble(R.newModel)
         if(is.null(mcmcCreator)){
@@ -238,7 +239,7 @@ generateCPPP <-  function(R.model,
             newMCMC <- mcmcCreator(R.newModel)
         }
 
-        modelpppFunc <- pppFunc(R.newModel,
+        modelcalcPPP <- calcPPP(R.newModel,
                                 dataNames,
                                 paramNames,
                                 cpppMCMCIter,
@@ -249,7 +250,7 @@ generateCPPP <-  function(R.model,
                                 discFunctionArgs)
 
         C.newMcmc <- compileNimble(newMCMC, project = R.newModel)
-        C.newPppFunc <- compileNimble(modelpppFunc,
+        C.newPppFunc <- compileNimble(modelcalcPPP,
                                       project = R.newModel)
         out <- list()
         for(iteration in 1:nBootIter){
@@ -258,7 +259,7 @@ generateCPPP <-  function(R.model,
             out[[iteration]] <- calcCPPP(cpppMCMCIter,
                                          burnIn,
                                          nPPPCalcIters,
-                                         C.pppFunc = C.newPppFunc,
+                                         C.calcPPP = C.newPppFunc,
                                          C.mcmc = C.newMcmc,
                                          returnSamples = returnSamples)
         }
@@ -267,17 +268,17 @@ generateCPPP <-  function(R.model,
 
 
     ## simulate the ppp values
-    sim.ppp.output <- mclapply(X = 1:nCores, FUN = cpppParallelFunction,
+    sim.ppp.output <- mclapply(X = 1:nCores, FUN = cpppTask,
                                nBootIter =
                                    ceiling(nSimPPPVals/nCores))
-    paste(sim.ppp.output)
+
     ## extract simulated ppp and boot SDs
     sim.ppp <- sapply(sapply(sim.ppp.output,
                              function(x) x), function(x)  x$pre.pp)
     sim.vars <- (sapply(sapply(sim.ppp.output, function(x) x),
                         function(x) x$bootSD))^2
 
-    ## approximate the distbution of observed ppp and simulated ppp
+    ## approximate the distribution of observed ppp and simulated ppp
     diff.ppp <- obs.cppp$pre.pp - sim.ppp
     diff.vars.ppp <- obs.cppp$bootSD^2 + sim.vars
 

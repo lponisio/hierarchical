@@ -208,23 +208,7 @@ mcmc <- buildMCMC(mcmc.spec.default)
 ## compile it all together
 C.mcmc <- compileNimble(mcmc, mcmc_no_top,  ms.ss.model)
 
-## for(node in non.latent) {
-##     ##writeLines(paste0(node, ': ', C.mcmc$ms.ss.model[[node]], ', ',
-##     ##model.input$inits[[node]]))
-##     if(!identical(as.numeric(C.mcmc$ms.ss.model[[node]]),
-##                   as.numeric(model.input$inits[[node]])))
-##         writeLines(paste0('problem with ', node))
-## }
-
-C.mcmc$mcmc_no_top$run(niter = 100000)
-
-## Z.after.first.sampling <- C.mcmc$ms.ss.model$Z
-## first.round.samples <- as.matrix(C.mcmc$mcmc_no_top$mvSamples)
-
-## C.mcmc$mcmc$run(niter = 2)
-## second.round.samples <- as.matrix(C.mcmc$mcmc$mvSamples)
-
-## comparison <- rbind(first.round.samples[10000,], second.round.samples[1,])
+C.mcmc$mcmc_no_top$run(niter = 500000)
 
 C.mcmc$mcmc$run(niter = 10000)
 
@@ -237,3 +221,23 @@ sums <- apply(samps, 2, function(x){
 sums[,"cato.occ.mean"]
 ## [1] 0.998051344 0.001663662 0.994 790566 1.001312123
 ## =(
+
+
+
+## for(node in non.latent) {
+##     ##writeLines(paste0(node, ': ', C.mcmc$ms.ss.model[[node]], ', ',
+##     ##model.input$inits[[node]]))
+##     if(!identical(as.numeric(C.mcmc$ms.ss.model[[node]]),
+##                   as.numeric(model.input$inits[[node]])))
+##         writeLines(paste0('problem with ', node))
+## }
+
+
+
+## Z.after.first.sampling <- C.mcmc$ms.ss.model$Z
+## first.round.samples <- as.matrix(C.mcmc$mcmc_no_top$mvSamples)
+
+## C.mcmc$mcmc$run(niter = 2)
+## second.round.samples <- as.matrix(C.mcmc$mcmc$mvSamples)
+
+## comparison <- rbind(first.round.samples[10000,], second.round.samples[1,])
