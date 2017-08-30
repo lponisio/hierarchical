@@ -44,32 +44,43 @@ calcPPP <- nimbleFunction(
         blockMatrix <- matrix(0, nrow = h*l, ncol = length(paramNames))
         ## approximately of size m (number of mc samples)
     },
+
     run = function(MCMCOutput = double(2), nPPPCalcIters = integer(0),
                    useBlockMatrix = logical(0)){
         countDeviant <- numeric(nPPPCalcIters)
         origDataValues <- values(model, dataNames)
         for(i in 1:nPPPCalcIters){
             randNum <- ceiling(runif(1, 0, (MCMCIter)/thin - burnIn - 1 ))
-            values(model, dataNames) <<- origDataValues
+            ## moved to end to avoid side effect of resetting the
+            ## original data
+
+            ## values(model, dataNames) <<- origDataValues
             if(useBlockMatrix == TRUE){
                 values(model, paramNames) <<- blockMatrix[randNum, ]
             }
             else{
                 values(model, paramNames) <<- MCMCOutput[burnIn + randNum, ]
             }
+            ## calculate deviance from real data
             calculate(model, paramDependencies)
             calculate(model, dataDependencies)
             obsDeviance <- discFunction[[1]]$run()
+
+            ## simulate data from model, then calculate deviance
             simulate(model, dataNames, includeData = TRUE)
             calculate(model, paramDependencies)
             calculate(model, dataDependencies)
             simDeviance <- discFunction[[1]]$run()
+
+            ## count the number of simulated data sets where the
+            ## simulated data has a higher deviance than the observed
             if(simDeviance >= obsDeviance) countDeviant[i] <- 1
             else countDeviant[i] <- 0
+            values(model, dataNames) <<- origDataValues
         }
-        out <- mean(countDeviant)
+        ppp <- mean(countDeviant)
         returnType(double(0))
-        return(out)
+        return(ppp)
     },
     methods = list(
         calcBlockBootstrapSD = function(MCMCOutput = double(2),
@@ -101,8 +112,6 @@ calcPPP <- nimbleFunction(
 
 
 
-## calculate proportion of deviances that are greater or equal to the
-## observed value
 calcCPPP <- function(MCMCIter,
                      burnIn,
                      nPPPCalcIters,
@@ -110,6 +119,8 @@ calcCPPP <- function(MCMCIter,
                      C.mcmc = NULL,
                      samples = NULL,
                      returnSamples){
+    ## calculate proportion of deviances that are greater or equal to the
+    ## observed value
     if(is.null(samples)){
         C.mcmc$run(MCMCIter, reset = TRUE, simulateAll = TRUE)
         samples <- as.matrix(C.mcmc$mvSamples)
@@ -126,7 +137,7 @@ calcCPPP <- function(MCMCIter,
 generateCPPP <-  function(R.model,
                           origMCMCOutput,
                           mcmcCreator = NULL,
-                          cpppMCMCIter = NULL,
+                          nCPPPMCMCIter = NULL,
                           thin = 1,
                           dataNames, ## names of the data
                           nPPPCalcIters,## number of samples from posterior
@@ -157,16 +168,16 @@ generateCPPP <-  function(R.model,
     if(origMCMCIter <= 1){
         stop("origMCMCOutput has no rows!")
     }
-    if(is.null(cpppMCMCIter)){
-        cpppMCMCIter <- origMCMCIter
+    if(is.null(nCPPPMCMCIter)){
+        nCPPPMCMCIter <- origMCMCIter
     }
-    else if(cpppMCMCIter < 2){
-        stop("cpppMCMCIter must be an integer > 1")
+    else if(nCPPPMCMCIter < 2){
+        stop("nCPPPMCMCIter must be an integer > 1")
     }
 
-    burnIn <- ceiling(burnInProp*(cpppMCMCIter/thin))
+    burnIn <- ceiling(burnInProp*(nCPPPMCMCIter/thin))
 
-    if(nPPPCalcIters > cpppMCMCIter){
+    if(nPPPCalcIters > nCPPPMCMCIter){
         stop("number of samples from posterior must be < number of MCMC iterations")
     }
 
@@ -218,7 +229,7 @@ generateCPPP <-  function(R.model,
                                project = R.model)
 
     ## calculate deviances
-    obs.cppp <- calcCPPP(origMCMCIter,
+    obs.CPPP <- calcCPPP(origMCMCIter,
                          burnIn,
                          nPPPCalcIters=nPPPCalcIters,
                          C.calcPPP,
@@ -226,7 +237,7 @@ generateCPPP <-  function(R.model,
                          returnSamples = returnSamples)
 
 
-    cpppTask <- function(coreNum, nBootIter){
+    CPPPTask <- function(coreNum, nBootIter){
         R.newModel <- R.model$newModel()
         C.newModel <- compileNimble(R.newModel)
         if(is.null(mcmcCreator)){
@@ -242,7 +253,7 @@ generateCPPP <-  function(R.model,
         modelcalcPPP <- calcPPP(R.newModel,
                                 dataNames,
                                 paramNames,
-                                cpppMCMCIter,
+                                nCPPPMCMCIter,
                                 thin,
                                 burnIn,
                                 discFunc = discFuncGenerator,
@@ -256,7 +267,7 @@ generateCPPP <-  function(R.model,
         for(iteration in 1:nBootIter){
             message(paste("refitting data iteration", iteration, "for core number", coreNum))
             simulate(C.newModel,  includeData =  TRUE)
-            out[[iteration]] <- calcCPPP(cpppMCMCIter,
+            out[[iteration]] <- calcCPPP(nCPPPMCMCIter,
                                          burnIn,
                                          nPPPCalcIters,
                                          C.calcPPP = C.newPppFunc,
@@ -268,7 +279,7 @@ generateCPPP <-  function(R.model,
 
 
     ## simulate the ppp values
-    sim.ppp.output <- mclapply(X = 1:nCores, FUN = cpppTask,
+    sim.ppp.output <- mclapply(X = 1:nCores, FUN = CPPPTask,
                                nBootIter =
                                    ceiling(nSimPPPVals/nCores))
 
@@ -279,13 +290,13 @@ generateCPPP <-  function(R.model,
                         function(x) x$bootSD))^2
 
     ## approximate the distribution of observed ppp and simulated ppp
-    diff.ppp <- obs.cppp$pre.pp - sim.ppp
-    diff.vars.ppp <- obs.cppp$bootSD^2 + sim.vars
+    diff.ppp <- obs.CPPP$pre.pp - sim.ppp
+    diff.vars.ppp <- obs.CPPP$bootSD^2 + sim.vars
 
 
     ## calculate the average prob that simulated values are less than
     ## the observed
-    cppp <- mean(pnorm(0, diff.ppp, diff.vars.ppp),
+    CPPP <- mean(pnorm(0, diff.ppp, diff.vars.ppp),
                  na.rm=TRUE)
 
     ## extract chains and diagnostics
@@ -299,10 +310,10 @@ generateCPPP <-  function(R.model,
     ## output real data and model
     nimble:::values(R.model, dataNames) <- origData
 
-    out <- list(cppp=cppp,
-                obs.ppp=c(estimate=obs.cppp$pre.pp,
-                          bootVar=(obs.cppp$bootSD)^2),
-                sim.cpp.dist=cbind(esimate=sim.ppp,
+    out <- list(CPPP=CPPP,
+                obs.ppp=c(estimate=obs.CPPP$pre.pp,
+                          bootVar=(obs.CPPP$bootSD)^2),
+                sim.ppp.dist=cbind(esimate=sim.ppp,
                                    bootVar=sim.vars),
                 samples=sim.samples)
     return(out)
