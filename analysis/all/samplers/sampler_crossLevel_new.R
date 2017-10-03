@@ -145,3 +145,102 @@ sampler_crossLevelBinary <- nimbleFunction(
   )
 
 
+
+
+
+binary2_virtual <- nimbleFunctionVirtual(
+    run = function() { },
+    methods = list(
+        calcBinaryPosteriorLogDensity = function() { returnType(double()) },
+        reset = function() { }
+    )
+)
+
+sampler_binary2 <- nimbleFunction(
+    name = 'sampler_binary2',
+    contains = binary2_virtual,
+    setup = function(model, mvSaved, target, control) {
+        ## node list generation
+        targetAsScalar <- model$expandNodeNames(target, returnScalarComponents = TRUE)
+        calcNodes <- model$getDependencies(target)
+        ## checks
+        if(length(targetAsScalar) > 1)  stop('cannot use binary sampler on more than one target node')
+        if(!model$isBinary(target))     stop('can only use binary sampler on discrete 0/1 (binary) nodes')
+    },
+    run = function() {
+        currentLogProb <- getLogProb(model, calcNodes)
+        model[[target]] <<- 1 - model[[target]]
+        otherLogProb <- calculate(model, calcNodes)
+        acceptanceProb <- 1/(exp(currentLogProb - otherLogProb) + 1)
+        if(!is.nan(acceptanceProb) & runif(1,0,1) < acceptanceProb)
+            nimCopy(from = model, to = mvSaved, row = 1, nodes = calcNodes, logProb = TRUE)
+        else
+            nimCopy(from = mvSaved, to = model, row = 1, nodes = calcNodes, logProb = TRUE)
+    },
+    methods = list(
+        calcBinaryPosteriorLogDensity = function() {
+            currentValue <- model[[target]]
+            currentLogProb <- getLogProb(model, calcNodes)
+            model[[target]] <<- 1 - currentValue
+            otherLogProb <- calculate(model, calcNodes)
+            model[[target]] <<- currentValue
+            calculate(model, calcNodes)
+            lp <- -log(exp(otherLogProb - currentLogProb) + 1)
+            returnType(double(0))
+            return(lp)
+        },
+        reset = function() { }
+    )
+)
+
+sampler_crossLevel_binary_DT <- nimbleFunction(
+    name = 'sampler_crossLevel_binary_DT',
+    contains = sampler_BASE,
+    setup = function(model, mvSaved, target, control) {
+        ## control list extraction
+        adaptive <- if(!is.null(control$adaptive)) control$adaptive else TRUE
+        ## node list generation
+        target       <- model$expandNodeNames(target)
+        lowNodes     <- model$getDependencies(target, self = FALSE, stochOnly = TRUE, includeData = FALSE)
+        lowCalcNodes <- model$getDependencies(lowNodes)
+        calcNodes    <- model$getDependencies(c(target, lowNodes))
+        ## nested function and function list definitions
+        mvInternal <- modelValues(model)
+        topRWblockSamplerFunction <- sampler_RW_block(model, mvInternal, target, control)
+        lowBinarySamplerFunctions <- nimbleFunctionList(binary2_virtual)
+        for(iLN in seq_along(lowNodes)) {
+            lowNode <- lowNodes[iLN]
+            if(!model$isBinary(lowNode))     stop('non-binary lowNode \'', lowNode, '\' in crossLevel_binary_DT sampler')
+            lowBinarySamplerFunctions[[iLN]] <- sampler_binary2(model, mvSaved, lowNode, control)
+        }
+        my_setAndCalculateTop <- setAndCalculate(model, target)
+        my_decideAndJump <- decideAndJump(model, mvSaved, calcNodes)
+    },
+    run = function() {
+        modelLP0 <- getLogProb(model, calcNodes)
+        propLP0 <- 0
+        for(iSF in seq_along(lowBinarySamplerFunctions))  { propLP0 <- propLP0 + lowBinarySamplerFunctions[[iSF]]$calcBinaryPosteriorLogDensity() }
+        propValueVector <- topRWblockSamplerFunction$generateProposalVector()
+        topLP <- my_setAndCalculateTop$run(propValueVector)
+        if(is.na(topLP))
+            jump <- my_decideAndJump$run(-Inf, 0, 0, 0)
+        else {
+            for(iSF in seq_along(lowBinarySamplerFunctions))
+                lowBinarySamplerFunctions[[iSF]]$run()
+            modelLP1 <- calculate(model, calcNodes)
+            propLP1 <- 0
+            for(iSF in seq_along(lowBinarySamplerFunctions))
+                propLP1 <- propLP1 + lowBinarySamplerFunctions[[iSF]]$calcBinaryPosteriorLogDensity()
+            jump <- my_decideAndJump$run(modelLP1, modelLP0, propLP1, propLP0)
+    	}
+        if(adaptive)     topRWblockSamplerFunction$adaptiveProcedure(jump)
+    },
+    methods = list(
+        reset = function() {
+            topRWblockSamplerFunction$reset()
+            for(iSF in seq_along(lowBinarySamplerFunctions)) {
+                lowBinarySamplerFunctions[[iSF]]$reset()
+            }
+        }
+    )
+)
