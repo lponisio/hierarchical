@@ -1,0 +1,76 @@
+
+ms.ss.occ.filter <- nimbleCode({
+  ## Define prior distributions for community-level model parameters
+  cato.occ.mean ~ dunif(0,1)
+  mu.ucato <- log(cato.occ.mean) - log(1-cato.occ.mean)
+  sigma.ucato ~ dunif(0, 100)
+  ##
+  fcw.occ.mean ~ dunif(0,1)
+  mu.ufcw <- log(fcw.occ.mean) - log(1-fcw.occ.mean)
+  sigma.ufcw ~ dunif(0, 100)
+  ##
+  cato.det.mean ~ dunif(0,1)
+  mu.vcato <- log(cato.det.mean) - log(1-cato.det.mean)
+  sigma.vcato ~ dunif(0, 100)
+  ##
+  fcw.det.mean ~ dunif(0,1)
+  mu.vfcw <- log(fcw.det.mean) - log(1-fcw.det.mean)
+  sigma.vfcw ~ dunif(0, 100)
+  ## random effects
+  mu.a1 ~ dnorm(0, 0.001)
+  sigma.a1 ~ dunif(0, 100)
+  mu.a2 ~ dnorm(0, 0.001)
+  sigma.a2 ~ dunif(0, 100)
+  mu.a3 ~ dnorm(0, 0.001)
+  sigma.a3 ~ dunif(0, 100)
+  mu.a4 ~ dnorm(0, 0.001)
+  sigma.a4 ~ dunif(0, 100)
+  mu.b1 ~ dnorm(0, 0.001)
+  sigma.b1 ~ dunif(0, 100)
+  mu.b2 ~ dnorm(0, 0.001)
+  sigma.b2 ~ dunif(0, 100)
+  ##
+  for (i in 1:(num.species)) {
+    ## Create priors for species i from the community level prior
+    ## distributions
+    u.cato[i] ~ dnorm(mu.ucato, sd=sigma.ucato)
+    u.fcw[i] ~ dnorm(mu.ufcw, sd=sigma.ufcw)
+    a1[i] ~ dnorm(mu.a1, sd=sigma.a1)
+    a2[i] ~ dnorm(mu.a2, sd=sigma.a2)
+    a3[i] ~ dnorm(mu.a3, sd=sigma.a3)
+    a4[i] ~ dnorm(mu.a4, sd=sigma.a4)
+    ##
+    v.cato[i] ~ dnorm(mu.vcato, sd=sigma.vcato)
+    v.fcw[i] ~ dnorm(mu.vfcw, sd=sigma.vfcw)
+    b1[i] ~ dnorm(mu.b1, sd=sigma.b1)
+    b2[i] ~ dnorm(mu.b2, sd=sigma.b2)
+    ##
+    ## vectorize the calculation of psi.
+    logit(psi[1:num.points,i]) <-
+      u.cato[i]*(1-habitat.ind[1:num.points]) +
+        u.fcw[i]*habitat.ind[1:num.points] +
+          a1[i]*ufc.linear[1:num.points] +
+            a2[i]*ufc.quadratic[1:num.points] +
+              a3[i]*ba.linear[1:num.points] +
+                a4[i]*ba.quadratic[1:num.points]
+    mu.psi[1:num.points,i] <- psi[1:num.points, i]
+    ##
+    logit(p[1:num.points, 1:max.num.reps, i]) <-
+      (v.cato[i]*(1-habitat.ind[1:num.points]) +
+       v.fcw[i]*habitat.ind[1:num.points]) %*%
+         asRow(onesRow[1, 1:max.num.reps])+
+           b1[i]*date.linear[1:num.points,1:max.num.reps] +
+             b2[i]*date.quadratic[1:num.points,1:max.num.reps]
+    ##
+    ## user defined distribution to combine the bernoulli occupancy
+    ## and detection events.  We can also make this is a single
+    ## compuation for the entire matrix of locations-x-visits, for
+    ## each species (i)
+    ##
+    X[1:num.points, 1:max.num.reps, i] ~ dBernDetectionMatrix(
+      occProb = mu.psi[1:num.points,i],
+      detectionProb = p[1:num.points, 1:max.num.reps,i],
+      numReps = num.reps[1:num.points])
+  }
+})
+
