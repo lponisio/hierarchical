@@ -162,7 +162,11 @@ prepMutiSpData <- function(survey.data,
 
     ## Z data for whether or not a species was ever observed
     ## zs with 1s as 1s and 0s as NAs
-    zs <- apply(data$X, c(1, 3), max, rm.na=TRUE)
+    ## CHANGE: generate correct initial values for z's:
+    ## function arg is "na.rm", not "rm.na"
+    ## -DT
+    ##zs <- apply(data$X, c(1, 3), max, rm.na=TRUE)
+    zs <- apply(data$X, c(1, 3), max, na.rm=TRUE)   ## NEW
     zs[zs == 0] <- NA
     zs[!is.finite(zs)] <- NA
 
@@ -243,3 +247,16 @@ prepMutiSpData <- function(survey.data,
                 inits=inits,
                 data=model.data))
 }
+
+## new function for generating initial values for use in nimbleModel(),
+## using posterior summary statistics
+## -DT
+genInits <- function(summary) {
+    e <- new.env()
+    for(n in names(summary))    eval(parse(text = paste0('e$', n, ' <- summary[\'', n, '\']'))[[1]])
+    new_inits <- list()
+    for(n in ls(e)) new_inits[[n]] <- e[[n]]
+    return(new_inits)
+}
+
+

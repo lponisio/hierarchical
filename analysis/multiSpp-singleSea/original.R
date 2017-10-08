@@ -14,9 +14,10 @@ model.input <- prepMutiSpData(survey.data,
                               remove.zs=FALSE)
 
 load(file=file.path(save.dir, "filter.Rdata"))
+## CHANGE: correctly process intial values, from filtering MCMC output
+## -DT
 model.input$inits <- c(model.input$inits,
-                       ms.ss.filter[[1]]$summary["nimble",
-                                                 "median",])
+                       genInits(ms.ss.filter[[1]]$summary["nimble", "median",]))
 rm(ms.ss.filter)
 
 ## *********************************************************************
@@ -108,7 +109,7 @@ input1 <- c(code=ms.ss.occ, model.input)
 ## original model with nimble
 
 ms.ss.orig <- compareMCMCs_withMonitors(input1,
-                           MCMCs=c('nimble'),
+                           MCMCs=c('nimble','jags'),
                            niter=niter,
                            burnin = burnin,
                            summary=FALSE,
@@ -155,10 +156,22 @@ MCMCdefs.crosslevel <- list('nimbleCrosslevel' = quote({
     base.names <- c("a1", "a2", "a3", "a4", "b1", "b2", "u.cato",
                     "u.fcw", "v.cato", "v.fcw" )
 
-    customSpec$removeSamplers(base.names)
-    customSpec$addSampler(target = base.names,
-                          type ='sampler_crossLevelBinary',
-                          print=FALSE)
+    ##customSpec$removeSamplers(base.names)
+    ## CHANGE: adding 116 instances of the crossLevel_binary sampler to
+    ## smaller subsets of top-level nodes (those with same binary dependencies).
+    ## rather than 1 crossLevel_binary sampler being applied to 580 nodes!!
+    ## -DT
+    ##customSpec$addSampler(target = base.names,
+    ##                      type ='sampler_crossLevel_binary_DT',
+    ##                      print=FALSE)
+    Zparents <- c('a1', 'a2', 'a3', 'a4', 'u.cato', 'u.fcw')
+    Xparents <- c('b1', 'b2', 'v.cato', 'v.fcw')
+    customSpec$removeSamplers(Zparents)
+    for(i in 1:58) customSpec$addSampler(target = paste0(Zparents,'[',i,']'),
+                                         type ='sampler_crossLevel_binary_DT')
+    ##for(i in 1:58) customSpec$addSampler(target = paste0(Xparents,'[',i,']'),
+    ##                                     type ='sampler_crossLevel_binary_DT')
+
     customSpec
 }))
 

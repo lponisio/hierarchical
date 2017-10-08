@@ -13,9 +13,10 @@ model.input <- prepMutiSpData(survey.data,
                               monitors)
 
 load(file=file.path(save.dir, "filter.Rdata"))
+## CHANGE: correctly process intial values, from filtering MCMC output
+## -DT
 model.input$inits <- c(model.input$inits,
-                       ms.ss.filter[[1]]$summary["nimble",
-                                               "median",])
+                       genInits(ms.ss.filter[[1]]$summary["nimble", "median",]))
 
 ## *********************************************************************
 ## multi-species site-occupancy models: vectorized with custom
