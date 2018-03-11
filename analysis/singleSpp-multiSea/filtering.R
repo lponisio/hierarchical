@@ -1,6 +1,6 @@
 rm(list=ls())
-
-setwd("occupancy/analysis/singleSpp-multiSea")
+## setwd("~/Dropbox/occupancy/")
+setwd("analysis/singleSpp-multiSea")
 source('src/initialize.R')
 set.seed(444)
 data <- genDynamicOccData()

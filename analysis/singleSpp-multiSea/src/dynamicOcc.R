@@ -112,8 +112,6 @@ registerDistributions(list(dbern_matrix = list(
 ## DynamicOccupancy removes the z's and muZ's from the model and computes
 ## the probability of all reps over all years for one site.
 dDynamicOccupancy <- nimbleFunction(
-    ## I've checked that this runs and compiles, but I haven't tested if
-    ## I got the logic right!
     run = function(x = double(2),
                    nrep = double(),
                    psi1 = double(),
@@ -121,7 +119,7 @@ dDynamicOccupancy <- nimbleFunction(
                    gamma = double(1),
                    p = double(1), # should double(2)
                    log = double(0, default = 0)) {
-        prob1 <- psi1 * p[1]
+
         numObs <- sum(x[,1]) ## do I have the right orientation?
         ## prob of the occupied sites out of the total sites given p
         ProbOccAndCount <- psi1 * dbinom(numObs, size = nrep, p = p[1], log = 0)

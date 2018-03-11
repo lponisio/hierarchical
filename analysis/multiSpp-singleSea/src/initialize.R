@@ -34,5 +34,7 @@ monitors <- c('mu.a1','mu.a2','mu.a3','mu.a4',
               'cato.det.mean', 'fcw.det.mean',
               'sigma.ucato', 'sigma.vcato', 'sigma.ufcw',
               'sigma.vfcw', 'mu.b1', 'mu.b2', 'sigma.b1',
-              'sigma.b2', 'u.cato', 'u.fcw',
-              'a1', 'a2', 'a3', 'a4', 'v.cato', 'v.fcw', 'b1', 'b2')
+              'sigma.b2')
+## mid level params kept track of for diagnosing problems with model
+## 'u.cato', 'u.fcw',
+## 'a1', 'a2', 'a3', 'a4', 'v.cato', 'v.fcw', 'b1', 'b2')

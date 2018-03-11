@@ -1,7 +1,9 @@
 rm(list=ls())
 library(nimble)
 library(coda)
-setwd("occupancy/analysis/singleSpp-multiSea")
+setwd("~/Dropbox/occupancy")
+setwd("analysis/singleSpp-multiSea")
+
 source('../all/plotting.R')
 source('src/initialize.R')
 
@@ -69,19 +71,22 @@ plotEffSize(by.config, by.param, f.path= file.path(save.dir,
                                 "SingleSpp-MultiSea",
             at=50, adj1=1, adj2=0.3, widths=c(4.5, 8.5))
 
-
+## difference between default Jags and Nimble
 (ss.ms.occ.all$ss.ms$efficiency$mean["JAGS-latent"] -
  ss.ms.occ.all$ss.ms$efficiency$mean["NIMBLE-latent"])/
     max(ss.ms.occ.all$ss.ms$efficiency$mean["JAGS-latent"])
 
+## jags and filtering
 (ss.ms.occ.all$ss.ms$efficiency$mean["JAGS-latent"] -
  ss.ms.occ.all$ss.ms$efficiency$mean["NIMBLE-filter"])/
     max(ss.ms.occ.all$ss.ms$efficiency$mean["JAGS-latent"])
 
+## jags and subsampling
 (ss.ms.occ.all$ss.ms$efficiency$mean["JAGS-latent"] -
  ss.ms.occ.all$ss.ms$efficiency$mean["NIMBLE-subsample"])/
     max(ss.ms.occ.all$ss.ms$efficiency$mean["JAGS-latent"])
 
+## subsampling and nimble defaults
 (ss.ms.occ.all$ss.ms$efficiency$mean["NIMBLE-subsample"] -
  ss.ms.occ.all$ss.ms$efficiency$mean["NIMBLE-latent"])/
     max(ss.ms.occ.all$ss.ms$efficiency$mean["NIMBLE-subsample"])

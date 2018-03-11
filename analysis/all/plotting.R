@@ -10,7 +10,7 @@ pdf.f <- function(f, file, ...) {
 
 checkChains <- function(all.mods.samps, f.path,
                         only.one="jags",
-                        params=NULL){
+                        params=NULL, prop.plot=0.1){
     ## function to plot values of parameters as a function of
     ## iterations. Input is a MCMCcompare object
     niter <- dim(all.mods.samps)[3]
@@ -24,7 +24,7 @@ checkChains <- function(all.mods.samps, f.path,
         f <- function(){
             layout(matrix(1:4, ncol=2))
             apply(all.mods.samps[z,params,], 1, function(x){
-                plot(x[seq(from=1, to=length(x), length.out=1000)], type="l",
+                plot(x[seq(from=1, to=length(x), length.out=length(x)*prop.plot)], type="l",
                      xlab = 'iteration',
                      main= params[which(apply(all.mods.samps[z,,], 1,
                                               function(y)
@@ -51,7 +51,7 @@ plotEffSize <- function(eff.size, eff.param,
             mar=c(0.5, 0, 2.5, 1), cex.axis=1.5)
         ## barplots
         mp1 <- barplot(eff.size$mean, names="", las=1, col=cols)
-        mtext("Mean", 3, line=0.5, cex=1.5)
+        mtext("Mean", 3, line=0.5, cex=1.2)
 
         mp2 <- barplot(eff.size$min, names="", las=1, col=cols)
         text(mp2, par('usr')[3] - adj1,
@@ -60,7 +60,7 @@ plotEffSize <- function(eff.size, eff.param,
              xpd = NA,
              cex=1)
 
-        mtext("Minimum", 3, line=0.5, cex=1.5)
+        mtext("Minimum", 3, line=0.5, cex=1.2)
         mtext("Effective sample size \n per second",
               2, line=4.5, cex=1.5, at=at)
     }
@@ -73,7 +73,7 @@ plotEffSize <- function(eff.size, eff.param,
 
         plot(NA, ylim=c(0,1), xlim=c(0,1), yaxt= "n", xaxt="n", bty="n")
         legend("top", legend=rownames(eff.param),
-               pch=16, col=cols, bty="n", ncol=3)
+               pch=16, col=cols, bty="n", ncol=3, cex=0.7)
 
         plot(NA, ylim=log(range(eff.param)), xlim=c(1, ncol(eff.param)),
              xlab="", ylab="", xaxt="n")
@@ -104,7 +104,7 @@ plotEffSize <- function(eff.size, eff.param,
 
         plot(NA, ylim=c(0,1), xlim=c(0,1), yaxt= "n", xaxt="n", bty="n")
         legend("top", legend=rownames(diffs),
-               pch=16, col=cols[-1], bty="n", ncol=3)
+               cex=0.7, pch=16, col=cols[-1], bty="n", ncol=3)
 
         plot(NA, ylim=range(diffs), xlim=c(1, ncol(diffs)),
              xlab="", ylab="", xaxt="n")

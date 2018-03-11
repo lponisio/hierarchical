@@ -3,6 +3,13 @@ library(devtools)
 ##                ref = "devel",
 ##                subdir = "packages/nimble")
 
+
+install_github("nimble-dev/nimble",
+               ref = "faster-vector-passing",
+               subdir = "packages/nimble")
+
+
+
 library(nimble)
 library(igraph)
 source("src/dynamicOcc.R")

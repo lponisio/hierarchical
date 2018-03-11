@@ -1,6 +1,6 @@
+## setwd('~/Dropbox/occupancy')
 rm(list=ls())
-setwd('~/Dropbox')
-setwd('occupancy/analysis/multiSpp-singleSea')
+setwd('analysis/multiSpp-singleSea')
 
 source('src/initialize.R')
 ## don't agument data
@@ -12,13 +12,6 @@ model.input <- prepMutiSpData(survey.data,
                               n.zeros,
                               monitors,
                               remove.zs=FALSE)
-
-load(file=file.path(save.dir, "filter.Rdata"))
-## CHANGE: correctly process intial values, from filtering MCMC output
-## -DT
-model.input$inits <- c(model.input$inits,
-                       genInits(ms.ss.filter[[1]]$summary["nimble", "median",]))
-rm(ms.ss.filter)
 
 ## *********************************************************************
 ## multi-species site-occupancy models: original
@@ -78,6 +71,7 @@ ms.ss.occ <- nimbleCode({
         b2[i] ~ dnorm(mu.b2, tau.b2)
         ## Create a loop to estimate the Z matrix (true occurrence for
         ## species i at point j).
+
         for (j in 1:num.points) {
             logit(psi[j,i]) <- u.cato[i]*(1-habitat.ind[j]) +
                 u.fcw[i]*habitat.ind[j] +
@@ -100,8 +94,6 @@ ms.ss.occ <- nimbleCode({
         }
     }
 })
-
-
 
 input1 <- c(code=ms.ss.occ, model.input)
 

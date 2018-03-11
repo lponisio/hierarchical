@@ -1,6 +1,6 @@
+## setwd('~/Dropbox/occupancy/')
 rm(list=ls())
-setwd('~/Dropbox')
-setwd('occupancy/analysis/multiSpp-singleSea')
+setwd('analysis/multiSpp-singleSea')
 
 source('src/initialize.R')
 ## don't agument data
@@ -12,11 +12,11 @@ model.input <- prepMutiSpData(survey.data,
                               n.zeros,
                               monitors)
 
-load(file=file.path(save.dir, "filter.Rdata"))
-## CHANGE: correctly process intial values, from filtering MCMC output
-## -DT
-model.input$inits <- c(model.input$inits,
-                       genInits(ms.ss.filter[[1]]$summary["nimble", "median",]))
+## load(file=file.path(save.dir, "filter.Rdata"))
+## ## CHANGE: correctly process intial values, from filtering MCMC output
+## ## -DT
+## model.input$inits <- c(model.input$inits,
+##                        genInits(ms.ss.filter[[1]]$summary["nimble", "median",]))
 
 ## *********************************************************************
 ## multi-species site-occupancy models: vectorized with custom
@@ -119,153 +119,153 @@ ms.ss.filter <- compareMCMCs_withMonitors(input1,
 save(ms.ss.filter, file=file.path(save.dir, "filter.Rdata"))
 
 
-## *********************************************************************
-## ## CPPP
-## *********************************************************************
-load(file=file.path(save.dir, "filter.Rdata"))
+## ## *********************************************************************
+## ## ## CPPP
+## ## *********************************************************************
+## load(file=file.path(save.dir, "filter.Rdata"))
 
-occ.R.model <- nimbleModel(code=ms.ss.occ,
-                           constants=input1$constants,
-                           data=input1$data,
-                           inits=input1$inits,
-                           check=FALSE)
+## occ.R.model <- nimbleModel(code=ms.ss.occ,
+##                            constants=input1$constants,
+##                            data=input1$data,
+##                            inits=input1$inits,
+##                            check=FALSE)
 
-occ.mcmc <- buildMCMC(occ.R.model)
-occ.C.model <- compileNimble(occ.R.model)
-occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model)
+## occ.mcmc <- buildMCMC(occ.R.model)
+## occ.C.model <- compileNimble(occ.R.model)
+## occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model)
 
-output <- as.matrix(t(ms.ss.filter$model1$samples[1,,]))
+## output <- as.matrix(t(ms.ss.filter$model1$samples[1,,]))
 
-mcmcGenFunc <- function(model){
-  mcmc.spec <- configureMCMC(model,
-                             print=FALSE,
-                             monitors = input1$monitors,
-                             thin=1)
-  mcmc <- buildMCMC(mcmc.spec)
-}
+## mcmcGenFunc <- function(model){
+##   mcmc.spec <- configureMCMC(model,
+##                              print=FALSE,
+##                              monitors = input1$monitors,
+##                              thin=1)
+##   mcmc <- buildMCMC(mcmc.spec)
+## }
 
-source('../cppp/src/calcCPPP.R', chdir = TRUE)
+## source('../cppp/src/calcCPPP.R', chdir = TRUE)
 
-CPPPoutput <- generateCPPP(occ.R.model,
-                       origMCMCOutput=output,
-                       mcmcCreator = mcmcGenFunc,
-                       dataNames = 'X',
-                       cpppMCMCIter = 10^4,
-                       nPPPCalcIters = 100,
-                       nSimPPPVals =100,
-                       burnInProp = 0.1,
-                       thin=1,
-                       nBootstrapSDReps=100,
-                       nCores = 2,
-                       discFuncGenerator=likeDiscFuncGenerator)
+## CPPPoutput <- generateCPPP(occ.R.model,
+##                        origMCMCOutput=output,
+##                        mcmcCreator = mcmcGenFunc,
+##                        dataNames = 'X',
+##                        cpppMCMCIter = 10^4,
+##                        nPPPCalcIters = 100,
+##                        nSimPPPVals =100,
+##                        burnInProp = 0.1,
+##                        thin=1,
+##                        nBootstrapSDReps=100,
+##                        nCores = 2,
+##                        discFuncGenerator=likeDiscFuncGenerator)
 
-save(CPPPoutput, file=file.path(save.dir, "ms_ss_filter_CPPP.Rdata"))
+## save(CPPPoutput, file=file.path(save.dir, "ms_ss_filter_CPPP.Rdata"))
 
 
-## *********************************************************************
-## ## cross validation
-## *********************************************************************
-## if not already run above
-load(file=file.path(save.dir, "filter.Rdata"))
+## ## *********************************************************************
+## ## ## cross validation
+## ## *********************************************************************
+## ## if not already run above
+## load(file=file.path(save.dir, "filter.Rdata"))
 
-options(mc.cores=5)
-occ.R.model <- nimbleModel(code=ms.ss.occ,
-                           constants=input1$constants,
-                           data=input1$data,
-                           inits=input1$inits,
-                           check=FALSE)
+## options(mc.cores=5)
+## occ.R.model <- nimbleModel(code=ms.ss.occ,
+##                            constants=input1$constants,
+##                            data=input1$data,
+##                            inits=input1$inits,
+##                            check=FALSE)
 
-occ.mcmc <- buildMCMC(occ.R.model)
-occ.C.model <- compileNimble(occ.R.model)
-occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model)
+## occ.mcmc <- buildMCMC(occ.R.model)
+## occ.C.model <- compileNimble(occ.R.model)
+## occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model)
+## ## occ.C.mcmc$run(niter)
+
+## source('../crossValidation/crossValidationFunction.R')
+
+## occ.R.model <- nimbleModel(code=ms.ss.occ,
+##                            constants=input1$constants,
+##                            data=input1$data,
+##                            inits=input1$inits,
+##                            check=FALSE)
+
+
+## output <- crossValidateOne(model=occ.R.model,
+##                            dataNames= "X",
+##                            MCMCIter= niter,
+##                            burnInProp=0.1,
+##                            thin=1,
+##                            leaveOutIndex=3,
+##                            MCMCdefs=NULL)
+
+
+## ## *********************************************************************
+
+## options(mc.cores=5)
+## source('../crossValidation/crossValidationFunction.R')
+
+## ms.ss.occ.simp <- nimbleCode({
+
+##   ## random effects
+##   a1 ~ dnorm(0, 0.001)
+##   a2 ~ dnorm(0, 0.001)
+##   a3 ~ dnorm(0, 0.001)
+##   a4 ~ dnorm(0, 0.001)
+##   b1 ~ dnorm(0, 0.001)
+##   b2 ~ dnorm(0, 0.001)
+
+
+##   for (i in 1:(num.species)) {
+##     ## Create priors for species i from the community level prior
+##     ## distributions
+
+##     ## vectorize the calculation of psi.
+##     logit(psi[1:num.points]) <-
+##       u.cato*(1-habitat.ind[1:num.points]) +
+##         u.fcw*habitat.ind[1:num.points] +
+##           a1*ufc.linear[1:num.points] +
+##             a2*ufc.quadratic[1:num.points] +
+##               a3*ba.linear[1:num.points] +
+##                 a4*ba.quadratic[1:num.points]
+##     ## vectorized calculation
+##     mu.psi[1:num.points] <- psi[1:num.points]
+
+##     logit(p[1:num.points, 1:max.num.reps]) <-
+##       (v.cato*(1-habitat.ind[1:num.points]) +
+##        v.fcw*habitat.ind[1:num.points]) %*%
+##          asRow(onesRow[1, 1:max.num.reps])+
+##            b1*date.linear[1:num.points,1:max.num.reps] +
+##              b2*date.quadratic[1:num.points,1:max.num.reps]
+
+##     X[1:num.points, 1:max.num.reps, i] ~ dBernDetectionMatrix(
+##       occProb = mu.psi[1:num.points],
+##       detectionProb = p[1:num.points, 1:max.num.reps],
+##       numReps = num.reps[1:num.points])
+##   }
+## })
+
+
+
+## input2 <- c(code=ms.ss.occ.simp, model.input)
+
+## occ.R.model.simp <- nimbleModel(code=ms.ss.occ.simp,
+##                                 constants=input2$constants,
+##                                 data=input2$data,
+##                                 inits=input2$inits,
+##                                 check=FALSE)
+
+## occ.mcmc <- buildMCMC(occ.R.model.simp)
+## occ.C.model <- compileNimble(occ.R.model.simp)
+## occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model.simp)
 ## occ.C.mcmc$run(niter)
 
-source('../crossValidation/crossValidationFunction.R')
 
-occ.R.model <- nimbleModel(code=ms.ss.occ,
-                           constants=input1$constants,
-                           data=input1$data,
-                           inits=input1$inits,
-                           check=FALSE)
-
-
-output <- crossValidateOne(model=occ.R.model,
-                           dataNames= "X",
-                           MCMCIter= niter,
-                           burnInProp=0.1,
-                           thin=1,
-                           leaveOutIndex=3,
-                           MCMCdefs=NULL)
-
-
-## *********************************************************************
-
-options(mc.cores=5)
-source('../crossValidation/crossValidationFunction.R')
-
-ms.ss.occ.simp <- nimbleCode({
-
-  ## random effects
-  a1 ~ dnorm(0, 0.001)
-  a2 ~ dnorm(0, 0.001)
-  a3 ~ dnorm(0, 0.001)
-  a4 ~ dnorm(0, 0.001)
-  b1 ~ dnorm(0, 0.001)
-  b2 ~ dnorm(0, 0.001)
-
-
-  for (i in 1:(num.species)) {
-    ## Create priors for species i from the community level prior
-    ## distributions
-
-    ## vectorize the calculation of psi.
-    logit(psi[1:num.points]) <-
-      u.cato*(1-habitat.ind[1:num.points]) +
-        u.fcw*habitat.ind[1:num.points] +
-          a1*ufc.linear[1:num.points] +
-            a2*ufc.quadratic[1:num.points] +
-              a3*ba.linear[1:num.points] +
-                a4*ba.quadratic[1:num.points]
-    ## vectorized calculation
-    mu.psi[1:num.points] <- psi[1:num.points]
-
-    logit(p[1:num.points, 1:max.num.reps]) <-
-      (v.cato*(1-habitat.ind[1:num.points]) +
-       v.fcw*habitat.ind[1:num.points]) %*%
-         asRow(onesRow[1, 1:max.num.reps])+
-           b1*date.linear[1:num.points,1:max.num.reps] +
-             b2*date.quadratic[1:num.points,1:max.num.reps]
-
-    X[1:num.points, 1:max.num.reps, i] ~ dBernDetectionMatrix(
-      occProb = mu.psi[1:num.points],
-      detectionProb = p[1:num.points, 1:max.num.reps],
-      numReps = num.reps[1:num.points])
-  }
-})
-
-
-
-input2 <- c(code=ms.ss.occ.simp, model.input)
-
-occ.R.model.simp <- nimbleModel(code=ms.ss.occ.simp,
-                                constants=input2$constants,
-                                data=input2$data,
-                                inits=input2$inits,
-                                check=FALSE)
-
-occ.mcmc <- buildMCMC(occ.R.model.simp)
-occ.C.model <- compileNimble(occ.R.model.simp)
-occ.C.mcmc <- compileNimble(occ.mcmc, project = occ.R.model.simp)
-occ.C.mcmc$run(niter)
-
-
-output.simp <- crossValidateOne(model=occ.R.model.simp,
-                                dataNames= "X",
-                                MCMCIter= niter,
-                                burnInProp=0.1,
-                                thin=1,
-                                leaveOutIndex=3,
-                                MCMCdefs=NULL)
+## output.simp <- crossValidateOne(model=occ.R.model.simp,
+##                                 dataNames= "X",
+##                                 MCMCIter= niter,
+##                                 burnInProp=0.1,
+##                                 thin=1,
+##                                 leaveOutIndex=3,
+##                                 MCMCdefs=NULL)
 
 ## *********************************************************************
 ##  block sampler for species random effects for each species
