@@ -4,7 +4,7 @@ rm(list=ls())
 setwd('analysis/multiSpp-multiSea')
 
 source("src/initialize.R")
-load("data/5-0-350.Rdata")
+load("data/all-5-0-350.Rdata")
 source("src/complete_allInt.R")
 
 input1 <- c(code=ms.ms.occ,
@@ -14,15 +14,28 @@ input1 <- c(code=ms.ms.occ,
 ## vanilla nimble/jags
 ## *****************************************************************
 
-ms.ms.nimble <- compareMCMCs_withMonitors(input1,
-                                          MCMCs=c('nimble', 'jags'),
+ms.ms.orig <- compareMCMCs_withMonitors(input1,
+                                          MCMCs=c('jags'),
                                           niter=niter,
                                           burnin = burnin,
                                           summary=FALSE,
                                           check=FALSE,
                                           monitors=model.input$monitors)
 
-save(ms.ms.orig, file=file.path(save.dir, 'orig.Rdata'))
+save(ms.ms.orig, file=file.path(save.dir, 'jags.Rdata'))
+
+
+## because it takes so long
+ms.ms.orig.nim <- compareMCMCs_withMonitors(input1,
+                                          MCMCs=c('nimble'),
+                                          niter=niter,
+                                          burnin = burnin,
+                                          summary=FALSE,
+                                          check=FALSE,
+                                          monitors=model.input$monitors)
+
+save(ms.ms.orig.nim, file=file.path(save.dir, 'nimble.Rdata'))
+
 
 ## *********************************************************************
 ## sampler only a subset of latent states

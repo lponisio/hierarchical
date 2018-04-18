@@ -33,57 +33,40 @@ ms.ms.occ <- nimbleCode({
     sigma.gam.fra ~ dunif(0,10)
 
     ## diet breadth
-    mu.phi.k  ~ dnorm(0,0.01)
-    mu.gam.k  ~ dnorm(0,0.01)
-    sigma.phi.k ~ dunif(0,10)
-    sigma.gam.k ~ dunif(0,10)
+    phi.k  ~ dnorm(0,0.01)
+    gam.k  ~ dnorm(0,0.01)
 
     ## body size
-    mu.phi.B  ~ dnorm(0,0.01)
-    mu.gam.B  ~ dnorm(0,0.01)
-    sigma.phi.B ~ dunif(0,10)
-    sigma.gam.B ~ dunif(0,10)
+    phi.B  ~ dnorm(0,0.01)
+    gam.B  ~ dnorm(0,0.01)
 
     ## interaction between hedgerow proximity and floral resources
     ## (habitat quality)
-    mu.phi.hr.area.fra  ~ dnorm(0,0.01)
-    mu.gam.hr.area.fra  ~ dnorm(0,0.01)
-    sigma.phi.hr.area.fra ~ dunif(0,10)
-    sigma.gam.hr.area.fra ~ dunif(0,10)
+    phi.hr.area.fra  ~ dnorm(0,0.01)
+    gam.hr.area.fra  ~ dnorm(0,0.01)
 
     ## interaction between semi nat habitat proximity and floral
     ## resources (habitat quality)
-    mu.phi.nat.area.fra  ~ dnorm(0,0.01)
-    mu.gam.nat.area.fra  ~ dnorm(0,0.01)
-    sigma.phi.nat.area.fra ~ dunif(0,10)
-    sigma.gam.nat.area.fra ~ dunif(0,10)
+    phi.nat.area.fra  ~ dnorm(0,0.01)
+    gam.nat.area.fra  ~ dnorm(0,0.01)
 
     ## interaction between hedgerow proximity and species diet breadth
-    mu.phi.hr.area.k  ~ dnorm(0,0.01)
-    mu.gam.hr.area.k  ~ dnorm(0,0.01)
-    sigma.phi.hr.area.k ~ dunif(0,10)
-    sigma.gam.hr.area.k ~ dunif(0,10)
+    phi.hr.area.k  ~ dnorm(0,0.01)
+    gam.hr.area.k  ~ dnorm(0,0.01)
 
     ## interaction between semi nat habitat proximity and species diet
     ## breadth
-    mu.phi.nat.area.k  ~ dnorm(0,0.01)
-    mu.gam.nat.area.k  ~ dnorm(0,0.01)
-    sigma.phi.nat.area.k ~ dunif(0,10)
-    sigma.gam.nat.area.k ~ dunif(0,10)
+    phi.nat.area.k  ~ dnorm(0,0.01)
+    gam.nat.area.k  ~ dnorm(0,0.01)
 
     ## interaction between hedgerow proximity and species body size
-    mu.phi.hr.area.B  ~ dnorm(0,0.01)
-    mu.gam.hr.area.B  ~ dnorm(0,0.01)
-    sigma.phi.hr.area.B ~ dunif(0,10)
-    sigma.gam.hr.area.B ~ dunif(0,10)
+    phi.hr.area.B  ~ dnorm(0,0.01)
+    gam.hr.area.B  ~ dnorm(0,0.01)
 
     ## interaction between semi nat habitat proximity and body size
     ## breadth
-    mu.phi.nat.area.B  ~ dnorm(0,0.01)
-    mu.gam.nat.area.B  ~ dnorm(0,0.01)
-    sigma.phi.nat.area.B ~ dunif(0,10)
-    sigma.gam.nat.area.B ~ dunif(0,10)
-
+    phi.nat.area.B  ~ dnorm(0,0.01)
+    gam.nat.area.B  ~ dnorm(0,0.01)
 
     ## species-specific  parameters
     for(sp in 1:nsp) {
@@ -92,7 +75,7 @@ ms.ms.occ <- nimbleCode({
         p.day.1[sp] ~ dnorm(mu.p.day.1, sd=sigma.p.day.1)
         p.day.2[sp] ~ dnorm(mu.p.day.2, sd=sigma.p.day.2)
 
-        ## species specific
+        ## species specific intercept
         phi.0[sp] ~ dnorm(mu.phi.0, sd=sigma.phi.0)
         gam.0[sp] ~ dnorm(mu.gam.0, sd=sigma.gam.0)
 
@@ -113,56 +96,6 @@ ms.ms.occ <- nimbleCode({
                             sd=sigma.phi.fra)
         gam.fra[sp] ~ dnorm(mu.gam.fra,
                             sd=sigma.gam.fra)
-
-        ## diet breadth
-        phi.k[sp] ~ dnorm(mu.phi.k,
-                          sd=sigma.phi.k)
-        gam.k[sp] ~ dnorm(mu.gam.k,
-                          sd=sigma.gam.k)
-
-        ## body size
-        phi.B[sp] ~ dnorm(mu.phi.B,
-                          sd=sigma.phi.B)
-        gam.B[sp] ~ dnorm(mu.gam.B,
-                          sd=sigma.gam.B)
-
-        ## hr area * fra interaction
-        phi.hr.area.fra[sp] ~ dnorm(mu.phi.hr.area.fra,
-                                    sd=sigma.phi.hr.area.fra)
-        gam.hr.area.fra[sp] ~ dnorm(mu.gam.hr.area.fra,
-                                    sd=sigma.gam.hr.area.fra)
-
-        ## nat area * fra interaction
-        phi.nat.area.fra[sp] ~ dnorm(mu.phi.nat.area.fra,
-                                     sd=sigma.phi.nat.area.fra)
-        gam.nat.area.fra[sp] ~ dnorm(mu.gam.nat.area.fra,
-                                     sd=sigma.gam.nat.area.fra)
-
-        ## hr area * diet breadth interaction
-        phi.hr.area.k[sp] ~ dnorm(mu.phi.hr.area.k,
-                                  sd=sigma.phi.hr.area.k)
-        gam.hr.area.k[sp] ~ dnorm(mu.gam.hr.area.k,
-                                  sd=sigma.gam.hr.area.k)
-
-        ## nat area * diet breadth interaction
-        phi.nat.area.k[sp] ~ dnorm(mu.phi.nat.area.k,
-                                   sd=sigma.phi.nat.area.k)
-        gam.nat.area.k[sp] ~ dnorm(mu.gam.nat.area.k,
-                                   sd=sigma.gam.nat.area.k)
-
-
-        ## hr area * body size interaction
-        phi.hr.area.B[sp] ~ dnorm(mu.phi.hr.area.B,
-                                  sd=sigma.phi.hr.area.B)
-        gam.hr.area.B[sp] ~ dnorm(mu.gam.hr.area.B,
-                                  sd=sigma.gam.hr.area.B)
-
-        ## nat area * body size interaction
-        phi.nat.area.B[sp] ~ dnorm(mu.phi.nat.area.B,
-                                   sd=sigma.phi.nat.area.B)
-        gam.nat.area.B[sp] ~ dnorm(mu.gam.nat.area.B,
-                                   sd=sigma.gam.nat.area.B)
-
 
     }
 
@@ -194,37 +127,36 @@ ms.ms.occ <- nimbleCode({
             ## psi is on a logit scale
             psi[site,1,sp] <- psi.1[site,sp]
 
-
             ## occupancy in subsequent years
             ## phi and gam are on a linear scale
             for(yr in 1:(nyear-1)) {
                 phi[site,yr,sp] <-
                     phi.0[sp] +
-                    phi.k[sp]*k[sp] +
-                    phi.B[sp]*B[sp] +
+                    phi.k*k[sp] +
+                    phi.B*B[sp] +
                     phi.hr.area[sp]*HRarea[site] +
                     phi.nat.area[sp]*natural[site] +
                     phi.fra[sp]*fra[site, yr] +
-                    phi.hr.area.fra[sp]*fra[site, yr]*HRarea[site] +
-                    phi.nat.area.fra[sp]*fra[site, yr]*natural[site] +
-                    phi.hr.area.k[sp]*k[sp]*HRarea[site] +
-                    phi.nat.area.k[sp]*k[sp]*natural[site] +
-                    phi.hr.area.B[sp]*B[sp]*HRarea[site] +
-                    phi.nat.area.B[sp]*B[sp]*natural[site]
+                    phi.hr.area.fra*fra[site, yr]*HRarea[site] +
+                    phi.nat.area.fra*fra[site, yr]*natural[site] +
+                    phi.hr.area.k*k[sp]*HRarea[site] +
+                    phi.nat.area.k*k[sp]*natural[site] +
+                    phi.hr.area.B*B[sp]*HRarea[site] +
+                    phi.nat.area.B*B[sp]*natural[site]
 
                 gam[site,yr,sp] <-
                     gam.0[sp] +
-                    gam.k[sp]*k[sp] +
-                    gam.B[sp]*B[sp] +
+                    gam.k*k[sp] +
+                    gam.B*B[sp] +
                     gam.hr.area[sp]*HRarea[site] +
                     gam.nat.area[sp]*natural[site] +
                     gam.fra[sp]*fra[site, yr] +
-                    gam.hr.area.fra[sp]*fra[site, yr]*HRarea[site] +
-                    gam.nat.area.fra[sp]*fra[site, yr]*natural[site] +
-                    gam.hr.area.k[sp]*k[sp]*HRarea[site] +
-                    gam.nat.area.k[sp]*k[sp]*natural[site] +
-                    gam.hr.area.B[sp]*B[sp]*HRarea[site] +
-                    gam.nat.area.B[sp]*B[sp]*natural[site]
+                    gam.hr.area.fra*fra[site, yr]*HRarea[site] +
+                    gam.nat.area.fra*fra[site, yr]*natural[site] +
+                    gam.hr.area.k*k[sp]*HRarea[site] +
+                    gam.nat.area.k*k[sp]*natural[site] +
+                    gam.hr.area.B*B[sp]*HRarea[site] +
+                    gam.nat.area.B*B[sp]*natural[site]
             }
 
         }
@@ -243,19 +175,5 @@ ms.ms.occ <- nimbleCode({
 
         }
     }
-    for(site in 1:nsite){
-        logit(phi.site.mean[site]) <- mean(phi[site, 1:(nyear-1),1:nsp])
-        logit(gam.site.mean[site]) <-
-            mean(gam[site,1:(nyear-1),1:nsp])
-        t.star[site] <- 2*gam.site.mean[site]*(1-phi.site.mean[site])/(1-phi.site.mean[site] + gam.site.mean[site])
-    }
-
-    for(sp in 1:nsp) {
-        logit(phi.sp.mean[sp]) <- mean(phi[1:nsite, 1:(nyear-1), sp])
-        logit(gam.sp.mean[sp]) <- mean(gam[1:nsite, 1:(nyear-1), sp])
-        psi.star[sp] <- mean(psi.1[1:nsite,sp])
-    }
-
-
 })
 
