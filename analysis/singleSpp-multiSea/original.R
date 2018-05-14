@@ -1,5 +1,6 @@
 rm(list=ls())
-setwd("occupancy/analysis/singleSpp-multiSea")
+setwd("Dropbox/occupancy")
+setwd("analysis/singleSpp-multiSea")
 source('src/initialize.R')
 
 set.seed(444)
@@ -109,3 +110,35 @@ ss.ms.crosslevel <- compareMCMCs(input1,
                            check=FALSE)
 
 save(ss.ms.crosslevel, file=file.path(save.dir, 'crosslevel.Rdata'))
+
+
+## *********************************************************************
+## block together phi and gamma
+## *********************************************************************
+
+MCMCdefs.blocking <- list('blocking' = quote({
+    customSpec <- configureMCMC(Rmodel)
+    ## find node names for random effects
+    parms.phi <- Rmodel$getNodeNames(includeData = FALSE)[grepl("^phi",
+                                                                Rmodel$getNodeNames(includeData = FALSE))]
+    parms.gam <- Rmodel$getNodeNames(includeData = FALSE)[grepl("^gamma",
+                                                                Rmodel$getNodeNames(includeData =
+                                                                                        FALSE))]
+    phi.gam <- cbind(parms.phi, parms.gam)[-1,]
+    for(i in 1:nrow(phi.gam)){
+        customSpec$removeSamplers(phi.gam[i,], print=FALSE)
+        customSpec$addSampler(target = phi.gam[i,],
+                              type = "AF_slice")
+    }
+    customSpec
+}))
+
+ss.ms.blocking <- compareMCMCs(input1,
+                           MCMCs=c('blocking'),
+                           MCMCdefs = MCMCdefs.blocking,
+                           niter=niter,
+                           burnin = burnin,
+                           summary=FALSE,
+                           check=FALSE)
+
+save(ss.ms.blocking, file=file.path(save.dir, "blocking.Rdata"))
