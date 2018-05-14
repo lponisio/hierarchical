@@ -165,8 +165,9 @@ rDynamicOccupancy <- nimbleFunction(
                    p = double(1),
                    log = double(0, default = 0)) {
         nyear <- length(p)
-        ans <- matrix()
-        setSize(ans, nrep, nyear)
+        ans <- matrix(rbinom(nrep*nyear, 1, prob=p),
+                      nrow=nrep, ncol=nyear)
+        ## setSize(ans, nrep, nyear)
         returnType(double(2))
         return(ans)
     }

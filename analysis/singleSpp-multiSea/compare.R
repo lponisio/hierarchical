@@ -15,10 +15,14 @@ load(file=file.path(save.dir, "orig.Rdata"))
 load(file=file.path(save.dir, "subsamp.Rdata"))
 
 ## cross level sampler
-load(file=file.path(save.dir, "crosslevel.Rdata"))
+## load(file=file.path(save.dir, "crosslevel.Rdata"))
 
 ## filter over latent states
 load(file=file.path(save.dir, "filter.Rdata"))
+
+## blocking with AFSS
+load(file=file.path(save.dir, "blocking.Rdata"))
+
 
 
 ## rename results
@@ -28,9 +32,9 @@ ss.ms.orig[[1]] <- rename_MCMC_comparison_method(c('nimble', 'jags'),
                                               comparison=ss.ms.orig[[1]])
 
 
-ss.ms.crosslevel[[1]] <- rename_MCMC_comparison_method('nimbleCrosslevel',
-                                                       'NIMBLE-cross-level',
-                                              comparison=ss.ms.crosslevel[[1]])
+## ss.ms.crosslevel[[1]] <- rename_MCMC_comparison_method('nimbleCrosslevel',
+##                                                        'NIMBLE-cross-level',
+##                                               comparison=ss.ms.crosslevel[[1]])
 
 ss.ms.subsamp[[1]] <- rename_MCMC_comparison_method('nimbleSubsamp',
                                                     'NIMBLE-subsample',
@@ -38,11 +42,16 @@ ss.ms.subsamp[[1]] <- rename_MCMC_comparison_method('nimbleSubsamp',
 
 ss.ms.filter[[1]] <- rename_MCMC_comparison_method('nimble',
                                                    'NIMBLE-filter',
-                                              comparison=ss.ms.filter[[1]])
+                                                   comparison=ss.ms.filter[[1]])
+
+ss.ms.blocking[[1]] <- rename_MCMC_comparison_method('blocking',
+                                                   'NIMBLE-blocking',
+                                              comparison=ss.ms.blocking[[1]])
 
 ## compare mcmcs
 ss.ms.occ.all <- combine_MCMC_comparison_results(ss.ms.orig[[1]],
-                                                 ss.ms.crosslevel[[1]],
+                                                 ss.ms.blocking[[1]],
+                                                 ## ss.ms.crosslevel[[1]],
                                                  ss.ms.subsamp[[1]],
                                                  ss.ms.filter[[1]],
                                                  name = "ss.ms" )
