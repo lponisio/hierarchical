@@ -13,7 +13,7 @@ install_github("nimble-dev/nimble",
 library(nimble)
 library(igraph)
 source("src/dynamicOcc.R")
-source("src/dataGen.R")
+source("src/setup.R")
 source("../all/plotting.R")
 source("../all/samplers/sampler_crossLevel_new.R")
 source("../all/samplers/leaveOutSampler.R")

@@ -11,7 +11,7 @@ source("../all/runNimble.R")
 source("../all/comparMCMCs_withMonitors.R")
 source("../all/samplers/sampler_crossLevel_new.R")
 source("../all/samplers/leaveOutSampler.R")
-source("src/reformatData.R")
+source("src/setup.R")
 source("src/multispeciesOcc.R")
 
 dir.create(file.path("../../../occupancy_saved/saved/multiSpp-singleSea/saved"),
