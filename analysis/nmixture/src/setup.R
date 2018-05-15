@@ -73,8 +73,8 @@ SGT_data1 <- list(y = y,
                   ## nrep = 3)
 
 constants <- list(nsite = 263,
-                  nrep = 3,
-                  e = 1e-06)
+                  nrep = 3)
+                  ## e = 1e-06)
 
 
 
