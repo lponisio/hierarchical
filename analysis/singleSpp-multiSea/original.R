@@ -87,30 +87,6 @@ ss.ms.subsamp <- compareMCMCs(input1,
 save(ss.ms.subsamp, file=file.path(save.dir, 'subsamp.Rdata'))
 
 
-## *********************************************************************
-## cross level sampler
-## *********************************************************************
-## sample latent and top-level parameters jointly, not included in ms
-
-MCMCdefs.crosslevel <- list('nimbleCrosslevel' = quote({
-    customSpec <- configureMCMC(Rmodel)
-    customSpec$removeSamplers('z')
-    customSpec$addSampler(target = c('phi', 'gamma', 'p', 'psi1'),
-                          type ='sampler_crossLevelBinary',
-                          print=FALSE)
-    customSpec
-}))
-
-ss.ms.crosslevel <- compareMCMCs(input1,
-                           MCMCs=c('nimbleCrosslevel'),
-                           MCMCdefs = MCMCdefs.crosslevel,
-                           niter= niter,
-                           burnin = burnin,
-                           summary=FALSE,
-                           check=FALSE)
-
-save(ss.ms.crosslevel, file=file.path(save.dir, 'crosslevel.Rdata'))
-
 
 ## *********************************************************************
 ## block together phi and gamma
