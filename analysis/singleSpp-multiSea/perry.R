@@ -4,12 +4,11 @@
 setwd("~/Dropbox/occupancy")
 setwd("analysis/singleSpp-multiSea")
 
-source("src/setup.R")
+source("src/initialize.R")
 set.seed(444)
 data <- genDynamicOccData()
 model.input <- prepModDataOcc(data)
 
-library(nimble)
 
 
 ss.ms.occ <- nimbleCode({
@@ -52,8 +51,6 @@ input1 <- c(code=ss.ms.occ,
 ## *********************************************************************
 ## original: vanilla nimble and JAGS
 ## *********************************************************************
-niter <- 10000
-burnin <- 100
 ss.ms.orig <- compareMCMCs(input1,
                            MCMCs=c('jags', 'nimble'),
                            niter=niter,
@@ -62,7 +59,9 @@ ss.ms.orig <- compareMCMCs(input1,
                            check=FALSE)
 
 
-##
+## *********************************************************************
+##  JAGS default in NIMBLE, and AFSS
+## *********************************************************************
 
 assignSlice <- function(MCMCconf, reorder = TRUE) {
     nodes <- MCMCconf$model$expandNodeNames(c('phi','gamma','p', 'psi1'))
@@ -121,12 +120,16 @@ MCMCdefs <- list(
 )
 
 ss.ms.slice <- compareMCMCs(input1,
-                            MCMCs=c('nim_slice', 'nim_AFSS'),
+                            MCMCs=c( 'nim_slice', 'nim_AFSS'),
                             MCMCdefs = MCMCdefs,
                             niter=niter,
                             burnin = burnin,
                             summary=FALSE,
                             check=FALSE)
+
+
+save(ss.ms.slice, file=file.path(save.dir, "slice.Rdata"))
+
 
 ss.ms.slice[[1]]$efficiency
 ss.ms.slice[[1]]$summary
