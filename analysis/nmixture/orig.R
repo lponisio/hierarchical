@@ -1,5 +1,5 @@
 rm(list=ls())
-setwd("Dropbox/occupancy")
+setwd("~/Dropbox/occupancy")
 setwd("analysis/nmixture")
 source('src/initialize.R')
 source("src/setup.R")
@@ -93,3 +93,60 @@ nmixture.orig <- compareMCMCs(input1,
 
 
 save(nmixture.orig, file=file.path(save.dir, "orig.Rdata"))
+
+
+## subset data for plotting
+nsite <- 1
+nrep <- 2
+
+model.input.plot <- model.input
+
+model.input.plot$constants <- model.input$constants
+model.input.plot$constants$nsite <- nsite
+model.input.plot$constants$nrep <- nrep
+
+model.input.plot$data[sapply(model.input$data, is.matrix)] <-
+    lapply(model.input$data[sapply(model.input$data, is.matrix)],
+           function(x) x[1:nsite, ])
+
+
+model.input.plot$data[c("y", "date", "dur", "date2", "dur2")] <-
+    lapply(model.input.plot$data[c("y", "date", "dur", "date2", "dur2")], function(y)y[,1:nrep])
+
+model.input.plot$data[sapply(model.input$data, is.vector)] <-
+    lapply(model.input$data[sapply(model.input$data, is.vector)],
+           function(x) x[1:nsite])
+
+nmix <-   nimbleModel(code=nmixture,
+                        constants=model.input.plot$constants,
+                        data=model.input.plot$data,
+                        inits=model.input.plot$inits,
+                        check=FALSE)
+
+
+## tkid <- tkplot(nmix$graph, vertex.shape="none", vertex.label.font=2.5,
+
+##       vertex.label.cex=.6, edge.color="gray70",  edge.width=2, layout=layout_as_tree)
+
+## byhand <- tkplot.getcoords(tkid)
+
+
+plot(nmix$graph, vertex.shape="none", vertex.label.font=2.5,
+
+      vertex.label.cex=.6, edge.color="gray70",  edge.width=2, layout=layout_in_circle)
+
+
+
+## full data
+nmix.full <-   nimbleModel(code=nmixture,
+                        constants=model.input$constants,
+                        data=model.input$data,
+                        inits=model.input$inits,
+                        check=FALSE)
+
+deg <- degree(nmix.full$graph, mode="all")
+hist(log(deg), main="Histogram of node degree")
+
+max(deg)
+mean(deg)
+median(deg)

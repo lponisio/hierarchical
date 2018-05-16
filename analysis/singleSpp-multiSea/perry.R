@@ -1,7 +1,10 @@
 ## This file contains work by Perry started 5/16/18.
 ## The goal is to explore sampling strategies for this model.
 
-source("src/dataGen.R")
+setwd("~/Dropbox/occupancy")
+setwd("analysis/singleSpp-multiSea")
+
+source("src/setup.R")
 set.seed(444)
 data <- genDynamicOccData()
 model.input <- prepModDataOcc(data)
@@ -106,7 +109,7 @@ assignAFSS <- function(MCMCconf) {
     MCMCconf
 }
 
-## 
+##
 
 MCMCdefs <- list(
     nim_slice = quote({

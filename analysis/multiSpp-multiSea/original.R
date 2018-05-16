@@ -63,7 +63,19 @@ save(ms.ms.subsamp, file=file.path(save.dir, 'subsamp.Rdata'))
 
 
 ## *********************************************************************
-## cross level sampler
+## plotting
 ## *********************************************************************
-## sample latent and top-level parameters jointly
+
+ms.ms.full <-   nimbleModel(code=ms.ms.occ,
+                        constants=model.input$constants,
+                        data=model.input$data,
+                        inits=model.input$inits,
+                        check=FALSE)
+
+deg <- degree(ms.ms.full$graph, mode="all")
+hist(log(deg), main="Histogram of node degree")
+
+max(deg)
+mean(deg)
+median(deg)
 
