@@ -1,0 +1,21 @@
+model
+{
+    mu.a0 ~ dnorm(0, 0.001)
+    mu.p0 ~ dnorm(0, 0.001)
+    sigma.a0 ~ dunif(0, 10)
+    sigma.p0 ~ dunif(0, 10)
+    tau.a0 <- pow(sigma.a0, -2)
+    tau.p0 <- pow(sigma.p0, -2)
+    for (i in 1:nspp) {
+        a0[i] ~ dnorm(mu.a0, tau.a0)
+        log(lambda[i]) <- a0[i]
+        p0[i] ~ dnorm(mu.p0, tau.p0)
+        p[i] <- 1/(1 + exp(-(p0[i])))
+        for (j in 1:nsites) {
+            N[i, j] ~ dpois(lambda[i])
+            for (t in 1:nvisits) {
+                counts[j, t, i] ~ dbin(p[i], N[i, j])
+            }
+        }
+    }
+}
