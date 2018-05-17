@@ -1,7 +1,7 @@
+setwd("~/Dropbox/occupancy")
 rm(list=ls())
 library(nimble)
 library(coda)
-setwd("~/Dropbox/occupancy")
 setwd("analysis/singleSpp-multiSea")
 
 source('../all/plotting.R')
@@ -23,9 +23,11 @@ load(file=file.path(save.dir, "filter.Rdata"))
 ## blocking with AFSS
 load(file=file.path(save.dir, "blocking.Rdata"))
 
+##  slice samplers
+load(file=file.path(save.dir, "slice.Rdata"))
 
 ##  slice sampleers
-load(file=file.path(save.dir, "slice.Rdata"))
+load(file=file.path(save.dir, "filter_blocking.Rdata"))
 
 
 
@@ -49,13 +51,19 @@ ss.ms.filter[[1]] <- rename_MCMC_comparison_method('nimble',
                                                    comparison=ss.ms.filter[[1]])
 
 ss.ms.blocking[[1]] <- rename_MCMC_comparison_method('blocking',
-                                                   'NIMBLE-blocking',
+                                                   'NIMBLE-AFSS-block',
                                               comparison=ss.ms.blocking[[1]])
 
 
 ss.ms.slice[[1]] <- rename_MCMC_comparison_method(c('nim_slice', 'nim_AFSS'),
                                                    c('NIMBLE-slice', 'NIMBLE-AFSS'),
                                               comparison=ss.ms.slice[[1]])
+
+
+
+ss.ms.filter.blocking[[1]] <- rename_MCMC_comparison_method('blocking',
+                                                   'NIMBLE-filter-AFSS-block',
+                                              comparison=ss.ms.filter.blocking[[1]])
 
 
 ## compare mcmcs
@@ -65,6 +73,7 @@ ss.ms.occ.all <- combine_MCMC_comparison_results(ss.ms.orig[[1]],
                                                  ## ss.ms.crosslevel[[1]],
                                                  ss.ms.subsamp[[1]],
                                                  ss.ms.filter[[1]],
+                                                 ss.ms.filter.blocking[[1]],
                                                  name = "ss.ms" )
 
 make_MCMC_comparison_pages(ss.ms.occ.all,

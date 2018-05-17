@@ -1,5 +1,6 @@
+## setwd("~/Dropbox/occupancy")
+
 rm(list=ls())
-setwd("~/Dropbox/occupancy")
 setwd("analysis/nmixture-beta")
 source('src/initialize.R')
 source("src/setup.R")
@@ -74,8 +75,10 @@ input1 <- c(code=ms.nmixture,
 ## *********************************************************************
 
 ms.nmixture.orig <- compareMCMCs(input1,
-                           MCMCs=c('nimble'),
+                           MCMCs=c('jags','nimble'),
                            niter=niter,
                            burnin = burnin,
                            summary=FALSE,
                            check=FALSE)
+
+save(ms.nmixture.orig, file=file.path(save.dir, "orig.Rdata"))

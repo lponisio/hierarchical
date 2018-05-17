@@ -1,5 +1,5 @@
-rm(list=ls())
 ## setwd("~/Dropbox/occupancy/")
+rm(list=ls())
 setwd("analysis/singleSpp-multiSea")
 source('src/initialize.R')
 set.seed(444)
@@ -52,3 +52,24 @@ ss.ms.filter <- compareMCMCs(input1,
 
 save(ss.ms.filter, file=file.path(save.dir, "filter.Rdata"))
 
+## *********************************************************************
+## phi and gam parameters together
+## *********************************************************************
+
+MCMCdefs.blocking <- list('blocking' = quote({
+    customSpec <- configureMCMC(Rmodel)
+        customSpec$removeSamplers(Rmodel$getNodeNames(includeData = FALSE), print=FALSE)
+        customSpec$addSampler(target = Rmodel$getNodeNames(includeData = FALSE),
+                              type = "AF_slice")
+    customSpec
+}))
+
+ss.ms.filter.blocking <- compareMCMCs(input1,
+                           MCMCs=c('blocking'),
+                           MCMCdefs = MCMCdefs.blocking,
+                           niter=niter,
+                           burnin = burnin,
+                           summary=FALSE,
+                           check=FALSE)
+
+save(ss.ms.filter.blocking, file=file.path(save.dir, "filter_blocking.Rdata"))
