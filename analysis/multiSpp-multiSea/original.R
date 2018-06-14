@@ -4,7 +4,7 @@ rm(list=ls())
 setwd('analysis/multiSpp-multiSea')
 
 source("src/initialize.R")
-load("data/all-5-0-350.Rdata")
+load("data/all-5-0-2500-350.Rdata")
 source("src/complete_allInt.R")
 
 input1 <- c(code=ms.ms.occ,
@@ -66,16 +66,16 @@ save(ms.ms.subsamp, file=file.path(save.dir, 'subsamp.Rdata'))
 ## plotting
 ## *********************************************************************
 
-ms.ms.full <-   nimbleModel(code=ms.ms.occ,
-                        constants=model.input$constants,
-                        data=model.input$data,
-                        inits=model.input$inits,
-                        check=FALSE)
+## ms.ms.full <-   nimbleModel(code=ms.ms.occ,
+##                         constants=model.input$constants,
+##                         data=model.input$data,
+##                         inits=model.input$inits,
+##                         check=FALSE)
 
-deg <- degree(ms.ms.full$graph, mode="all")
-hist(log(deg), main="Histogram of node degree")
+## deg <- degree(ms.ms.full$graph, mode="all")
+## hist(log(deg), main="Histogram of node degree")
 
-max(deg)
-mean(deg)
-median(deg)
+## max(deg)
+## mean(deg)
+## median(deg)
 
