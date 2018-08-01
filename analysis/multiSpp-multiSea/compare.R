@@ -17,7 +17,7 @@ load(file=file.path(save.dir, "nimble.Rdata"))
 load(file=file.path(save.dir, "filtering.Rdata"))
 
 ## subsampling
-load(file=file.path(save.dir, "subsamp.Rdata"))
+## load(file=file.path(save.dir, "subsamp.Rdata"))
 
 ms.ms.orig.nim[[1]] <- rename_MCMC_comparison_method(c('nimble'),
                                                  c('NIMBLE-latent' ),
@@ -28,7 +28,6 @@ ms.ms.orig[[1]] <- rename_MCMC_comparison_method(c('jags'),
                                                  c('JAGS-latent' ),
                                               comparison=ms.ms.orig[[1]])
 
-ms.ms.filter <- ms.ms.nimble
 ms.ms.filter[[1]] <- rename_MCMC_comparison_method(c('nimble'),
                                                  c('NIMBLE-filter'),
                                               comparison=ms.ms.filter[[1]])
