@@ -38,8 +38,8 @@ genDynamicOccData <- function(nsite = 100,
     ## Later years
     for(site in 1:nsite){				## Loop over sites
         for(year in 2:nyear){				## Loop over years
-            muZ[year] <- expit(z[site, year-1]*phi[year-1] +
-                (1-z[site, year-1])*gamma[year-1]) ## Prob for occ.
+            muZ[year] <- z[site, year-1]*expit(phi[year-1]) +
+                (1-z[site, year-1])*expit(gamma[year-1]) ## Prob for occ.
             z[site,year] <- rbinom(1, 1, muZ[year])
         }
     }
@@ -47,7 +47,7 @@ genDynamicOccData <- function(nsite = 100,
     ## Generate detection/nondetection data
     for(site in 1:nsite){
         for(year in 1:nyear){
-            prob <- expit(z[site, year] * p[year])
+            prob <- z[site, year] * expit(p[year])
             for(rep in 1:nreps){
                 y[site, rep ,year] <- rbinom(1, 1, prob)
             }
@@ -59,14 +59,10 @@ genDynamicOccData <- function(nsite = 100,
         psi[year] <- psi[year-1]*expit(phi[year-1]) +
             (1-psi[year-1])*expit(gamma[year-1])
     }
-    ## Plot apparent occupancy
-    psi.app <- apply(apply(y, c(1,3), max), 2, mean)
-
     return(list(nsite = nsite,
                 nreps = nreps,
                 nyear = nyear,
                 psi = psi,
-                psi.app = psi.app,
                 z = z,
                 phi = phi,
                 gamma = gamma,

@@ -14,25 +14,21 @@ model.input <- prepModDataOcc(sim.input)
 ss.ms.occ <- nimbleCode({
     ## Specify priors
     psi1 ~ dunif(0, 1)
-
     mu.p     ~ dnorm(0,0.001)
     sigma.p     ~ dunif(0,100)
     tau.p <- 1/(sigma.p*sigma.p)
-
     mu.phi  ~ dnorm(0,0.001)
     mu.gamma  ~ dnorm(0,0.001)
     sigma.phi ~ dunif(0,100)
     sigma.gamma ~ dunif(0,100)
     tau.phi <-  1/(sigma.phi*sigma.phi)
     tau.gamma <-  1/(sigma.gamma*sigma.gamma)
-
     for(year in 1:(nyear -1)) {
         p[year]   ~ dnorm(mu.p,     tau.p)
         phi[year] ~ dnorm(mu.phi, tau.phi)
         gamma[year] ~ dnorm(mu.gamma, tau.gamma)
     }
     p[nyear]      ~ dnorm(mu.p,     tau.p)
-
 
     ## Ecological submodel: Define state conditional on parameters
     for (site in 1:nsite){
