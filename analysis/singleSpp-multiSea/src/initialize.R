@@ -4,9 +4,9 @@ library(devtools)
 ##                subdir = "packages/nimble")
 
 
-install_github("nimble-dev/nimble",
-               ref = "calcPriorFirst",
-               subdir = "packages/nimble")
+## install_github("nimble-dev/nimble",
+##                ref = "calcPriorFirst",
+##                subdir = "packages/nimble")
 
 
 

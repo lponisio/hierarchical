@@ -7,7 +7,6 @@ set.seed(444)
 sim.input <- genDynamicOccData()
 model.input <- prepModDataOcc(sim.input)
 
-
 ## *********************************************************************
 ##  original multi-season occupancy : JAGS & NIMBLE
 ## *********************************************************************
@@ -54,12 +53,10 @@ ss.ms.occ <- nimbleCode({
             }
         }
     }
-
 })
 
 input1 <- c(code=ss.ms.occ,
             model.input)
-
 
 ## *********************************************************************
 ## original: vanilla nimble and JAGS
@@ -75,17 +72,17 @@ ss.ms.orig <- compareMCMCs(input1,
 save(ss.ms.orig, file=file.path(save.dir, "orig.Rdata"))
 
 ## *********************************************************************
-## block together phi and gamma
+## block together phi and gamma, af slice
 ## *********************************************************************
 
 MCMCdefs.AFSS.block <- list('AFSS_block' = quote({
     customSpec <- configureMCMC(Rmodel)
     parms.phi <- Rmodel$getNodeNames(
                             includeData = FALSE)[grepl("^phi",
-                             Rmodel$getNodeNames(includeData = FALSE))]
+                                                       Rmodel$getNodeNames(includeData = FALSE))]
     parms.gam <- Rmodel$getNodeNames(
                             includeData = FALSE)[grepl("^gamma",
-                            Rmodel$getNodeNames(includeData = FALSE))]
+                                                       Rmodel$getNodeNames(includeData = FALSE))]
     phi.gam <- cbind(parms.phi, parms.gam)[-1,]
     ## find node names for random effects
     for(i in 1:nrow(phi.gam)){
@@ -96,15 +93,48 @@ MCMCdefs.AFSS.block <- list('AFSS_block' = quote({
     customSpec
 }))
 
-ss.ms.blocking <- compareMCMCs(input1,
-                               MCMCs=c('AFSS_block'),
-                               MCMCdefs = MCMCdefs.AFSS.block,
-                               niter=niter,
-                               burnin = burnin,
-                               summary=FALSE,
-                               check=FALSE)
+ss.ms.AFSblocking <- compareMCMCs(input1,
+                                     MCMCs=c('AFSS_block'),
+                                     MCMCdefs = MCMCdefs.AFSS.block,
+                                     niter=niter,
+                                     burnin = burnin,
+                                     summary=FALSE,
+                                     check=FALSE)
 
-save(ss.ms.blocking, file=file.path(save.dir, "AFSS_block.Rdata"))
+save(ss.ms.AFSblocking, file=file.path(save.dir, "AFSS_block.Rdata"))
+
+
+## *********************************************************************
+## block together phi and gamma, rw block
+## *********************************************************************
+
+MCMCdefs.RW.block <- list('RW_block' = quote({
+    customSpec <- configureMCMC(Rmodel)
+    parms.phi <- Rmodel$getNodeNames(
+                            includeData = FALSE)[grepl("^phi",
+                                                       Rmodel$getNodeNames(includeData = FALSE))]
+    parms.gam <- Rmodel$getNodeNames(
+                            includeData = FALSE)[grepl("^gamma",
+                                                       Rmodel$getNodeNames(includeData = FALSE))]
+    phi.gam <- cbind(parms.phi, parms.gam)[-1,]
+    ## find node names for random effects
+    for(i in 1:nrow(phi.gam)){
+        customSpec$removeSamplers(phi.gam[i,], print=FALSE)
+        customSpec$addSampler(target = phi.gam[i,],
+                              type = "RW_block")
+    }
+    customSpec
+}))
+
+ss.ms.RWblocking <- compareMCMCs(input1,
+                                     MCMCs=c('RW_block'),
+                                     MCMCdefs = MCMCdefs.RW.block,
+                                     niter=niter,
+                                     burnin = burnin,
+                                     summary=FALSE,
+                                     check=FALSE)
+
+save(ss.ms.RWblocking, file=file.path(save.dir, "RW_block.Rdata"))
 
 
 

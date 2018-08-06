@@ -9,13 +9,13 @@ expit <- function(x) {
 genDynamicOccData <- function(nsite = 100,
                               nreps = 10,
                               nyear = 15,
-                              psi1 = 0.4,
-                              mu.p = 0.5,
-                              sigma.p = 1,
-                              mu.phi = 1.5,
-                              sigma.phi = 1,
-                              mu.gamma = -2,
-                              sigma.gamma = 1) {
+                              psi1 = runif(1),
+                              mu.p = rnorm(1),
+                              sigma.p = runif(1),
+                              mu.phi = rnorm(1),
+                              sigma.phi = runif(1),
+                              mu.gamma = rnorm(1),
+                              sigma.gamma = runif(1)) {
 
     ##  Generation and analysis of simulated data for multi season
     ##  occupancy model (adapted from Kery and Schaud 2012)
@@ -95,12 +95,9 @@ genDynamicOccData <- function(nsite = 100,
 
 ## prep data for nimble model
 prepModDataOcc <- function(sim.input,
-                           monitors = c("psi1", "phi",
-                                        "gamma",
-                                        "p"),
                            include.zs=TRUE){
     ## data zs with 0s set to NAs
-    zs <- apply(sim.input$y, c(1, 3), max)
+    zs <- apply(sim.input$y, c(1, 3), max, na.rm=TRUE)
     zs[zs == 0] <- NA
 
     ## initial condiations, NAs where 1s are in z, and 1s are where NA
@@ -132,7 +129,6 @@ prepModDataOcc <- function(sim.input,
         inits$z <- NULL
     }
     model.input <- list(data=model.data,
-                        monitors=monitors,
                         constants=constants,
                         inits=inits)
     return(model.input)

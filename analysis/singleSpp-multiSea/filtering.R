@@ -62,7 +62,7 @@ ss.ms.filter <- compareMCMCs(input1,
 save(ss.ms.filter, file=file.path(save.dir, "filter.Rdata"))
 
 ## *********************************************************************
-## block together phi and gamma
+## block together phi and gamma, af slice
 ## *********************************************************************
 
 MCMCdefs.AFSS.block <- list('AFSS_block' = quote({
@@ -83,7 +83,7 @@ MCMCdefs.AFSS.block <- list('AFSS_block' = quote({
     customSpec
 }))
 
-ss.ms.filer.blocking <- compareMCMCs(input1,
+ss.ms.filter.AFSblocking <- compareMCMCs(input1,
                                      MCMCs=c('AFSS_block'),
                                      MCMCdefs = MCMCdefs.AFSS.block,
                                      niter=niter,
@@ -91,4 +91,36 @@ ss.ms.filer.blocking <- compareMCMCs(input1,
                                      summary=FALSE,
                                      check=FALSE)
 
-save(ss.ms.filter.blocking, file=file.path(save.dir, "filter_AFSS_block.Rdata"))
+save(ss.ms.filter.AFSblocking, file=file.path(save.dir, "filter_AFSS_block.Rdata"))
+
+## *********************************************************************
+## block together phi and gamma, rw block
+## *********************************************************************
+
+MCMCdefs.RW.block <- list('RW_block' = quote({
+    customSpec <- configureMCMC(Rmodel)
+    parms.phi <- Rmodel$getNodeNames(
+                            includeData = FALSE)[grepl("^phi",
+                                                       Rmodel$getNodeNames(includeData = FALSE))]
+    parms.gam <- Rmodel$getNodeNames(
+                            includeData = FALSE)[grepl("^gamma",
+                                                       Rmodel$getNodeNames(includeData = FALSE))]
+    phi.gam <- cbind(parms.phi, parms.gam)[-1,]
+    ## find node names for random effects
+    for(i in 1:nrow(phi.gam)){
+        customSpec$removeSamplers(phi.gam[i,], print=FALSE)
+        customSpec$addSampler(target = phi.gam[i,],
+                              type = "RW_block")
+    }
+    customSpec
+}))
+
+ss.ms.filter.RWblocking <- compareMCMCs(input1,
+                                     MCMCs=c('RW_block'),
+                                     MCMCdefs = MCMCdefs.RW.block,
+                                     niter=niter,
+                                     burnin = burnin,
+                                     summary=FALSE,
+                                     check=FALSE)
+
+save(ss.ms.filter.RWblocking, file=file.path(save.dir, "filter_RW_block.Rdata"))

@@ -23,6 +23,13 @@ load(file=file.path(save.dir, "AFSS_block.Rdata"))
 ##  AFSS block and filtering
 load(file=file.path(save.dir, "filter_AFSS_block.Rdata"))
 
+##  RW block
+load(file=file.path(save.dir, "RW_block.Rdata"))
+
+##  RW block and filtering
+load(file=file.path(save.dir, "filter_RW_block.Rdata"))
+
+
 ## rename results
 ss.ms.orig[[1]] <- rename_MCMC_comparison_method(c('nimble', 'jags'),
                                                  c('NIMBLE-latent',
@@ -33,13 +40,22 @@ ss.ms.filter[[1]] <- rename_MCMC_comparison_method('nimble',
                                                    'NIMBLE-rm-latent',
                                                    comparison=ss.ms.filter[[1]])
 
-ss.ms.blocking[[1]] <- rename_MCMC_comparison_method('AFSS_block',
+ss.ms.AFSblocking[[1]] <- rename_MCMC_comparison_method('AFSS_block',
                                                    'NIMBLE-AFSS-block',
-                                              comparison=ss.ms.blocking[[1]])
+                                              comparison=ss.ms.AFSblocking[[1]])
 
-ss.ms.filter.blocking[[1]] <- rename_MCMC_comparison_method('AFSS_block',
+ss.ms.filter.AFSblocking[[1]] <- rename_MCMC_comparison_method('AFSS_block',
                                                    'NIMBLE-rm-latent-AFSS-block',
-                                              comparison=ss.ms.filter.blocking[[1]])
+                                              comparison=ss.ms.filter.AFSblocking[[1]])
+
+ss.ms.RWblocking[[1]] <- rename_MCMC_comparison_method('RW_block',
+                                                   'NIMBLE-RW-block',
+                                              comparison=ss.ms.RWblocking[[1]])
+
+ss.ms.filter.RWblocking[[1]] <- rename_MCMC_comparison_method('RW_block',
+                                                   'NIMBLE-rm-latent-RW-block',
+                                              comparison=ss.ms.filter.RWblocking[[1]])
+
 
 
 ## ss.ms.subsamp[[1]] <- rename_MCMC_comparison_method('nimbleSubsamp',
@@ -49,9 +65,11 @@ ss.ms.filter.blocking[[1]] <- rename_MCMC_comparison_method('AFSS_block',
 
 ## compare mcmcs
 ss.ms.occ.all <- combine_MCMC_comparison_results(ss.ms.orig[[1]],
-                                                 ss.ms.blocking[[1]],
-                                                 ss.ms.filter[[1]],
-                                                 ss.ms.filter.blocking[[1]],
+                                                 ss.ms.AFSblocking[[1]],
+                                                 ss.ms.RWblocking[[1]],
+                                                 ## ss.ms.filter[[1]],
+                                                 ## ss.ms.filter.AFSblocking[[1]],
+                                                 ## ss.ms.filter.RWblocking[[1]],
                                                  name = "ss.ms" )
 
 make_MCMC_comparison_pages(ss.ms.occ.all,
