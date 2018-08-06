@@ -1,4 +1,4 @@
-setwd("~/Dropbox/occupancy")
+## setwd("~/Dropbox/occupancy")
 rm(list=ls())
 library(nimble)
 library(coda)
@@ -12,24 +12,16 @@ source('src/initialize.R')
 load(file=file.path(save.dir, "orig.Rdata"))
 
 ## subsample latent states
-load(file=file.path(save.dir, "subsamp.Rdata"))
-
-## cross level sampler
-## load(file=file.path(save.dir, "crosslevel.Rdata"))
+## load(file=file.path(save.dir, "subsamp.Rdata"))
 
 ## filter over latent states
 load(file=file.path(save.dir, "filter.Rdata"))
 
-## blocking with AFSS
-load(file=file.path(save.dir, "blocking.Rdata"))
+##  AFSS block
+load(file=file.path(save.dir, "AFSS_block.Rdata"))
 
-##  slice samplers
-load(file=file.path(save.dir, "slice.Rdata"))
-
-##  slice sampleers
-load(file=file.path(save.dir, "filter_blocking.Rdata"))
-
-
+##  AFSS block and filtering
+load(file=file.path(save.dir, "filter_AFSS_block.Rdata"))
 
 ## rename results
 ss.ms.orig[[1]] <- rename_MCMC_comparison_method(c('nimble', 'jags'),
@@ -37,41 +29,27 @@ ss.ms.orig[[1]] <- rename_MCMC_comparison_method(c('nimble', 'jags'),
                                                    'JAGS-latent'),
                                               comparison=ss.ms.orig[[1]])
 
-
-## ss.ms.crosslevel[[1]] <- rename_MCMC_comparison_method('nimbleCrosslevel',
-##                                                        'NIMBLE-cross-level',
-##                                               comparison=ss.ms.crosslevel[[1]])
-
-ss.ms.subsamp[[1]] <- rename_MCMC_comparison_method('nimbleSubsamp',
-                                                    'NIMBLE-subsample',
-                                              comparison=ss.ms.subsamp[[1]])
-
 ss.ms.filter[[1]] <- rename_MCMC_comparison_method('nimble',
-                                                   'NIMBLE-filter',
+                                                   'NIMBLE-rm-latent',
                                                    comparison=ss.ms.filter[[1]])
 
-ss.ms.blocking[[1]] <- rename_MCMC_comparison_method('blocking',
+ss.ms.blocking[[1]] <- rename_MCMC_comparison_method('AFSS_block',
                                                    'NIMBLE-AFSS-block',
                                               comparison=ss.ms.blocking[[1]])
 
-
-ss.ms.slice[[1]] <- rename_MCMC_comparison_method(c('nim_slice', 'nim_AFSS'),
-                                                   c('NIMBLE-slice', 'NIMBLE-AFSS'),
-                                              comparison=ss.ms.slice[[1]])
-
-
-
-ss.ms.filter.blocking[[1]] <- rename_MCMC_comparison_method('blocking',
-                                                   'NIMBLE-filter-AFSS-block',
+ss.ms.filter.blocking[[1]] <- rename_MCMC_comparison_method('AFSS_block',
+                                                   'NIMBLE-rm-latent-AFSS-block',
                                               comparison=ss.ms.filter.blocking[[1]])
+
+
+## ss.ms.subsamp[[1]] <- rename_MCMC_comparison_method('nimbleSubsamp',
+##                                                     'NIMBLE-subsample',
+##                                               comparison=ss.ms.subsamp[[1]])
 
 
 ## compare mcmcs
 ss.ms.occ.all <- combine_MCMC_comparison_results(ss.ms.orig[[1]],
                                                  ss.ms.blocking[[1]],
-                                                 ss.ms.slice[[1]],
-                                                 ## ss.ms.crosslevel[[1]],
-                                                 ss.ms.subsamp[[1]],
                                                  ss.ms.filter[[1]],
                                                  ss.ms.filter.blocking[[1]],
                                                  name = "ss.ms" )

@@ -8,14 +8,17 @@ expit <- function(x) {
 
 genDynamicOccData <- function(nsite = 100,
                               nreps = 10,
-                              nyear = 10,
+                              nyear = 15,
                               psi1 = 0.4,
-                              range.p = c(0.2, 0.4),
-                              range.phi = c(0.6, 0.8),
-                              range.gamma = c(0, 0.1)) {
+                              mu.p = 0.5,
+                              sigma.p = 1,
+                              mu.phi = 1.5,
+                              sigma.phi = 1,
+                              mu.gamma = -2,
+                              sigma.gamma = 1) {
 
     ##  Generation and analysis of simulated data for multi season
-    ##  occupancy model (Kery and Schaud 2012)
+    ##  occupancy model (adapted from Kery and Schaud 2012)
 
     ## Function to simulate detection/nondetection data for dynamic site-occ model
     ## Annual variation in probabilities of patch survival, colonization and
@@ -38,18 +41,17 @@ genDynamicOccData <- function(nsite = 100,
 
     ## Determine initial occupancy and demographic parameters
     psi[1] <- psi1				## Initial occupancy probability
-    p <- runif(n = nyear, min = range.p[1], max = range.p[2])
-    phi <- runif(n = nyear-1, min = range.phi[1], max = range.phi[2])
-    gamma <- runif(n = nyear-1, min = range.gamma[1], max = range.gamma[2])
-
+    p <- rnorm(nyear, mu.p, sigma.p)
+    phi <- rnorm(nyear -1, mu.phi, sigma.phi)
+    gamma <- rnorm(nyear -1, mu.gamma, sigma.gamma)
     ## Generate latent states of occurrence
     ## First year
     z[,1] <- rbinom(nsite, 1, psi[1])		## Initial occupancy state
     ## Later years
     for(site in 1:nsite){				## Loop over sites
         for(year in 2:nyear){				## Loop over years
-            muZ[year] <- z[site, year-1]*phi[year-1] +
-                (1-z[site, year-1])*gamma[year-1] ## Prob for occ.
+            muZ[year] <- expit(z[site, year-1]*phi[year-1] +
+                (1-z[site, year-1])*gamma[year-1]) ## Prob for occ.
             z[site,year] <- rbinom(1, 1, muZ[year])
         }
     }
@@ -57,7 +59,7 @@ genDynamicOccData <- function(nsite = 100,
     ## Generate detection/nondetection data
     for(site in 1:nsite){
         for(year in 1:nyear){
-            prob <- z[site, year] * p[year]
+            prob <- expit(z[site, year] * p[year])
             for(rep in 1:nreps){
                 y[site, rep ,year] <- rbinom(1, 1, prob)
             }
@@ -66,9 +68,9 @@ genDynamicOccData <- function(nsite = 100,
 
     ## Compute annual population occupancy
     for (year in 2:nyear){
-        psi[year] <- psi[year-1]*phi[year-1] + (1-psi[year-1])*gamma[year-1]
+        psi[year] <- psi[year-1]*expit(phi[year-1]) +
+            (1-psi[year-1])*expit(gamma[year-1])
     }
-
     ## Plot apparent occupancy
     psi.app <- apply(apply(y, c(1,3), max), 2, mean)
 
@@ -81,18 +83,24 @@ genDynamicOccData <- function(nsite = 100,
                 phi = phi,
                 gamma = gamma,
                 p = p,
-                y = y))
+                y = y,
+                mu.p = mu.p,
+                sigma.p = sigma.p,
+                mu.phi = mu.phi,
+                sigma.phi = sigma.phi,
+                mu.gamma = mu.gamma,
+                sigma.gamma = sigma.gamma))
 }
 
 
 ## prep data for nimble model
-prepModDataOcc <- function(data,
+prepModDataOcc <- function(sim.input,
                            monitors = c("psi1", "phi",
                                         "gamma",
                                         "p"),
                            include.zs=TRUE){
     ## data zs with 0s set to NAs
-    zs <- apply(data$y, c(1, 3), max)
+    zs <- apply(sim.input$y, c(1, 3), max)
     zs[zs == 0] <- NA
 
     ## initial condiations, NAs where 1s are in z, and 1s are where NA
@@ -103,21 +111,25 @@ prepModDataOcc <- function(data,
     inits <- list(z = zinits)
 
     ## constants
-    constants <- list(nsite = dim(data$y)[1],
-                      nrep = dim(data$y)[2],
-                      nyear = dim(data$y)[3])
-    if(include.zs){
-        model.data <- list(y = data$y, z = zs)
-        inits <- list(z = zinits,
-                      phi = data$phi,
-                      gamma = data$gamma,
-                      p = data$p,
-                      psi1= data$psi[1])
-    } else{
-        model.data <- list(y = data$y)
-        inits <- list(gamma = data$gamma,
-                      p = data$p,
-                      psi1= data$psi[1])
+    constants <- list(nsite = dim(sim.input$y)[1],
+                      nrep = dim(sim.input$y)[2],
+                      nyear = dim(sim.input$y)[3])
+
+    model.data <- list(y = sim.input$y, z = zs)
+    inits <- list(z = zinits,
+                  phi = sim.input$phi,
+                  gamma = sim.input$gamma,
+                  p = sim.input$p,
+                  psi1= sim.input$psi[1],
+                  mu.p = sim.input$mu.p,
+                  sigma.p = sim.input$sigma.p,
+                  mu.phi = sim.input$mu.phi,
+                  sigma.phi = sim.input$sigma.phi,
+                  mu.gamma = sim.input$mu.gamma,
+                  sigma.gamma = sim.input$sigma.gamma)
+    if(!include.zs){
+        model.data$z <- NULL
+        inits$z <- NULL
     }
     model.input <- list(data=model.data,
                         monitors=monitors,
