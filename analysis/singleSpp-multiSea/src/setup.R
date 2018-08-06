@@ -20,16 +20,6 @@ genDynamicOccData <- function(nsite = 100,
     ##  Generation and analysis of simulated data for multi season
     ##  occupancy model (adapted from Kery and Schaud 2012)
 
-    ## Function to simulate detection/nondetection data for dynamic site-occ model
-    ## Annual variation in probabilities of patch survival, colonization and
-    ## detection is specified by the bounds of a uniform distribution.
-
-    ## Function arguments:
-    ## nsite - Number of sites
-    ## nreps - Number of replicate surveys
-    ## nyear - Number of years
-    ## psi1 - occupancy probability in first year
-
     ## Set up some required arrays
     site <- 1:nsite					## Sites
     year <- 1:nyear					## Years
