@@ -29,8 +29,6 @@ genDynamicOccData <- function(nsite = 100,
     ## nreps - Number of replicate surveys
     ## nyear - Number of years
     ## psi1 - occupancy probability in first year
-    ## range.p - bounds of uniform distribution from which annual p drawn
-    ## range.psi and range.gamma - same for survival and colonization probability
 
     ## Set up some required arrays
     site <- 1:nsite					## Sites
@@ -100,7 +98,7 @@ prepModDataOcc <- function(sim.input,
     zs <- apply(sim.input$y, c(1, 3), max, na.rm=TRUE)
     zs[zs == 0] <- NA
 
-    ## initial condiations, NAs where 1s are in z, and 1s are where NA
+    ## initial conditions, NAs where 1s are in z, and 1s are where NA
     zinits <- zs
     zinits[zinits == 1] <- 2
     zinits[is.na(zinits)] <- 1
