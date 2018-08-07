@@ -120,13 +120,9 @@ dDynamicOccupancy <- nimbleFunction(
                    p = double(1), # should double(2)
                    log = double(0, default = 0)) {
 
-        numObs <- sum(x[,1]) ## do I have the right orientation?
+        numObs <- sum(x[,1])
         ## prob of the occupied sites out of the total sites given p
         ProbOccAndCount <- psi1 * dbinom(numObs, size = nrep, p = p[1], log = 0)
-
-        ## will become something like this (flip indices):
-        ## ProbOccAndCount <- psi1 * prod(dbinom(x[,1], size = nrep, p = p[,1], log = 0))
-
         ## prob of the empty sites
         ProbUnoccAndCount <- (1-psi1) * (numObs == 0)
         ## probably of the observed states

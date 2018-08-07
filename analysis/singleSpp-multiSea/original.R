@@ -13,6 +13,7 @@ model.input <- prepModDataOcc(sim.input)
 
 ss.ms.occ <- nimbleCode({
     ## Specify priors
+    ##  priors
     psi1 ~ dunif(0, 1)
     mu.p     ~ dnorm(0,0.001)
     sigma.p     ~ dunif(0,100)
@@ -24,7 +25,7 @@ ss.ms.occ <- nimbleCode({
     tau.phi <-  1/(sigma.phi*sigma.phi)
     tau.gamma <-  1/(sigma.gamma*sigma.gamma)
     for(year in 1:(nyear -1)) {
-        p[year]   ~ dnorm(mu.p,     tau.p)
+        p[year]  ~ dnorm(mu.p,     tau.p)
         phi[year] ~ dnorm(mu.phi, tau.phi)
         gamma[year] ~ dnorm(mu.gamma, tau.gamma)
     }
@@ -51,6 +52,25 @@ ss.ms.occ <- nimbleCode({
     }
 })
 
+
+ss.ms.occ.model <- nimbleModel(code=ss.ms.occ,
+                               constants=model.input$constants,
+                               data=model.input$data,
+                               inits=model.input$inits,
+                               check=FALSE)
+
+
+C.model <- compileNimble(ss.ms.occ.model)
+
+C.model$calculate()
+
+
+## This steps through the calculations in order
+for(node in C.model$getMaps('nodeNamesLHSall')) {
+    writeLines(node)
+    print(C.model$calculate(node))
+}
+
 input1 <- c(code=ss.ms.occ,
             model.input)
 
@@ -59,7 +79,7 @@ input1 <- c(code=ss.ms.occ,
 ## *********************************************************************
 
 ss.ms.orig <- compareMCMCs(input1,
-                           MCMCs=c('jags', 'nimble'),
+                           MCMCs=c('nimble', 'jags'),
                            niter=niter,
                            burnin = burnin,
                            summary=FALSE,
@@ -90,12 +110,12 @@ MCMCdefs.AFSS.block <- list('AFSS_block' = quote({
 }))
 
 ss.ms.AFSblocking <- compareMCMCs(input1,
-                                     MCMCs=c('AFSS_block'),
-                                     MCMCdefs = MCMCdefs.AFSS.block,
-                                     niter=niter,
-                                     burnin = burnin,
-                                     summary=FALSE,
-                                     check=FALSE)
+                                  MCMCs=c('AFSS_block'),
+                                  MCMCdefs = MCMCdefs.AFSS.block,
+                                  niter=niter,
+                                  burnin = burnin,
+                                  summary=FALSE,
+                                  check=FALSE)
 
 save(ss.ms.AFSblocking, file=file.path(save.dir, "AFSS_block.Rdata"))
 
@@ -123,12 +143,12 @@ MCMCdefs.RW.block <- list('RW_block' = quote({
 }))
 
 ss.ms.RWblocking <- compareMCMCs(input1,
-                                     MCMCs=c('RW_block'),
-                                     MCMCdefs = MCMCdefs.RW.block,
-                                     niter=niter,
-                                     burnin = burnin,
-                                     summary=FALSE,
-                                     check=FALSE)
+                                 MCMCs=c('RW_block'),
+                                 MCMCdefs = MCMCdefs.RW.block,
+                                 niter=niter,
+                                 burnin = burnin,
+                                 summary=FALSE,
+                                 check=FALSE)
 
 save(ss.ms.RWblocking, file=file.path(save.dir, "RW_block.Rdata"))
 

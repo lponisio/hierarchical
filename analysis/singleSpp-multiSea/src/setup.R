@@ -29,7 +29,7 @@ genDynamicOccData <- function(nsite = 100,
 
     ## Determine initial occupancy and demographic parameters
     psi[1] <- psi1				## Initial occupancy probability
-    p <- rnorm(nyear, mu.p, sigma.p)
+    p <-  rnorm(nyear, mu.p, sigma.p)
     phi <- rnorm(nyear -1, mu.phi, sigma.phi)
     gamma <- rnorm(nyear -1, mu.gamma, sigma.gamma)
     ## Generate latent states of occurrence
@@ -47,7 +47,7 @@ genDynamicOccData <- function(nsite = 100,
     ## Generate detection/nondetection data
     for(site in 1:nsite){
         for(year in 1:nyear){
-            prob <- z[site, year] * expit(p[year])
+            prob <- z[site, year]*expit(p[year])
             for(rep in 1:nreps){
                 y[site, rep ,year] <- rbinom(1, 1, prob)
             }
@@ -84,12 +84,11 @@ prepModDataOcc <- function(sim.input,
     zs <- apply(sim.input$y, c(1, 3), max, na.rm=TRUE)
     zs[zs == 0] <- NA
 
-    ## initial conditions, NAs where 1s are in z, and 1s are where NA
+    ## initial conditions, NAs where 1s in z, and 1s are where NA
     zinits <- zs
     zinits[zinits == 1] <- 2
     zinits[is.na(zinits)] <- 1
     zinits[zinits == 2] <- NA
-    inits <- list(z = zinits)
 
     ## constants
     constants <- list(nsite = dim(sim.input$y)[1],

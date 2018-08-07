@@ -42,6 +42,32 @@ ss.ms.occ <- nimbleCode({
     }
 })
 
+
+
+
+ss.ms.occ.model <- nimbleModel(code=ss.ms.occ,
+                        constants=model.input$constants,
+                        data=model.input$data,
+                        inits=model.input$inits,
+                        check=FALSE)
+
+
+C.model <- compileNimble(ss.ms.occ.model)
+
+site <- 2
+nyear <- 15
+nrep <- 10
+with(C.model,
+     dDynamicOccupancy(y[site, 1:nrep, 1:nyear],
+                       nrep=nrep,
+                       psi1=psi1,
+                       phi=expit(phi[1:(nyear-1)]),
+                       gamma=expit(gamma[1:(nyear-1)]),
+                       p=p[1:nyear],
+                       log = TRUE)
+     )
+
+
 input1 <- c(code=ss.ms.occ,
             model.input)
 
@@ -54,7 +80,7 @@ ss.ms.filter <- compareMCMCs(input1,
                              niter=niter,
                              burnin = burnin,
                              summary=FALSE,
-                             check=FALSE)
+                             check=TRUE)
 
 save(ss.ms.filter, file=file.path(save.dir, "filter.Rdata"))
 
