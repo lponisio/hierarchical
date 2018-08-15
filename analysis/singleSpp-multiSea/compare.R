@@ -29,6 +29,12 @@ load(file=file.path(save.dir, "RW_block.Rdata"))
 ##  RW block and filtering
 load(file=file.path(save.dir, "filter_RW_block.Rdata"))
 
+## slice
+load(file=file.path(save.dir, "slice.Rdata"))
+
+## ##  slice and filtering
+## load(file=file.path(save.dir, "filter_slice.Rdata"))
+
 
 ## rename results
 ss.ms.orig[[1]] <- rename_MCMC_comparison_method(c('nimble', 'jags'),
@@ -57,6 +63,11 @@ ss.ms.filter.RWblocking[[1]] <- rename_MCMC_comparison_method('RW_block',
                                               comparison=ss.ms.filter.RWblocking[[1]])
 
 
+ss.ms.slice[[1]] <- rename_MCMC_comparison_method('slice_jags',
+                                                   'JAGS-like-NIMBLE',
+                                              comparison=ss.ms.slice[[1]])
+
+
 
 ## ss.ms.subsamp[[1]] <- rename_MCMC_comparison_method('nimbleSubsamp',
 ##                                                     'NIMBLE-subsample',
@@ -67,9 +78,10 @@ ss.ms.filter.RWblocking[[1]] <- rename_MCMC_comparison_method('RW_block',
 ss.ms.occ.all <- combine_MCMC_comparison_results(ss.ms.orig[[1]],
                                                  ss.ms.AFSblocking[[1]],
                                                  ss.ms.RWblocking[[1]],
-                                                 ## ss.ms.filter[[1]],
+                                                 ss.ms.slice[[1]],
+                                                 ss.ms.filter[[1]],
                                                  ## ss.ms.filter.AFSblocking[[1]],
-                                                 ## ss.ms.filter.RWblocking[[1]],
+                                                 ss.ms.filter.RWblocking[[1]],
                                                  name = "ss.ms" )
 
 make_MCMC_comparison_pages(ss.ms.occ.all,

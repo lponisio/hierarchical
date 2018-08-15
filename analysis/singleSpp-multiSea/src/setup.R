@@ -10,7 +10,7 @@ genDynamicOccData <- function(nsite = 100,
                               nreps = 10,
                               nyear = 15,
                               psi1 = runif(1),
-                              mu.p = rnorm(1),
+                              mu.p = 1.5,
                               sigma.p = runif(1),
                               mu.phi = rnorm(1),
                               sigma.phi = runif(1),
@@ -19,14 +19,12 @@ genDynamicOccData <- function(nsite = 100,
 
     ##  Generation and analysis of simulated data for multi season
     ##  occupancy model (adapted from Kery and Schaud 2012)
-
     ## Set up some required arrays
     site <- 1:nsite					## Sites
     year <- 1:nyear					## Years
     psi <- rep(NA, nyear)				## Occupancy probability
     muZ <- z <- array(dim = c(nsite, nyear))	## Expected and realized occurrence
     y <- array(NA, dim = c(nsite, nreps, nyear))	## Detection histories
-
     ## Determine initial occupancy and demographic parameters
     psi[1] <- psi1				## Initial occupancy probability
     p <-  rnorm(nyear, mu.p, sigma.p)
@@ -38,12 +36,11 @@ genDynamicOccData <- function(nsite = 100,
     ## Later years
     for(site in 1:nsite){				## Loop over sites
         for(year in 2:nyear){				## Loop over years
-            muZ[year] <- z[site, year-1]*expit(phi[year-1]) +
+            muZ[site, year] <- z[site, year-1]*expit(phi[year-1]) +
                 (1-z[site, year-1])*expit(gamma[year-1]) ## Prob for occ.
-            z[site,year] <- rbinom(1, 1, muZ[year])
+            z[site,year] <- rbinom(1, 1, muZ[site, year])
         }
     }
-
     ## Generate detection/nondetection data
     for(site in 1:nsite){
         for(year in 1:nyear){
@@ -59,6 +56,7 @@ genDynamicOccData <- function(nsite = 100,
         psi[year] <- psi[year-1]*expit(phi[year-1]) +
             (1-psi[year-1])*expit(gamma[year-1])
     }
+
     return(list(nsite = nsite,
                 nreps = nreps,
                 nyear = nyear,
