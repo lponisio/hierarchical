@@ -118,14 +118,14 @@ makeModel <- function(ffilter, hyper.param){
                 for(i in 1:nsite) {
                     ## removes the z's and muZ's from the model and compute
                     ## the probability of all reps over all years for one site.
-                    y[i, 1:nrep, 1:nyear] ~ dDynamicOccupancy(nrep,
+                    y[i, 1:nrep, 1:nyear] ~ dDynamicOccupancyNoYr(nrep,
                                                               psi1,
-                                                              expit(mu.phi[1:(nyear-1)]),
-                                                              expit(mu.gamma[1:(nyear-1)]),
-                                                              expit(mu.p[1:nyear]))
+                                                              expit(mu.phi),
+                                                              expit(mu.gamma),
+                                                              expit(mu.p))
                 }
             })
         }
     }
-    return(  ss.ms.occ )
+    return(ss.ms.occ)
 }

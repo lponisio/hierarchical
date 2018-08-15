@@ -52,7 +52,13 @@ MCMCdefs.slice <- list('jags_like_nimble' = quote({
     parms.gam <- Rmodel$getNodeNames(
                             includeData = FALSE)[grepl("^gamma",
                             Rmodel$getNodeNames(includeData = FALSE))]
-    phi.gam <- c(parms.phi, parms.gam)
+    parms.mu <- Rmodel$getNodeNames(
+                            includeData = FALSE)[grepl("^mu",
+                             Rmodel$getNodeNames(includeData = FALSE))]
+    parms.sigma <- Rmodel$getNodeNames(
+                            includeData = FALSE)[grepl("^sigma",
+                            Rmodel$getNodeNames(includeData = FALSE))]
+    phi.gam <- c(parms.phi, parms.gam, parms.mu, parms.sigma)
     ## find node names for random effects
     for(i in 1:length(phi.gam)){
         customSpec$removeSamplers(phi.gam[i], print=FALSE)

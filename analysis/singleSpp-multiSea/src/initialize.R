@@ -30,7 +30,8 @@ burnin <- 1e1*scale
 niter <- (1e3)*scale
 
 
-runAllMCMC <- function(i, input1, niter, burnin, ffilter,  hyper.param){
+runAllMCMC <- function(i, input1, niter, burnin, ffilter,
+                       hyper.param, MCMCdefs){
     print(i)
     if(i == 'nimble' | i == 'jags'){
         ss.ms.samples <- compareMCMCs(input1,
@@ -57,7 +58,7 @@ runAllMCMC <- function(i, input1, niter, burnin, ffilter,  hyper.param){
 
 
 
-runAllModels <- function(ffilter, hyper.param, niter, burnin){
+runAllModels <- function(ffilter, hyper.param, niter, burnin, MCMCs, MCMCdefs){
     data <- genDynamicOccData()
     model.input <- prepModDataOcc(data, include.zs=!ffilter)
     if(!hyper.param){
@@ -67,5 +68,6 @@ runAllModels <- function(ffilter, hyper.param, niter, burnin){
     ss.ms.occ <- makeModel(ffilter, hyper.param)
     input1 <- c(code=ss.ms.occ,
                 model.input)
-    lapply(MCMCs, runAllMCMC, input1, niter, burnin,  ffilter,  hyper.param)
+    mclapply(MCMCs, runAllMCMC, input1, niter, burnin,  ffilter,
+           hyper.param, MCMCdefs)
 }
