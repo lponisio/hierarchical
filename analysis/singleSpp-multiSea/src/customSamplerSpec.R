@@ -47,18 +47,20 @@ MCMCdefs.slice <- list('jags_like_nimble' = quote({
     ## continous nodes.
     customSpec <- configureMCMC(Rmodel)
     parms.phi <- Rmodel$getNodeNames(
-                            includeData = FALSE)[grepl("^phi",
+                            includeData = FALSE)[grepl("phi",
                             Rmodel$getNodeNames(includeData = FALSE))]
     parms.gam <- Rmodel$getNodeNames(
-                            includeData = FALSE)[grepl("^gamma",
+                            includeData = FALSE)[grepl("gamma",
                             Rmodel$getNodeNames(includeData = FALSE))]
-    parms.mu <- Rmodel$getNodeNames(
-                            includeData = FALSE)[grepl("^mu",
-                             Rmodel$getNodeNames(includeData = FALSE))]
-    parms.sigma <- Rmodel$getNodeNames(
-                            includeData = FALSE)[grepl("^sigma",
-                            Rmodel$getNodeNames(includeData = FALSE))]
-    phi.gam <- c(parms.phi, parms.gam, parms.mu, parms.sigma)
+    ## parms.mu <- Rmodel$getNodeNames(
+    ##                         includeData = FALSE)[grepl("^mu",
+    ##                          Rmodel$getNodeNames(includeData = FALSE))]
+    ## parms.sigma <- Rmodel$getNodeNames(
+    ##                         includeData = FALSE)[grepl("^sigma",
+    ##                         Rmodel$getNodeNames(includeData = FALSE))]
+    phi.gam <- c(parms.phi, parms.gam)
+    phi.gam <- phi.gam[!grepl("tau", phi.gam)]
+    phi.gam <- phi.gam[!grepl("lifted", phi.gam)]
     ## find node names for random effects
     for(i in 1:length(phi.gam)){
         customSpec$removeSamplers(phi.gam[i], print=FALSE)

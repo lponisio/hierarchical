@@ -25,14 +25,25 @@ dir.create(file.path("../../../occupancy_saved/saved/singleSpp-multiSea/saved"),
 save.dir <-  "../../../occupancy_saved/saved/singleSpp-multiSea/saved"
 
 ## MCMC settings
-scale <- 1e1
+scale <- 1
 burnin <- 1e1*scale
 niter <- (1e3)*scale
 
+logit <- function(x) {
+    log(x/(1 - x))
+}
+
+expit <- function(x) {
+    exp(x)/(1 + exp(x))
+}
+
+
 
 runAllMCMC <- function(i, input1, niter, burnin, ffilter,
-                       hyper.param, MCMCdefs){
-    print(i)
+                       hyper.param, MCMCdefs, mu.p){
+    print(sprintf("hyperparam%s_filter%s_sampler%s_mup%s",
+                                               hyper.param,
+                                               ffilter, i, mu.p))
     if(i == 'nimble' | i == 'jags'){
         ss.ms.samples <- compareMCMCs(input1,
                                       MCMCs=i,
@@ -51,15 +62,16 @@ runAllMCMC <- function(i, input1, niter, burnin, ffilter,
 
     }
     save(ss.ms.samples, file=file.path(save.dir,
-                                       sprintf("hyperparam%s_filter%s_sampler%s.Rdata",
+                                       sprintf("hyperparam%s_filter%s_sampler%s_mup%s.Rdata",
                                                hyper.param,
-                                               ffilter, i)))
+                                               ffilter, i, mu.p)))
 }
 
 
 
-runAllModels <- function(ffilter, hyper.param, niter, burnin, MCMCs, MCMCdefs){
-    data <- genDynamicOccData()
+runAllModels <- function(ffilter, hyper.param, niter, burnin, MCMCs,
+    MCMCdefs, mu.p){
+    data <- genDynamicOccData(mu.p=mu.p)
     model.input <- prepModDataOcc(data, include.zs=!ffilter)
     if(!hyper.param){
         to.drop <- c("sigma.phi", "sigma.gamma", "sigma.p", "p", "phi", "gamma")
@@ -68,6 +80,6 @@ runAllModels <- function(ffilter, hyper.param, niter, burnin, MCMCs, MCMCdefs){
     ss.ms.occ <- makeModel(ffilter, hyper.param)
     input1 <- c(code=ss.ms.occ,
                 model.input)
-    mclapply(MCMCs, runAllMCMC, input1, niter, burnin,  ffilter,
-           hyper.param, MCMCdefs)
+    lapply(MCMCs, runAllMCMC, input1, niter, burnin,  ffilter,
+           hyper.param, MCMCdefs, mu.p)
 }
