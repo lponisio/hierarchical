@@ -3,19 +3,27 @@ if(latent){
     if(hyper.param){
         ## latent states and hyper param
         ms.ss.occ <- nimbleCode({
-            ## Define prior distributions for community-level model parameters
+            ## Define prior distributions for community-level model
+            ## parameters
             cato.occ.mean ~ dunif(0,1)
             mu.ucato <- log(cato.occ.mean) - log(1-cato.occ.mean)
             sigma.ucato ~ dunif(0, 100)
             tau.ucato <-  1/(sigma.ucato*sigma.ucato)
+
             fcw.occ.mean ~ dunif(0,1)
             mu.ufcw <- log(fcw.occ.mean) - log(1-fcw.occ.mean)
             sigma.ufcw ~ dunif(0, 100)
             tau.ufcw <-  1/(sigma.ufcw*sigma.ufcw)
+
             cato.det.mean ~ dunif(0,1)
             mu.vcato <- log(cato.det.mean) - log(1-cato.det.mean)
+            sigma.vcato ~ dunif(0, 100)
+            tau.vcato <-  1/(sigma.vcato*sigma.vcato)
+
             fcw.det.mean ~ dunif(0,1)
             mu.vfcw <- log(fcw.det.mean) - log(1-fcw.det.mean)
+            sigma.vfcw ~ dunif(0, 100)
+            tau.vfcw <-  1/(sigma.vfcw*sigma.vfcw)
 
             ## random effects
             mu.a1 ~ dnorm(0, 0.001)
@@ -30,10 +38,6 @@ if(latent){
             mu.a4 ~ dnorm(0, 0.001)
             sigma.a4 ~ dunif(0, 100)
             tau.a4 <-  1/(sigma.a4*sigma.a4)
-            sigma.vcato ~ dunif(0, 100)
-            sigma.vfcw ~ dunif(0, 100)
-            tau.vcato <-  1/(sigma.vcato*sigma.vcato)
-            tau.vfcw <-  1/(sigma.vfcw*sigma.vfcw)
             mu.b1 ~ dnorm(0, 0.001)
             sigma.b1 ~ dunif(0, 100)
             tau.b1 <-  1/(sigma.b1*sigma.b1)
@@ -79,6 +83,10 @@ if(latent){
                 }
             }
         })
+
+
+
+
     } else {
         ## latent states, no hypper param
         ms.ss.occ <- nimbleCode({
@@ -89,13 +97,24 @@ if(latent){
             a4 ~ dnorm(0, 0.001)
             b1 ~ dnorm(0, 0.001)
             b2 ~ dnorm(0, 0.001)
-            u.cato ~ dnorm(0, 0.001)
-            u.fcw ~ dnorm(0, 0.001)
-            v.cato ~ dnorm(0, 0.001)
-            v.fcw ~ dnorm(0, 0.001)
+
+            cato.occ ~ dunif(0,1)
+            u.cato <- log(cato.occ) - log(1-cato.occ)
+
+            fcw.occ ~ dunif(0,1)
+            u.fcw <- log(fcw.occ) - log(1-fcw.occ)
+
+            cato.det ~ dunif(0,1)
+            v.cato <- log(cato.det) - log(1-cato.det)
+
+            fcw.det ~ dunif(0,1)
+            v.fcw <- log(fcw.det) - log(1-fcw.det)
 
 
-            for (i in 1:(num.species)) {
+             for (i in 1:(num.species)) {
+                ## Create a loop to estimate the Z matrix (true occurrence for
+                ## species i at point j).
+
                 for (j in 1:num.points) {
                     logit(psi[j,i]) <- u.cato*(1-habitat.ind[j]) +
                         u.fcw*habitat.ind[j] +
@@ -211,36 +230,42 @@ if(latent){
             a4 ~ dnorm(0, 0.001)
             b1 ~ dnorm(0, 0.001)
             b2 ~ dnorm(0, 0.001)
-            u.cato ~ dnorm(0, 0.001)
-            u.fcw ~ dnorm(0, 0.001)
-            v.cato ~ dnorm(0, 0.001)
-            v.fcw ~ dnorm(0, 0.001)
+            cato.occ ~ dunif(0,1)
+            u.cato <- log(cato.occ) - log(1-cato.occ)
+            fcw.occ ~ dunif(0,1)
+            u.fcw <- log(fcw.occ) - log(1-fcw.occ)
+            cato.det ~ dunif(0,1)
+            v.cato <- log(cato.det) - log(1-cato.det)
+            fcw.det ~ dunif(0,1)
+            v.fcw <- log(fcw.det) - log(1-fcw.det)
 
-            for (i in 1:(num.species)) {
-                ## Create priors for species i from the community level prior
-                ## distributions
+         for (i in 1:(num.species)) {
 
                 ## vectorize the calculation of psi.
-                logit(psi[1:num.points]) <-
+                logit(psi[1:num.points,i]) <-
                     u.cato*(1-habitat.ind[1:num.points]) +
                     u.fcw*habitat.ind[1:num.points] +
                     a1*ufc.linear[1:num.points] +
                     a2*ufc.quadratic[1:num.points] +
                     a3*ba.linear[1:num.points] +
                     a4*ba.quadratic[1:num.points]
-                ## vectorized calculation
-                mu.psi[1:num.points] <- psi[1:num.points]
+                mu.psi[1:num.points,i] <- psi[1:num.points, i]
 
-                logit(p[1:num.points, 1:max.num.reps]) <-
+                logit(p[1:num.points, 1:max.num.reps, i]) <-
                     (v.cato*(1-habitat.ind[1:num.points]) +
                      v.fcw*habitat.ind[1:num.points]) %*%
                     asRow(onesRow[1, 1:max.num.reps])+
                     b1*date.linear[1:num.points,1:max.num.reps] +
                     b2*date.quadratic[1:num.points,1:max.num.reps]
 
+                ## user defined distribution to combine the bernoulli occupancy
+                ## and detection events.  We can also make this is a single
+                ## compuation for the entire matrix of locations-x-visits, for
+                ## each species (i)
+
                 X[1:num.points, 1:max.num.reps, i] ~ dBernDetectionMatrix(
-                    occProb = mu.psi[1:num.points],
-                    detectionProb = p[1:num.points, 1:max.num.reps],
+                    occProb = mu.psi[1:num.points,i],
+                    detectionProb = p[1:num.points, 1:max.num.reps,i],
                     numReps = num.reps[1:num.points])
             }
         })

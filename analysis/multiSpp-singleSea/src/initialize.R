@@ -24,7 +24,7 @@ survey.dates <- read.csv("data/survey_dates.csv")
 habitat <- read.csv("data/habitat.csv")
 
 ## mcmc settings
-scale <- 1e3
+scale <- 1
 burnin <- 1e2*scale
 niter <- (1e3)*scale
 

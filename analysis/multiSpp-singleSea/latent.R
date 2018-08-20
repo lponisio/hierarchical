@@ -3,6 +3,9 @@ rm(list=ls())
 setwd('analysis/multiSpp-singleSea')
 
 source('src/initialize.R')
+latent <- c(TRUE)
+hyper.param <- c(FALSE)
+
 ## don't agument data
 n.zeroes <- 0
 model.input <- prepMutiSpData(survey.data,
@@ -11,7 +14,17 @@ model.input <- prepMutiSpData(survey.data,
                               habitat,
                               n.zeros,
                               monitors,
-                              remove.zs=FALSE)
+                              remove.zs=!latent,
+                              hyper.param=hyper.param)
+
+source('src/models.R')
+input1 <- c(code=ms.ss.occ, model.input)
+ss.ms.samples <- compareMCMCs(input1,
+                              MCMCs='nimble',
+                              niter=niter,
+                              burnin = burnin,
+                              summary=FALSE,
+                              check=FALSE)
 
 ## *********************************************************************
 ## multi-species site-occupancy models: original

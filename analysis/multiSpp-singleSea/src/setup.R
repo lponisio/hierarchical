@@ -148,7 +148,8 @@ prepMutiSpData <- function(survey.data,
                            n.zeros,
                            monitors,
                            remove.zs=TRUE,
-                           vectorized=TRUE){
+                           vectorized=TRUE,
+                           hyper.param=TRUE){
     ## reformat data
     data <- reformatData(survey.data,
                          survey.dates,
@@ -162,11 +163,7 @@ prepMutiSpData <- function(survey.data,
 
     ## Z data for whether or not a species was ever observed
     ## zs with 1s as 1s and 0s as NAs
-    ## CHANGE: generate correct initial values for z's:
-    ## function arg is "na.rm", not "rm.na"
-    ## -DT
-    ##zs <- apply(data$X, c(1, 3), max, rm.na=TRUE)
-    zs <- apply(data$X, c(1, 3), max, na.rm=TRUE)   ## NEW
+    zs <- apply(data$X, c(1, 3), max, na.rm=TRUE)
     zs[zs == 0] <- NA
     zs[!is.finite(zs)] <- NA
 
@@ -187,28 +184,44 @@ prepMutiSpData <- function(survey.data,
     ## initial values
     omega.draw <- runif(1, num.species/(num.species + n.zeroes), 1)
 
-    ## inital conditions. 1 should be 1, NA should be a 0 or 1
+    ## inital conditions. 1 should be NA, NA should be a 0 or 1
     zinits <- zs
     zinits[zinits == 1] <- 2
     ## zinits[is.na(zinits)] <- 1
     zinits[is.na(zinits)] <- sample(0:1, sum(is.na(zinits)),
                                     replace=TRUE)
     zinits[zinits == 2] <- NA
-
-    inits <-list(Z=zinits,
-                 omega = omega.draw,
-                 w = c(rep(1, num.species),
-                       rbinom(n.zeroes, size = 1, prob = omega.draw)),
-                 u.cato = rnorm(num.species + n.zeroes),
-                 v.cato = rnorm(num.species + n.zeroes),
-                 u.fcw = rnorm(num.species + n.zeroes) ,
-                 v.fcw = rnorm(num.species + n.zeroes),
-                 a1 = rnorm(num.species + n.zeroes),
-                 a2 = rnorm(num.species + n.zeroes),
-                 a3 = rnorm(num.species + n.zeroes),
-                 a4 = rnorm(num.species + n.zeroes),
-                 b1 = rnorm(num.species + n.zeroes),
-                 b2 = rnorm(num.species + n.zeroes))
+    if(hyper.param){
+        inits <-list(Z=zinits,
+                     omega = omega.draw,
+                     w = c(rep(1, num.species),
+                           rbinom(n.zeroes, size = 1, prob = omega.draw)),
+                     u.cato = rnorm(num.species + n.zeroes),
+                     v.cato = rnorm(num.species + n.zeroes),
+                     u.fcw = rnorm(num.species + n.zeroes) ,
+                     v.fcw = rnorm(num.species + n.zeroes),
+                     a1 = rnorm(num.species + n.zeroes),
+                     a2 = rnorm(num.species + n.zeroes),
+                     a3 = rnorm(num.species + n.zeroes),
+                     a4 = rnorm(num.species + n.zeroes),
+                     b1 = rnorm(num.species + n.zeroes),
+                     b2 = rnorm(num.species + n.zeroes))
+    } else{
+        inits <-list(Z=zinits,
+                     omega = omega.draw,
+                     w = c(rep(1, num.species),
+                           rbinom(n.zeroes, size = 1, prob = omega.draw)),
+                     u.cato = rnorm(1),
+                     v.cato = rnorm(1),
+                     u.fcw = rnorm(1) ,
+                     v.fcw = rnorm(1),
+                     a1 = rnorm(1),
+                     a2 = rnorm(1),
+                     a3 = rnorm(1),
+                     a4 = rnorm(1),
+                     b1 = rnorm(1),
+                     b2 = rnorm(1))
+    }
 
     ## constants
     constants <- list(num.species = num.species,
@@ -239,8 +252,8 @@ prepMutiSpData <- function(survey.data,
         inits[["Z"]] <- NULL
         ## additional constants and dats for models where z is removed
         constants$max.num.reps <- max(constants$num.reps)
-        model.data$onesRow <- matrix(rep(1, constants$max.num.reps), nrow =
-                                                                         1)
+        model.data$onesRow <- matrix(rep(1, constants$max.num.reps),
+                                     nrow =1)
     }
     return(list(monitors=monitors,
                 constants=constants,
