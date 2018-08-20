@@ -145,8 +145,7 @@ prepMutiSpData <- function(survey.data,
                            survey.dates,
                            species.groups,
                            habitat,
-                           n.zeros,
-                           monitors,
+                           n.zeroes,
                            remove.zs=TRUE,
                            vectorized=TRUE,
                            hyper.param=TRUE){
@@ -233,7 +232,7 @@ prepMutiSpData <- function(survey.data,
     if(n.zeroes == 0){
         inits[c("w", "omega")] <- NULL
         constants[c("n.zeroes")] <- NULL
-        monitors <- monitors[!monitors == "N"]
+
     }
 
     ## these were removed from the model
@@ -255,8 +254,7 @@ prepMutiSpData <- function(survey.data,
         model.data$onesRow <- matrix(rep(1, constants$max.num.reps),
                                      nrow =1)
     }
-    return(list(monitors=monitors,
-                constants=constants,
+    return(list(constants=constants,
                 inits=inits,
                 data=model.data))
 }

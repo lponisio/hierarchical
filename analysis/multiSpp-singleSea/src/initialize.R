@@ -7,12 +7,9 @@ library(nimble)
 library(igraph)
 library(reshape)
 source("../all/plotting.R")
-source("../all/runNimble.R")
-source("../all/comparMCMCs_withMonitors.R")
-source("../all/samplers/sampler_crossLevel_new.R")
-source("../all/samplers/leaveOutSampler.R")
 source("src/setup.R")
 source("src/multispeciesOcc.R")
+source("src/models.R")
 
 dir.create(file.path("../../../occupancy_saved/saved/multiSpp-singleSea/saved"),
            showWarnings = FALSE)
@@ -28,13 +25,60 @@ scale <- 1
 burnin <- 1e2*scale
 niter <- (1e3)*scale
 
-monitors <- c('mu.a1','mu.a2','mu.a3','mu.a4',
-              'sigma.a1','sigma.a2','sigma.a3','sigma.a4',
-              'cato.occ.mean', 'fcw.occ.mean',
-              'cato.det.mean', 'fcw.det.mean',
-              'sigma.ucato', 'sigma.vcato', 'sigma.ufcw',
-              'sigma.vfcw', 'mu.b1', 'mu.b2', 'sigma.b1',
-              'sigma.b2')
-## mid level params kept track of for diagnosing problems with model
-## 'u.cato', 'u.fcw',
-## 'a1', 'a2', 'a3', 'a4', 'v.cato', 'v.fcw', 'b1', 'b2')
+
+logit <- function(x) {
+    log(x/(1 - x))
+}
+
+expit <- function(x) {
+    exp(x)/(1 + exp(x))
+}
+
+
+
+runAllMCMC <- function(i, input1, niter, burnin, latent,
+                       hyper.param, MCMCdefs){
+    print(sprintf("hyperparam%s_latent%s_sampler%s",
+                                               hyper.param,
+                                               latent, i))
+    if(i == 'nimble' | i == 'jags'){
+       ms.ss.samples <- compareMCMCs(input1,
+                                      MCMCs=i,
+                                      niter=niter,
+                                      burnin = burnin,
+                                      summary=FALSE,
+                                      check=FALSE)
+    } else{
+        ms.ss.samples <- compareMCMCs(input1,
+                                      MCMCs=i,
+                                      MCMCdefs = MCMCdefs[i],
+                                      niter=niter,
+                                      burnin = burnin,
+                                      summary=FALSE,
+                                      check=FALSE)
+
+    }
+    save(ms.ss.samples, file=file.path(save.dir,
+                                       sprintf("hyperparam%s_latent%s_sampler%s.Rdata",
+                                               hyper.param,
+                                               latent, i)))
+}
+
+
+
+runAllModels <- function(latent, hyper.param, niter, burnin,
+                         MCMCs, MCMCdefs){
+    model.input <- prepMutiSpData(survey.data,
+                                  survey.dates,
+                                  species.groups,
+                                  habitat,
+                                  n.zeroes =0, ## don't augment data
+                                  remove.zs=!latent,
+                                  hyper.param=hyper.param)
+
+    ms.ss.occ <- makeModel(latent, hyper.param)
+    input1 <- c(code=ms.ss.occ,
+                model.input)
+    lapply(MCMCs, runAllMCMC, input1, niter, burnin,  latent,
+           hyper.param, MCMCdefs)
+}
