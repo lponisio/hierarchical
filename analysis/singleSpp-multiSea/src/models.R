@@ -1,5 +1,5 @@
-makeModel <- function(ffilter, hyper.param){
-    if(!ffilter){
+makeModel <- function(latent, hyper.param){
+    if(latent){
         if(hyper.param){
             ## ***************************************************************
             ## no filtering, including hyper param
@@ -77,7 +77,7 @@ makeModel <- function(ffilter, hyper.param){
         }
     }
 
-    if(ffilter){
+    if(!latent){
         if(hyper.param){
             ## ***************************************************************
             ## filtering and hyper param

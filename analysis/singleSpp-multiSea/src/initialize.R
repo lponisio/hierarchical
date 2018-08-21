@@ -39,11 +39,11 @@ expit <- function(x) {
 
 
 
-runAllMCMC <- function(i, input1, niter, burnin, ffilter,
+runAllMCMC <- function(i, input1, niter, burnin, latent,
                        hyper.param, MCMCdefs, mu.p){
-    print(sprintf("hyperparam%s_filter%s_sampler%s_mup%s",
+    print(sprintf("hyperparam%s_latent%s_sampler%s_mup%s",
                                                hyper.param,
-                                               ffilter, i, mu.p))
+                                               latent, i, mu.p))
     if(i == 'nimble' | i == 'jags'){
         ss.ms.samples <- compareMCMCs(input1,
                                       MCMCs=i,
@@ -62,31 +62,24 @@ runAllMCMC <- function(i, input1, niter, burnin, ffilter,
 
     }
     save(ss.ms.samples, file=file.path(save.dir,
-                                       sprintf("hyperparam%s_filter%s_sampler%s_mup%s.Rdata",
+                                       sprintf("hyperparam%s_latent%s_sampler%s_mup%s.Rdata",
                                                hyper.param,
-                                               ffilter, i, mu.p)))
+                                               latent, i, mu.p)))
 }
 
 
 
-runAllModels <- function(ffilter, hyper.param, niter, burnin, MCMCs,
+runAllModels <- function(latent, hyper.param, niter, burnin, MCMCs,
                          MCMCdefs, mu.p){
-    n.zeroes <- 0
-    model.input <- prepMutiSpData(survey.data,
-                                  survey.dates,
-                                  species.groups,
-                                  habitat,
-                                  n.zeros,
-                                  monitors,
-                                  remove.zs=!latent,
-                                  hyper.param=hyper.param)
-    if(!hyper.param){
-        to.drop <- c("sigma.phi", "sigma.gamma", "sigma.p", "p", "phi", "gamma")
-        model.input$inits[to.drop] <- NULL
+        data <- genDynamicOccData(mu.p=mu.p)
+        model.input <- prepModDataOcc(data, include.zs=latent)
+        if(!hyper.param){
+            to.drop <- c("sigma.phi", "sigma.gamma", "sigma.p", "p", "phi", "gamma")
+            model.input$inits[to.drop] <- NULL
+        }
+        ss.ms.occ <- makeModel(latent, hyper.param)
+        input1 <- c(code=ss.ms.occ,
+                    model.input)
+        lapply(MCMCs, runAllMCMC, input1, niter, burnin,  latent,
+               hyper.param, MCMCdefs, mu.p)
     }
-    ss.ms.occ <- makeModel(ffilter, hyper.param)
-    input1 <- c(code=ss.ms.occ,
-                model.input)
-    lapply(MCMCs, runAllMCMC, input1, niter, burnin,  ffilter,
-           hyper.param, MCMCdefs, mu.p)
-}

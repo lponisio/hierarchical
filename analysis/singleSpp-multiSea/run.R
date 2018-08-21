@@ -11,8 +11,8 @@ MCMC.defs <- c('nimble', MCMCdefs.slice,  'jags', MCMCdefs.RW.block,
                MCMCdefs.AFSS.block)
 names(MCMC.defs) <- cust.MCMCs
 
-## TRUE for model integrating over latent states
-filter.opts <- c(TRUE, FALSE)
+## FALSE for model integrating over latent states
+latent.opts <- c(TRUE, FALSE)
 ## true for model including hyper paramters for year effects on phi,
 ## gamma and p
 hyper.param.opts <- c(TRUE, FALSE)
@@ -21,8 +21,8 @@ mus.p <- c(1.5, 0.2)
 
 for(mu.p in mus.p){
     for(h in hyper.param.opts){
-        for(ff in filter.opts) {
-            if(ff){ ## filtering
+        for(l in latent.opts) {
+            if(!l){ ## filtering, no latent states
                 these.MCMCs <- cust.MCMCs[1:2]
             } else if(!h){ ## no filtering or hyper param
                 these.MCMCs <- cust.MCMCs[1:3]
@@ -30,7 +30,7 @@ for(mu.p in mus.p){
                 these.MCMCs <- cust.MCMCs
             }
 
-            runAllModels(ffilter=ff,
+            runAllModels(latent=l,
                          hyper.param=h,
                          niter=niter,
                          burnin=burnin,
