@@ -1,7 +1,9 @@
 makeModel <- function(ffilter, hyper.param){
     if(!ffilter){
         if(hyper.param){
+            ## ***************************************************************
             ## no filtering, including hyper param
+            ## ***************************************************************
             ss.ms.occ <- nimbleCode({
                 ## Specify priors
                 psi1 ~ dunif(0, 1)
@@ -43,7 +45,9 @@ makeModel <- function(ffilter, hyper.param){
             })
 
         } else{
+            ## ***************************************************************
             ## no filtering, no hyper param
+            ## ***************************************************************
             ss.ms.occ <- nimbleCode({
                 ## Specify priors
                 psi1 ~ dunif(0, 1)
@@ -75,7 +79,9 @@ makeModel <- function(ffilter, hyper.param){
 
     if(ffilter){
         if(hyper.param){
+            ## ***************************************************************
             ## filtering and hyper param
+            ## ***************************************************************
             ss.ms.occ <- nimbleCode({
                 ##  priors
                 psi1 ~ dunif(0, 1)
@@ -107,7 +113,9 @@ makeModel <- function(ffilter, hyper.param){
                 }
             })
         }else{
+            ## ***************************************************************
             ## filtering, no hyper param
+            ## ***************************************************************
             ss.ms.occ <- nimbleCode({
                 ##  priors
                 psi1 ~ dunif(0, 1)
@@ -119,10 +127,10 @@ makeModel <- function(ffilter, hyper.param){
                     ## removes the z's and muZ's from the model and compute
                     ## the probability of all reps over all years for one site.
                     y[i, 1:nrep, 1:nyear] ~ dDynamicOccupancyNoYr(nrep,
-                                                              psi1,
-                                                              expit(mu.phi),
-                                                              expit(mu.gamma),
-                                                              expit(mu.p))
+                                                                  psi1,
+                                                                  expit(mu.phi),
+                                                                  expit(mu.gamma),
+                                                                  expit(mu.p))
                 }
             })
         }

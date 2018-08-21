@@ -25,7 +25,7 @@ dir.create(file.path("../../../occupancy_saved/saved/singleSpp-multiSea/saved"),
 save.dir <-  "../../../occupancy_saved/saved/singleSpp-multiSea/saved"
 
 ## MCMC settings
-scale <- 1
+scale <- 1e1
 burnin <- 1e1*scale
 niter <- (1e3)*scale
 
@@ -70,9 +70,16 @@ runAllMCMC <- function(i, input1, niter, burnin, ffilter,
 
 
 runAllModels <- function(ffilter, hyper.param, niter, burnin, MCMCs,
-    MCMCdefs, mu.p){
-    data <- genDynamicOccData(mu.p=mu.p)
-    model.input <- prepModDataOcc(data, include.zs=!ffilter)
+                         MCMCdefs, mu.p){
+    n.zeroes <- 0
+    model.input <- prepMutiSpData(survey.data,
+                                  survey.dates,
+                                  species.groups,
+                                  habitat,
+                                  n.zeros,
+                                  monitors,
+                                  remove.zs=!latent,
+                                  hyper.param=hyper.param)
     if(!hyper.param){
         to.drop <- c("sigma.phi", "sigma.gamma", "sigma.p", "p", "phi", "gamma")
         model.input$inits[to.drop] <- NULL

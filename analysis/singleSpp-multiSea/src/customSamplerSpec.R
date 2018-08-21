@@ -1,6 +1,8 @@
 MCMCdefs.RW.block <- list('RW_block' = quote({
+    ## ## ************************************************************
     ## block together corresponging phi and gamma for each year with
     ## random walk sampler
+    ## ***************************************************************
     customSpec <- configureMCMC(Rmodel)
     parms.phi <- Rmodel$getNodeNames(
                             includeData = FALSE)[grepl("^phi",
@@ -21,8 +23,10 @@ MCMCdefs.RW.block <- list('RW_block' = quote({
 
 
 MCMCdefs.AFSS.block <- list('AFSS_block' = quote({
+    ## ***************************************************************
     ## block together corresponging phi and gamma for each year with
     ## automated factor slice sampler
+    ## ***************************************************************
     customSpec <- configureMCMC(Rmodel)
     parms.phi <- Rmodel$getNodeNames(
                             includeData = FALSE)[grepl("^phi",
@@ -43,8 +47,10 @@ MCMCdefs.AFSS.block <- list('AFSS_block' = quote({
 
 
 MCMCdefs.slice <- list('jags_like_nimble' = quote({
+    ## ***************************************************************
     ## jags sampler specifications via nimble. Slice samplers on
     ## continous nodes.
+    ## ***************************************************************
     customSpec <- configureMCMC(Rmodel)
     parms.phi <- Rmodel$getNodeNames(
                             includeData = FALSE)[grepl("phi",
@@ -52,12 +58,6 @@ MCMCdefs.slice <- list('jags_like_nimble' = quote({
     parms.gam <- Rmodel$getNodeNames(
                             includeData = FALSE)[grepl("gamma",
                             Rmodel$getNodeNames(includeData = FALSE))]
-    ## parms.mu <- Rmodel$getNodeNames(
-    ##                         includeData = FALSE)[grepl("^mu",
-    ##                          Rmodel$getNodeNames(includeData = FALSE))]
-    ## parms.sigma <- Rmodel$getNodeNames(
-    ##                         includeData = FALSE)[grepl("^sigma",
-    ##                         Rmodel$getNodeNames(includeData = FALSE))]
     phi.gam <- c(parms.phi, parms.gam)
     phi.gam <- phi.gam[!grepl("tau", phi.gam)]
     phi.gam <- phi.gam[!grepl("lifted", phi.gam)]
@@ -70,12 +70,3 @@ MCMCdefs.slice <- list('jags_like_nimble' = quote({
     customSpec
 }))
 
-
-MCMCdefs.subsamp <- list('nimbleSubsamp' = quote({
-    customSpec <- configureMCMC(Rmodel)
-    customSpec$removeSamplers('z')
-    customSpec$addSampler('z', type = 'sampler_latentSub',
-                          control = list(leaveOutProportion = 0.6,
-                                         control = list()))
-    customSpec
-}))

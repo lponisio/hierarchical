@@ -2,7 +2,9 @@
 makeModel <- function(latent, hyper.param){
     if(latent){
         if(hyper.param){
-            ## latent states and hyper param
+            ## *********************************************************************
+            ## latent states and hyper param for species
+            ## *********************************************************************
             ms.ss.occ <- nimbleCode({
                 ## Define prior distributions for community-level model
                 ## parameters
@@ -89,7 +91,9 @@ makeModel <- function(latent, hyper.param){
 
 
         } else {
+            ## *********************************************************************
             ## latent states, no hyper param
+            ## *********************************************************************
             ms.ss.occ <- nimbleCode({
                 ## Define prior distributions
                 a1 ~ dnorm(0, 0.001)
@@ -143,7 +147,9 @@ makeModel <- function(latent, hyper.param){
 
     } else if (!latent){
         if(hyper.param){
-            ## integrate over latent states and with  hyper param
+            ## *********************************************************************
+            ## integrate over latent states and  hyper param
+            ## *********************************************************************
             ms.ss.occ <- nimbleCode({
                 ## Define prior distributions for community-level
                 ## model parameters
@@ -224,7 +230,9 @@ makeModel <- function(latent, hyper.param){
             })
 
         } else{
-            ## integrate over latent states and remove hyper param
+            ## *********************************************************************
+            ## integrate over latent states and no hyper param
+            ## *********************************************************************
             ms.ss.occ <- nimbleCode({
                 ## random effects
                 a1 ~ dnorm(0, 0.001)
