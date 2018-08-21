@@ -89,7 +89,7 @@ makeModel <- function(latent, hyper.param){
 
 
         } else {
-            ## latent states, no hypper param
+            ## latent states, no hyper param
             ms.ss.occ <- nimbleCode({
                 ## Define prior distributions
                 a1 ~ dnorm(0, 0.001)
@@ -113,8 +113,8 @@ makeModel <- function(latent, hyper.param){
 
 
                 for (i in 1:(num.species)) {
-                    ## Create a loop to estimate the Z matrix (true occurrence for
-                    ## species i at point j).
+                    ## Create a loop to estimate the Z matrix (true
+                    ## occurrence for species i at point j).
 
                     for (j in 1:num.points) {
                         logit(psi[j,i]) <- u.cato*(1-habitat.ind[j]) +
@@ -125,8 +125,9 @@ makeModel <- function(latent, hyper.param){
                             a4*ba.quadratic[j]
                         mu.psi[j,i] <- psi[j,i]
                         Z[j,i] ~ dbern(mu.psi[j,i])
-                        ## Create a loop to estimate detection for species i at point k
-                        ## during sampling period k.
+                        ## Create a loop to estimate detection for
+                        ## species i at point k during sampling period
+                        ## k.
                         for (k in 1:num.reps[j]) {
                             logit(p[j,k,i]) <-  v.cato*(1-habitat.ind[j]) +
                                 v.fcw*habitat.ind[j] +
@@ -144,7 +145,8 @@ makeModel <- function(latent, hyper.param){
         if(hyper.param){
             ## integrate over latent states and with  hyper param
             ms.ss.occ <- nimbleCode({
-                ## Define prior distributions for community-level model parameters
+                ## Define prior distributions for community-level
+                ## model parameters
                 cato.occ.mean ~ dunif(0,1)
                 mu.ucato <- log(cato.occ.mean) - log(1-cato.occ.mean)
                 sigma.ucato ~ dunif(0, 100)

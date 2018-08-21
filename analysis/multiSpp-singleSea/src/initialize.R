@@ -10,6 +10,7 @@ source("../all/plotting.R")
 source("src/setup.R")
 source("src/multispeciesOcc.R")
 source("src/models.R")
+source("src/customSamplerSpec.R")
 
 dir.create(file.path("../../../occupancy_saved/saved/multiSpp-singleSea/saved"),
            showWarnings = FALSE)
