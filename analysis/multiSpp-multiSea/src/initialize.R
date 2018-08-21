@@ -7,6 +7,7 @@ library(nimble)
 library(igraph)
 source("../all/plotting.R")
 source("src/models.R")
+source("src/customSamplerSpec.R")
 source("src/dynamicOcc.R")
 
 dir.create(file.path("../../../occupancy_saved/saved/multiSpp-multiSea/saved"),
