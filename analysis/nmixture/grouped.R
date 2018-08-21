@@ -44,7 +44,6 @@ nmixture.grouped <- nimbleCode( {
 
         ## new
         loglam[i] <- loglam.fixed[i] + eps.lam[i]
-
         loglam.lim[i] <- min(250, max(-250, loglam[i]))  ## Stabilize log
         lam[i] <- exp(loglam.lim[i])
         mu.poisson[i] <- a[i] * lam[i]
