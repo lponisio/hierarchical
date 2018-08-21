@@ -6,18 +6,75 @@ library(devtools)
 library(nimble)
 library(igraph)
 source("../all/plotting.R")
-source("../all/runNimble.R")
-source("../all/comparMCMCs_withMonitors.R")
-source("../all/samplers/sampler_crossLevel_new.R")
-source("../all/samplers/leaveOutSampler.R")
+source("src/models.R")
+source("src/dynamicOcc.R")
 
 dir.create(file.path("../../../occupancy_saved/saved/multiSpp-multiSea/saved"),
            showWarnings = FALSE)
 save.dir <-  "../../../occupancy_saved/saved/multiSpp-multiSea/saved"
 
 ## mcmc settings
-scale <- 1e2
+scale <- 1
 burnin <- 1e2*scale
 niter <- (1e3)*scale
 
-source("src/dynamicOcc.R")
+logit <- function(x) {
+    log(x/(1 - x))
+}
+
+expit <- function(x) {
+    exp(x)/(1 + exp(x))
+}
+
+
+
+runAllMCMC <- function(i, input1, niter, burnin, latent,
+                       hyper.param, MCMCdefs){
+    print(sprintf("hyperparam%s_latent%s_sampler%s",
+                  hyper.param,
+                  latent, i))
+    if(i == 'nimble' | i == 'jags'){
+        ms.ms.samples <- compareMCMCs(input1,
+                                      MCMCs=i,
+                                      niter=niter,
+                                      burnin = burnin,
+                                      summary=FALSE,
+                                      check=FALSE)
+    } else{
+        ms.ms.samples <- compareMCMCs(input1,
+                                      MCMCs=i,
+                                      MCMCdefs = MCMCdefs[i],
+                                      niter=niter,
+                                      burnin = burnin,
+                                      summary=FALSE,
+                                      check=FALSE)
+
+    }
+    save(ms.ms.samples, file=file.path(save.dir,
+                                       sprintf("hyperparam%s_latent%s_sampler%s.Rdata",
+                                               hyper.param,
+                                               latent, i)))
+}
+
+
+
+runAllModels <- function(latent, hyper.param, niter, burnin,
+                         MCMCs, MCMCdefs){
+    load("data/all-5-0-2500-350.Rdata")
+    if(!latent){
+        model.input$data$Z <- NULL
+        model.input$inits$Z <- NULL
+        ## We do not want any X element equal to NA or they will not be
+        ## considered data and will be sampled.
+        model.input$data$X[ is.na(model.input$data$X) ] <- -1000
+    }
+    if(!hyper.param){
+        model.input$inits <- lapply(model.input$inits, function(x)
+            ifelse(length(x) == 49, x[1], x))
+    }
+    ms.ms.occ <- makeModel(latent, hyper.param)
+    input1 <- c(code=ms.ms.occ,
+                model.input)
+    lapply(MCMCs, runAllMCMC, input1, niter, burnin,  latent,
+           hyper.param, MCMCdefs)
+}
