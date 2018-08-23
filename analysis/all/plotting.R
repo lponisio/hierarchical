@@ -135,3 +135,5 @@ plotEffSize <- function(eff.size, eff.param,
           height=4, width=widths[2])
 }
 
+
+

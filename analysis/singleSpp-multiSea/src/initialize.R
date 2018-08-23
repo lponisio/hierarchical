@@ -16,6 +16,7 @@ library(parallel)
 source("src/dynamicOcc.R")
 source("src/setup.R")
 source("../all/plotting.R")
+source("src/plotting.R")
 
 source('src/models.R')
 source('src/customSamplerSpec.R')
@@ -25,7 +26,7 @@ dir.create(file.path("../../../occupancy_saved/saved/singleSpp-multiSea/saved"),
 save.dir <-  "../../../occupancy_saved/saved/singleSpp-multiSea/saved"
 
 ## MCMC settings
-scale <- 1e1
+scale <- 1e2
 burnin <- 1e1*scale
 niter <- (1e3)*scale
 
@@ -37,6 +38,13 @@ expit <- function(x) {
     exp(x)/(1 + exp(x))
 }
 
+set.seed(444)
+psi1 <- runif(1)
+sigma.p <- runif(1)
+mu.phi <- rnorm(1)
+sigma.phi <- runif(1)
+mu.gamma <- rnorm(1)
+sigma.gamma <- runif(1)
 
 
 runAllMCMC <- function(i, input1, niter, burnin, latent,
@@ -69,17 +77,32 @@ runAllMCMC <- function(i, input1, niter, burnin, latent,
 
 
 
-runAllModels <- function(latent, hyper.param, niter, burnin, MCMCs,
-                         MCMCdefs, mu.p){
-        data <- genDynamicOccData(mu.p=mu.p)
-        model.input <- prepModDataOcc(data, include.zs=latent)
-        if(!hyper.param){
-            to.drop <- c("sigma.phi", "sigma.gamma", "sigma.p", "p", "phi", "gamma")
-            model.input$inits[to.drop] <- NULL
-        }
-        ss.ms.occ <- makeModel(latent, hyper.param)
-        input1 <- c(code=ss.ms.occ,
-                    model.input)
-        lapply(MCMCs, runAllMCMC, input1, niter, burnin,  latent,
-               hyper.param, MCMCdefs, mu.p)
+runAllModels <- function(latent, hyper.param,
+                         niter,
+                         burnin, MCMCs,
+                         MCMCdefs,
+                         mu.p,
+                         psi1,
+                         sigma.p,
+                         mu.phi,
+                         sigma.phi,
+                         mu.gamma,
+                         sigma.gamma){
+    data <- genDynamicOccData(mu.p=mu.p,
+                              psi1=psi1,
+                              sigma.p=sigma.p,
+                              mu.phi=mu.phi,
+                              sigma.phi=sigma.phi,
+                              mu.gamma=mu.gamma,
+                              sigma.gamma=sigma.gamma)
+    model.input <- prepModDataOcc(data, include.zs=latent)
+    if(!hyper.param){
+        to.drop <- c("sigma.phi", "sigma.gamma", "sigma.p", "p", "phi", "gamma")
+        model.input$inits[to.drop] <- NULL
     }
+    ss.ms.occ <- makeModel(latent, hyper.param)
+    input1 <- c(code=ss.ms.occ,
+                model.input)
+    lapply(MCMCs, runAllMCMC, input1, niter, burnin,  latent,
+           hyper.param, MCMCdefs, mu.p)
+}

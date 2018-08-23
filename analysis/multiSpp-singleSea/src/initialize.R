@@ -4,9 +4,11 @@ library(devtools)
 ##                subdir = "packages/nimble")
 
 library(nimble)
+library(parallel)
 library(igraph)
 library(reshape)
 source("../all/plotting.R")
+source("src/plotting.R")
 source("src/setup.R")
 source("src/multispeciesOcc.R")
 source("src/models.R")
@@ -22,7 +24,7 @@ survey.dates <- read.csv("data/survey_dates.csv")
 habitat <- read.csv("data/habitat.csv")
 
 ## mcmc settings
-scale <- 1
+scale <- 1e2
 burnin <- 1e2*scale
 niter <- (1e3)*scale
 
@@ -80,6 +82,6 @@ runAllModels <- function(latent, hyper.param, niter, burnin,
     ms.ss.occ <- makeModel(latent, hyper.param)
     input1 <- c(code=ms.ss.occ,
                 model.input)
-    lapply(MCMCs, runAllMCMC, input1, niter, burnin,  latent,
+    mclapply(MCMCs, runAllMCMC, input1, niter, burnin,  latent,
            hyper.param, MCMCdefs)
 }

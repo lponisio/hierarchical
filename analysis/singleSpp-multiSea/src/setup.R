@@ -1,14 +1,14 @@
 
-genDynamicOccData <- function(nsite = 100,
+genDynamicOccData <- function(nsite = 50,
                               nreps = 10,
                               nyear = 15,
-                              psi1 = runif(1),
-                              mu.p = 1.5,
-                              sigma.p = runif(1),
-                              mu.phi = rnorm(1),
-                              sigma.phi = runif(1),
-                              mu.gamma = rnorm(1),
-                              sigma.gamma = runif(1)) {
+                              mu.p,
+                              psi1,
+                              sigma.p,
+                              mu.phi,
+                              sigma.phi,
+                              mu.gamma,
+                              sigma.gamma) {
 
     ##  Generation and analysis of simulated data for multi season
     ##  occupancy model (adapted from Kery and Schaud 2012)

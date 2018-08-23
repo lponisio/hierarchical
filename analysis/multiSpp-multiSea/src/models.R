@@ -497,7 +497,6 @@ makeModel <- function(latent, hyper.param){
                 }
 
 
-
                 for(site in 1:nsite) {
                     for(sp in 1:nsp) {
                         X[site, 1:nyear, 1:max.nreps, sp] ~

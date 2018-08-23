@@ -6,6 +6,7 @@ library(devtools)
 library(nimble)
 library(igraph)
 source("../all/plotting.R")
+source("src/plotting.R")
 source("src/models.R")
 source("src/customSamplerSpec.R")
 source("src/dynamicOcc.R")
@@ -79,3 +80,5 @@ runAllModels <- function(latent, hyper.param, niter, burnin,
     lapply(MCMCs, runAllMCMC, input1, niter, burnin,  latent,
            hyper.param, MCMCdefs)
 }
+
+

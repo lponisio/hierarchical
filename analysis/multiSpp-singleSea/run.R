@@ -2,6 +2,7 @@
 rm(list=ls())
 setwd('analysis/multiSpp-singleSea')
 source('src/initialize.R')
+options(mc.cores=15)
 
 ## MCMC sampler options
 cust.MCMCs <- c('nimble', 'RW_block1', 'RW_block2',
@@ -37,4 +38,14 @@ for(h in hyper.param.opts){
                      MCMCdefs=MCMC.defs)
     }
 }
+
+
+effsHP <- getEffFUN("hyperparamTRUE", save.dir,  summary="efficiency")
+effsNoHP <- getEffFUN("hyperparamFALSE", save.dir,  summary="efficiency")
+
+meanHP <- getEffFUN("hyperparamTRUE", save.dir,  summary="mean")
+meanNoHP <- getEffFUN("hyperparamFALSE", save.dir,  summary="mean")
+
+pdf.f(plotEffMSSS, file.path(save.dir, "../../../figures/MSSS.pdf"),
+      height=6, width=7)
 
