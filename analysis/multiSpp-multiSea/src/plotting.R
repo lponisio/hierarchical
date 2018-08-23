@@ -41,7 +41,7 @@ plotEffMSMS <- function(){
     par(oma=c(0, 7, 2, 1),
         mar=c(5, 1, 0.5, 3), cex.axis=1.5)
     ## latent, HP
-    plotBar("latentTRUE", effsHP, 0.3)
+    plotBar("latentTRUE", effsHP, 0)
     legend("topright", legend="a)", bty="n")
     mtext("Min effective sample size per second",
           2, line=6.5, cex=1.5, at=-1)
@@ -55,7 +55,7 @@ plotEffMSMS <- function(){
           2, line=4, cex=1.5)
     legend("topright", legend="c)", bty="n")
     ## no latent, HP
-    plotBar("latentFALSE", effsHP, 0.3)
+    plotBar("latentFALSE", effsHP, 0)
     mtext("No latent states",
           3, line=1, cex=1.5)
     legend("topright", legend="b)", bty="n")

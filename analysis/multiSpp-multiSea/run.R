@@ -48,7 +48,7 @@ meanHP <- getEffFUN("hyperparamTRUE", save.dir,  summary="mean")
 meanNoHP <- getEffFUN("hyperparamFALSE", save.dir,  summary="mean")
 
 
-pdf.f(plotEffMSMS, file.path(save.dir, "../../../figures/SSMS.pdf"),
+pdf.f(plotEffMSMS, file.path(save.dir, "../../../figures/MSMS.pdf"),
       height=6, width=7)
 
 
