@@ -4,17 +4,14 @@ MCMCdefs.RW.block <- list('RW_block' = quote({
     ## random walk sampler
     ## ***************************************************************
     customSpec <- configureMCMC(Rmodel)
-    parms.phi <- Rmodel$getNodeNames(
-                            includeData = FALSE)[grepl("^phi",
-                            Rmodel$getNodeNames(includeData = FALSE))]
-    parms.gam <- Rmodel$getNodeNames(
-                            includeData = FALSE)[grepl("^gamma",
-                            Rmodel$getNodeNames(includeData = FALSE))]
-    phi.gam <- cbind(parms.phi, parms.gam)[-1,]
+    parms.phi <- Rmodel$expandNodeNames("phi")
+    parms.gam <- Rmodel$expandNodeNames("gamma")
+    parms.p <- Rmodel$expandNodeNames("p")
+    phi.gam.p <- cbind(parms.phi, parms.gam, parms.p[-length(parms.p)])
     ## find node names for random effects
-    for(i in 1:nrow(phi.gam)){
-        customSpec$removeSamplers(phi.gam[i,], print=FALSE)
-        customSpec$addSampler(target = phi.gam[i,],
+    for(i in 1:nrow(phi.gam.p)){
+        customSpec$removeSamplers(phi.gam.p[i,], print=FALSE)
+        customSpec$addSampler(target = phi.gam.p[i,],
                               type = "RW_block")
     }
     customSpec
@@ -28,17 +25,14 @@ MCMCdefs.AFSS.block <- list('AFSS_block' = quote({
     ## automated factor slice sampler
     ## ***************************************************************
     customSpec <- configureMCMC(Rmodel)
-    parms.phi <- Rmodel$getNodeNames(
-                            includeData = FALSE)[grepl("^phi",
-                            Rmodel$getNodeNames(includeData = FALSE))]
-    parms.gam <- Rmodel$getNodeNames(
-                            includeData = FALSE)[grepl("^gamma",
-                            Rmodel$getNodeNames(includeData = FALSE))]
-    phi.gam <- cbind(parms.phi, parms.gam)[-1,]
+    parms.phi <- Rmodel$expandNodeNames("phi")
+    parms.gam <- Rmodel$expandNodeNames("gamma")
+    parms.p <- Rmodel$expandNodeNames("p")
+    phi.gam.p <- cbind(parms.phi, parms.gam, parms.p[-length(parms.p)])
     ## find node names for random effects
-    for(i in 1:nrow(phi.gam)){
-        customSpec$removeSamplers(phi.gam[i,], print=FALSE)
-        customSpec$addSampler(target = phi.gam[i,],
+    for(i in 1:nrow(phi.gam.p)){
+        customSpec$removeSamplers(phi.gam.p[i,], print=FALSE)
+        customSpec$addSampler(target = phi.gam.p[i,],
                               type = "AF_slice")
     }
     customSpec
@@ -52,19 +46,14 @@ MCMCdefs.slice <- list('jags_like_nimble' = quote({
     ## continous nodes.
     ## ***************************************************************
     customSpec <- configureMCMC(Rmodel)
-    parms.phi <- Rmodel$getNodeNames(
-                            includeData = FALSE)[grepl("phi",
-                            Rmodel$getNodeNames(includeData = FALSE))]
-    parms.gam <- Rmodel$getNodeNames(
-                            includeData = FALSE)[grepl("gamma",
-                            Rmodel$getNodeNames(includeData = FALSE))]
-    phi.gam <- c(parms.phi, parms.gam)
-    phi.gam <- phi.gam[!grepl("tau", phi.gam)]
-    phi.gam <- phi.gam[!grepl("lifted", phi.gam)]
+    parms.phi <- Rmodel$expandNodeNames("phi")
+    parms.gam <- Rmodel$expandNodeNames("gamma")
+    parms.p <- Rmodel$expandNodeNames("p")
+    phi.gam.p <- c(parms.phi, parms.gam, parms.p)
     ## find node names for random effects
-    for(i in 1:length(phi.gam)){
-        customSpec$removeSamplers(phi.gam[i], print=FALSE)
-        customSpec$addSampler(target = phi.gam[i],
+    for(i in 1:length(phi.gam.p)){
+        customSpec$removeSamplers(phi.gam.p[i], print=FALSE)
+        customSpec$addSampler(target = phi.gam.p[i],
                               type = "slice")
     }
     customSpec

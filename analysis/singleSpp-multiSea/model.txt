@@ -1,0 +1,22 @@
+model
+{
+    psi1 ~ dunif(0, 1)
+    mu.p ~ dnorm(0, 0.001)
+    mu.phi ~ dnorm(0, 0.001)
+    mu.gamma ~ dnorm(0, 0.001)
+    for (site in 1:nsite) {
+        z[site, 1] ~ dbern(psi1)
+        for (year in 2:nyear) {
+            logit(muZ[site, year]) <- z[site, year - 1] * mu.phi + (1 - z[site, year - 1]) * mu.gamma
+            z[site, year] ~ dbern(muZ[site, year])
+        }
+    }
+    for (site in 1:nsite) {
+        for (rep in 1:nrep) {
+            for (year in 1:nyear) {
+                logit(muy[site, rep, year]) <- z[site, year] * mu.p
+                y[site, rep, year] ~ dbern(muy[site, rep, year])
+            }
+        }
+    }
+}
