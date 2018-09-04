@@ -50,8 +50,8 @@ sigma.gamma <- runif(1)
 runAllMCMC <- function(i, input1, niter, burnin, latent,
                        hyper.param, MCMCdefs, mu.p){
     print(sprintf("hyperparam%s_latent%s_sampler%s_mup%s",
-                                               hyper.param,
-                                               latent, i, mu.p))
+                  hyper.param,
+                  latent, i, mu.p))
     if(i == 'nimble' | i == 'jags'){
         ss.ms.samples <- compareMCMCs(input1,
                                       MCMCs=i,
@@ -97,12 +97,18 @@ runAllModels <- function(latent, hyper.param,
                               sigma.gamma=sigma.gamma)
     model.input <- prepModDataOcc(data, include.zs=latent)
     if(!hyper.param){
-        to.drop <- c("sigma.phi", "sigma.gamma", "sigma.p", "p", "phi", "gamma")
+        to.drop <- c("sigma.phi", "sigma.gamma", "sigma.p", "p",
+                     "phi", "gamma", "mu.p.mean", "mu.gamma.mean",
+                     "mu.phi.mean")
+        model.input$inits[to.drop] <- NULL
+    }else{
+        ## with new inits priors logit trick
+        to.drop <- c("mu.phi", "mu.gamma", "mu.p")
         model.input$inits[to.drop] <- NULL
     }
     ss.ms.occ <- makeModel(latent, hyper.param)
     input1 <- c(code=ss.ms.occ,
                 model.input)
-    mclapply(MCMCs, runAllMCMC, input1, niter, burnin,  latent,
+    lapply(MCMCs, runAllMCMC, input1, niter, burnin,  latent,
            hyper.param, MCMCdefs, mu.p)
 }

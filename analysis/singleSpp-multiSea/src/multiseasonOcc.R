@@ -39,21 +39,21 @@ dDynamicOccupancy <- nimbleFunction(
   }
   )
 
-rDynamicOccupancy <- nimbleFunction(
-  run = function(n = double(),
-    nrep = double(),
-    psi1 = double(),
-    phi = double(1),
-    gamma = double(1),
-    p = double(1),
-    log = double(0, default = 0)) {
-    nyear <- length(p)
-    ans <- matrix()
-    setSize(ans, nrep, nyear)
-    returnType(double(2))
-    return(ans)
-  }
-  )
+## rDynamicOccupancy <- nimbleFunction(
+##   run = function(n = double(),
+##     nrep = double(),
+##     psi1 = double(),
+##     phi = double(1),
+##     gamma = double(1),
+##     p = double(1),
+##     log = double(0, default = 0)) {
+##     nyear <- length(p)
+##     ans <- matrix()
+##     setSize(ans, nrep, nyear)
+##     returnType(double(2))
+##     return(ans)
+##   }
+##   )
 
 registerDistributions(list(
   dDynamicOccupancy = list(

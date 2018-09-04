@@ -97,7 +97,10 @@ prepModDataOcc <- function(sim.input,
                   mu.phi = sim.input$mu.phi,
                   sigma.phi = sim.input$sigma.phi,
                   mu.gamma = sim.input$mu.gamma,
-                  sigma.gamma = sim.input$sigma.gamma)
+                  sigma.gamma = sim.input$sigma.gamma,
+                  mu.p.mean = expit(sim.input$mu.p),
+                  mu.gamma.mean = expit(sim.input$mu.gamma),
+                  mu.phi.mean = expit(sim.input$mu.phi))
     if(!include.zs){
         model.data$z <- NULL
         inits$z <- NULL

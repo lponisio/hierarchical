@@ -7,15 +7,20 @@ makeModel <- function(latent, hyper.param){
             ss.ms.occ <- nimbleCode({
                 ## Specify priors
                 psi1 ~ dunif(0, 1)
-                mu.p     ~ dnorm(0,0.001)
+
+                mu.p.mean     ~ dunif(0,1)
+                mu.p <-  log(mu.p.mean) - log(1-mu.p.mean)
                 sigma.p     ~ dunif(0,100)
                 tau.p <- 1/(sigma.p*sigma.p)
-                mu.phi  ~ dnorm(0,0.001)
-                mu.gamma  ~ dnorm(0,0.001)
+                mu.phi.mean     ~ dunif(0,1)
+                mu.phi     <- log(mu.phi.mean) - log(1-mu.phi.mean)
+                mu.gamma.mean     ~ dunif(0,1)
+                mu.gamma     <- log(mu.gamma.mean) - log(1-mu.gamma.mean)
                 sigma.phi ~ dunif(0,100)
                 sigma.gamma ~ dunif(0,100)
                 tau.phi <-  1/(sigma.phi*sigma.phi)
                 tau.gamma <-  1/(sigma.gamma*sigma.gamma)
+
                 for(year in 1:(nyear -1)) {
                     p[year]  ~ dnorm(mu.p,     tau.p)
                     phi[year] ~ dnorm(mu.phi, tau.phi)
@@ -85,16 +90,19 @@ makeModel <- function(latent, hyper.param){
             ss.ms.occ <- nimbleCode({
                 ##  priors
                 psi1 ~ dunif(0, 1)
-                mu.p     ~ dnorm(0,0.001)
+                mu.p.mean     ~ dunif(0,1)
+                mu.p     <- log(mu.p.mean) - log(1-mu.p.mean)
                 sigma.p     ~ dunif(0,100)
                 tau.p <- 1/(sigma.p*sigma.p)
-
-                mu.phi  ~ dnorm(0,0.001)
-                mu.gamma  ~ dnorm(0,0.001)
+                mu.phi.mean     ~ dunif(0,1)
+                mu.phi     <- log(mu.phi.mean) - log(1-mu.phi.mean)
+                mu.gamma.mean     ~ dunif(0,1)
+                mu.gamma     <- log(mu.gamma.mean) - log(1-mu.gamma.mean)
                 sigma.phi ~ dunif(0,100)
                 sigma.gamma ~ dunif(0,100)
                 tau.phi <-  1/(sigma.phi*sigma.phi)
                 tau.gamma <-  1/(sigma.gamma*sigma.gamma)
+
 
                 for(year in 1:(nyear -1)) {
                     p[year]   ~ dnorm(mu.p,     tau.p)

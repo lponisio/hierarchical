@@ -1,22 +1,25 @@
 model
 {
     psi1 ~ dunif(0, 1)
-    mu.p ~ dnorm(0, 0.001)
-    mu.phi ~ dnorm(0, 0.001)
-    mu.gamma ~ dnorm(0, 0.001)
-    for (site in 1:nsite) {
-        z[site, 1] ~ dbern(psi1)
-        for (year in 2:nyear) {
-            logit(muZ[site, year]) <- z[site, year - 1] * mu.phi + (1 - z[site, year - 1]) * mu.gamma
-            z[site, year] ~ dbern(muZ[site, year])
-        }
+    mu.p.mean ~ dunif(0, 1)
+    mu.p <- log(mu.p.mean) - log(1 - mu.p.mean)
+    sigma.p ~ dunif(0, 100)
+    tau.p <- 1/(sigma.p * sigma.p)
+    mu.phi.mean ~ dunif(0, 1)
+    mu.phi <- log(mu.phi.mean) - log(1 - mu.phi.mean)
+    mu.gamma.mean ~ dunif(0, 1)
+    mu.gamma <- log(mu.gamma.mean) - log(1 - mu.gamma.mean)
+    sigma.phi ~ dunif(0, 100)
+    sigma.gamma ~ dunif(0, 100)
+    tau.phi <- 1/(sigma.phi * sigma.phi)
+    tau.gamma <- 1/(sigma.gamma * sigma.gamma)
+    for (year in 1:(nyear - 1)) {
+        p[year] ~ dnorm(mu.p, tau.p)
+        phi[year] ~ dnorm(mu.phi, tau.phi)
+        gamma[year] ~ dnorm(mu.gamma, tau.gamma)
     }
-    for (site in 1:nsite) {
-        for (rep in 1:nrep) {
-            for (year in 1:nyear) {
-                logit(muy[site, rep, year]) <- z[site, year] * mu.p
-                y[site, rep, year] ~ dbern(muy[site, rep, year])
-            }
-        }
+    p[nyear] ~ dnorm(mu.p, tau.p)
+    for (i in 1:nsite) {
+        y[i, 1:nrep, 1:nyear] ~ dDynamicOccupancy(nrep, psi1, expit(phi[1:(nyear - 1)]), expit(gamma[1:(nyear - 1)]), expit(p[1:nyear]))
     }
 }
