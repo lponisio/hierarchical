@@ -65,20 +65,20 @@ SGT_data1 <- list(y = y,
                   elev2 = elev2,
                   date2 = date2,
                   dur2 = dur2)
-                  ## e = 1e-06,
-                  ## hlam.on = 0,
-                  ## hp.site.on = 0,
-                  ## hp.survey.on = 0
-                  ## nsite = 263,
-                  ## nrep = 3)
+## e = 1e-06,
+## hlam.on = 0,
+## hp.site.on = 0,
+## hp.survey.on = 0
+## nsite = 263,
+## nrep = 3)
 
 constants <- list(nsite = 263,
                   nrep = 3)
-                  ## e = 1e-06)
+## e = 1e-06)
 
 
 
-SGT_inits_full <- function(){
+SGT_inits_full <- function(latent, hyper.param){
     ans <- list(N = Nst,
                 beta0 = 0,
                 mean.p = rep(0.5, 3),
@@ -95,10 +95,21 @@ SGT_inits_full <- function(){
                                       nrow = constants$nsite)
                 )
     ans$a[ ans$N > 0 ] <- 1
-    ans
+    if(!latent){
+        ans$N <- NULL
+    }
+    if(!hyper.param){
+        ans$sd.lam <- NULL
+        ans$sd.p.site <- NULL
+        ans$sd.p.survey <- NULL
+        ans$eps.lam <- NULL
+        ans$eps.p.site <- NULL
+        ans$eps.p.survey <- NULL
+    }
+    return(ans)
 }
 
 
 model.input <- list(data=SGT_data1,
                     constants = constants,
-                    inits = SGT_inits_full())
+                    inits = SGT_inits_full(latent=latent, hyper.param=hyper.param))

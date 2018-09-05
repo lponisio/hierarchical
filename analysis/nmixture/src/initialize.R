@@ -5,18 +5,16 @@ library(devtools)
 
 library(nimble)
 library(igraph)
+source("src/dNmixture.R")
 source("../all/plotting.R")
-source("../all/runNimble.R")
-source("../all/comparMCMCs_withMonitors.R")
-source("../all/samplers/sampler_crossLevel_new.R")
-source("../all/samplers/leaveOutSampler.R")
+## source("src/plotting.R")
 
 dir.create(file.path("../../../occupancy_saved/saved/nmixture/saved"),
            showWarnings = FALSE)
 save.dir <-  "../../../occupancy_saved/saved/nmixture/saved"
 
 ## mcmc settings
-scale <- 1e2
+scale <- 1
 burnin <- 1e2*scale
 niter <- (1e3)*scale
 
