@@ -17,15 +17,13 @@ latent.opts <- c(FALSE, TRUE)
 ## gamma and p
 hyper.param.opts <- c(FALSE, TRUE)
 ## easy or difficult to detect
-mus.p <- c(1.5, 0.2)
+mus.p <- c(1.5, 1)
 
 for(mu.p in mus.p){
     for(h in hyper.param.opts){
         for(l in latent.opts) {
             if(!l){ ## filtering, no latent states
                 these.MCMCs <- cust.MCMCs[-2]
-            ## } else if(!h){ ## no filtering or hyper param
-            ##     these.MCMCs <- cust.MCMCs
             } else{ ## no filtering, either year or no hyper param
                 these.MCMCs <- cust.MCMCs
             }
