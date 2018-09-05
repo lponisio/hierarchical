@@ -186,10 +186,11 @@ prepMutiSpData <- function(survey.data,
     ## inital conditions. 1 should be NA, NA should be a 0 or 1
     zinits <- zs
     zinits[zinits == 1] <- 2
-    ## zinits[is.na(zinits)] <- 1
-    zinits[is.na(zinits)] <- sample(0:1, sum(is.na(zinits)),
-                                    replace=TRUE)
+    zinits[is.na(zinits)] <- 1
+    ## zinits[is.na(zinits)] <- sample(0:1, sum(is.na(zinits)),
+    ##                                 replace=TRUE)
     zinits[zinits == 2] <- NA
+
     if(hyper.param){
         inits <-list(Z=zinits,
                      omega = omega.draw,
@@ -210,10 +211,10 @@ prepMutiSpData <- function(survey.data,
                      omega = omega.draw,
                      w = c(rep(1, num.species),
                            rbinom(n.zeroes, size = 1, prob = omega.draw)),
-                     ## u.cato = rnorm(1),
-                     ## v.cato = rnorm(1),
-                     ## u.fcw = rnorm(1) ,
-                     ## v.fcw = rnorm(1),
+                     u.cato = rnorm(1),
+                     v.cato = rnorm(1),
+                     u.fcw = rnorm(1) ,
+                     v.fcw = rnorm(1),
                      a1 = rnorm(1),
                      a2 = rnorm(1),
                      a3 = rnorm(1),
@@ -252,7 +253,7 @@ prepMutiSpData <- function(survey.data,
         ## additional constants and dats for models where z is removed
         constants$max.num.reps <- max(constants$num.reps)
         model.data$onesRow <- matrix(rep(1, constants$max.num.reps),
-                                     nrow =1)
+                                     nrow=1)
     }
     return(list(constants=constants,
                 inits=inits,

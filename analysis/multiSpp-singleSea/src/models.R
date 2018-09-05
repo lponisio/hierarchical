@@ -103,18 +103,10 @@ makeModel <- function(latent, hyper.param){
                 b1 ~ dnorm(0, 0.001)
                 b2 ~ dnorm(0, 0.001)
 
-                cato.occ ~ dunif(0,1)
-                u.cato <- log(cato.occ) - log(1-cato.occ)
-
-                fcw.occ ~ dunif(0,1)
-                u.fcw <- log(fcw.occ) - log(1-fcw.occ)
-
-                cato.det ~ dunif(0,1)
-                v.cato <- log(cato.det) - log(1-cato.det)
-
-                fcw.det ~ dunif(0,1)
-                v.fcw <- log(fcw.det) - log(1-fcw.det)
-
+                u.cato  ~ dnorm(0, 0.001)
+                u.fcw  ~ dnorm(0, 0.001)
+                v.cato  ~ dnorm(0, 0.001)
+                v.fcw  ~ dnorm(0, 0.001)
 
                 for (i in 1:(num.species)) {
                     ## Create a loop to estimate the Z matrix (true
@@ -241,14 +233,11 @@ makeModel <- function(latent, hyper.param){
                 a4 ~ dnorm(0, 0.001)
                 b1 ~ dnorm(0, 0.001)
                 b2 ~ dnorm(0, 0.001)
-                cato.occ ~ dunif(0,1)
-                u.cato <- log(cato.occ) - log(1-cato.occ)
-                fcw.occ ~ dunif(0,1)
-                u.fcw <- log(fcw.occ) - log(1-fcw.occ)
-                cato.det ~ dunif(0,1)
-                v.cato <- log(cato.det) - log(1-cato.det)
-                fcw.det ~ dunif(0,1)
-                v.fcw <- log(fcw.det) - log(1-fcw.det)
+
+                u.cato  ~ dnorm(0, 0.001)
+                u.fcw  ~ dnorm(0, 0.001)
+                v.cato  ~ dnorm(0, 0.001)
+                v.fcw  ~ dnorm(0, 0.001)
 
                 for (i in 1:(num.species)) {
 

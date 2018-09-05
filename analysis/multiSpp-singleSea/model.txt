@@ -1,0 +1,19 @@
+model
+{
+    a1 ~ dnorm(0, 0.001)
+    a2 ~ dnorm(0, 0.001)
+    a3 ~ dnorm(0, 0.001)
+    a4 ~ dnorm(0, 0.001)
+    b1 ~ dnorm(0, 0.001)
+    b2 ~ dnorm(0, 0.001)
+    u.cato ~ dnorm(0, 0.001)
+    u.fcw ~ dnorm(0, 0.001)
+    v.cato ~ dnorm(0, 0.001)
+    v.fcw ~ dnorm(0, 0.001)
+    for (i in 1:(num.species)) {
+        logit(psi[1:num.points, i]) <- u.cato * (1 - habitat.ind[1:num.points]) + u.fcw * habitat.ind[1:num.points] + a1 * ufc.linear[1:num.points] + a2 * ufc.quadratic[1:num.points] + a3 * ba.linear[1:num.points] + a4 * ba.quadratic[1:num.points]
+        mu.psi[1:num.points, i] <- psi[1:num.points, i]
+        logit(p[1:num.points, 1:max.num.reps, i]) <- (v.cato * (1 - habitat.ind[1:num.points]) + v.fcw * habitat.ind[1:num.points]) %*% asRow(onesRow[1, 1:max.num.reps]) + b1 * date.linear[1:num.points, 1:max.num.reps] + b2 * date.quadratic[1:num.points, 1:max.num.reps]
+        X[1:num.points, 1:max.num.reps, i] ~ dBernDetectionMatrix(occProb = mu.psi[1:num.points, i], detectionProb = p[1:num.points, 1:max.num.reps, i], numReps = num.reps[1:num.points])
+    }
+}

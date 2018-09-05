@@ -82,6 +82,6 @@ runAllModels <- function(latent, hyper.param, niter, burnin,
     ms.ss.occ <- makeModel(latent, hyper.param)
     input1 <- c(code=ms.ss.occ,
                 model.input)
-    mclapply(MCMCs, runAllMCMC, input1, niter, burnin,  latent,
+    lapply(MCMCs, runAllMCMC, input1, niter, burnin,  latent,
            hyper.param, MCMCdefs)
 }
