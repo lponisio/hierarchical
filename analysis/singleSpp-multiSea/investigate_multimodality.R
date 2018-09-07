@@ -19,6 +19,8 @@ data <- genDynamicOccData(mu.p=mu.p,
 
 model.input <- prepModDataOcc(data, include.zs=TRUE)
 
+## presentButNeverSeen <- data$z & (apply(data$y, c(1, 3), sum) == 0)
+## There are no false absences!
 
 ## All z's were 1 in data or inits.
 ## I will introduce some zeros to increase chance of good mixing.
@@ -34,19 +36,40 @@ m <- nimbleModel(
     constants = model.input$constants
 )
 
-mcmc <- buildMCMC(m)
+mcmc <- buildMCMC(m,
+                  monitors2 = c('psi1',
+                                'mu.p.mean','mu.p','sigma.p',
+                                'mu.phi.mean','mu.phi',
+                                'mu.gamma.mean','mu.gamma',
+                                'sigma.phi','sigma.gamma',
+                                'p','phi','gamma',
+                                'z'),
+                  thin2 = 10)
 
 cm <- compileNimble(m)
 cmcmc <- compileNimble(mcmc, project = m)
 
-cmcmc$run(100000)
+cmcmc$run(10000)
 samples <- as.matrix(cmcmc$mvSamples)
+samples2 <- as.matrix(cmcmc$mvSamples2)
 colnames(samples)
+colnames(samples2)
 plot(samples[,'psi1'])
 plot(samples[,'mu.phi.mean'])
 plot(samples[,'mu.p.mean'])
 plot(samples[,'mu.gamma.mean'])
 plot(samples[,'sigma.p'])
+
+## This prints the number of 1s in the state sequences.
+## Almost all 1s or almost no 1s indicates almost
+## no state flipping in the sampling.
+for(i in 1:15) {
+    matchstring <- paste0('z\\[[[:digit:]]{1,2}\\, ',i,']')
+    zibool <- grepl(matchstring, colnames(samples2))
+    if(sum(zibool) != 50) stop(paste0('problem for ', i))
+    print(i)
+    print(apply(samples2[, zibool], 2, sum))
+}
 
 ## Model without latent states is below.
 
@@ -71,4 +94,15 @@ plot(samplesNL[,'mu.phi.mean'])
 plot(samplesNL[,'mu.p.mean'])
 plot(samplesNL[,'mu.gamma.mean'])
 plot(samplesNL[,'sigma.p'])
+plot(samplesNL[,'sigma.gamma'])
+
+## 1. compare probabilities integrated over the z's from the latent-states model
+cmNL$calculate()
+cmVars <- cm$getVarNames()
+cmNLvars <- cmNL$getVarNames()
+for(v in cmVars) {
+    if(v %in% cmNLvars)
+        cmNL[[v]] <- cm[[v]]
+}
+
 
