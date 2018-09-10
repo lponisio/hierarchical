@@ -16,7 +16,7 @@ dir.create(file.path("../../../occupancy_saved/saved/multiSpp-multiSea/saved"),
 save.dir <-  "../../../occupancy_saved/saved/multiSpp-multiSea/saved"
 
 ## mcmc settings
-scale <- 1
+scale <- 1e2
 burnin <- 1e2*scale
 niter <- (1e3)*scale
 
