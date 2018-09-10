@@ -40,28 +40,28 @@ getSamplerNames <- function(effs){
 plotEffMSSS <- function(){
     layout(matrix(1:4, nrow=2))
     par(oma=c(0, 7, 2, 1),
-        mar=c(5, 1, 0.5, 3), cex.axis=1.5)
+        mar=c(6, 1, 0.5, 3), cex.axis=1.5)
     ## latent, HP
-    plotBar("latentTRUE", effsHP, 0.3)
-    legend("topright", legend="a)", bty="n")
+    plotBar("latentTRUE", effsHP, 0.05)
+    legend("topleft", legend="a)", bty="n")
     mtext("Min effective sample size per second",
-          2, line=6.5, cex=1.5, at=-1)
+          2, line=6.5, cex=1.5, at=-0.25)
     mtext("Hyperparameters",
           2, line=4, cex=1.5)
     mtext("Latent states",
           3, line=1, cex=1.5)
     ## latent, no HP
-    plotBar("latentTRUE", effsNoHP, 0)
+    plotBar("latentTRUE", effsNoHP, 2)
     mtext("No hyperparameters",
           2, line=4, cex=1.5)
-    legend("topright", legend="c)", bty="n")
+    legend("topleft", legend="c)", bty="n")
     ## no latent, HP
-    plotBar("latentFALSE", effsHP, 0.3)
+    plotBar("latentFALSE", effsHP, 0.05)
     mtext("No latent states",
           3, line=1, cex=1.5)
-    legend("topright", legend="b)", bty="n")
+    legend("topleft", legend="b)", bty="n")
     ## no latent, no HP
-    plotBar("latentFALSE", effsNoHP, 0)
+    plotBar("latentFALSE", effsNoHP, 2)
     legend("topleft", legend="d)", bty="n")
 }
 
@@ -74,7 +74,7 @@ plotBar <- function(pattern, effs, adj.names){
                    names="",
                    las=1,
                    xlab="", ylab="",
-                   ylim=range(c(0,effs)))
+                   ylim=range(c(0,effs)) + c(0, min(effs)))
     text(bp1, par('usr')[3] - adj.names,
          srt = 45, adj = 1,
          labels = names.effs$samplers,

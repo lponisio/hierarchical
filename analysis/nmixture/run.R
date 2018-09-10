@@ -1,44 +1,30 @@
+## setwd("~/Dropbox/occupancy")
 rm(list=ls())
-setwd("~/Dropbox/occupancy")
 setwd("analysis/nmixture")
 source('src/initialize.R')
 
-latent <- TRUE
-hyper.param <- TRUE
-source("src/setup.R")
-source('src/models.R')
+cust.MCMCs <- c('nimble', 'jags', 'RW_block', 'jags_like_nimble','AFSS_block')
+MCMC.defs <- c('nimble', 'jags', MCMCdefs.RW.block, MCMCdefs.slice,
+               MCMCdefs.AFSS.block)
+names(MCMC.defs) <- cust.MCMCs
 
-input1 <- c(code=nmixture,
-            model.input)
+## TRUE for model integrating over latent states
+latent.opts <- c(FALSE)
+## true for model including random effects
+hyper.param.opts <- c(FALSE)
 
-
-## *********************************************************************
-## original: vanilla nimble and JAGS
-## *********************************************************************
-
-nmixture.orig <- compareMCMCs(input1,
-                           MCMCs=c('jags', 'nimble'),
-                           niter=niter,
-                           burnin = burnin,
-                           summary=FALSE,
-                           check=FALSE)
-
-
-
-latent <- TRUE
-hyper.param <- FALSE
-source("src/setup.R")
-source('src/models.R')
-
-input1 <- c(code=nmixture,
-            model.input)
-
-
-nmixture.orig <- compareMCMCs(input1,
-                           MCMCs=c('jags', 'nimble'),
-                           niter=niter,
-                           burnin = burnin,
-                           summary=FALSE,
-                           check=FALSE)
-
-
+for(h in hyper.param.opts){
+    for(ff in latent.opts) {
+        if(ff){ ## latent states and hyper param
+            these.MCMCs <- cust.MCMCs
+        }else{
+            these.MCMCs <- cust.MCMCs[-2]
+        }
+        runAllModels(latent=ff,
+                     hyper.param=h,
+                     niter=niter,
+                     burnin=burnin,
+                     MCMCs=these.MCMCs,
+                     MCMCdefs=MCMC.defs)
+    }
+}

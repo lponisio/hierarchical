@@ -23,10 +23,13 @@ makeModel <- function(latent, hyper.param){
 
                 for(year in 1:(nyear -1)) {
                     p[year]  ~ dnorm(mu.p,     tau.p)
+                    expit.p[year] <- 1/(1 + exp(-p[year]))
                     phi[year] ~ dnorm(mu.phi, tau.phi)
                     gamma[year] ~ dnorm(mu.gamma, tau.gamma)
                 }
                 p[nyear]      ~ dnorm(mu.p,     tau.p)
+
+                expit.p[nyear] <- 1/(1 + exp(-p[nyear]))
 
                 ## Ecological submodel: Define state conditional on parameters
                 for (site in 1:nsite){
@@ -42,7 +45,7 @@ makeModel <- function(latent, hyper.param){
                 for (site in 1:nsite){
                     for (rep in 1:nrep){
                         for (year in 1:nyear){
-                            muy[site,rep,year] <- z[site,year]*expit(p[year])
+                            muy[site,rep,year] <- z[site,year]*expit.p[year]
                             y[site,rep,year] ~ dbern(muy[site,rep,year])
                         }
                     }
@@ -60,6 +63,8 @@ makeModel <- function(latent, hyper.param){
                 mu.phi  ~ dnorm(0,0.001)
                 mu.gamma  ~ dnorm(0,0.001)
 
+                expit.mu.p <- 1/(1 + exp(-mu.p))
+
                 ## Ecological submodel: Define state conditional on parameters
                 for (site in 1:nsite){
                     z[site,1] ~ dbern(psi1)
@@ -73,7 +78,7 @@ makeModel <- function(latent, hyper.param){
                 for (site in 1:nsite){
                     for (rep in 1:nrep){
                         for (year in 1:nyear){
-                            logit(muy[site,rep,year]) <- z[site,year]*mu.p
+                            muy[site,rep,year] <- z[site,year]*expit(mu.p)
                             y[site,rep,year] ~ dbern(muy[site,rep,year])
                         }
                     }

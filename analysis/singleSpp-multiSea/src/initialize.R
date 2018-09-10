@@ -16,7 +16,6 @@ source("src/dynamicOcc.R")
 source("src/setup.R")
 source("../all/plotting.R")
 source("src/plotting.R")
-## source("../all/comparMCMCs_withClearCompiled.R")
 
 source('src/models.R')
 source('src/customSamplerSpec.R')

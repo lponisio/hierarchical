@@ -8,16 +8,15 @@ options(mc.cores=15)
 cust.MCMCs <- c('nimble', 'jags', 'RW_block', 'jags_like_nimble','AFSS_block')
 MCMC.defs <- c('nimble', 'jags', MCMCdefs.RW.block, MCMCdefs.slice,
                MCMCdefs.AFSS.block)
-
 names(MCMC.defs) <- cust.MCMCs
 
 ## FALSE for model integrating over latent states
-latent.opts <- c(FALSE, TRUE)
+latent.opts <- c(TRUE)
 ## true for model including hyper paramters for year effects on phi,
 ## gamma and p
-hyper.param.opts <- c(FALSE, TRUE)
+hyper.param.opts <- c(TRUE)
 ## easy or difficult to detect
-mus.p <- c(1.5, 1)
+mus.p <- c(1.5, 1.3)
 
 for(mu.p in mus.p){
     for(h in hyper.param.opts){
@@ -49,7 +48,9 @@ effsHP <- getEffFUN("hyperparamTRUE", save.dir,  summary="efficiency")
 effsNoHP <- getEffFUN("hyperparamFALSE", save.dir,  summary="efficiency")
 
 meanHP <- getEffFUN("hyperparamTRUE", save.dir,  summary="mean")
-mu.p <- NA
+mu.p.mean <- NA
+mu.phi.mean <- expit(mu.phi)
+mu.gamma.mean <- expit(mu.gamma)
 meanHP <- rbind(meanHP, sim=lapply(colnames(meanHP), get))
 
 meanNoHP <- getEffFUN("hyperparamFALSE", save.dir,  summary="mean")
