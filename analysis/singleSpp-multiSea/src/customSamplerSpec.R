@@ -79,7 +79,7 @@ MCMCdefs.slice <- list('jags_like_nimble' = quote({
     ## ***************************************************************
     customSpec <- configureMCMC(Rmodel)
     sigma.nodes <-  Rmodel$getNodeNames(stochOnly=TRUE)[grepl("sigma",
-                                                              Rmodel$getNodeNames(stochOnly=TRUE))]
+                                                       Rmodel$getNodeNames(stochOnly=TRUE))]
     if(length(sigma.nodes) > 0){
         customSpec$removeSamplers(sigma.nodes, print=FALSE)
         for(node in sigma.nodes){
@@ -89,7 +89,7 @@ MCMCdefs.slice <- list('jags_like_nimble' = quote({
     }
 
     mu.nodes <-  Rmodel$getNodeNames(stochOnly=TRUE)[grepl("mu",
-                                                              Rmodel$getNodeNames(stochOnly=TRUE))]
+                                                         Rmodel$getNodeNames(stochOnly=TRUE))]
     if(length(mu.nodes) > 0){
         customSpec$removeSamplers(mu.nodes, print=FALSE)
         for(node in mu.nodes){

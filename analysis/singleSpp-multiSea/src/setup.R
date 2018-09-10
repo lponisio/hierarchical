@@ -1,7 +1,7 @@
 
-genDynamicOccData <- function(nsite = 50,
-                              nreps = 10,
-                              nyear = 15,
+genDynamicOccData <- function(nsite = 25,
+                              nreps = 3,
+                              nyear = 10,
                               mu.p,
                               psi1,
                               sigma.p,

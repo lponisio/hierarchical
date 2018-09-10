@@ -95,6 +95,16 @@ MCMCdefs.slice <- list('jags_like_nimble' = quote({
                                   type = "slice")
         }
     }
+
+    mu.nodes <-  Rmodel$getNodeNames(stochOnly=TRUE)[grepl("mu",
+                                                           Rmodel$getNodeNames(stochOnly=TRUE))]
+    if(length(mu.nodes) > 0){
+        customSpec$removeSamplers(mu.nodes, print=FALSE)
+        for(node in mu.nodes){
+            customSpec$addSampler(target = node,
+                                  type = "slice")
+        }
+    }
     ## find node names of each species for random effects
     base.names <- c("a1", "a2", "a3", "a4", "b1", "b2")
     cont.nodes <- Rmodel$expandNodeNames(base.names)

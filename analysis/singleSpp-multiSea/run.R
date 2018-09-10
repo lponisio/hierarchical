@@ -11,12 +11,12 @@ MCMC.defs <- c('nimble', 'jags', MCMCdefs.RW.block, MCMCdefs.slice,
 names(MCMC.defs) <- cust.MCMCs
 
 ## FALSE for model integrating over latent states
-latent.opts <- c(TRUE)
+latent.opts <- c(TRUE, FALSE)
 ## true for model including hyper paramters for year effects on phi,
 ## gamma and p
-hyper.param.opts <- c(TRUE)
+hyper.param.opts <- c(TRUE, FALSE)
 ## easy or difficult to detect
-mus.p <- c(1.5, 1.3)
+mus.p <- c(-0.5, -2.5)
 
 for(mu.p in mus.p){
     for(h in hyper.param.opts){

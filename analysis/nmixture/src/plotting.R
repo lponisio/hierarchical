@@ -6,11 +6,11 @@ getEffFUN <- function(pattern, save.dir, summary="efficiency", make.plot=TRUE){
     for(res in 1:length(these.files)){
         load(file.path(save.dir,
                        these.files[res]))
-        nmixture.samples[[1]] <- rename_MCMC_comparison_method(
-            rownames(nmixture.samples[[1]]$summary),
+        ms.ms.samples[[1]] <- rename_MCMC_comparison_method(
+            rownames(ms.ms.samples[[1]]$summary),
             gsub(".Rdata", "", these.files[res]),
-                                              comparison= nmixture.samples[[1]])
-        res.list.all[[res]] <- nmixture.samples
+                                              comparison= ms.ms.samples[[1]])
+        res.list.all[[res]] <- ms.ms.samples
     }
 
     occ.all <-
@@ -41,6 +41,7 @@ getEffFUN <- function(pattern, save.dir, summary="efficiency", make.plot=TRUE){
     return(out)
 }
 
+
 getSamplerNames <- function(effs){
     samp.names.prep <- sapply(strsplit(names(effs), "sampler"),
                               function(x) x[2])
@@ -50,31 +51,31 @@ getSamplerNames <- function(effs){
 }
 
 
-plotEffMSSS <- function(){
+plotEffMSMS <- function(){
     layout(matrix(1:4, nrow=2))
     par(oma=c(0, 7, 2, 1),
-        mar=c(6, 1, 0.5, 3), cex.axis=1.5)
+        mar=c(5, 1, 0.5, 3), cex.axis=1.5)
     ## latent, HP
-    plotBar("latentTRUE", effsHP, 0.05)
-    legend("topleft", legend="a)", bty="n")
+    plotBar("latentTRUE", effsHP, 0)
+    legend("topright", legend="a)", bty="n")
     mtext("Min effective sample size per second",
-          2, line=6.5, cex=1.5, at=-0.25)
+          2, line=6.5, cex=1.5, at=-1)
     mtext("Hyperparameters",
           2, line=4, cex=1.5)
     mtext("Latent states",
           3, line=1, cex=1.5)
     ## latent, no HP
-    plotBar("latentTRUE", effsNoHP, 2)
+    plotBar("latentTRUE", effsNoHP, 0)
     mtext("No hyperparameters",
           2, line=4, cex=1.5)
-    legend("topleft", legend="c)", bty="n")
+    legend("topright", legend="c)", bty="n")
     ## no latent, HP
-    plotBar("latentFALSE", effsHP, 0.05)
+    plotBar("latentFALSE", effsHP, 0)
     mtext("No latent states",
           3, line=1, cex=1.5)
-    legend("topleft", legend="b)", bty="n")
+    legend("topright", legend="b)", bty="n")
     ## no latent, no HP
-    plotBar("latentFALSE", effsNoHP, 2)
+    plotBar("latentFALSE", effsNoHP, 0)
     legend("topleft", legend="d)", bty="n")
 }
 
@@ -87,7 +88,7 @@ plotBar <- function(pattern, effs, adj.names){
                    names="",
                    las=1,
                    xlab="", ylab="",
-                   ylim=range(c(0,effs)) + c(0, min(effs)))
+                   ylim=range(c(0,effs)))
     text(bp1, par('usr')[3] - adj.names,
          srt = 45, adj = 1,
          labels = names.effs$samplers,

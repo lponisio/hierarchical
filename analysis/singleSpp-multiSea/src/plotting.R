@@ -1,19 +1,33 @@
-
-getEffFUN <- function(pattern, save.dir, summary="efficiency"){
+getEffFUN <- function(pattern, save.dir, summary="efficiency", make.plot=TRUE){
     these.files <- list.files(save.dir, pattern=pattern)
 
     res.list.all <- list()
     for(res in 1:length(these.files)){
         load(file.path(save.dir,
                        these.files[res]))
+        ss.ms.samples[[1]] <- rename_MCMC_comparison_method(
+            rownames(ss.ms.samples[[1]]$summary),
+            gsub(".Rdata", "", these.files[res]),
+                                              comparison= ss.ms.samples[[1]])
         res.list.all[[res]] <- ss.ms.samples
     }
+
     occ.all <-
         do.call(combine_MCMC_comparison_results, unlist(res.list.all,
                                                         recursive=FALSE))
-    try(make_MCMC_comparison_pages(occ.all,
-                   dir=file.path(save.dir, "../figures/comparisons")),
-        silent=TRUE)
+
+    if(make.plot){
+    checkChains(occ.all$MCMCresults$samples,
+                f.path = file.path(save.dir,
+                                   "../figures/chains/%s.pdf"))
+    dir.create(file.path(save.dirsprintf("../figures/comparisons/%s",
+                                         pattern)),
+               showWarnings = FALSE)
+    make_MCMC_comparison_pages(occ.all,
+                           dir=file.path(save.dir,
+                                         sprintf("../figures/comparisons/%s",
+    pattern)))
+    }
 
     if(summary == "efficiency"){
         out <- occ.all$MCMCresults$efficiency$min
@@ -25,7 +39,6 @@ getEffFUN <- function(pattern, save.dir, summary="efficiency"){
     }
     return(out)
 }
-
 
 getSamplerNames <- function(effs){
     samp.names.prep <- sapply(strsplit(names(effs), "sampler"),
