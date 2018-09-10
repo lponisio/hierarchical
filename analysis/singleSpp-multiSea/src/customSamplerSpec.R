@@ -4,6 +4,15 @@ MCMCdefs.RW.block <- list('RW_block' = quote({
     ## random walk sampler
     ## ***************************************************************
     customSpec <- configureMCMC(Rmodel)
+    sigma.nodes <-  Rmodel$getNodeNames(stochOnly=TRUE)[grepl("sigma",
+                                                              Rmodel$getNodeNames(stochOnly=TRUE))]
+    if(length(sigma.nodes) > 0){
+        customSpec$removeSamplers(sigma.nodes, print=FALSE)
+        for(node in sigma.nodes){
+            customSpec$addSampler(target = node,
+                                  type = "slice")
+        }
+    }
     if("phi[1]" %in% Rmodel$getNodeNames()){
         parms.phi <- Rmodel$expandNodeNames("phi")
         parms.gam <- Rmodel$expandNodeNames("gamma")
@@ -32,6 +41,15 @@ MCMCdefs.AFSS.block <- list('AFSS_block' = quote({
     ## automated factor slice sampler
     ## ***************************************************************
     customSpec <- configureMCMC(Rmodel)
+    sigma.nodes <-  Rmodel$getNodeNames(stochOnly=TRUE)[grepl("sigma",
+                                                              Rmodel$getNodeNames(stochOnly=TRUE))]
+    if(length(sigma.nodes) > 0){
+        customSpec$removeSamplers(sigma.nodes, print=FALSE)
+        for(node in sigma.nodes){
+            customSpec$addSampler(target = node,
+                                  type = "slice")
+        }
+    }
     if("phi[1]" %in% Rmodel$getNodeNames()){
         parms.phi <- Rmodel$expandNodeNames("phi")
         parms.gam <- Rmodel$expandNodeNames("gamma")
@@ -60,6 +78,26 @@ MCMCdefs.slice <- list('jags_like_nimble' = quote({
     ## continous nodes.
     ## ***************************************************************
     customSpec <- configureMCMC(Rmodel)
+    sigma.nodes <-  Rmodel$getNodeNames(stochOnly=TRUE)[grepl("sigma",
+                                                              Rmodel$getNodeNames(stochOnly=TRUE))]
+    if(length(sigma.nodes) > 0){
+        customSpec$removeSamplers(sigma.nodes, print=FALSE)
+        for(node in sigma.nodes){
+            customSpec$addSampler(target = node,
+                                  type = "slice")
+        }
+    }
+
+    mu.nodes <-  Rmodel$getNodeNames(stochOnly=TRUE)[grepl("mu",
+                                                              Rmodel$getNodeNames(stochOnly=TRUE))]
+    if(length(mu.nodes) > 0){
+        customSpec$removeSamplers(mu.nodes, print=FALSE)
+        for(node in mu.nodes){
+            customSpec$addSampler(target = node,
+                                  type = "slice")
+        }
+    }
+
     if("phi[1]" %in% Rmodel$getNodeNames()){
         parms.phi <- Rmodel$expandNodeNames("phi")
         parms.gam <- Rmodel$expandNodeNames("gamma")

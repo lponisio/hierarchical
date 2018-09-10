@@ -5,6 +5,15 @@ MCMCdefs.RW.block1 <- list('RW_block1' = quote({
     ##  block sampler for species random effects for each species, RW
     ## *********************************************************************
     customSpec <- configureMCMC(Rmodel)
+    sigma.nodes <-  Rmodel$getNodeNames(stochOnly=TRUE)[grepl("sigma",
+                                                              Rmodel$getNodeNames(stochOnly=TRUE))]
+    if(length(sigma.nodes) > 0){
+        customSpec$removeSamplers(sigma.nodes, print=FALSE)
+        for(node in sigma.nodes){
+            customSpec$addSampler(target = node,
+                                  type = "slice")
+        }
+    }
     ## find node names of each species for random effects
     base.names <- c("a1", "a2", "a3", "a4", "b1", "b2",
                     "u.cato", "u.fcw", "v.cato", "v.fcw")
@@ -36,6 +45,15 @@ MCMCdefs.AFSS.block1 <- list('AFSS_block1' = quote({
     ##  block sampler for species random effects for each species, AFSS
     ## *********************************************************************
     customSpec <- configureMCMC(Rmodel)
+    sigma.nodes <-  Rmodel$getNodeNames(stochOnly=TRUE)[grepl("sigma",
+                                                              Rmodel$getNodeNames(stochOnly=TRUE))]
+    if(length(sigma.nodes) > 0){
+        customSpec$removeSamplers(sigma.nodes, print=FALSE)
+        for(node in sigma.nodes){
+            customSpec$addSampler(target = node,
+                                  type = "slice")
+        }
+    }
     ## find node names of each species for random effects
     base.names <- c("a1", "a2", "a3", "a4", "b1", "b2",
                     "u.cato", "u.fcw", "v.cato", "v.fcw")
@@ -68,6 +86,15 @@ MCMCdefs.slice <- list('jags_like_nimble' = quote({
     ## continous nodes.
     ## ***************************************************************
     customSpec <- configureMCMC(Rmodel)
+    sigma.nodes <-  Rmodel$getNodeNames(stochOnly=TRUE)[grepl("sigma",
+                                                              Rmodel$getNodeNames(stochOnly=TRUE))]
+    if(length(sigma.nodes) > 0){
+        customSpec$removeSamplers(sigma.nodes, print=FALSE)
+        for(node in sigma.nodes){
+            customSpec$addSampler(target = node,
+                                  type = "slice")
+        }
+    }
     ## find node names of each species for random effects
     base.names <- c("a1", "a2", "a3", "a4", "b1", "b2")
     cont.nodes <- Rmodel$expandNodeNames(base.names)
@@ -100,16 +127,14 @@ MCMCdefs.slice <- list('jags_like_nimble' = quote({
 ##                                 sp.parms.v),
 ##                               print=FALSE)
 
-##     customSpec$addSampler(target = sp.parms.a,
-##                           type = "RW_block")
-##     customSpec$addSampler(target = sp.parms.b,
-##                           type = "RW_block")
-##     customSpec$addSampler(target = sp.parms.u,
-##                           type = "RW_block")
-##     customSpec$addSampler(target = sp.parms.v,
-##                           type = "RW_block")
-##     customSpec
-## }))
+##     customSpec$addSampler(target = sp.parms.a, type = "RW_block")
+##                           customSpec$addSampler(target =
+##                           sp.parms.b, type = "RW_block")
+##                           customSpec$addSampler(target =
+##                           sp.parms.u, type = "RW_block")
+##                           customSpec$addSampler(target =
+##                           sp.parms.v, type = "RW_block") customSpec
+##                           }))
 
 
 
