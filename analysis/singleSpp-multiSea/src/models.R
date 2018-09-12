@@ -78,7 +78,7 @@ makeModel <- function(latent, hyper.param){
                 for (site in 1:nsite){
                     for (rep in 1:nrep){
                         for (year in 1:nyear){
-                            muy[site,rep,year] <- z[site,year]*expit(mu.p)
+                            muy[site,rep,year] <- z[site,year]*expit.mu.p
                             y[site,rep,year] ~ dbern(muy[site,rep,year])
                         }
                     }

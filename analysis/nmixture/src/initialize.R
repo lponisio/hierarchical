@@ -25,29 +25,38 @@ niter <- (1e3)*scale
 runAllMCMC <- function(i, input1, niter, burnin, latent,
                        hyper.param, MCMCdefs){
     print(sprintf("hyperparam%s_latent%s_sampler%s",
-                                               hyper.param,
-                                               latent, i))
+                  hyper.param,
+                  latent, i))
+
+    R.model <- nimbleModel(code=input1$code,
+                           constants=input1$constants,
+                           data=input1$data,
+                           inits=input1$inits,
+                           check=FALSE)
+    browser()
+
+
     if(i == 'nimble' | i == 'jags'){
-       nmixture.samples <- compareMCMCs(input1,
-                                      MCMCs=i,
-                                      niter=niter,
-                                      burnin = burnin,
-                                      summary=FALSE,
-                                      check=FALSE)
+        nmixture.samples <- compareMCMCs(input1,
+                                         MCMCs=i,
+                                         niter=niter,
+                                         burnin = burnin,
+                                         summary=FALSE,
+                                         check=FALSE)
     } else{
         nmixture.samples <- compareMCMCs(input1,
-                                      MCMCs=i,
-                                      MCMCdefs = MCMCdefs[i],
-                                      niter=niter,
-                                      burnin = burnin,
-                                      summary=FALSE,
-                                      check=FALSE)
+                                         MCMCs=i,
+                                         MCMCdefs = MCMCdefs[i],
+                                         niter=niter,
+                                         burnin = burnin,
+                                         summary=FALSE,
+                                         check=FALSE)
 
     }
     save(nmixture.samples, file=file.path(save.dir,
-                                       sprintf("hyperparam%s_latent%s_sampler%s.Rdata",
-                                               hyper.param,
-                                               latent, i)))
+                                          sprintf("hyperparam%s_latent%s_sampler%s.Rdata",
+                                                  hyper.param,
+                                                  latent, i)))
 }
 
 

@@ -2,6 +2,7 @@
 makeModel <- function(latent, hyper.param){
     if(latent){
         if(hyper.param){
+            print(paste(latent, hyper.param))
             nmixture <- nimbleCode( {
                 ## This example is adapted for NIMBLE from the AHM book by Jacob Levine and Perry de Valpine
                 ## 6.11.1 Bayesian fitting of the basic ZIP N-mixture model
@@ -65,6 +66,7 @@ makeModel <- function(latent, hyper.param){
             )
 
         }else{
+            print(paste(latent, hyper.param))
             nmixture <- nimbleCode( {
                 ## Specify priors
                 ## zero-inflation/suitability
@@ -118,6 +120,7 @@ makeModel <- function(latent, hyper.param){
         }
     } else if(!latent){
         if(hyper.param){
+            print(paste(latent, hyper.param))
             nmixture <- nimbleCode( {
 
                 ## Specify priors
@@ -182,11 +185,15 @@ makeModel <- function(latent, hyper.param){
             }
             )
 
-        } else
+        } else{
+            print(paste(latent, hyper.param))
             nmixture <- nimbleCode( {
+
                 ## Specify priors
                 ## zero-inflation/suitability
-                phi ~ dunif(0,1)          ## proportion of suitable sites (probability of being not a structural 0)
+                phi ~ dunif(0,1)          ## proportion of suitable
+                                          ## sites (probability of
+                                          ## being not a structural 0)
                 theta <- 1-phi            ## zero-inflation (proportion of unsuitable)
                 ltheta <- logit(theta)
 
@@ -214,6 +221,7 @@ makeModel <- function(latent, hyper.param){
                 ## ZIP model for abundance
                 for (i in 1:nsite){
                     a[i] ~ dbern(phi)
+
                     loglam[i] <- beta0 + inprod(beta[1:7], lamDM[i, 1:7])
                     loglam.lim[i] <- min(250, max(-250, loglam[i]))  ## Stabilize log
                     lam[i] <- exp(loglam.lim[i])
@@ -241,7 +249,7 @@ makeModel <- function(latent, hyper.param){
                 }
             }
             )
+        }
     }
     return(nmixture)
 }
-

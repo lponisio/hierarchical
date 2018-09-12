@@ -21,7 +21,7 @@ getEffFUN <- function(pattern, save.dir, summary="efficiency", make.plot=TRUE){
     checkChains(occ.all$MCMCresults$samples,
                 f.path = file.path(save.dir,
                                    "../figures/chains/%s.pdf"))
-    dir.create(file.path(save.dirsprintf("../figures/comparisons/%s",
+    dir.create(file.path(save.dir,sprintf("../figures/comparisons/%s",
                                          pattern)),
                showWarnings = FALSE)
     make_MCMC_comparison_pages(occ.all,

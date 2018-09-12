@@ -3,22 +3,27 @@ rm(list=ls())
 setwd("analysis/nmixture")
 source('src/initialize.R')
 
-cust.MCMCs <- c('nimble', 'jags', 'RW_block', 'jags_like_nimble','AFSS_block')
-MCMC.defs <- c('nimble', 'jags', MCMCdefs.RW.block, MCMCdefs.slice,
-               MCMCdefs.AFSS.block)
+## cust.MCMCs <- c('nimble', 'jags', 'RW_block', 'jags_like_nimble','AFSS_block')
+## MCMC.defs <- c('nimble', 'jags', MCMCdefs.RW.block, MCMCdefs.slice,
+##                MCMCdefs.AFSS.block)
+## names(MCMC.defs) <- cust.MCMCs
+
+cust.MCMCs <- c('nimble')
+MCMC.defs <- c('nimble')
 names(MCMC.defs) <- cust.MCMCs
+
 
 ## TRUE for model integrating over latent states
 latent.opts <- c(FALSE)
 ## true for model including random effects
-hyper.param.opts <- c(FALSE)
+hyper.param.opts <- c(TRUE)
 
 for(h in hyper.param.opts){
     for(ff in latent.opts) {
         if(ff){ ## latent states and hyper param
             these.MCMCs <- cust.MCMCs
         }else{
-            these.MCMCs <- cust.MCMCs[-2]
+            these.MCMCs <- cust.MCMCs
         }
         runAllModels(latent=ff,
                      hyper.param=h,
@@ -28,3 +33,4 @@ for(h in hyper.param.opts){
                      MCMCdefs=MCMC.defs)
     }
 }
+

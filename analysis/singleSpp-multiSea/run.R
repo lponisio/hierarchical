@@ -16,7 +16,7 @@ latent.opts <- c(TRUE, FALSE)
 ## gamma and p
 hyper.param.opts <- c(TRUE, FALSE)
 ## easy or difficult to detect
-mus.p <- c(-0.5, -2.5)
+mus.p <- c(0, -0.5)
 
 for(mu.p in mus.p){
     for(h in hyper.param.opts){
@@ -44,17 +44,11 @@ for(mu.p in mus.p){
 }
 
 
-effsHP <- getEffFUN("hyperparamTRUE", save.dir,  summary="efficiency")
-effsNoHP <- getEffFUN("hyperparamFALSE", save.dir,  summary="efficiency")
-
-meanHP <- getEffFUN("hyperparamTRUE", save.dir,  summary="mean")
-mu.p.mean <- NA
-mu.phi.mean <- expit(mu.phi)
-mu.gamma.mean <- expit(mu.gamma)
-meanHP <- rbind(meanHP, sim=lapply(colnames(meanHP), get))
-
-meanNoHP <- getEffFUN("hyperparamFALSE", save.dir,  summary="mean")
-meanNoHP <- rbind(meanNoHP, sim=lapply(colnames(meanNoHP), get))
+effsHP <- getEffFUN("hyperparamTRUE", save.dir,  summary="efficiency",
+                   FALSE)
+effsNoHP <- getEffFUN("hyperparamFALSE", save.dir,
+                      summary="efficiency",
+                      FALSE)
 
 pdf.f(plotEffSSMS, file.path(save.dir, "../../../figures/SSMS.pdf"),
       height=6, width=7)

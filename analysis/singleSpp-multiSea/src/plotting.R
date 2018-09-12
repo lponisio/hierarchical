@@ -20,7 +20,7 @@ getEffFUN <- function(pattern, save.dir, summary="efficiency", make.plot=TRUE){
     checkChains(occ.all$MCMCresults$samples,
                 f.path = file.path(save.dir,
                                    "../figures/chains/%s.pdf"))
-    dir.create(file.path(save.dirsprintf("../figures/comparisons/%s",
+    dir.create(file.path(save.dir, sprintf("../figures/comparisons/%s",
                                          pattern)),
                showWarnings = FALSE)
     make_MCMC_comparison_pages(occ.all,
@@ -77,23 +77,23 @@ plotBar <- function(pattern, effs, adj.names){
 plotEffSSMS <- function(){
     layout(matrix(1:4, nrow=2))
     par(oma=c(0, 7, 2, 1),
-        mar=c(5, 1, 0.5, 3), cex.axis=1.5)
+        mar=c(6, 1, 0.5, 3), cex.axis=1.5)
     ## latent, HP
-    plotBar("latentTRUE", effsHP, 0.3)
+    plotBar("latentTRUE", effsHP, 1)
     legend("topright", legend="a)", bty="n")
     mtext("Min effective sample size per second",
-          2, line=6.5, cex=1.5, at=-1)
+          2, line=6.5, cex=1.5, at=-2)
     mtext("Hyperparameters",
           2, line=4, cex=1.5)
     mtext("Latent states",
           3, line=1, cex=1.5)
     ## latent, no HP
-    plotBar("latentTRUE", effsNoHP, 10)
+    plotBar("latentTRUE", effsNoHP, 50)
     mtext("No hyperparameters",
           2, line=4, cex=1.5)
     legend("topright", legend="c)", bty="n")
     ## no latent, HP
-    plotBar("latentFALSE", effsHP, 0.3)
+    plotBar("latentFALSE", effsHP, 1)
     mtext("No latent states",
           3, line=1, cex=1.5)
     legend("topright", legend="b)", bty="n")
@@ -101,7 +101,7 @@ plotEffSSMS <- function(){
            legend=c("Low detectability", "High detectability"),
            bty="n")
     ## no latent, no HP
-    plotBar("latentFALSE", effsNoHP, 10)
+    plotBar("latentFALSE", effsNoHP, 50)
     legend("topleft", legend="d)", bty="n")
 }
 

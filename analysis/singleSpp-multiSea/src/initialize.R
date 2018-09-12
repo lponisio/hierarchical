@@ -25,7 +25,7 @@ dir.create(file.path("../../../occupancy_saved/saved/singleSpp-multiSea/saved"),
 save.dir <-  "../../../occupancy_saved/saved/singleSpp-multiSea/saved"
 
 ## MCMC settings
-scale <- 1e1
+scale <- 1e2
 burnin <- 1e1*scale
 niter <- (1e3)*scale
 
@@ -38,12 +38,12 @@ expit <- function(x) {
 }
 
 set.seed(444)
-psi1 <- runif(1)
-sigma.p <- runif(1)
+psi1 <- 0.2
+sigma.p <- 0.05
 mu.phi <- rnorm(1)
-sigma.phi <- runif(1)
+sigma.phi <- 0.02
 mu.gamma <- rnorm(1)
-sigma.gamma <- runif(1)
+sigma.gamma <- 0.03
 
 
 runAllMCMC <- function(i, input1, niter, burnin, latent,
