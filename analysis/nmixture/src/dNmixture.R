@@ -5,8 +5,9 @@ dNmixture <- nimbleFunction(
                    lambda = double(0),
                    notZero = double(0),
                    log = integer(0, default = 0)) {
-        if(is.finite(x) == 0){
-            return(NA)
+        if(is.na(x) | is.nan(x)) {
+            if(log) return(-Inf)
+            return (0)
         }
         if(notZero == 0) { ## It is structural zero
             if(x == 0) {

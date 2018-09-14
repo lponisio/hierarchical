@@ -44,11 +44,9 @@ for(mu.p in mus.p){
 }
 
 
-effsHP <- getEffFUN("hyperparamTRUE", save.dir,  summary="efficiency",
-                   FALSE)
+effsHP <- getEffFUN("hyperparamTRUE", save.dir,  summary="efficiency")
 effsNoHP <- getEffFUN("hyperparamFALSE", save.dir,
-                      summary="efficiency",
-                      FALSE)
+                      summary="efficiency")
 
 pdf.f(plotEffSSMS, file.path(save.dir, "../../../figures/SSMS.pdf"),
       height=6, width=7)

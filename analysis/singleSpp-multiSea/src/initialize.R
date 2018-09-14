@@ -39,11 +39,11 @@ expit <- function(x) {
 
 set.seed(444)
 psi1 <- 0.2
-sigma.p <- 0.05
+sigma.p <- 0.02
 mu.phi <- rnorm(1)
 sigma.phi <- 0.02
 mu.gamma <- rnorm(1)
-sigma.gamma <- 0.03
+sigma.gamma <- 0.02
 
 
 runAllMCMC <- function(i, input1, niter, burnin, latent,

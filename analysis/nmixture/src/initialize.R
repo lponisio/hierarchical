@@ -28,14 +28,6 @@ runAllMCMC <- function(i, input1, niter, burnin, latent,
                   hyper.param,
                   latent, i))
 
-    R.model <- nimbleModel(code=input1$code,
-                           constants=input1$constants,
-                           data=input1$data,
-                           inits=input1$inits,
-                           check=FALSE)
-    browser()
-
-
     if(i == 'nimble' | i == 'jags'){
         nmixture.samples <- compareMCMCs(input1,
                                          MCMCs=i,

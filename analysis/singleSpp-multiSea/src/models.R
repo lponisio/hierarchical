@@ -7,15 +7,11 @@ makeModel <- function(latent, hyper.param){
             ss.ms.occ <- nimbleCode({
                 ## Specify priors
                 psi1 ~ dunif(0, 1)
-
-                mu.p.mean     ~ dunif(0,1)
-                mu.p <-  log(mu.p.mean) - log(1-mu.p.mean)
+                mu.p  ~ dnorm(0,0.001)
                 sigma.p     ~ dunif(0,100)
                 tau.p <- 1/(sigma.p*sigma.p)
-                mu.phi.mean     ~ dunif(0,1)
-                mu.phi     <- log(mu.phi.mean) - log(1-mu.phi.mean)
-                mu.gamma.mean     ~ dunif(0,1)
-                mu.gamma     <- log(mu.gamma.mean) - log(1-mu.gamma.mean)
+                mu.phi  ~ dnorm(0,0.001)
+                mu.gamma  ~ dnorm(0,0.001)
                 sigma.phi ~ dunif(0,100)
                 sigma.gamma ~ dunif(0,100)
                 tau.phi <-  1/(sigma.phi*sigma.phi)
@@ -23,13 +19,12 @@ makeModel <- function(latent, hyper.param){
 
                 for(year in 1:(nyear -1)) {
                     p[year]  ~ dnorm(mu.p,     tau.p)
-                    expit.p[year] <- 1/(1 + exp(-p[year]))
+                    expit.p[year] <- ilogit(p[year])
                     phi[year] ~ dnorm(mu.phi, tau.phi)
                     gamma[year] ~ dnorm(mu.gamma, tau.gamma)
                 }
                 p[nyear]      ~ dnorm(mu.p,     tau.p)
-
-                expit.p[nyear] <- 1/(1 + exp(-p[nyear]))
+                expit.p[nyear] <- ilogit(p[nyear])
 
                 ## Ecological submodel: Define state conditional on parameters
                 for (site in 1:nsite){
@@ -63,7 +58,7 @@ makeModel <- function(latent, hyper.param){
                 mu.phi  ~ dnorm(0,0.001)
                 mu.gamma  ~ dnorm(0,0.001)
 
-                expit.mu.p <- 1/(1 + exp(-mu.p))
+                expit.mu.p <- ilogit(mu.p)
 
                 ## Ecological submodel: Define state conditional on parameters
                 for (site in 1:nsite){
@@ -95,26 +90,20 @@ makeModel <- function(latent, hyper.param){
             ss.ms.occ <- nimbleCode({
                 ##  priors
                 psi1 ~ dunif(0, 1)
-                mu.p.mean     ~ dunif(0,1)
-                mu.p     <- log(mu.p.mean) - log(1-mu.p.mean)
+                mu.p  ~ dnorm(0,0.001)
                 sigma.p     ~ dunif(0,100)
-                tau.p <- 1/(sigma.p*sigma.p)
-                mu.phi.mean     ~ dunif(0,1)
-                mu.phi     <- log(mu.phi.mean) - log(1-mu.phi.mean)
-                mu.gamma.mean     ~ dunif(0,1)
-                mu.gamma     <- log(mu.gamma.mean) - log(1-mu.gamma.mean)
+                mu.phi  ~ dnorm(0,0.001)
+                mu.gamma  ~ dnorm(0,0.001)
                 sigma.phi ~ dunif(0,100)
                 sigma.gamma ~ dunif(0,100)
-                tau.phi <-  1/(sigma.phi*sigma.phi)
-                tau.gamma <-  1/(sigma.gamma*sigma.gamma)
 
 
                 for(year in 1:(nyear -1)) {
-                    p[year]   ~ dnorm(mu.p,     tau.p)
-                    phi[year] ~ dnorm(mu.phi, tau.phi)
-                    gamma[year] ~ dnorm(mu.gamma, tau.gamma)
+                    p[year]  ~ dnorm(mu.p,     sd=sigma.p)
+                    phi[year] ~ dnorm(mu.phi, sd=sigma.phi)
+                    gamma[year] ~ dnorm(mu.gamma, sd=sigma.gamma)
                 }
-                p[nyear]      ~ dnorm(mu.p,     tau.p)
+                p[nyear]      ~ dnorm(mu.p,     sd=sigma.p)
 
                 ## Ecological submodel: Define state conditional on parameters
                 for(i in 1:nsite) {
