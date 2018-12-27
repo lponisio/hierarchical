@@ -75,8 +75,6 @@ prepNmixtureData <- function(latent, hyper.param, DO_PLOT=FALSE){
     nrep <- apply(y, 1, function(x) sum(!is.na(x)))
     constants <- list(nsite = 263,
                       nrep = nrep)
-    ## e = 1e-06)
-
 
 
     SGT_inits_full <- function(latent, hyper.param){
