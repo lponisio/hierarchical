@@ -10,27 +10,27 @@ MCMC.defs <- c('nimble', MCMCdefs.RW.block,
                MCMCdefs.AFSS.block, MCMCdefs.slice, 'jags')
 
 
-## ## TRUE for model integrating over latent states
-## latent.opts <- c(TRUE, FALSE)
-## ## true for model including hyper paramters for year effects on phi,
-## ## gamma and p
-## hyper.param.opts <- c(TRUE, FALSE)
+## TRUE for model integrating over latent states
+latent.opts <- c(TRUE, FALSE)
+## true for model including hyper paramters for year effects on phi,
+## gamma and p
+hyper.param.opts <- c(TRUE, FALSE)
 
-## for(h in hyper.param.opts){
-##     for(ff in latent.opts) {
-##         if(ff){ ## latent states and hyper param
-##             these.MCMCs <- cust.MCMCs
-##         }else{
-##             these.MCMCs <- cust.MCMCs
-##         }
-##         runAllModels(latent=ff,
-##                      hyper.param=h,
-##                      niter=niter,
-##                      burnin=burnin,
-##                      MCMCs=these.MCMCs,
-##                      MCMCdefs=MCMC.defs)
-##     }
-## }
+for(h in hyper.param.opts){
+    for(ff in latent.opts) {
+        if(ff){ ## latent states and hyper param
+            these.MCMCs <- cust.MCMCs
+        }else{
+            these.MCMCs <- cust.MCMCs
+        }
+        runAllModels(latent=ff,
+                     hyper.param=h,
+                     niter=niter,
+                     burnin=burnin,
+                     MCMCs=these.MCMCs,
+                     MCMCdefs=MCMC.defs)
+    }
+}
 
 effsHP <- getEffFUN("hyperparamTRUE", save.dir,  summary="efficiency")
 effsNoHP <- getEffFUN("hyperparamFALSE", save.dir,  summary="efficiency")

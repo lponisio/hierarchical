@@ -71,7 +71,7 @@ plotEffMSSS <- function(){
     legend("topleft", legend="c)", bty="n")
     ## no latent, HP
     plotBar("latentFALSE", effsHP, 0.05)
-    mtext("No latent states",
+    mtext("Latent state integration",
           3, line=1, cex=1.5)
     legend("topleft", legend="b)", bty="n")
     ## no latent, no HP
