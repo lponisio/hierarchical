@@ -186,9 +186,9 @@ prepMutiSpData <- function(survey.data,
     ## inital conditions. 1 should be NA, NA should be a 0 or 1
     zinits <- zs
     zinits[zinits == 1] <- 2
-    zinits[is.na(zinits)] <- 1
-    ## zinits[is.na(zinits)] <- sample(0:1, sum(is.na(zinits)),
-    ##                                 replace=TRUE)
+    ## zinits[is.na(zinits)] <- 1
+    zinits[is.na(zinits)] <- sample(0:1, sum(is.na(zinits)),
+                                    replace=TRUE)
     zinits[zinits == 2] <- NA
 
     if(hyper.param){

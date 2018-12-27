@@ -4,24 +4,24 @@ setwd('analysis/multiSpp-singleSea')
 source('src/initialize.R')
 options(mc.cores=15)
 
-cust.MCMCs <- c('nimble', 'RW_block1',
-                'AFSS_block1', 'jags_like_nimble', 'jags')
-MCMC.defs <- c('nimble', MCMCdefs.RW.block1,
-               MCMCdefs.AFSS.block1, MCMCdefs.slice, 'jags')
+cust.MCMCs <- c('nimble', 'block_RW',
+                'block_AFSS', 'jags_like_nimble', 'jags')
+MCMC.defs <- c('nimble', MCMCdefs.RW.block,
+               MCMCdefs.AFSS.block, MCMCdefs.slice, 'jags')
 
 
 ## ## TRUE for model integrating over latent states
-## latent.opts <- c(FALSE, TRUE)
+## latent.opts <- c(TRUE, FALSE)
 ## ## true for model including hyper paramters for year effects on phi,
 ## ## gamma and p
-## hyper.param.opts <- c(FALSE, TRUE)
+## hyper.param.opts <- c(TRUE, FALSE)
 
 ## for(h in hyper.param.opts){
 ##     for(ff in latent.opts) {
 ##         if(ff){ ## latent states and hyper param
 ##             these.MCMCs <- cust.MCMCs
 ##         }else{
-##             these.MCMCs <- cust.MCMCs[-5]
+##             these.MCMCs <- cust.MCMCs
 ##         }
 ##         runAllModels(latent=ff,
 ##                      hyper.param=h,
@@ -35,8 +35,6 @@ MCMC.defs <- c('nimble', MCMCdefs.RW.block1,
 effsHP <- getEffFUN("hyperparamTRUE", save.dir,  summary="efficiency")
 effsNoHP <- getEffFUN("hyperparamFALSE", save.dir,  summary="efficiency")
 
-meanHP <- getEffFUN("hyperparamTRUE", save.dir,  summary="mean")
-meanNoHP <- getEffFUN("hyperparamFALSE", save.dir,  summary="mean")
 
 pdf.f(plotEffMSSS, file.path(save.dir, "../../../figures/MSSS.pdf"),
       height=6, width=7)

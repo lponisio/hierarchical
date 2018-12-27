@@ -6,11 +6,11 @@ getEffFUN <- function(pattern, save.dir, summary="efficiency", make.plot=TRUE){
     for(res in 1:length(these.files)){
         load(file.path(save.dir,
                        these.files[res]))
-        nmixture.samples[[1]] <- rename_MCMC_comparison_method(
-            rownames(nmixture.samples[[1]]$summary),
+        ms.ss.samples[[1]] <- rename_MCMC_comparison_method(
+            rownames(ms.ss.samples[[1]]$summary),
             gsub(".Rdata", "", these.files[res]),
-                                              comparison= nmixture.samples[[1]])
-        res.list.all[[res]] <- nmixture.samples
+                                              comparison= ms.ss.samples[[1]])
+        res.list.all[[res]] <- ms.ss.samples
     }
 
     occ.all <-
@@ -21,9 +21,9 @@ getEffFUN <- function(pattern, save.dir, summary="efficiency", make.plot=TRUE){
     checkChains(occ.all$MCMCresults$samples,
                 f.path = file.path(save.dir,
                                    "../figures/chains/%s.pdf"))
-    ## dir.create(file.path(save.dirsprintf("../figures/comparisons/%s",
-    ##                                      pattern)),
-    ##            showWarnings = FALSE)
+    dir.create(file.path(save.dir,sprintf("../figures/comparisons/%s",
+                                         pattern)),
+               showWarnings = FALSE)
     make_MCMC_comparison_pages(occ.all,
                            dir=file.path(save.dir,
                                          sprintf("../figures/comparisons/%s",
@@ -40,6 +40,7 @@ getEffFUN <- function(pattern, save.dir, summary="efficiency", make.plot=TRUE){
     }
     return(out)
 }
+
 
 getSamplerNames <- function(effs){
     samp.names.prep <- sapply(strsplit(names(effs), "sampler"),
