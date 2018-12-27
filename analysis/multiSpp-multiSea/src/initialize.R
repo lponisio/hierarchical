@@ -1,4 +1,4 @@
-library(devtools)
+## library(devtools)
 ## install_github("nimble-dev/nimble",
 ##                ref = "devel",
 ##                subdir = "packages/nimble")
@@ -71,8 +71,18 @@ runAllModels <- function(latent, hyper.param, niter, burnin,
         model.input$data$X[ is.na(model.input$data$X) ] <- -1000
     }
     if(!hyper.param){
-        model.input$inits <- lapply(model.input$inits, function(x)
-            ifelse(length(x) == 49, x[1], x))
+        model.input$inits <- lapply(model.input$inits, function(x){
+            if(length(x) == 49){
+                x <- x[1]
+            } else{
+                x <- x
+            }
+            return(x)
+        })
+        model.input$inits[grepl("sigma",
+                                names(model.input$inits))] <- NULL
+        model.input$inits[grepl("mu",
+                                names(model.input$inits))] <- NULL
     }
     ms.ms.occ <- makeModel(latent, hyper.param)
     input1 <- c(code=ms.ms.occ,

@@ -3,18 +3,25 @@ rm(list=ls())
 setwd('analysis/multiSpp-multiSea')
 source("src/initialize.R")
 
+## ## MCMC sampler options
+## cust.MCMCs <- c('jags')
+## MCMC.defs <- c( 'jags' )
+## names(MCMC.defs) <- cust.MCMCs
+
 ## MCMC sampler options
-cust.MCMCs <- c('nimble', 'jags', 'RW_block',
+cust.MCMCs <- c('nimble', 'RW_block',
                 'AFSS_block', 'jags_like_nimble')
-MCMC.defs <- c('nimble',  'jags', MCMCdefs.RW.block,
+MCMC.defs <- c('nimble', MCMCdefs.RW.block,
                MCMCdefs.AFSS.block, MCMCdefs.slice )
 names(MCMC.defs) <- cust.MCMCs
+
+
 
 ## FALSE for model integrating over latent states
 latent.opts <- c(TRUE, FALSE)
 ## true for model including hyper paramters for year effects on phi,
 ## gamma and p
-hyper.param.opts <- c(TRUE, FALSE)
+hyper.param.opts <- c(FALSE)
 for(h in hyper.param.opts){
     for(l in latent.opts) {
         if(l){ ## latent states
