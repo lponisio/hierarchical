@@ -53,29 +53,33 @@ getSamplerNames <- function(effs){
 
 plotEffMSMS <- function(){
     layout(matrix(1:4, nrow=2))
-    par(oma=c(0, 7, 2, 1),
-        mar=c(5, 1, 0.5, 3), cex.axis=1.5)
+    par(oma=c(0, 8.5, 2, 1),
+        mar=c(6, 1, 0.5, 5), cex.axis=1.5)
+
     ## latent, HP
-    plotBar("latentTRUE", effsHP, 0)
-    legend("topright", legend="a)", bty="n")
+    plotBar("latentTRUE", effsHP, 0.0005)
+    legend("topleft", legend="a)", bty="n")
     mtext("Min effective sample size per second",
-          2, line=6.5, cex=1.5, at=-1)
+          2, line=7.5, cex=1.5, at=-0.002)
     mtext("Hyperparameters",
-          2, line=4, cex=1.5)
+          2, line=5, cex=1.5)
     mtext("Latent states",
           3, line=1, cex=1.5)
+
     ## latent, no HP
-    plotBar("latentTRUE", effsNoHP, 0)
+    plotBar("latentTRUE", effsNoHP, 0.005)
     mtext("No hyperparameters",
-          2, line=4, cex=1.5)
-    legend("topright", legend="c)", bty="n")
+          2, line=5, cex=1.5)
+    legend("topleft", legend="c)", bty="n")
+
     ## no latent, HP
-    plotBar("latentFALSE", effsHP, 0)
-    mtext("No latent states",
+    plotBar("latentFALSE", effsHP, 0.0005)
+    mtext("Latent state integration",
           3, line=1, cex=1.5)
-    legend("topright", legend="b)", bty="n")
+    legend("topleft", legend="b)", bty="n")
+
     ## no latent, no HP
-    plotBar("latentFALSE", effsNoHP, 0)
+    plotBar("latentFALSE", effsNoHP, 0.005)
     legend("topleft", legend="d)", bty="n")
 }
 
