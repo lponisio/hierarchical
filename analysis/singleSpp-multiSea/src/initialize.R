@@ -51,6 +51,7 @@ runAllMCMC <- function(i, input1, niter, burnin, latent,
     print(sprintf("hyperparam%s_latent%s_sampler%s_mup%s",
                   hyper.param,
                   latent, i, mu.p))
+
     if(i == 'nimble' | i == 'jags'){
         ss.ms.samples <- compareMCMCs(input1,
                                       MCMCs=i,
@@ -81,33 +82,24 @@ runAllModels <- function(latent, hyper.param,
                          burnin, MCMCs,
                          MCMCdefs,
                          mu.p,
-                         psi1,
-                         sigma.p,
-                         mu.phi,
-                         sigma.phi,
-                         mu.gamma,
-                         sigma.gamma){
-    data <- genDynamicOccData(mu.p=mu.p,
-                              psi1=psi1,
-                              sigma.p=sigma.p,
-                              mu.phi=mu.phi,
-                              sigma.phi=sigma.phi,
-                              mu.gamma=mu.gamma,
-                              sigma.gamma=sigma.gamma)
+                         data){
+
     model.input <- prepModDataOcc(data, include.zs=latent)
     if(!hyper.param){
         to.drop <- c("sigma.phi", "sigma.gamma", "sigma.p", "p",
-                     "phi", "gamma", "mu.p.mean", "mu.gamma.mean",
-                     "mu.phi.mean")
+                     "phi", "gamma")
         model.input$inits[to.drop] <- NULL
     }else{
         ## with new inits priors logit trick
-        to.drop <- c("mu.phi", "mu.gamma", "mu.p")
-        model.input$inits[to.drop] <- NULL
+        ## to.drop <- c("mu.phi", "mu.gamma", "mu.p")
+        ## model.input$inits[to.drop] <- NULL
     }
     ss.ms.occ <- makeModel(latent, hyper.param)
     input1 <- c(code=ss.ms.occ,
                 model.input)
+    save(input1,
+         file=file.path("~/Dropbox/occupancy_saved/saved/singleSpp-multiSea/data",
+                        sprintf("%s%s%s.Rdata", latent, hyper.param, mu.p)))
     lapply(MCMCs, runAllMCMC, input1, niter, burnin,  latent,
            hyper.param, MCMCdefs, mu.p)
 }

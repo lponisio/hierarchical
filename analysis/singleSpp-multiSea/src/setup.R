@@ -78,7 +78,7 @@ prepModDataOcc <- function(sim.input,
     ## initial conditions, NAs where 1s in z, and 1s are where NA
     zinits <- zs
     zinits[zinits == 1] <- 2
-    zinits[is.na(zinits)] <- 1
+    zinits[is.na(zinits)] <- sample(0:1, sum(is.na(zinits)), replace=TRUE)
     zinits[zinits == 2] <- NA
 
     ## constants
@@ -97,10 +97,11 @@ prepModDataOcc <- function(sim.input,
                   mu.phi = sim.input$mu.phi,
                   sigma.phi = sim.input$sigma.phi,
                   mu.gamma = sim.input$mu.gamma,
-                  sigma.gamma = sim.input$sigma.gamma,
-                  mu.p.mean = expit(sim.input$mu.p),
-                  mu.gamma.mean = expit(sim.input$mu.gamma),
-                  mu.phi.mean = expit(sim.input$mu.phi))
+                  sigma.gamma = sim.input$sigma.gamma
+                  ## mu.p.mean = expit(sim.input$mu.p),
+                  ## mu.gamma.mean = expit(sim.input$mu.gamma),
+                  ## mu.phi.mean = expit(sim.input$mu.phi)
+                  )
     if(!include.zs){
         model.data$z <- NULL
         inits$z <- NULL

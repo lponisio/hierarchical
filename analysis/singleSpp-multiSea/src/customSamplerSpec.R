@@ -1,4 +1,4 @@
-MCMCdefs.RW.block <- list('RW_block' = quote({
+MCMCdefs.RW.block <- list('block_RW' = quote({
     ## ## ************************************************************
     ## block together corresponging phi and gamma for each year with
     ## random walk sampler
@@ -35,7 +35,7 @@ MCMCdefs.RW.block <- list('RW_block' = quote({
 
 
 
-MCMCdefs.AFSS.block <- list('AFSS_block' = quote({
+MCMCdefs.AFSS.block <- list('block_AFSS' = quote({
     ## ***************************************************************
     ## block together corresponging phi and gamma for each year with
     ## automated factor slice sampler

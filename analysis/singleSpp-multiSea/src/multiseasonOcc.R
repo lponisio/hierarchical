@@ -10,7 +10,7 @@ dDynamicOccupancy <- nimbleFunction(
     p = double(1),
     log = double(0, default = 0)) {
     prob1 <- psi1 * p[1]
-    numObs <- sum(x[,1]) ## do I have the right orientation?
+    numObs <- sum(x[,1])
     ## prob of the occupied sites out of the total sites given p
     ProbOccAndCount <- psi1 * dbinom(numObs, size = nrep, p = p[1], log = 0)
     ## prob of the empty sites
