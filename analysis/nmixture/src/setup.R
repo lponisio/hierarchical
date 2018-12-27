@@ -72,9 +72,9 @@ prepNmixtureData <- function(latent, hyper.param, DO_PLOT=FALSE){
     ## hp.survey.on = 0
     ## nsite = 263,
     ## nrep = 3)
-
+    nrep <- apply(y, 1, function(x) sum(!is.na(x)))
     constants <- list(nsite = 263,
-                      nrep = 3)
+                      nrep = nrep)
     ## e = 1e-06)
 
 
@@ -92,8 +92,8 @@ prepNmixtureData <- function(latent, hyper.param, DO_PLOT=FALSE){
                   , a = rbinom(constants$nsite, prob = 0.5, size = 1)
                   , eps.lam = rnorm(constants$nsite)
                   , eps.p.site = rnorm(constants$nsite)
-                  , eps.p.survey = matrix(rnorm(constants$nsite * constants$nrep),
-                                          nrow = constants$nsite)
+                  ## , eps.p.survey = matrix(rnorm(constants$nsite * constants$nrep),
+                  ##                         nrow = constants$nsite)
                     )
         ans$a[ans$N > 0] <- 1
         if(!latent){

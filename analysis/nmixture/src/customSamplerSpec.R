@@ -1,6 +1,6 @@
-MCMCdefs.RW.block <- list('RW_block' = quote({
+MCMCdefs.RW.block <- list('block_RW' = quote({
     ## *********************************************************************
-    ##  block sampler for intercept and other covariates
+    ##  RW block sampler for intercept and other covariates
     ## *********************************************************************
     customSpec <- configureMCMC(Rmodel)
     customSpec$removeSamplers(c("beta0","beta"))
@@ -12,11 +12,10 @@ MCMCdefs.RW.block <- list('RW_block' = quote({
 
 
 
-MCMCdefs.AFSS.block <- list('AFSS_block' = quote({
+MCMCdefs.AFSS.block <- list('block_AFSS' = quote({
     ## *********************************************************************
-    ##  block sampler for species random effects for each species, AFSS
+    ##  AFSS block sampler for intercept and other covariates
     ## *********************************************************************
-    customSpec <- configureMCMC(Rmodel)
     customSpec <- configureMCMC(Rmodel)
     customSpec$removeSamplers(c("beta0","beta"))
     customSpec$addSampler(c("beta0","beta"), type = "AF_slice")

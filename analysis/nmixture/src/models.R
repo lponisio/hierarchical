@@ -1,4 +1,3 @@
-
 makeModel <- function(latent, hyper.param){
     if(latent){
         if(hyper.param){
@@ -47,7 +46,7 @@ makeModel <- function(latent, hyper.param){
                 ## Measurement error model
                 for (i in 1:nsite){
                     eps.p.site[i] ~ dnorm(0, tau.p.site) ## Random site effects in logit(p)
-                    for (j in 1:nrep){
+                    for (j in 1:nrep[i]){
                         y[i,j] ~ dbin(p[i,j], N[i])
                         p[i,j] <- 1 / (1 + exp(-lp.lim[i,j]))
                         lp.lim[i,j] <- min(250, max(-250, lp[i,j]))  ## Stabilize logit
@@ -101,7 +100,7 @@ makeModel <- function(latent, hyper.param){
 
                 ## Measurement error model
                 for (i in 1:nsite){
-                    for (j in 1:nrep){
+                    for (j in 1:nrep[i]){
                         y[i,j] ~ dbin(p[i,j], N[i])
                         p[i,j] <- 1 / (1 + exp(-lp.lim[i,j]))
                         lp.lim[i,j] <- min(250, max(-250, lp[i,j]))  ## Stabilize logit
@@ -158,6 +157,8 @@ makeModel <- function(latent, hyper.param){
                     loglam.lim[i] <- min(250, max(-250, loglam[i]))  ## Stabilize log
                     lam[i] <- exp(loglam.lim[i])
                     mu.poisson[i] <- a[i] * lam[i]
+                    ## the difference between original model and model
+                    ## with latent state integration
                     ##        N[i] ~ dpois(mu.poisson[i])
                 }
 
@@ -166,7 +167,8 @@ makeModel <- function(latent, hyper.param){
                 ## Measurement error model
                 for (i in 1:nsite){
                     eps.p.site[i] ~ dnorm(0, tau.p.site) ## Random site effects in logit(p)
-                    for (j in 1:nrep){
+                    for (j in 1:nrep[i]){
+                        ## latent state integration
                         y[i,j] ~ dNmixture(p[i,j], lam[i], a[i])
                         ##            y[i,j] ~ dbin(p[i,j], N[i])
                         p[i,j] <- 1 / (1 + exp(-lp.lim[i,j]))
@@ -192,8 +194,8 @@ makeModel <- function(latent, hyper.param){
                 ## Specify priors
                 ## zero-inflation/suitability
                 phi ~ dunif(0,1)          ## proportion of suitable
-                                          ## sites (probability of
-                                          ## being not a structural 0)
+                ## sites (probability of
+                ## being not a structural 0)
                 theta <- 1-phi            ## zero-inflation (proportion of unsuitable)
                 ltheta <- logit(theta)
 
@@ -202,8 +204,6 @@ makeModel <- function(latent, hyper.param){
                 for(k in 1:7){            ## Regression params in lambda
                     beta[k] ~ dnorm(0, 1)
                 }
-                tau.lam <- pow(sd.lam, -2)
-                sd.lam ~ dunif(0, 2)      ## site heterogeneity in lambda
 
                 ## detection
                 for(j in 1:3){
@@ -213,10 +213,6 @@ makeModel <- function(latent, hyper.param){
                 for(k in 1:13){           ## Regression params in p
                     alpha[k] ~ dnorm(0, 1)
                 }
-                tau.p.site <- pow(sd.p.site, -2)
-                sd.p.site ~ dunif(0, 2)   ## site heterogeneity in p
-                tau.p.survey <- pow(sd.p.survey, -2)
-                sd.p.survey ~ dunif(0, 2) ## site-survey heterogeneity in p
 
                 ## ZIP model for abundance
                 for (i in 1:nsite){
@@ -226,6 +222,8 @@ makeModel <- function(latent, hyper.param){
                     loglam.lim[i] <- min(250, max(-250, loglam[i]))  ## Stabilize log
                     lam[i] <- exp(loglam.lim[i])
                     mu.poisson[i] <- a[i] * lam[i]
+                    ## the difference between original model and model
+                    ## with latent state integration
                     ##        N[i] ~ dpois(mu.poisson[i])
                 }
 
@@ -233,8 +231,9 @@ makeModel <- function(latent, hyper.param){
 
                 ## Measurement error model
                 for (i in 1:nsite){
-                    for (j in 1:nrep){
+                    for (j in 1:nrep[i]){
                         y[i,j] ~ dNmixture(p[i,j], lam[i], a[i])
+                        ## latent state integration
                         ##            y[i,j] ~ dbin(p[i,j], N[i])
                         p[i,j] <- 1 / (1 + exp(-lp.lim[i,j]))
                         lp.lim[i,j] <- min(250, max(-250, lp[i,j]))  ## Stabilize logit

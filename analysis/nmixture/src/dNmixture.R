@@ -1,9 +1,9 @@
 
 dNmixture <- nimbleFunction(
     run = function(x = double(0),
-                   prob = double(0),
-                   lambda = double(0),
-                   notZero = double(0),
+                   prob = double(),
+                   lambda = double(),
+                   notZero = double(),
                    log = integer(0, default = 0)) {
         if(is.na(x) | is.nan(x)) {
             if(log) return(-Inf)
@@ -51,9 +51,9 @@ registerDistributions(list(
         BUGSdist = "dNmixture(prob, lambda, notZero)",
         Rdist = "dNmixture(prob, lambda, notZero)",
         types = c('value = double(0)',
-                  'prob = double(0)',
-                  'lambda = double(0)',
-                  'notZero = double(0)'))
+                  'prob = double()',
+                  'lambda = double()',
+                  'notZero = double()'))
 ))
 
 
