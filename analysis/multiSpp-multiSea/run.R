@@ -3,15 +3,10 @@ rm(list=ls())
 setwd('analysis/multiSpp-multiSea')
 source("src/initialize.R")
 
-## ## MCMC sampler options
-## cust.MCMCs <- c('jags')
-## MCMC.defs <- c( 'jags' )
-## names(MCMC.defs) <- cust.MCMCs
-
 ## MCMC sampler options
-cust.MCMCs <- c('nimble', 'RW_block',
-                'AFSS_block', 'jags_like_nimble')
-MCMC.defs <- c('nimble', MCMCdefs.RW.block,
+cust.MCMCs <- c('nimble', 'jags','block_RW',
+                'block_AFSS', 'jags_like_nimble')
+MCMC.defs <- c('nimble', 'jags', MCMCdefs.RW.block,
                MCMCdefs.AFSS.block, MCMCdefs.slice )
 names(MCMC.defs) <- cust.MCMCs
 
@@ -27,7 +22,7 @@ for(h in hyper.param.opts){
         if(l){ ## latent states
             these.MCMCs <- cust.MCMCs
         } else{ ## no latent states, but yes hyper param, cannot use JAGS
-            these.MCMCs <- cust.MCMCs
+            these.MCMCs <- cust.MCMCs[-2]
         }
 
         runAllModels(latent=l,

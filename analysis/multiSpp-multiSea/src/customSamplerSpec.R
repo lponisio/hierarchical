@@ -1,6 +1,6 @@
 
 
-MCMCdefs.RW.block <- list('RW_block' = quote({
+MCMCdefs.RW.block <- list('block_RW' = quote({
     ## *********************************************************************
     ##  block sampler for species random effects for each species, RW
     ## *********************************************************************
@@ -56,7 +56,7 @@ MCMCdefs.RW.block <- list('RW_block' = quote({
 
 
 
-MCMCdefs.AFSS.block <- list('AFSS_block' = quote({
+MCMCdefs.AFSS.block <- list('block_AFSS' = quote({
     ## *********************************************************************
     ##  block sampler for species random effects for each species, AFSS
     ## *********************************************************************
