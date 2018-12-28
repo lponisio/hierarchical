@@ -136,4 +136,55 @@ plotEffSize <- function(eff.size, eff.param,
 }
 
 
+plotPointsMakeTable <- function(occ.all){
+    layout(matrix(1:2, ncol=1), heights=c(1,3))
+    par(oma=c(5, 6, 0.5, 1),
+        mar=c(0.5, 0, 0.5, 1), cex.axis=1.5)
+    sampler.names <- getSamplerNames(occ.all$MCMCresults$efficiency$min)$samplers
+    unique.samplers <- unique(sampler.names)
+    cols <- rainbow(length(unique.samplers))
+    names(cols) <- unique.samplers
+
+    latent <- sapply(strsplit(dimnames(occ.all$MCMCresults$summary)[[1]],"latent"), function(x) x[2])
+    latent <- sapply(strsplit(latent,'_'), function(x) x[1])
+    pchs <- ifelse(latent, 16, 15)
+
+    plot(NA, ylim=c(0,1), xlim=c(0,1), yaxt= "n", xaxt="n", bty="n")
+    legend("top", legend=unique.samplers,
+           cex=0.7, lty=1, lwd=2,
+           col=cols, bty="n", ncol=length(unique.samplers))
+
+    legend("bottom", legend=c("Latent states", "Latent state integration"),
+           cex=0.7, pch=c(16,15), bty="n", ncol=2)
+
+    plot(NA,
+         ylim=range(log(occ.all$MCMCresults$summary[,'efficiency',])),
+         xlim=c(0,1),  xaxt="n",
+         ylab="", xlab="")
+
+    params <- colnames(occ.all$MCMCresults$summary[,'efficiency',])
+    text(x=(1:length(params))/length(params), par('usr')[3],
+         srt = 45, adj=1.3,
+         labels = params,
+         xpd = NA,
+         cex=0.7)
+    mtext("Effective sample size \n per second (log)",
+          2, line=3.2, cex=1.5)
+
+
+    for(i in 1:dim(occ.all$MCMCresults$summary)[1]){
+        write.table(round(t(occ.all$MCMCresults$summary[i,,]), digits=2),
+                    sep=",", row.names=TRUE,
+                    file=file.path(save.dir,
+                                   sprintf("../tables/%s.csv",
+                                           dimnames(occ.all$MCMCresults$summary)[[1]][i])))
+        points(x=(1:length(params))/
+                   length(params),
+               y=log(occ.all$MCMCresults$summary[i,'efficiency',]),
+               col=cols[sampler.names[i]],
+               pch=pchs[i],
+               xaxt="n",
+               type="o")
+    }
+}
 

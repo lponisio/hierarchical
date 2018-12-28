@@ -1,5 +1,11 @@
 
-getEffFUN <- function(pattern, save.dir, summary="efficiency", make.plot=TRUE){
+getEffFUN <- function(pattern, save.dir, summary="efficiency",
+                      make.plot=TRUE){
+
+    plotPointsMakeTableWapper <- function() {
+        plotPointsMakeTable(occ.all=occ.all)
+    }
+
     these.files <- list.files(save.dir, pattern=pattern)
 
     res.list.all <- list()
@@ -9,7 +15,7 @@ getEffFUN <- function(pattern, save.dir, summary="efficiency", make.plot=TRUE){
         ms.ms.samples[[1]] <- rename_MCMC_comparison_method(
             rownames(ms.ms.samples[[1]]$summary),
             gsub(".Rdata", "", these.files[res]),
-                                              comparison= ms.ms.samples[[1]])
+            comparison= ms.ms.samples[[1]])
         res.list.all[[res]] <- ms.ms.samples
     }
 
@@ -18,17 +24,23 @@ getEffFUN <- function(pattern, save.dir, summary="efficiency", make.plot=TRUE){
                                                         recursive=FALSE))
 
     if(make.plot){
-    checkChains(occ.all$MCMCresults$samples,
-                f.path = file.path(save.dir,
-                                   "../figures/chains/%s.pdf"))
-    dir.create(file.path(save.dir,sprintf("../figures/comparisons/%s",
-                                         pattern)),
-               showWarnings = FALSE)
-    make_MCMC_comparison_pages(occ.all,
-                           dir=file.path(save.dir,
-                                         sprintf("../figures/comparisons/%s",
-    pattern)))
+        checkChains(occ.all$MCMCresults$samples,
+                    f.path = file.path(save.dir,
+                                       "../figures/chains/%s.pdf"))
+        dir.create(file.path(save.dir,sprintf("../figures/comparisons/%s",
+                                              pattern)),
+                   showWarnings = FALSE)
+        make_MCMC_comparison_pages(occ.all,
+                                   dir=file.path(save.dir,
+                                                 sprintf("../figures/comparisons/%s",
+                                                         pattern)))
     }
+
+    pdf.f(plotPointsMakeTableWapper,
+          file= file.path(save.dir,
+                          sprintf("../figures/comparisons/points_%s.pdf",
+                                  pattern)),
+          height=4, width=8)
 
     if(summary == "efficiency"){
         out <- occ.all$MCMCresults$efficiency$min
@@ -99,3 +111,4 @@ plotBar <- function(pattern, effs, adj.names){
          xpd = NA,
          cex=1)
 }
+

@@ -11,7 +11,6 @@ MCMC.defs <- c('nimble', 'jags', MCMCdefs.RW.block,
 names(MCMC.defs) <- cust.MCMCs
 
 
-
 ## FALSE for model integrating over latent states
 latent.opts <- c(TRUE, FALSE)
 ## true for model including hyper parameters for year effects on phi,
