@@ -29,6 +29,7 @@ runAllMCMC <- function(i, input1, niter, burnin, latent,
                   latent, i))
 
     if(i == 'nimble' | i == 'jags'){
+        browser()
         nmixture.samples <- compareMCMCs(input1,
                                          MCMCs=i,
                                          niter=niter,

@@ -24,7 +24,8 @@ checkChains <- function(all.mods.samps, f.path,
         f <- function(){
             layout(matrix(1:4, ncol=2))
             apply(all.mods.samps[z,params,], 1, function(x){
-                plot(x[seq(from=1, to=length(x), length.out=length(x)*prop.plot)], type="l",
+                plot(x[seq(from=1, to=length(x),
+                           length.out=length(x)*prop.plot)], type="l",
                      xlab = 'iteration',
                      main= params[which(apply(all.mods.samps[z,,], 1,
                                               function(y)
@@ -50,10 +51,12 @@ plotEffSize <- function(eff.size, eff.param,
         par(oma=c(6.5, 8, 0.5, 1),
             mar=c(0.5, 0, 2.5, 1), cex.axis=1.5)
         ## barplots
-        mp1 <- barplot(eff.size$mean, names="", las=1, col=cols)
+        mp1 <- barplot(eff.size$mean, names="",
+                       las=1, col=cols)
         mtext("Mean", 3, line=0.5, cex=1.2)
 
-        mp2 <- barplot(eff.size$min, names="", las=1, col=cols)
+        mp2 <- barplot(eff.size$min, names="",
+                       las=1, col=cols)
         text(mp2, par('usr')[3] - adj1,
              srt = 45, adj = 1,
              labels = names(eff.size$mean),
@@ -71,14 +74,19 @@ plotEffSize <- function(eff.size, eff.param,
         par(oma=c(5, 6, 0.5, 1),
             mar=c(0.5, 0, 0.5, 1), cex.axis=1.5)
 
-        plot(NA, ylim=c(0,1), xlim=c(0,1), yaxt= "n", xaxt="n", bty="n")
-        legend("top", legend=rownames(eff.param),
-               pch=16, col=cols, bty="n", ncol=3, cex=0.7)
+        plot(NA, ylim=c(0,1), xlim=c(0,1),
+             yaxt= "n", xaxt="n", bty="n")
+        legend("top",
+               legend=rownames(eff.param),
+               pch=16, col=cols, bty="n",
+               ncol=3, cex=0.7)
 
-        plot(NA, ylim=log(range(eff.param)), xlim=c(1, ncol(eff.param)),
+        plot(NA, ylim=log(range(eff.param)),
+             xlim=c(1, ncol(eff.param)),
              xlab="", ylab="", xaxt="n")
         for(i in 1:nrow(eff.param)){
-            points(x=1:ncol(eff.param), y=log(eff.param[i,]),
+            points(x=1:ncol(eff.param),
+                   y=log(eff.param[i,]),
                    col=cols[i],
                    pch=16,
                    xaxt="n",
@@ -100,13 +108,18 @@ plotEffSize <- function(eff.size, eff.param,
             mar=c(0.5, 0, 0.5, 1), cex.axis=1.5)
 
         diffs <- t(apply(eff.param, 1,
-                         function(x) log(x) - log(eff.param["JAGS-latent",])))[-1,]
+                         function(x){
+                             log(x) - log(eff.param["JAGS-latent",])
+        }))[-1,]
 
-        plot(NA, ylim=c(0,1), xlim=c(0,1), yaxt= "n", xaxt="n", bty="n")
+        plot(NA, ylim=c(0,1), xlim=c(0,1),
+             yaxt= "n", xaxt="n", bty="n")
         legend("top", legend=rownames(diffs),
-               cex=0.7, pch=16, col=cols[-1], bty="n", ncol=3)
+               cex=0.7, pch=16, col=cols[-1],
+               bty="n", ncol=3)
 
-        plot(NA, ylim=range(diffs), xlim=c(1, ncol(diffs)),
+        plot(NA, ylim=range(diffs),
+             xlim=c(1, ncol(diffs)),
              xlab="", ylab="", xaxt="n")
         for(i in 1:nrow(diffs)){
             points(x=1:ncol(diffs), y=diffs[i,],
@@ -136,53 +149,69 @@ plotEffSize <- function(eff.size, eff.param,
 }
 
 
-plotPointsMakeTable <- function(occ.all){
+plotPointsMakeTable <- function(occ.all, adj.xlab=1.3, sim.data=FALSE){
     layout(matrix(1:2, ncol=1), heights=c(1,3))
     par(oma=c(5, 6, 0.5, 1),
         mar=c(0.5, 0, 0.5, 1), cex.axis=1.5)
-    sampler.names <- getSamplerNames(occ.all$MCMCresults$efficiency$min)$samplers
+    sampler.names <-
+        getSamplerNames(occ.all$MCMCresults$efficiency$min)$samplers
     unique.samplers <- unique(sampler.names)
-    cols <- rainbow(length(unique.samplers))
+    cols <- brewer.pal(length(unique.samplers), "Dark2")
     names(cols) <- unique.samplers
+    params <- colnames(occ.all$MCMCresults$summary[,'efficiency',])
 
-    latent <- sapply(strsplit(dimnames(occ.all$MCMCresults$summary)[[1]],"latent"), function(x) x[2])
+    latent <-
+        sapply(strsplit(dimnames(occ.all$MCMCresults$summary)[[1]],
+                        "latent"), function(x) x[2])
     latent <- sapply(strsplit(latent,'_'), function(x) x[1])
     pchs <- ifelse(latent, 16, 15)
+
+    ltys=rep(1, length(latent))
 
     plot(NA, ylim=c(0,1), xlim=c(0,1), yaxt= "n", xaxt="n", bty="n")
     legend("top", legend=unique.samplers,
            cex=0.7, lty=1, lwd=2,
            col=cols, bty="n", ncol=length(unique.samplers))
 
-    legend("bottom", legend=c("Latent states", "Latent state integration"),
+    legend("bottomleft", legend=c("Latent states",
+                                  "Latent state integration"),
            cex=0.7, pch=c(16,15), bty="n", ncol=2)
+
+     if(sim.data){
+        mus <-
+            sapply(strsplit(dimnames(occ.all$MCMCresults$summary)[[1]],
+                            "mup"), function(x) x[2])
+        ltys <- ifelse(mus == 1, 1, 2)
+        legend("bottomright",
+               legend=c("High detectability", "Low detectability"),
+           cex=0.7, lty=c(1,2), bty="n", ncol=2)
+    }
 
     plot(NA,
          ylim=range(log(occ.all$MCMCresults$summary[,'efficiency',])),
-         xlim=c(0,1),  xaxt="n",
-         ylab="", xlab="")
+         xlim=c(1, length(params)),  xaxt="n",
+         ylab="", xlab="", las=2, cex.axis=0.8)
 
-    params <- colnames(occ.all$MCMCresults$summary[,'efficiency',])
-    text(x=(1:length(params))/length(params), par('usr')[3],
-         srt = 45, adj=1.3,
+    text(x=1:length(params), par('usr')[3],
+         srt = 45, adj=adj.xlab,
          labels = params,
          xpd = NA,
          cex=0.7)
     mtext("Effective sample size \n per second (log)",
-          2, line=3.2, cex=1.5)
+          2, line=3.2, cex=1.2)
 
 
     for(i in 1:dim(occ.all$MCMCresults$summary)[1]){
         write.table(round(t(occ.all$MCMCresults$summary[i,,]), digits=2),
                     sep=",", row.names=TRUE,
                     file=file.path(save.dir,
-                                   sprintf("../tables/%s.csv",
-                                           dimnames(occ.all$MCMCresults$summary)[[1]][i])))
-        points(x=(1:length(params))/
-                   length(params),
+                    sprintf("../tables/%s.csv",
+                    dimnames(occ.all$MCMCresults$summary)[[1]][i])))
+        points(x=1:length(params),
                y=log(occ.all$MCMCresults$summary[i,'efficiency',]),
                col=cols[sampler.names[i]],
                pch=pchs[i],
+               ltys[i],
                xaxt="n",
                type="o")
     }

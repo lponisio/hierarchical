@@ -1,7 +1,12 @@
-## library(devtools)
-## install_github("nimble-dev/nimble",
-##                ref = "devel",
-##                subdir = "packages/nimble")
+args <- commandArgs(trailingOnly=TRUE)
+if(length(args) == 0){
+    run.models <- FALSE
+    make.comp.plots <- FALSE
+} else{
+    run.models <- args[1]
+    make.comp.plots <- args[2]
+}
+
 
 library(nimble)
 library(igraph)

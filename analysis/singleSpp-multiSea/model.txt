@@ -1,0 +1,34 @@
+model
+{
+    psi1 ~ dunif(0, 1)
+    mu.p ~ dnorm(0, 0.001)
+    sigma.p ~ dunif(0, 100)
+    tau.p <- 1/(sigma.p * sigma.p)
+    mu.phi ~ dnorm(0, 0.001)
+    mu.gamma ~ dnorm(0, 0.001)
+    sigma.phi ~ dunif(0, 100)
+    sigma.gamma ~ dunif(0, 100)
+    tau.phi <- 1/(sigma.phi * sigma.phi)
+    tau.gamma <- 1/(sigma.gamma * sigma.gamma)
+    for (year in 1:(nyear - 1)) {
+        p[year] ~ dnorm(mu.p, tau.p)
+        phi[year] ~ dnorm(mu.phi, tau.phi)
+        gamma[year] ~ dnorm(mu.gamma, tau.gamma)
+    }
+    p[nyear] ~ dnorm(mu.p, tau.p)
+    for (site in 1:nsite) {
+        z[site, 1] ~ dbern(psi1)
+        for (year in 2:nyear) {
+            logit(muZ[site, year]) <- z[site, year - 1] * phi[year - 1] + (1 - z[site, year - 1]) * gamma[year - 1]
+            z[site, year] ~ dbern(muZ[site, year])
+        }
+    }
+    for (site in 1:nsite) {
+        for (rep in 1:nrep) {
+            for (year in 1:nyear) {
+                muy[site, rep, year] <- z[site, year] * ilogit(p[year])
+                y[site, rep, year] ~ dbern(muy[site, rep, year])
+            }
+        }
+    }
+}

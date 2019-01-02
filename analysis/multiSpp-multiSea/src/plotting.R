@@ -1,9 +1,9 @@
 
 getEffFUN <- function(pattern, save.dir, summary="efficiency",
-                      make.plot=TRUE){
+                      make.plot=TRUE, adj.xlab=1.3){
 
     plotPointsMakeTableWapper <- function() {
-        plotPointsMakeTable(occ.all=occ.all)
+        plotPointsMakeTable(occ.all=occ.all, adj.xlab=adj.xlab)
     }
 
     these.files <- list.files(save.dir, pattern=pattern)
@@ -38,7 +38,7 @@ getEffFUN <- function(pattern, save.dir, summary="efficiency",
 
     pdf.f(plotPointsMakeTableWapper,
           file= file.path(save.dir,
-                          sprintf("../figures/comparisons/points_%s.pdf",
+                          sprintf("../figures/comparisons/msms_%s.pdf",
                                   pattern)),
           height=4, width=8)
 
@@ -104,7 +104,7 @@ plotBar <- function(pattern, effs, adj.names){
                    names="",
                    las=1,
                    xlab="", ylab="",
-                   ylim=range(c(0,effs)))
+                   ylim=range(c(0,effs + 0.002)))
     text(bp1, par('usr')[3] - adj.names,
          srt = 45, adj = 1,
          labels = names.effs$samplers,
