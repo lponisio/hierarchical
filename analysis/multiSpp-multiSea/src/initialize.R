@@ -16,9 +16,7 @@ source("src/models.R")
 source("src/customSamplerSpec.R")
 source("src/dynamicOcc.R")
 
-dir.create(file.path("../../../occupancy_saved/saved/multiSpp-multiSea/saved"),
-           showWarnings = FALSE)
-save.dir <-  "../../../occupancy_saved/saved/multiSpp-multiSea/saved"
+save.dir <-  "../../../hierarchical_saved/multiSpp-multiSea/saved"
 
 ## mcmc settings
 scale <- 1e2
@@ -57,10 +55,11 @@ runAllMCMC <- function(i, input1, niter, burnin, latent,
                                       check=FALSE)
 
     }
-    save(ms.ms.samples, file=file.path(save.dir,
-                                       sprintf("hyperparam%s_latent%s_sampler%s.Rdata",
-                                               hyper.param,
-                                               latent, i)))
+    save(ms.ms.samples,
+         file=file.path(save.dir,
+                        sprintf("hyperparam%s_latent%s_sampler%s.Rdata",
+                                hyper.param,
+                                latent, i)))
 }
 
 

@@ -17,9 +17,7 @@ source("src/multispeciesOcc.R")
 source("src/models.R")
 source("src/customSamplerSpec.R")
 
-dir.create(file.path("../../../occupancy_saved/saved/multiSpp-singleSea/saved"),
-           showWarnings = FALSE)
-save.dir <-  "../../../occupancy_saved/saved/multiSpp-singleSea/saved"
+save.dir <-  "../../../hierarchical_saved/multiSpp-singleSea/saved"
 
 survey.data <- read.csv("data/occupancy_data.csv")
 species.groups <- read.csv("data/species_groups.csv")
@@ -45,10 +43,10 @@ expit <- function(x) {
 runAllMCMC <- function(i, input1, niter, burnin, latent,
                        hyper.param, MCMCdefs){
     print(sprintf("hyperparam%s_latent%s_sampler%s",
-                                               hyper.param,
-                                               latent, i))
+                  hyper.param,
+                  latent, i))
     if(i == 'nimble' | i == 'jags'){
-       ms.ss.samples <- compareMCMCs(input1,
+        ms.ss.samples <- compareMCMCs(input1,
                                       MCMCs=i,
                                       niter=niter,
                                       burnin = burnin,
@@ -64,10 +62,11 @@ runAllMCMC <- function(i, input1, niter, burnin, latent,
                                       check=FALSE)
 
     }
-    save(ms.ss.samples, file=file.path(save.dir,
-                                       sprintf("hyperparam%s_latent%s_sampler%s.Rdata",
-                                               hyper.param,
-                                               latent, i)))
+    save(ms.ss.samples,
+         file=file.path(save.dir,
+                        sprintf("hyperparam%s_latent%s_sampler%s.Rdata",
+                                hyper.param,
+                                latent, i)))
 }
 
 

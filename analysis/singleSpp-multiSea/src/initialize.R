@@ -18,9 +18,7 @@ source("src/plotting.R")
 source('src/models.R')
 source('src/customSamplerSpec.R')
 
-dir.create(file.path("../../../occupancy_saved/saved/singleSpp-multiSea/saved"),
-           showWarnings = FALSE)
-save.dir <-  "../../../occupancy_saved/saved/singleSpp-multiSea/saved"
+save.dir <-  "../../../hierarchical_saved/singleSpp-multiSea/saved"
 
 ## MCMC settings
 scale <- 1e2
@@ -67,10 +65,11 @@ runAllMCMC <- function(i, input1, niter, burnin, latent,
                                       check=FALSE)
 
     }
-    save(ss.ms.samples, file=file.path(save.dir,
-                                       sprintf("hyperparam%s_latent%s_sampler%s_mup%s.Rdata",
-                                               hyper.param,
-                                               latent, i, mu.p)))
+    save(ss.ms.samples,
+         file=file.path(save.dir,
+                        sprintf("hyperparam%s_latent%s_sampler%s_mup%s.Rdata",
+                                hyper.param,
+                                latent, i, mu.p)))
 }
 
 
@@ -95,9 +94,6 @@ runAllModels <- function(latent, hyper.param,
     ss.ms.occ <- makeModel(latent, hyper.param)
     input1 <- c(code=ss.ms.occ,
                 model.input)
-    save(input1,
-         file=file.path("~/Dropbox/occupancy_saved/saved/singleSpp-multiSea/data",
-                        sprintf("%s%s%s.Rdata", latent, hyper.param, mu.p)))
     lapply(MCMCs, runAllMCMC, input1, niter, burnin,  latent,
            hyper.param, MCMCdefs, mu.p)
 }

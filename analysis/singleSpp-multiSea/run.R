@@ -1,4 +1,4 @@
-## setwd("~/Dropbox/occupancy")
+## setwd("~/Dropbox/hierarchical")
 rm(list=ls())
 setwd("analysis/singleSpp-multiSea")
 source('src/initialize.R')
@@ -54,7 +54,7 @@ effsNoHP <- getEffFUN("hyperparamFALSE", save.dir,
                       summary="efficiency",
                       make.plot=make.comp.plots)
 
-pdf.f(plotEffSSMS, file.path(save.dir, "../../../figures/SSMS.pdf"),
+pdf.f(plotEffSSMS, file.path(save.dir, "../figures/comparisons/SSMS.pdf.pdf"),
       height=6, width=7)
 
 

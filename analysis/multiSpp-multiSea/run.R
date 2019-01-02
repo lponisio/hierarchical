@@ -1,4 +1,4 @@
-## setwd('~/Dropbox/occupancy')
+## setwd('~/Dropbox/hierarchical')
 rm(list=ls())
 setwd('analysis/multiSpp-multiSea')
 source("src/initialize.R")
@@ -40,5 +40,6 @@ effsHP <- getEffFUN("hyperparamTRUE", save.dir,  summary="efficiency",
 effsNoHP <- getEffFUN("hyperparamFALSE", save.dir,
                       summary="efficiency",
                       make.plot=make.comp.plots)
-pdf.f(plotEffMSMS, file.path(save.dir, "../../../figures/MSMS.pdf"),
+pdf.f(plotEffMSMS, file.path(save.dir, "../figures/comparisons/MSMS.pdf"),
       height=6, width=7)
+

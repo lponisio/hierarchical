@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-## Rscript -e 'install.packages("devtools", repos="http://cran.r-project.org")'
 Rscript -e 'install.packages("igraph", repos="http://cran.r-project.org")'
 Rscript -e 'install.packages("nimble", repos="http://cran.r-project.org")'
 Rscript -e 'install.packages("ggplot2", repos="http://cran.r-project.org")'

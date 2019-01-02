@@ -1,7 +1,11 @@
-## library(devtools)
-## install_github("nimble-dev/nimble",
-##                ref = "devel",
-##                subdir = "packages/nimble")
+args <- commandArgs(trailingOnly=TRUE)
+if(length(args) == 0){
+    run.models <- FALSE
+    make.comp.plots <- FALSE
+} else{
+    run.models <- args[1]
+    make.comp.plots <- args[2]
+}
 
 library(nimble)
 library(igraph)
@@ -12,9 +16,7 @@ source("src/setup.R")
 source("../all/plotting.R")
 source("src/plotting.R")
 
-dir.create(file.path("../../../occupancy_saved/saved/nmixture/saved"),
-           showWarnings = FALSE)
-save.dir <-  "../../../occupancy_saved/saved/nmixture/saved"
+save.dir <-  "../../../hierarchical_saved/nmixture/saved"
 
 ## mcmc settings
 scale <- 1
@@ -46,10 +48,11 @@ runAllMCMC <- function(i, input1, niter, burnin, latent,
                                          check=FALSE)
 
     }
-    save(nmixture.samples, file=file.path(save.dir,
-                                          sprintf("hyperparam%s_latent%s_sampler%s.Rdata",
-                                                  hyper.param,
-                                                  latent, i)))
+    save(nmixture.samples,
+         file=file.path(save.dir,
+                        sprintf("hyperparam%s_latent%s_sampler%s.Rdata",
+                                hyper.param,
+                                latent, i)))
 }
 
 
