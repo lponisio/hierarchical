@@ -3,7 +3,7 @@ rm(list=ls())
 setwd("analysis/singleSpp-multiSea")
 source('src/initialize.R')
 ## MCMC sampler options
-cust.MCMCs <- c('nimble', 'jags', 'block_RW', 'jags_like_nimble','block_RW')
+cust.MCMCs <- c('nimble', 'jags', 'block_RW', 'jags_like_nimble','block_AFSS')
 MCMC.defs <- c('nimble', 'jags', MCMCdefs.RW.block, MCMCdefs.slice,
                MCMCdefs.AFSS.block)
 names(MCMC.defs) <- cust.MCMCs
