@@ -121,7 +121,8 @@ makeModel <- function(latent, hyper.param){
         if(hyper.param){
             print(paste(latent, hyper.param))
             nmixture <- nimbleCode( {
-
+                lambdaRange[1] <- 0.01
+                lambdaRange[2] <- 10000
                 ## Specify priors
                 ## zero-inflation/suitability
                 phi ~ dunif(0,1)          ## proportion of suitable sites (probability of being not a structural 0)
@@ -167,9 +168,9 @@ makeModel <- function(latent, hyper.param){
                 ## Measurement error model
                 for (i in 1:nsite){
                     eps.p.site[i] ~ dnorm(0, tau.p.site) ## Random site effects in logit(p)
+                    ## latent state integration
+                    y[i,1:nrep[i]] ~ dNmixtureRep(p[i,1:nrep[i]], lam[i], a[i], lambdaRange[1:2])
                     for (j in 1:nrep[i]){
-                        ## latent state integration
-                        y[i,j] ~ dNmixture(p[i,j], lam[i], a[i])
                         ##            y[i,j] ~ dbin(p[i,j], N[i])
                         p[i,j] <- 1 / (1 + exp(-lp.lim[i,j]))
                         lp.lim[i,j] <- min(250, max(-250, lp[i,j]))  ## Stabilize logit
@@ -190,7 +191,8 @@ makeModel <- function(latent, hyper.param){
         } else{
             print(paste(latent, hyper.param))
             nmixture <- nimbleCode( {
-
+                lambdaRange[1] <- 0.01
+                lambdaRange[2] <- 10000
                 ## Specify priors
                 ## zero-inflation/suitability
                 phi ~ dunif(0,1)          ## proportion of suitable
@@ -231,9 +233,9 @@ makeModel <- function(latent, hyper.param){
 
                 ## Measurement error model
                 for (i in 1:nsite){
+                    ## latent state integration
+                    y[i,1:nrep[i]] ~ dNmixtureRep(p[i,1:nrep[i]], lam[i], a[i], lambdaRange[1:2])
                     for (j in 1:nrep[i]){
-                        y[i,j] ~ dNmixture(p[i,j], lam[i], a[i])
-                        ## latent state integration
                         ##            y[i,j] ~ dbin(p[i,j], N[i])
                         p[i,j] <- 1 / (1 + exp(-lp.lim[i,j]))
                         lp.lim[i,j] <- min(250, max(-250, lp[i,j]))  ## Stabilize logit

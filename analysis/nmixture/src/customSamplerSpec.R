@@ -4,9 +4,9 @@ MCMCdefs.RW.block <- list('block_RW' = quote({
     ## *********************************************************************
     customSpec <- configureMCMC(Rmodel)
     customSpec$removeSamplers(c("beta0","beta"))
-    customSpec$addSampler(c("beta0","beta"), type = "RW_block")
-    customSpec$removeSamplers(c("mean.p", "alpha"))
-    customSpec$addSampler(c("mean.p", "alpha"), type = "RW_block")
+    customSpec$addSampler(c("beta0","beta"), type = "RW_block", tries = 2)
+    customSpec$removeSamplers(c("alpha"))
+    customSpec$addSampler(c("alpha"), type = "RW_block", tries = 4)
     customSpec
 }))
 
@@ -19,8 +19,8 @@ MCMCdefs.AFSS.block <- list('block_AFSS' = quote({
     customSpec <- configureMCMC(Rmodel)
     customSpec$removeSamplers(c("beta0","beta"))
     customSpec$addSampler(c("beta0","beta"), type = "AF_slice")
-    customSpec$removeSamplers(c("mean.p", "alpha"))
-    customSpec$addSampler(c("mean.p", "alpha"), type = "AF_slice")
+    customSpec$removeSamplers(c("alpha"))
+    customSpec$addSampler(c("alpha"), type = "AF_slice")
     customSpec
 }))
 
