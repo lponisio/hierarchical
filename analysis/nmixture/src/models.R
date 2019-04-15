@@ -158,9 +158,6 @@ makeModel <- function(latent, hyper.param){
                     loglam.lim[i] <- min(250, max(-250, loglam[i]))  ## Stabilize log
                     lam[i] <- exp(loglam.lim[i])
                     mu.poisson[i] <- a[i] * lam[i]
-                    ## the difference between original model and model
-                    ## with latent state integration
-                    ##        N[i] ~ dpois(mu.poisson[i])
                 }
 
 
@@ -171,7 +168,6 @@ makeModel <- function(latent, hyper.param){
                     ## latent state integration
                     y[i,1:nrep[i]] ~ dNmixtureRep(p[i,1:nrep[i]], lam[i], a[i], lambdaRange[1:2])
                     for (j in 1:nrep[i]){
-                        ##            y[i,j] ~ dbin(p[i,j], N[i])
                         p[i,j] <- 1 / (1 + exp(-lp.lim[i,j]))
                         lp.lim[i,j] <- min(250, max(-250, lp[i,j]))  ## Stabilize logit
                         lp[i,j] <- alpha0[j] + alpha[1] * elev[i] + alpha[2] * elev2[i] +
@@ -224,9 +220,6 @@ makeModel <- function(latent, hyper.param){
                     loglam.lim[i] <- min(250, max(-250, loglam[i]))  ## Stabilize log
                     lam[i] <- exp(loglam.lim[i])
                     mu.poisson[i] <- a[i] * lam[i]
-                    ## the difference between original model and model
-                    ## with latent state integration
-                    ##        N[i] ~ dpois(mu.poisson[i])
                 }
 
 
@@ -236,7 +229,6 @@ makeModel <- function(latent, hyper.param){
                     ## latent state integration
                     y[i,1:nrep[i]] ~ dNmixtureRep(p[i,1:nrep[i]], lam[i], a[i], lambdaRange[1:2])
                     for (j in 1:nrep[i]){
-                        ##            y[i,j] ~ dbin(p[i,j], N[i])
                         p[i,j] <- 1 / (1 + exp(-lp.lim[i,j]))
                         lp.lim[i,j] <- min(250, max(-250, lp[i,j]))  ## Stabilize logit
                         lp[i,j] <- alpha0[j] + alpha[1] * elev[i] + alpha[2] * elev2[i] +
@@ -254,3 +246,5 @@ makeModel <- function(latent, hyper.param){
     }
     return(nmixture)
 }
+
+

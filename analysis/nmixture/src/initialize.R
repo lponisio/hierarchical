@@ -2,9 +2,11 @@ args <- commandArgs(trailingOnly=TRUE)
 if(length(args) == 0){
     run.models <- FALSE
     make.comp.plots <- FALSE
+    mcmc.scale <- 2e2
 } else{
     run.models <- args[1]
     make.comp.plots <- args[2]
+    mcmc.scale <- as.numeric(args[3])
 }
 
 library(nimble)
@@ -19,9 +21,8 @@ source("src/plotting.R")
 save.dir <-  "../../../hierarchical_saved/nmixture/saved"
 
 ## mcmc settings
-scale <- 1
-burnin <- 1e2*scale
-niter <- (1e3)*scale
+burnin <- 1e2*mcmc.scale
+niter <- (1e3)*mcmc.scale
 
 
 runAllMCMC <- function(i, input1, niter, burnin, latent,

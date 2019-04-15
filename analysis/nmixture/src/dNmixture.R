@@ -43,7 +43,9 @@ dNmixture <- nimbleFunction(
             if(iterations > 5000) {
                 fractional <- (iterations - 5000)/1000
                 if(abs(fractional - round(fractional)) < 0.00001)
-                    print("On iteration ", iterations, " with lambda = ", lambda, " x = ", x, " cumPoisProb = ", cumPoisProb)
+                    print("On iteration ", iterations,
+                          " with lambda = ",
+                          lambda, " x = ", x, " cumPoisProb = ", cumPoisProb)
             }
         }
         if(log) return(log(obsProb))
@@ -88,39 +90,32 @@ dNmixtureRep <- nimbleFunction(
                 else return(0)
             }
         }
-        ## It is not a structural zero
+        ## It is not a structural zero.
+        ##
+        ## For each x, the conditional distribution of (N - x | x) is pois(lambda * (1-p))
+        ## We determine the lowest N and highest N at extreme quantiles and sum over those.
+        minN <- min(x + qpois(0.00001, lambda * (1-prob)))
+        maxN <- max(x + qpois(0.99999, lambda * (1-prob)))
+        minN <- max( max(x), minN ) ## set minN to at least the largest x
+
         obsProb <- 0
-        N <- max(x)
-        poissonTolerance <- 0.9999
-        if(N > 0){
-            cumPoisProb <- ppois(N-1, lambda)
-            if(cumPoisProb >= poissonTolerance) {
-                ## If there is virtually 0 probability that N is large enough to yield the observed counts,
-                ## set obsProb as if N is known to be the largest count, so that a non-zero probability is returned.
-                obsProb <- dpois(N, lambda) * prod(dbinom(x, size = N, prob = prob))
+        if(maxN > minN) { ## should normally be true, but check in case it isn't in some corner case.
+        ##    print("counting from ", minN, " to ", maxN, " with lambda = ", lambda)
+            for(N in minN:maxN) {
+                thisObsProb <- dpois(N, lambda) * prod(dbinom(x, size = N, prob = prob))
+                obsProb <- obsProb + thisObsProb
             }
         } else {
-            cumPoisProb <- 0
-        }
-        iterations <- 0
-        while(cumPoisProb < poissonTolerance) {
-            thisPoisProb <- dpois(N, lambda)
-            thisObsProb <- thisPoisProb * prod(dbinom(x, size = N, prob = prob))
-            obsProb <- obsProb + thisObsProb
-            cumPoisProb <- cumPoisProb + thisPoisProb
-            N <- N + 1
-            iterations <- iterations + 1
-            if(iterations > 1000000) {
-                fractional <- iterations/1000000
-                if(abs(fractional - round(fractional)) < 0.0000001)
-                    print("Warning: dNmixture is on N = ", N, " with lambda = ", lambda, " x = ", x, " cumPoisProb = ", cumPoisProb, ". Is it stuck forever?")
-            }
+            ## return a potentially non-zero obsProb
+            N <- max(x)
+            obsProb <- dpois(N, lambda) * prod(dbinom(x, size = N, prob = prob))
         }
         if(log) return(log(obsProb))
         else return(obsProb)
         returnType(double(0))
     }
 )
+
 
 
 registerDistributions(list(

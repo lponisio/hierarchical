@@ -1,8 +1,9 @@
 library(AHMbook)
 
 prepNmixtureData <- function(latent, hyper.param, DO_PLOT=FALSE){
-    ## From section 6.9.2 - for data creation/organization:
-    ## Code modified to use the SwissTits data set included in the AHMbook package
+    ## From section 6.9.2 - for data creation/organization: Code
+    ## modified to use the SwissTits data set included in the AHMbook
+    ## package
     data(SwissTits)
     ## str(SwissTits)
     ## SwissTits$species  ## Available species
@@ -20,7 +21,8 @@ prepNmixtureData <- function(latent, hyper.param, DO_PLOT=FALSE){
 
     ## Plot observed data: counts vs survey date (Fig. 6-9)
     if(DO_PLOT) matplot(t(date), t(y), type = "l", lwd = 3, lty = 1,
-                        frame = F, xlab = "Survey data (1 = April 1)", ylab = "Count of Great Tits")
+                        frame = F, xlab = "Survey data (1 = April 1)",
+                        ylab = "Count of Great Tits")
 
     ## Load unmarked, create unmarked data frame and inspect result
     library(unmarked)
@@ -43,19 +45,13 @@ prepNmixtureData <- function(latent, hyper.param, DO_PLOT=FALSE){
     iRoute <- umf@siteCovs$iLength
 
     ## Design matrix for abundance model (no intercept)
-    lamDM <- model.matrix(~ elev + elev2 + forest + forest2 + elev:forest + elev:forest2 + iRoute)[,-1]
-
+    lamDM <- model.matrix(~ elev + elev2 + forest +
+                              forest2 + elev:forest +
+                              elev:forest2 + iRoute)[,-1]
     ## Initial values
-    Nst <- apply(y, 1, max, na.rm = T) + 1
+    Nst <- apply(y, 1, max, na.rm = TRUE) + 1
     Nst[is.na(Nst)] <- round(mean(y, na.rm = TRUE))
     Nst[Nst == "-Inf"] <- round(mean(y, na.rm = TRUE))
-    SGT_inits <- function(){ list(N = Nst,
-                                  beta0 = 0,
-                                  mean.p = rep(0.5, 3),
-                                  beta = runif(7, 0, 0),
-                                  alpha = runif(13, 0, 0)
-                                  )}
-
 
     ## Bundle data and choose to fit simple ZIP model (model 1)
     SGT_data1 <- list(y = y,
@@ -66,12 +62,7 @@ prepNmixtureData <- function(latent, hyper.param, DO_PLOT=FALSE){
                       elev2 = elev2,
                       date2 = date2,
                       dur2 = dur2)
-    ## e = 1e-06,
-    ## hlam.on = 0,
-    ## hp.site.on = 0,
-    ## hp.survey.on = 0
-    ## nsite = 263,
-    ## nrep = 3)
+
     nrep <- apply(y, 1, function(x) sum(!is.na(x)))
     constants <- list(nsite = 263,
                       nrep = nrep)
@@ -79,20 +70,21 @@ prepNmixtureData <- function(latent, hyper.param, DO_PLOT=FALSE){
 
     SGT_inits_full <- function(latent, hyper.param){
         ans <- list(N = Nst,
-                    beta0 = 0,
+                    beta0 = 3.15,
                     mean.p = rep(0.5, 3),
-                    beta = runif(7, 0, 0),
-                    alpha = runif(13, 0, 0)
-                  , phi = 0.5
-                  , sd.lam = 1
-                  , sd.p.site = 1
-                  , sd.p.survey = 1
-                  , a = rbinom(constants$nsite, prob = 0.5, size = 1)
-                  , eps.lam = rnorm(constants$nsite)
-                  , eps.p.site = rnorm(constants$nsite)
-                  ## , eps.p.survey = matrix(rnorm(constants$nsite * constants$nrep),
-                  ##                         nrow = constants$nsite)
-                    )
+                    ## beta = runif(7, 0, 0),
+                    beta = c(0.433, -0.086,  0.122, -0.27, -0.80, -0.04, -0.165),
+                    ## alpha = runif(13, 0, 0),
+                    alpha =c(-1.47, -0.48, -0.099, 0.073, -0.01, 0.07,
+                             -0.32, -0.35, -0.017,  0.19,  0.367, -0.019, -0.094),
+                    phi = 0.97,
+                    sd.lam = 0.402,
+                    sd.p.site = 0.948,
+                    sd.p.survey = 0.35,
+                    a = rbinom(constants$nsite,
+                               prob = 0.5, size = 1),
+                    eps.lam = rnorm(constants$nsite),
+                    eps.p.site = rnorm(constants$nsite))
         ans$a[ans$N > 0] <- 1
         if(!latent){
             ans$N <- NULL
