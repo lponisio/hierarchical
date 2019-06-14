@@ -2,9 +2,11 @@ args <- commandArgs(trailingOnly=TRUE)
 if(length(args) == 0){
     run.models <- FALSE
     make.comp.plots <- FALSE
+    mcmc.scale <- 2e2
 } else{
     run.models <- args[1]
     make.comp.plots <- args[2]
+    mcmc.scale <- as.numeric(args[3])
 }
 
 library(nimble)
@@ -13,25 +15,16 @@ library(parallel)
 source("src/dynamicOcc.R")
 source("src/setup.R")
 source("../all/plotting.R")
+source("../all/misc.R")
 source("src/plotting.R")
-
 source('src/models.R')
 source('src/customSamplerSpec.R')
 
 save.dir <-  "../../../hierarchical_saved/singleSpp-multiSea/saved"
 
 ## MCMC settings
-scale <- 1e2
-burnin <- 1e1*scale
-niter <- (1e3)*scale
-
-logit <- function(x) {
-    log(x/(1 - x))
-}
-
-expit <- function(x) {
-    exp(x)/(1 + exp(x))
-}
+burnin <- 1e1*mcmc.scale
+niter <- (1e3)*mcmc.scale
 
 set.seed(444)
 psi1 <- 0.2

@@ -61,7 +61,6 @@ runAllModels <- function(latent, hyper.param, niter, burnin,
                          MCMCs, MCMCdefs){
     model.input <- prepNmixtureData(latent=latent,
                                     hyper.param=hyper.param)
-
     nmixture <- makeModel(latent, hyper.param)
     input1 <- c(code=nmixture,
                 model.input)

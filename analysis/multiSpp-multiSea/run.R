@@ -2,12 +2,15 @@
 rm(list=ls())
 setwd('analysis/multiSpp-multiSea')
 source("src/initialize.R")
+make.comp.plots <- TRUE
 
 ## MCMC sampler options
 cust.MCMCs <- c('nimble', 'jags','block_RW',
                 'block_AFSS', 'jags_like_nimble')
 MCMC.defs <- c('nimble', 'jags', MCMCdefs.RW.block,
                MCMCdefs.AFSS.block, MCMCdefs.slice )
+
+
 names(MCMC.defs) <- cust.MCMCs
 
 ## FALSE for model integrating over latent states

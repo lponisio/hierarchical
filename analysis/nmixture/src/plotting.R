@@ -1,36 +1,47 @@
 
-getEffFUN <- function(pattern, save.dir, summary="efficiency", make.plot=TRUE){
+
+getEffFUN <- function(pattern, save.dir, summary="efficiency",
+                      make.plot=TRUE, adj.xlab=1.3){
+
+    plotPointsMakeTableWapper <- function() {
+        plotPointsMakeTable(occ.all=occ.all, adj.xlab=adj.xlab)
+    }
+
     these.files <- list.files(save.dir, pattern=pattern)
-    print(these.files)
+
     res.list.all <- list()
     for(res in 1:length(these.files)){
-        print(res)
         load(file.path(save.dir,
                        these.files[res]))
         nmixture.samples[[1]] <- rename_MCMC_comparison_method(
             rownames(nmixture.samples[[1]]$summary),
             gsub(".Rdata", "", these.files[res]),
-                                              comparison= nmixture.samples[[1]])
+            comparison= nmixture.samples[[1]])
         res.list.all[[res]] <- nmixture.samples
     }
 
-    lapply(res.list.all, function(x) colnames(x$model1$samples[1,,]))
     occ.all <-
         do.call(combine_MCMC_comparison_results, unlist(res.list.all,
                                                         recursive=FALSE))
 
     if(make.plot){
-    checkChains(occ.all$MCMCresults$samples,
-                f.path = file.path(save.dir,
-                                   "../figures/chains/%s.pdf"))
-    dir.create(file.path(save.dir, sprintf("../figures/comparisons/%s",
-                                         pattern)),
-               showWarnings = FALSE)
-    make_MCMC_comparison_pages(occ.all,
-                           dir=file.path(save.dir,
-                                         sprintf("../figures/comparisons/%s",
-    pattern)))
+        checkChains(occ.all$MCMCresults$samples,
+                    f.path = file.path(save.dir,
+                                       "../figures/chains/%s.pdf"))
+        dir.create(file.path(save.dir,sprintf("../figures/comparisons/%s",
+                                              pattern)),
+                   showWarnings = FALSE)
+        make_MCMC_comparison_pages(occ.all,
+                                   dir=file.path(save.dir,
+                                   sprintf("../figures/comparisons/%s",
+                                                         pattern)))
     }
+
+    pdf.f(plotPointsMakeTableWapper,
+          file= file.path(save.dir,
+                          sprintf("../figures/comparisons/nmixture_%s.pdf",
+                                  pattern)),
+          height=4, width=8)
 
     if(summary == "efficiency"){
         out <- occ.all$MCMCresults$efficiency$min
@@ -55,10 +66,10 @@ getSamplerNames <- function(effs){
 
 plotEffNmixture <- function(){
     layout(matrix(1:4, nrow=2))
-    par(oma=c(0, 7, 2, 1),
+    par(oma=c(2, 7, 2, 1),
         mar=c(5, 1, 0.5, 3), cex.axis=1.5)
     ## latent, HP
-    plotBar("latentTRUE", effsHP, 0)
+    plotBar("latentTRUE", effsHP, 0.01)
     legend("topright", legend="a)", bty="n")
     mtext("Min effective sample size per second",
           2, line=6.5, cex=1.5, at=-1)
@@ -67,17 +78,17 @@ plotEffNmixture <- function(){
     mtext("Latent states",
           3, line=1, cex=1.5)
     ## latent, no HP
-    plotBar("latentTRUE", effsNoHP, 0)
+    plotBar("latentTRUE", effsNoHP, 0.2)
     mtext("No hyperparameters",
           2, line=4, cex=1.5)
     legend("topright", legend="c)", bty="n")
     ## no latent, HP
-    plotBar("latentFALSE", effsHP, 0)
+    plotBar("latentFALSE", effsHP, 0.01)
     mtext("No latent states",
           3, line=1, cex=1.5)
     legend("topright", legend="b)", bty="n")
     ## no latent, no HP
-    plotBar("latentFALSE", effsNoHP, 0)
+    plotBar("latentFALSE", effsNoHP, 0.2)
     legend("topleft", legend="d)", bty="n")
 }
 

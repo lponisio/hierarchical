@@ -202,8 +202,14 @@ plotPointsMakeTable <- function(occ.all, adj.xlab=1.3, sim.data=FALSE){
 
 
     for(i in 1:dim(occ.all$MCMCresults$summary)[1]){
-        write.table(round(t(occ.all$MCMCresults$summary[i,,]), digits=2),
-                    sep=",", row.names=TRUE,
+        sum.output <- round(t(occ.all$MCMCresults$summary[i,,]),
+                            digits=2)
+        sum.output <- as.data.frame(sum.output)
+        sum.output$param <- rownames(sum.output)
+        rownames(sum.output) <- NULL
+        sum.output$geweke <- geweke.diag(t(occ.all$MCMCresults$samples[i,,]))$z
+        write.table(sum.output,
+                    sep=",", row.names=FALSE,
                     file=file.path(save.dir,
                     sprintf("../tables/%s.csv",
                     dimnames(occ.all$MCMCresults$summary)[[1]][i])))

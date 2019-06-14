@@ -15,21 +15,21 @@ latent.opts <- c(TRUE, FALSE)
 hyper.param.opts <- c(TRUE, FALSE)
 
 if(run.models){
-for(h in hyper.param.opts){
-    for(ff in latent.opts) {
-        if(ff){ ## latent states and hyper param
-            these.MCMCs <- cust.MCMCs
-        }else{
-            these.MCMCs <- cust.MCMCs[-5]
+    for(h in hyper.param.opts){
+        for(ff in latent.opts) {
+            if(ff){ ## latent states and hyper param
+                these.MCMCs <- cust.MCMCs
+            }else{
+                these.MCMCs <- cust.MCMCs[-5]
+            }
+            runAllModels(latent=ff,
+                         hyper.param=h,
+                         niter=niter,
+                         burnin=burnin,
+                         MCMCs=these.MCMCs,
+                         MCMCdefs=MCMC.defs)
         }
-        runAllModels(latent=ff,
-                     hyper.param=h,
-                     niter=niter,
-                     burnin=burnin,
-                     MCMCs=these.MCMCs,
-                     MCMCdefs=MCMC.defs)
     }
-}
 }
 
 effsHP <- getEffFUN("hyperparamTRUE", save.dir,  summary="efficiency",

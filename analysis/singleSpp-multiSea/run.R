@@ -15,7 +15,7 @@ latent.opts <- c(TRUE, FALSE)
 ## gamma and p
 hyper.param.opts <- c(TRUE, FALSE)
 ## easy or difficult to detect
-mus.p <- c(1, -1)
+mus.p <- c(1, 0.5)
 
 if(run.models){
     for(mu.p in mus.p){
@@ -54,7 +54,8 @@ effsNoHP <- getEffFUN("hyperparamFALSE", save.dir,
                       summary="efficiency",
                       make.plot=make.comp.plots)
 
-pdf.f(plotEffSSMS, file.path(save.dir, "../figures/comparisons/SSMS.pdf.pdf"),
+pdf.f(plotEffSSMS, file.path(save.dir,
+                             "../figures/comparisons/SSMS.pdf"),
       height=6, width=7)
 
 
