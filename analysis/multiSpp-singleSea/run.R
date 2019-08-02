@@ -36,10 +36,11 @@ effsHP <- getEffFUN("hyperparamTRUE", save.dir,  summary="efficiency",
                     make.plot=make.comp.plots)
 effsNoHP <- getEffFUN("hyperparamFALSE", save.dir,
                       summary="efficiency",
-                      adj.xlab=2,
+                      adj.xlab=-3,
                       make.plot=make.comp.plots)
 
 pdf.f(plotEffMSSS, file.path(save.dir, "../figures/comparisons/MSSS.pdf"),
       height=6, width=7)
 
-
+makeCombinedTables("hyperparamTRUE", save.dir)
+makeCombinedTables("hyperparamFALSE", save.dir)

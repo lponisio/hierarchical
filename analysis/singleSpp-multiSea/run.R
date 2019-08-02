@@ -59,3 +59,7 @@ pdf.f(plotEffSSMS, file.path(save.dir,
       height=6, width=7)
 
 
+makeCombinedTables("hyperparamTRUE", save.dir, "0.5")
+makeCombinedTables("hyperparamTRUE", save.dir, "1")
+makeCombinedTables("hyperparamFALSE", save.dir, "0.5")
+makeCombinedTables("hyperparamFALSE", save.dir, "1")

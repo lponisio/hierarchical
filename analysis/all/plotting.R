@@ -64,7 +64,7 @@ plotEffSize <- function(eff.size, eff.param,
              cex=1)
 
         mtext("Minimum", 3, line=0.5, cex=1.2)
-        mtext("Effective sample size \n per second",
+        mtext("ESS/second",
               2, line=4.5, cex=1.5, at=at)
     }
 
@@ -149,7 +149,7 @@ plotEffSize <- function(eff.size, eff.param,
 }
 
 
-plotPointsMakeTable <- function(occ.all, adj.xlab=1.3, sim.data=FALSE){
+plotPointsMakeTable <- function(occ.all, adj.xlab, sim.data=FALSE){
     layout(matrix(1:2, ncol=1), heights=c(1,3))
     par(oma=c(5, 6, 0.5, 1),
         mar=c(0.5, 0, 0.5, 1), cex.axis=1.5)
@@ -188,16 +188,17 @@ plotPointsMakeTable <- function(occ.all, adj.xlab=1.3, sim.data=FALSE){
     }
 
     plot(NA,
-         ylim=range(log(occ.all$MCMCresults$summary[,'efficiency',])),
+         ylim=range(occ.all$MCMCresults$summary[,'efficiency',]),
          xlim=c(1, length(params)),  xaxt="n",
+         log="y",
          ylab="", xlab="", las=2, cex.axis=0.8)
 
     text(x=1:length(params), par('usr')[3],
-         srt = 45, adj=adj.xlab,
+         srt = 45, ## adj=adj.xlab,
          labels = params,
          xpd = NA,
          cex=0.7)
-    mtext("Effective sample size \n per second (log)",
+    mtext("ESS/second",
           2, line=3.2, cex=1.2)
 
 
@@ -207,14 +208,18 @@ plotPointsMakeTable <- function(occ.all, adj.xlab=1.3, sim.data=FALSE){
         sum.output <- as.data.frame(sum.output)
         sum.output$param <- rownames(sum.output)
         rownames(sum.output) <- NULL
-        sum.output$geweke <- geweke.diag(t(occ.all$MCMCresults$samples[i,,]))$z
+        sum.output$geweke <-
+            geweke.diag(t(occ.all$MCMCresults$samples[i,,]))$z
+        sum.output$sec1000samp <- 1000/sum.output$efficiency
+        sum.output$min1000samp <- (1000/sum.output$efficiency)/60
+        sum.output$hrs1000samp <- ((1000/sum.output$efficiency)/60)/60
         write.table(sum.output,
                     sep=",", row.names=FALSE,
                     file=file.path(save.dir,
                     sprintf("../tables/%s.csv",
                     dimnames(occ.all$MCMCresults$summary)[[1]][i])))
         points(x=1:length(params),
-               y=log(occ.all$MCMCresults$summary[i,'efficiency',]),
+               y=occ.all$MCMCresults$summary[i,'efficiency',],
                col=cols[sampler.names[i]],
                pch=pchs[i],
                ltys[i],
@@ -223,3 +228,39 @@ plotPointsMakeTable <- function(occ.all, adj.xlab=1.3, sim.data=FALSE){
     }
 }
 
+
+makeCombinedTables <- function(pattern, save.dir, patternp=NULL){
+    list.tables <- list.files(file.path(save.dir, "../tables"),
+                              pattern=pattern)
+
+    if(!is.null(patternp)){
+        list.tables <- list.tables[grepl(patternp, list.tables)]
+        pattern <- paste0(pattern, patternp)
+        }
+    tables <- lapply(file.path(save.dir, "../tables", list.tables),
+                     read.csv)
+    sum.tables <- lapply(tables, function(x){
+        x[,c("mean", "sd", "geweke")]
+    })
+
+    sum.tables <- do.call(cbind, sum.tables)
+    sum.tables <- round(sum.tables, digits=2)
+
+    rownames(sum.tables) <- tables[[1]]$param
+
+    samp.names.prep <- sapply(strsplit(list.tables, "sampler"),
+                              function(x) x[2])
+    samp.names <-
+        sapply(strsplit(samp.names.prep, ".csv"), function(x) x[1])
+
+    cols <- colnames(sum.tables)
+    sum.tables <- rbind(cols, sum.tables)
+    colnames(sum.tables) <- rep(samp.names, each=3)
+    write.table(sum.tables,
+                sep="&",
+                file=file.path(save.dir,
+                               sprintf("../%s.txt",
+                                       pattern)))
+
+
+}

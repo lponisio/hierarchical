@@ -46,3 +46,5 @@ effsNoHP <- getEffFUN("hyperparamFALSE", save.dir,
 pdf.f(plotEffMSMS, file.path(save.dir, "../figures/comparisons/MSMS.pdf"),
       height=6, width=7)
 
+makeCombinedTables("hyperparamTRUE", save.dir)
+makeCombinedTables("hyperparamFALSE", save.dir)

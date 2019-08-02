@@ -1,7 +1,7 @@
 
 
 getEffFUN <- function(pattern, save.dir, summary="efficiency",
-                      make.plot=TRUE, adj.xlab=1.3){
+                      make.plot=TRUE, adj.xlab=0){
 
     plotPointsMakeTableWapper <- function() {
         plotPointsMakeTable(occ.all=occ.all, adj.xlab=adj.xlab)
@@ -25,9 +25,9 @@ getEffFUN <- function(pattern, save.dir, summary="efficiency",
                                                         recursive=FALSE))
 
     if(make.plot){
-        checkChains(occ.all$MCMCresults$samples,
-                    f.path = file.path(save.dir,
-                                       "../figures/chains/%s.pdf"))
+        ## checkChains(occ.all$MCMCresults$samples,
+        ##             f.path = file.path(save.dir,
+        ##                                "../figures/chains/%s.pdf"))
         dir.create(file.path(save.dir,sprintf("../figures/comparisons/%s",
                                               pattern)),
                    showWarnings = FALSE)
@@ -66,20 +66,20 @@ getSamplerNames <- function(effs){
 
 plotEffNmixture <- function(){
     layout(matrix(1:4, nrow=2))
-    par(oma=c(2, 7, 2, 1),
+    par(oma=c(2, 8, 2, 1),
         mar=c(5, 1, 0.5, 3), cex.axis=1.5)
     ## latent, HP
     plotBar("latentTRUE", effsHP, 0.01)
     legend("topright", legend="a)", bty="n")
-    mtext("Min effective sample size per second",
-          2, line=6.5, cex=1.5, at=-1)
-    mtext("Hyperparameters",
+    mtext("Min ESS/second",
+          2, line=6.5, cex=1.5, at=-0.05)
+    mtext("More hierarchy",
           2, line=4, cex=1.5)
     mtext("Latent states",
           3, line=1, cex=1.5)
     ## latent, no HP
     plotBar("latentTRUE", effsNoHP, 0.2)
-    mtext("No hyperparameters",
+    mtext("Less hierarchy",
           2, line=4, cex=1.5)
     legend("topright", legend="c)", bty="n")
     ## no latent, HP

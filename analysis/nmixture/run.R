@@ -42,3 +42,6 @@ effsNoHP <- getEffFUN("hyperparamFALSE", save.dir,
 pdf.f(plotEffNmixture, file.path(save.dir,
                        "../figures/comparisons/nmixture.pdf"),
       height=6, width=7)
+
+makeCombinedTables("hyperparamTRUE", save.dir)
+makeCombinedTables("hyperparamFALSE", save.dir)
