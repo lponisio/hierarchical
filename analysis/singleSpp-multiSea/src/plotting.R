@@ -1,6 +1,6 @@
 
 getEffFUN <- function(pattern, save.dir, summary="efficiency",
-                      make.plot=TRUE, adj.xlab=0){
+                      make.plot=TRUE, adj.xlab=1.5){
 
     plotPointsMakeTableWapper <- function() {
         plotPointsMakeTable(occ.all=occ.all,
@@ -26,9 +26,9 @@ getEffFUN <- function(pattern, save.dir, summary="efficiency",
                                                         recursive=FALSE))
 
     if(make.plot){
-        ## checkChains(occ.all$MCMCresults$samples,
-        ##             f.path = file.path(save.dir,
-        ##                                "../figures/chains/%s.pdf"))
+        checkChains(occ.all$MCMCresults$samples,
+                    f.path = file.path(save.dir,
+                                       "../figures/chains/%s.pdf"))
         dir.create(file.path(save.dir,sprintf("../figures/comparisons/%s",
                                               pattern)),
                    showWarnings = FALSE)
@@ -93,9 +93,9 @@ plotBar <- function(pattern, effs, adj.names){
 plotEffSSMS <- function(){
     layout(matrix(1:4, nrow=2))
     par(oma=c(0, 8, 2, 1),
-        mar=c(6, 1, 0.5, 3), cex.axis=1.5)
+        mar=c(8, 1, 0.5, 3), cex.axis=1.5)
     ## latent, HP
-    plotBar("latentTRUE", effsHP, 1)
+    plotBar("latentTRUE", effsHP, 0.5)
     legend("topleft", legend="a)", bty="n")
     mtext("Min ESS/second",
           2, line=7.5, cex=1.5, at=-0.25)
@@ -109,11 +109,12 @@ plotEffSSMS <- function(){
           2, line=5, cex=1.5)
     legend("topleft", legend="c)", bty="n")
     ## no latent, HP
-    plotBar("latentFALSE", effsHP, 1)
+    plotBar("latentFALSE", effsHP, 0.5)
     mtext("Latent state integration",
           3, line=1, cex=1.5)
     legend("topleft", legend="b)", bty="n")
-    legend("topright", col=c("black", "grey"), pch=15,
+    legend("topright", col=c("black", "grey"),
+           pch=15,
            legend=c("Low detectability", "High detectability"),
            bty="n")
     ## no latent, no HP

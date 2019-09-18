@@ -104,7 +104,8 @@ plotBar <- function(pattern, effs, adj.names){
                    names="",
                    las=1,
                    xlab="", ylab="",
-                   ylim=range(c(0,effs + 0.002)))
+                   ylim=range(c(0,effs + 0.002)),
+                   col="black")
     text(bp1, par('usr')[3] - adj.names,
          srt = 45, adj = 1,
          labels = names.effs$samplers,

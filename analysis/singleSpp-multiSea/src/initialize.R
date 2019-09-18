@@ -79,10 +79,6 @@ runAllModels <- function(latent, hyper.param,
         to.drop <- c("sigma.phi", "sigma.gamma", "sigma.p", "p",
                      "phi", "gamma")
         model.input$inits[to.drop] <- NULL
-    }else{
-        ## with new inits priors logit trick
-        ## to.drop <- c("mu.phi", "mu.gamma", "mu.p")
-        ## model.input$inits[to.drop] <- NULL
     }
     ss.ms.occ <- makeModel(latent, hyper.param)
     input1 <- c(code=ss.ms.occ,

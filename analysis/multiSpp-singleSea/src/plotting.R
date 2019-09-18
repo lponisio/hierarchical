@@ -98,7 +98,7 @@ plotBar <- function(pattern, effs, adj.names){
     bp1 <- barplot(these.effs,
                    names="",
                    las=1,
-                   xlab="", ylab="",
+                   xlab="", ylab="", col= "black",
                    ylim=range(c(0,effs)) + c(0, min(effs)))
     text(bp1, par('usr')[3] - adj.names,
          srt = 45, adj = 1,

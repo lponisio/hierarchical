@@ -15,7 +15,7 @@ latent.opts <- c(TRUE, FALSE)
 ## gamma and p
 hyper.param.opts <- c(TRUE, FALSE)
 ## easy or difficult to detect
-mus.p <- c(1, 0.5)
+mus.p <- c(1, -1)
 
 if(run.models){
     for(mu.p in mus.p){
@@ -58,8 +58,7 @@ pdf.f(plotEffSSMS, file.path(save.dir,
                              "../figures/comparisons/SSMS.pdf"),
       height=6, width=7)
 
-
-makeCombinedTables("hyperparamTRUE", save.dir, "0.5")
+makeCombinedTables("hyperparamTRUE", save.dir, "-1")
 makeCombinedTables("hyperparamTRUE", save.dir, "1")
-makeCombinedTables("hyperparamFALSE", save.dir, "0.5")
+makeCombinedTables("hyperparamFALSE", save.dir, "-1")
 makeCombinedTables("hyperparamFALSE", save.dir, "1")

@@ -83,11 +83,10 @@ plotPointsMakeTable <- function(occ.all, adj.xlab, sim.data=FALSE){
     plot(NA,
          ylim=range(occ.all$MCMCresults$summary[,'efficiency',]),
          xlim=c(1, length(params)),  xaxt="n",
-         log="y",
          ylab="", xlab="", las=2, cex.axis=0.8)
 
     text(x=1:length(params), par('usr')[3],
-         srt = 45, ## adj=adj.xlab,
+         srt = 45, adj=adj.xlab,
          labels = params,
          xpd = NA,
          cex=0.7)
@@ -97,7 +96,7 @@ plotPointsMakeTable <- function(occ.all, adj.xlab, sim.data=FALSE){
 
     for(i in 1:dim(occ.all$MCMCresults$summary)[1]){
         sum.output <- round(t(occ.all$MCMCresults$summary[i,,]),
-                            digits=2)
+                            digits=4)
         sum.output <- as.data.frame(sum.output)
         sum.output$param <- rownames(sum.output)
         rownames(sum.output) <- NULL
@@ -123,6 +122,8 @@ plotPointsMakeTable <- function(occ.all, adj.xlab, sim.data=FALSE){
 
 
 makeCombinedTables <- function(pattern, save.dir, patternp=NULL){
+    ## function for taking the summary tables and combining by scenario
+    ## for supplemental table
     list.tables <- list.files(file.path(save.dir, "../tables"),
                               pattern=pattern)
 
@@ -140,19 +141,31 @@ makeCombinedTables <- function(pattern, save.dir, patternp=NULL){
     sum.tables <- round(sum.tables, digits=2)
 
     rownames(sum.tables) <- tables[[1]]$param
+    cols <- colnames(sum.tables)
+    sum.tables <- rbind(cols, sum.tables)
 
+    ## split by whether latent states were sampled
+    samp.latent <- grepl("latentTRUE", list.tables)
+    nosamp.latent <- grepl("latentFALSE", list.tables)
     samp.names.prep <- sapply(strsplit(list.tables, "sampler"),
                               function(x) x[2])
     samp.names <-
         sapply(strsplit(samp.names.prep, ".csv"), function(x) x[1])
-
-    cols <- colnames(sum.tables)
-    sum.tables <- rbind(cols, sum.tables)
     colnames(sum.tables) <- rep(samp.names, each=3)
-    write.table(sum.tables,
+
+    ## split tables by whether latent states are sampled
+    sum.tab.latent <- sum.tables[, rep(samp.latent, each=3)]
+    sum.tab.nolatent <- sum.tables[, rep(nosamp.latent, each=3)]
+
+    write.table(sum.tab.latent,
                 sep="&",
                 file=file.path(save.dir,
-                               sprintf("../%s.txt",
+                               sprintf("../latentTRUE%s.txt",
+                                       pattern)))
+      write.table(sum.tab.nolatent,
+                sep="&",
+                file=file.path(save.dir,
+                               sprintf("../latentFALSE%s.txt",
                                        pattern)))
 
 

@@ -1,6 +1,6 @@
 
-genDynamicOccData <- function(nsite = 25,
-                              nreps = 4,
+genDynamicOccData <- function(nsite = 100,
+                              nreps = 5,
                               nyear = 15,
                               mu.p,
                               psi1,
