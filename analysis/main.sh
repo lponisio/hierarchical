@@ -32,16 +32,12 @@ mkdir -p ../hierarchical_saved/nmixture/tables
 ## run models
 ## **************************************************************
 ## each model run takes quite a bit of memory and time. The first
-## argument is whether to run the models, the second is whether to plot
+## argument is whether to run the models (can be set to FALSE is only
+## plotting is desired), the second is whether to plot
 ## the chains and ggplot comparison figures
+
 Rscript analysis/singleSpp-multiSea/run.R TRUE TRUE 3e2
 Rscript analysis/multiSpp-singleSea/run.R TRUE TRUE 3e2
 Rscript analysis/multiSpp-multiSea/run.R TRUE TRUE 3e2
 Rscript analysis/nmixture/run.R TRUE TRUE 3e2
-
-## just plotting
-Rscript analysis/singleSpp-multiSea/run.R FALSE TRUE
-Rscript analysis/multiSpp-singleSea/run.R FALSE TRUE 
-Rscript analysis/multiSpp-multiSea/run.R FALSE TRUE 
-Rscript analysis/nmixture/run.R FALSE TRUE
 

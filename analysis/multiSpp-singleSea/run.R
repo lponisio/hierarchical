@@ -1,4 +1,3 @@
-## setwd('~/Dropbox/hierarchical')
 rm(list=ls())
 setwd('analysis/multiSpp-singleSea')
 source('src/initialize.R')

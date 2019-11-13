@@ -1,4 +1,3 @@
-## setwd("~/Dropbox/hierarchical")
 rm(list=ls())
 setwd("analysis/nmixture")
 source('src/initialize.R')

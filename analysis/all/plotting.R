@@ -90,7 +90,7 @@ plotPointsMakeTable <- function(occ.all, adj.xlab, sim.data=FALSE){
          labels = params,
          xpd = NA,
          cex=0.7)
-    mtext("ESS/second",
+    mtext("Effective sample size \n per second (log)",
           2, line=3.2, cex=1.2)
 
 
