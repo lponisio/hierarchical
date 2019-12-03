@@ -1,7 +1,7 @@
 
 
 getEffFUN <- function(pattern, save.dir, summary="efficiency",
-                      make.plot=TRUE, adj.xlab=0){
+                      make.plot=TRUE, adj.xlab=1.5){
 
     plotPointsMakeTableWapper <- function() {
         plotPointsMakeTable(occ.all=occ.all, adj.xlab=adj.xlab)
@@ -25,9 +25,9 @@ getEffFUN <- function(pattern, save.dir, summary="efficiency",
                                                         recursive=FALSE))
 
     if(make.plot){
-        ## checkChains(occ.all$MCMCresults$samples,
-        ##             f.path = file.path(save.dir,
-        ##                                "../figures/chains/%s.pdf"))
+        checkChains(occ.all$MCMCresults$samples,
+                    f.path = file.path(save.dir,
+                                       "../figures/chains/%s.pdf"))
         dir.create(file.path(save.dir,sprintf("../figures/comparisons/%s",
                                               pattern)),
                    showWarnings = FALSE)
@@ -99,7 +99,7 @@ plotBar <- function(pattern, effs, adj.names){
 
     bp1 <- barplot(these.effs,
                    names="",
-                   las=1, col="black",
+                   las=1, col="grey",
                    xlab="", ylab="",
                    ylim=range(c(0,effs)))
     text(bp1, par('usr')[3] - adj.names,
