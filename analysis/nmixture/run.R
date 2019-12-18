@@ -10,7 +10,7 @@ MCMC.defs <- c('nimble', 'jags', MCMCdefs.RW.block, MCMCdefs.slice,
 names(MCMC.defs) <- cust.MCMCs
 
 ## FALSE for model integrating over latent states
-latent.opts <- c(TRUE, FALSE)
+latent.opts <- c(FALSE)
 ## true for model including random effects
 hyper.param.opts <- c(TRUE, FALSE)
 
