@@ -1,4 +1,5 @@
-Analysis code for "Factors affecting MCMC performance in complex hierarchical models".  
+Analysis code for Ponisio, L.C., de Valpine, P., Michaud, P., Turek, D. Boosting MCMC performance for complex hierarchical models using NIMBLE, in press Ecology and Evolution 
+open access link: https://onlinelibrary.wiley.com/doi/full/10.1002/ece3.6053
 
 Analyses were conducted in R 3.6.1 and NIMBLE v0.7.1.  Within the analysis folder, the packages.sh script will install all necessary packages, though the specific version of NIMBLE needs to be installed from within R. The main.sh file will run all models and make the corresponding comparison figures.
 
